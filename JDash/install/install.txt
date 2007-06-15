@@ -1,0 +1,12 @@
+
+On Windows, to install the JDash application, simply double click on the
+setup-x.x.x.jar file.  Windows should automatically execute Java, and load the
+installer.  If this doesn't work, your java install might not be correct.  You
+can also try to manually run the setup from the command line "java -jar
+setup-x.x.x.jar"
+
+
+On Unix/Linux, to install the JDash application, you need to launch Java yourself.
+From the command prompt, enter "java -jar setup.x.x.x.jar".  This should launch
+the setup program for you.
+

@@ -1,0 +1,148 @@
+<!-- =======================================
+ This is the JDash ANT build file.  
+ The following list defines the set of common build targets.
+ 
+ all = Build everything up to the JAR file, and put it into the RTE dir.
+ compile = Compile sources ONLY
+ jar = Build the JAR file
+ rte = Build the RTE. This is the same as "all"
+ javadoc = Build the javadoc files
+ launch = Launch the application
+ launch-config = Launch the config application
+ clean = clean up all build files
+ release = create a release zip file named JDash-x.x.x.zip
+
+============================================ -->
+
+<project default="all">
+	
+	<!-- Init -->
+	<target name="init">
+		<property name="projectName" value="JDash"/>
+		<property name="izhome" value="/opt/izpack"/>
+		<property name="sourceDir" value="src" />
+		<property name="outputDir" value="build" />
+		<property name="rteDir" value="rte" />
+		<property name="docDir" value="doc" />
+		<property name="classpath"
+			  value="${rteDir}/RXTXcomm.jar:${rteDir}/bsh-core-2.0b4.jar:${rteDir}/hsqldb.jar:${rteDir}/jdom.jar:${rteDir}/junit.jar:${rteDir}/jcckit.jar" />
+		<mkdir dir="${outputDir}" />
+	</target>
+	
+	<!-- ALL -->
+	<target name="all" depends="init,rte">
+		<echo message="JDash build complete"/>
+	</target>
+	
+	<!-- Compile -->
+	<target name="compile" depends="init">
+		<echo message="Compiling JDash"/>
+		<javac 
+			srcdir="${sourceDir}" 
+			destdir="${outputDir}" 
+			classpath="${classpath}" 
+			deprecation="true" 
+			debug="true" 
+			debuglevel="source,lines,vars"
+		/>
+	</target>
+	
+	<!-- Jar -->
+	<target name="jar" depends="init,compile">
+		<echo message="Creating JDash jar file"/>
+		
+		<delete file="manifest.txt" />
+		<touch file="manifest.txt" />
+<echo file="manifest.txt">Manifest-Version: 1.0
+Created-By: Shane Powell (Copyright 2006)
+Main-Class: net.sourceforge.JDash.Startup</echo>
+		<echo message="Creating jar file..."/>
+		
+		<copy todir="${outputDir}">
+			<fileset dir="${sourceDir}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+		
+		<jar destfile="rte/JDash.jar"
+		     basedir="build"
+		     includes="**/*"
+		     manifest="manifest.txt"
+         	/>
+		
+		<delete file="manifest.txt" />
+	</target>
+	
+	<!-- RTE -->
+	<target name="rte" depends="init,jar">
+		<echo message="Creating JDash Runtime Environment"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/icon.ico" tofile="${rteDir}/icon.ico"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/icon.png" tofile="${rteDir}/icon.png"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/config.png" tofile="${rteDir}/config.png"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/config.ico" tofile="${rteDir}/config.ico"/>
+	</target>
+	
+	<!-- java doc -->
+	<target name="javadoc" depends="init">
+		<javadoc packagenames="*"
+			sourcepath="${sourceDir}"
+			destdir="${docDir}/javadoc"
+			classpath="${classpath}"
+			author="true"
+			version="true"
+			windowtitle="${projectName} API"
+			doctitle="${projectName}"
+			header="${projectName} JavaDoc"
+			overview="Overview"
+			bottom="Copyright (c) 2006 Shane Powell under the LGPL License. All Rights Reserved."
+    	/>
+	</target>
+	
+	<!-- Build zip file -->
+	<target name="release" depends="init,rte">
+		<exec executable="java" dir="install">
+			<arg line=" -cp standalone-compiler.jar" />
+			<arg line=" -Dtools.jar=$JAVA_HOME/lib/tools.jar" />
+			<arg line=" com.izforge.izpack.compiler.Compiler" />
+			<arg line=" izpack_install.xml" />
+			<arg line=" -b ../${rteDir} -o setup"/>
+		</exec>
+
+		<zip
+		    destFile="JDash-x.x.x.zip"
+		    basedir="./install"
+		    includes="setup.jar install.txt"
+		/>
+
+		<delete file="install/setup.jar"/>
+
+	</target>
+	
+	<!-- clean -->
+	<target name="clean" depends="init">
+		<echo message="Cleaning..." />
+		<delete failonerror="no" dir="${outputDir}" />
+		<delete failonerror="no" file="${rte}/JDash.jar" />
+	</target>
+	
+	<!-- Launch -->
+	<target name="launch" depends="rte">
+		<exec executable="java">
+			<arg line="-jar rte/JDash.jar"/>
+		</exec>
+	</target>
+
+	<target name="launch-jmp" depends="rte">
+		<exec executable="java">
+			<arg line="-Xrunjmp -jar rte/JDash.jar"/>
+		</exec>
+	</target>
+	
+	<!-- Launch Config -->
+	<target name="launch-config" depends="rte">
+		<exec executable="java">
+			<arg line="-jar rte/JDash.jar -config"/>
+		</exec>
+	</target>
+	
+</project>

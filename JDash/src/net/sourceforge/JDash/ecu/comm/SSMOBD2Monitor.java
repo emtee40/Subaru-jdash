@@ -82,8 +82,6 @@ public class SSMOBD2Monitor extends RS232Monitor
     {
     	super.init(reg, initListener);
     	
-    	getPort().setRTS(false);
-   	
     	
 		/* Setup the init packet */
     	RS232Packet txPacket = new RS232Packet();
@@ -323,9 +321,7 @@ public class SSMOBD2Monitor extends RS232Monitor
 				if (is.available() != 0)
 				{
 					Thread.sleep(100); /* Wait for just a bit longer. giveing the stale bytes time to complete */
-					System.out.println("Warning, there were stale bytes on the input stream");
 					byte[] staleBytes = readBytes(is, is.available());
-					System.out.println(UTIL.bytesToString(staleBytes));
 				}
 				
 				

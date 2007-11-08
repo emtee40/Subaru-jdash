@@ -1,0 +1,44 @@
+<!-- ======================================================================
+ This is a JDash XMLSkin definition file.  See website for details
+ http://jdash.sourceforge.net
+ $Id: default2.skn,v 1.2 2006/09/14 02:03:45 shaneapowell Exp $
+     ====================================================================== -->
+<skin name="Minimal" resource-url="/net/sourceforge/JDash/skin/XMLSkin/DefaultSkin">
+
+  <description>This skin will put the RPM, MPH, Lambda and Vacuum/Boost values on the screen as text</description>
+  
+    <!-- Main Window -->
+  <window width="300" height="300" type="window:50"  fill-color="#000000">
+<!--    <image name="background" x="0" y="0" width="-1" height="-1" />  -->
+  </window>
+  
+  <!-- Images -->
+  <image name="background"                  src="blank_black.jpg"/> 
+  
+  <!-- Color definitions -->
+  <color name="red"        value="#ff0000" />
+  <color name="dark-red"   value="#990000" />
+  <color name="green"      value="#00ff00" />
+  <color name="blue"       value="#0000ff" />
+  <color name="yellow"     value="#fffb0b" />
+  
+  <!-- Font Definitions -->
+  <font name="digital" src="digital.ttf" />
+   
+  <gauge sensor="RPM" type="digital">
+     <text color="green" size="25" x="20" y="50" format="%02.2f" font="digital"/>
+  </gauge>
+  
+  <gauge sensor="MPH" type="digital">
+     <text color="green" size="25" x="20" y="100" format="%02.2f" font="digital"/>
+  </gauge>
+  
+  <gauge sensor="LAMBDA_1" type="digital">
+     <text color="green" size="25" x="20" y="150" format="%02.2f" font="digital"/>
+  </gauge>
+  
+  <gauge sensor="VAC_BOOST_PSI" type="digital">
+     <text color="green" size="25" x="20" y="200" format="%02.2f" font="digital"/>
+  </gauge>
+  
+</skin>

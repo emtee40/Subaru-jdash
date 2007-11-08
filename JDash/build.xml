@@ -14,7 +14,7 @@
 
 ============================================ -->
 
-<project default="all">
+<project default="all" name="JDash">
 	
 	<!-- Init -->
 	<target name="init">

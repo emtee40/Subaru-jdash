@@ -29,7 +29,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -136,8 +135,9 @@ public class Startup
 				Startup.splashFrame_.setStatus(20, "Loading ECU Parameters");
 				
 				/* Load the loader */
-				String ecuParamFile = Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR) + '/' + Setup.getSetup().get(Setup.SETUP_CONFIG_PARAMETER_FILE);
-				final XMLParameterLoader loader = new XMLParameterLoader(new File(ecuParamFile));
+				//String ecuParamFile = Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR) + '/' + Setup.getSetup().get(Setup.SETUP_CONFIG_PARAMETER_FILE);
+				String ecuParamFile = Setup.getSetup().get(Setup.SETUP_CONFIG_PARAMETER_FILE);
+				final XMLParameterLoader loader = new XMLParameterLoader(new File(Setup.SETUP_CONFIG_ECU_PARAMS_DIR + File.separatorChar + ecuParamFile));
 				
 				/* Create a parameter registry */
 				ParameterRegistry paramRegistry = new ParameterRegistry();

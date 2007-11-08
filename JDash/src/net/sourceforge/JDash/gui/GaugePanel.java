@@ -135,6 +135,7 @@ public class GaugePanel extends JPanel
 			}
 			catch(Exception e)
 			{
+				e.printStackTrace();
 				gaugeProblems += "Unable to add gauge [" + gaugeIndex + "] from this skin. " + e.getMessage() + "\n";
 			}
 			

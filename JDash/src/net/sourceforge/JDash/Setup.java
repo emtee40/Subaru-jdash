@@ -51,7 +51,7 @@ import java.util.Properties;
 public class Setup
 {	
 	/** The application version string */
-	public static final String VERSION = "v0.6.0 05-21-2007";
+	public static final String VERSION = "v0.7.1 11-08-2007";
 	
 	/** The applicaiton name */
 	public static final String APPLICATION = "JDash / " + VERSION;
@@ -70,7 +70,16 @@ public class Setup
 	public static final String SETUP_DEFAULT_WINDOWS_SERIAL_PORT = "com1";
 	
 	/** The get() config key to return the running base directory */
-	public static final String SETUP_CONFIG_BASE_DIR = "base.dir";
+//	public static final String SETUP_CONFIG_BASE_DIR = "base.dir";
+	
+	/** The name of the log database directory */
+	public static final String SETUP_CONFIG_LOGDB_DIR = "logdb";
+	
+	/** The name of the skins directory */
+	public static final String SETUP_CONFIG_SKINS_DIR = "skins";
+	
+	/** The name of the ecu parameter directory */
+	public static final String SETUP_CONFIG_ECU_PARAMS_DIR = "ecu";
 	
 	/* These setup keys are the ones that are stored in the config file */
 	/** The get() config key to return the skin ID */
@@ -135,7 +144,22 @@ public class Setup
 		try
 		{
 			/* Set the runtime directory */
-			set(SETUP_CONFIG_BASE_DIR, determineRuntimeDir().toString());
+//			set(SETUP_CONFIG_BASE_DIR, determineRuntimeDir().toString());
+			
+			/* Make sure that all directories exist */
+			File ecuDir = new File(SETUP_CONFIG_ECU_PARAMS_DIR);
+			File logDBDir = new File(SETUP_CONFIG_LOGDB_DIR);
+			File skinDir = new File(SETUP_CONFIG_SKINS_DIR);
+			
+			if (!ecuDir.exists() && !logDBDir.exists() && !skinDir.exists())
+			{
+				throw new Exception("Unable to load config files.  One of the following directories is missing\n" +
+						SETUP_CONFIG_ECU_PARAMS_DIR + "\n" + 
+						SETUP_CONFIG_LOGDB_DIR + "\n" + 
+						SETUP_CONFIG_SKINS_DIR);
+			}
+			
+			
 			
 
 			/* Initialize the resource values */
@@ -324,33 +348,35 @@ public class Setup
 		this.configFileValues_ = new Properties();
 		
 		/* Create the config file object */
-		File configFile = new File(get(SETUP_CONFIG_BASE_DIR), SETUP_CONFIG_FILE);
+		//File configFile = new File(get(SETUP_CONFIG_BASE_DIR), SETUP_CONFIG_FILE);
+		File configFile = new File(SETUP_CONFIG_FILE);
 		
 		/* If the config file doesn't exist, then set the defaults */
 		if (configFile.exists() == false)
 		{
+			throw new Exception("Unable to find config file in runtime path.");
 		
-			/* Set the config values with blanks / Defaults */
-			this.configFileValues_.setProperty(SETUP_CONFIG_PARAMETER_FILE, "");
-			
-			/* If this is a windows system, then the default monitor port is different */
-			if (System.getProperty("os.name").indexOf("Windows") >= 0)
-			{
-				this.configFileValues_.setProperty(SETUP_CONFIG_MONITOR_PORT, SETUP_DEFAULT_WINDOWS_SERIAL_PORT);
-			}
-			else
-			{
-				this.configFileValues_.setProperty(SETUP_CONFIG_MONITOR_PORT, SETUP_DEFAULT_LINUX_SERIAL_PORT);
-			}
-			
-			this.configFileValues_.setProperty(SETUP_CONFIG_SKINFACTORY_CLASS, "");
-			this.configFileValues_.setProperty(SETUP_CONFIG_SKIN_ID, "");
-			this.configFileValues_.setProperty(SETUP_CONFIG_ENABLE_TEST, Boolean.FALSE.toString());
-			this.configFileValues_.setProperty(SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK, Boolean.FALSE.toString());
-			
-			this.setupProperties_.putAll(this.configFileValues_);
-			
-			return false;
+//			/* Set the config values with blanks / Defaults */
+//			this.configFileValues_.setProperty(SETUP_CONFIG_PARAMETER_FILE, "");
+//			
+//			/* If this is a windows system, then the default monitor port is different */
+//			if (System.getProperty("os.name").indexOf("Windows") >= 0)
+//			{
+//				this.configFileValues_.setProperty(SETUP_CONFIG_MONITOR_PORT, SETUP_DEFAULT_WINDOWS_SERIAL_PORT);
+//			}
+//			else
+//			{
+//				this.configFileValues_.setProperty(SETUP_CONFIG_MONITOR_PORT, SETUP_DEFAULT_LINUX_SERIAL_PORT);
+//			}
+//			
+//			this.configFileValues_.setProperty(SETUP_CONFIG_SKINFACTORY_CLASS, "");
+//			this.configFileValues_.setProperty(SETUP_CONFIG_SKIN_ID, "");
+//			this.configFileValues_.setProperty(SETUP_CONFIG_ENABLE_TEST, Boolean.FALSE.toString());
+//			this.configFileValues_.setProperty(SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK, Boolean.FALSE.toString());
+//			
+//			this.setupProperties_.putAll(this.configFileValues_);
+//			
+//			return false;
 
 		}
 		
@@ -367,7 +393,8 @@ public class Setup
 	public void saveConfigFile() throws Exception
 	{
 		/* Create the config file object */
-		File configFile = new File(get(SETUP_CONFIG_BASE_DIR), SETUP_CONFIG_FILE);
+//		File configFile = new File(get(SETUP_CONFIG_BASE_DIR), SETUP_CONFIG_FILE);
+		File configFile = new File(SETUP_CONFIG_FILE);
 		
 		this.configFileValues_.store(new FileOutputStream(configFile), "JDash Config");
 	}
@@ -382,30 +409,30 @@ public class Setup
 	 *******************************************************/
 	private void initializeResources() throws Exception
 	{
-		File baseDir = new File(get(SETUP_CONFIG_BASE_DIR));
+//		File baseDir = new File(get(SETUP_CONFIG_BASE_DIR));
 		
 		/* Setup the minimum system parameters.  Copy in our config values, and set a few manualy */
-		set(SETUP_CONFIG_BASE_DIR, baseDir.toString()); 
+//		set(SETUP_CONFIG_BASE_DIR, baseDir.toString()); 
 		
 		
-		/* Modify the class path to include the jar files found here */
-		File[] allFiles = baseDir.listFiles();
-		for (File f : allFiles)
-		{
-			/* If the file IS a file, and it ends with .jar, then append it to the class path */
-			if (f.isFile() == true)
-			{
-				if (f.getName().endsWith(".jar") || f.getName().endsWith(".JAR"))	
-				{
-					addClassPathURL(f.toURL());
-					//System.setProperty("java.class.path", System.getProperty("java.class.path") + libPathSeparator + f.getAbsolutePath());
-						/* Also, if the .jar file is named XXXX.skin.jar, then this is a skin jar file */
-				}
-			}
-		}
-		
-		/* Set the native library path to include our base directory */
-		addLibDir(baseDir);
+//		/* Modify the class path to include the jar files found here */
+//		File[] allFiles = baseDir.listFiles();
+//		for (File f : allFiles)
+//		{
+//			/* If the file IS a file, and it ends with .jar, then append it to the class path */
+//			if (f.isFile() == true)
+//			{
+//				if (f.getName().endsWith(".jar") || f.getName().endsWith(".JAR"))	
+//				{
+//					addClassPathURL(f.toURL());
+//					//System.setProperty("java.class.path", System.getProperty("java.class.path") + libPathSeparator + f.getAbsolutePath());
+//						/* Also, if the .jar file is named XXXX.skin.jar, then this is a skin jar file */
+//				}
+//			}
+//		}
+//		
+//		/* Set the native library path to include our base directory */
+//		addLibDir(baseDir);
 	}
 	
 	

@@ -54,7 +54,8 @@ public class XMLSkinFactory extends SkinFactory
 	public XMLSkinFactory() throws Exception
 	{
 		/* Get the list of all files in the base directory */
-		File configDir = new File(Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR));
+		//File configDir = new File(Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR));
+		File configDir = new File(Setup.SETUP_CONFIG_SKINS_DIR);
 		
 		/* Check each jar file */
 		for (File f : configDir.listFiles())
@@ -86,18 +87,35 @@ public class XMLSkinFactory extends SkinFactory
 		}
 		
 		
-		/* Any files in the root directory with the .skn extenesion now get loaded, We do these
-		 * after the jar files to allow the override of an existing skin by it's name */
+		/* Now..Lets check each sub directory */
 		for (File f : configDir.listFiles())
 		{
-			/* If this file ends with the skin extension, then we'll add it */
-			if (f.getName().endsWith(SKIN_FILE_EXTENSION) == true)
+			if (f.isDirectory())
 			{
-				XMLSkin skin = new XMLSkin(this, f.toURL());
-				this.skins_.add(skin);
+				for (File sf : f.listFiles())
+				{
+					if (sf.getName().endsWith(SKIN_FILE_EXTENSION) == true)
+					{
+						XMLSkin skin = new XMLSkin(this, sf.toURL());
+						this.skins_.add(skin);
+					}
+				}
 			}
-			
 		}
+		
+		
+//		/* Any files in the root directory with the .skn extenesion now get loaded, We do these
+//		 * after the jar files to allow the override of an existing skin by it's name */
+//		for (File f : configDir.listFiles())
+//		{
+//			/* If this file ends with the skin extension, then we'll add it */
+//			if (f.getName().endsWith(SKIN_FILE_EXTENSION) == true)
+//			{
+//				XMLSkin skin = new XMLSkin(this, f.toURL());
+//				this.skins_.add(skin);
+//			}
+//			
+//		}
 	}
 
 	/*******************************************************

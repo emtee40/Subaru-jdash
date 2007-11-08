@@ -153,7 +153,7 @@ public class DatabaseLogger extends DataLogger
 		try
 		{
 			
-			File dbDir = new File(Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR));
+			File dbDir = new File(Setup.SETUP_CONFIG_LOGDB_DIR);
 			
 			if (dbDir.isDirectory() == false)
 			{

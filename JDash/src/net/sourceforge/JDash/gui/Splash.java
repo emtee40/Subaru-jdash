@@ -64,7 +64,7 @@ public class Splash extends JFrame
 		/* Configure our splash frame */
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setIconImage(new ImageIcon(DashboardFrame.ICON).getImage());
-		setAlwaysOnTop(true);
+		setAlwaysOnTop(false);
 		setResizable(false);
 		
 		

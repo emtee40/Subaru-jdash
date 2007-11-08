@@ -54,7 +54,6 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
 import net.sourceforge.JDash.Setup;
-import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.param.XMLParameterLoader;
 import net.sourceforge.JDash.skin.Skin;
 import net.sourceforge.JDash.skin.SkinFactory;
@@ -207,7 +206,7 @@ public class ConfigureFrame extends JFrame
 
 		
 		/* Add the monitor parameter files */
-		File baseDir = new File(Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR));
+		File baseDir = new File(Setup.SETUP_CONFIG_ECU_PARAMS_DIR);
 		for (File f : baseDir.listFiles())
 		{
 			if (f.getName().endsWith(MONITOR_FILE_SUFFIX) == true)

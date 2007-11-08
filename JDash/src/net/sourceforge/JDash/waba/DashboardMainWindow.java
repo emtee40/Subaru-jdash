@@ -26,14 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.waba;
 
 
-import java.util.Enumeration;
-
-import gnu.io.CommPortIdentifier;
-
-import net.sourceforge.JDash.waba.error.ErrorDialog;
 import net.sourceforge.JDash.waba.error.ErrorLog;
-import waba.io.SerialPort;
-import waba.sys.Convert;
 import waba.sys.Settings;
 import waba.ui.MainWindow;
 

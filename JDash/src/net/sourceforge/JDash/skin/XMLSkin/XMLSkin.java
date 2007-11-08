@@ -30,8 +30,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -87,7 +90,7 @@ public class XMLSkin extends Skin
 {
 	
 	/** This is the full resource path to the digital ttf file.  */
-	private static final String PATH_TO_DIGITAL_FONT = "/net/sourceforge/JDash/skin/XMLSkin/DefaultSkin/digital.ttf";
+//	private static final String PATH_TO_DIGITAL_FONT = "/net/sourceforge/JDash/skin/XMLSkin/DefaultSkin/digital.ttf";
 	
 	private static final String GAUGE_TYPE_ANALOG 		= "analog";
 	private static final String GAUGE_TYPE_DIGITAL 		= "digital";
@@ -106,6 +109,7 @@ public class XMLSkin extends Skin
 	private static final String NODE_NEEDLE		= "needle";
 	private static final String NODE_LED		= "led";
 	private static final String NODE_POINT		= "point";
+	private static final String NODE_FONT		= "font";
 	
 	private static final String NODE_BUTTON				= "button";
 	private static final String NODE_POLYGON			= "polygon";
@@ -121,7 +125,7 @@ public class XMLSkin extends Skin
 	private static final String ATTRIB_NAME 		= "name";
 	private static final String ATTRIB_EXTENDS		= "extends";
 	private static final String ATTRIB_DELAY		= "delay";
-	private static final String ATTRIB_RESOURCE_URL	= "resource-url";
+//	private static final String ATTRIB_RESOURCE_URL	= "resource-url";
 	private static final String ATTRIB_SRC 			= "src";
 	private static final String ATTRIB_SENSOR 		= "sensor";
 	private static final String ATTRIB_TYPE			= "type";
@@ -154,7 +158,7 @@ public class XMLSkin extends Skin
 	private static final String VALUE_HIGH			= "high";
 	
 	/** This is the fontfile name to use in a text component is you wish to use the built in digital font */
-	public static final String VALUE_JDASH_DIGITAL	= "jdash-digital";
+//	public static final String VALUE_JDASH_DIGITAL	= "jdash-digital";
 
 	
 	
@@ -164,6 +168,8 @@ public class XMLSkin extends Skin
 	/** The loaded xml config file. */
 	private Document xmlSkinDoc_ = null;
 
+	/** The cache of fonts */
+	private HashMap<String, Font> fontCache_ = new HashMap<String,Font>();
 
 	private String id_ = null;
 	private String name_ = null;
@@ -218,7 +224,7 @@ public class XMLSkin extends Skin
 		if (docToAddTo != null)
 		{
 			/* Copy over the resource-url attribute */
-			docToAddTo.getDocumentElement().setAttribute(ATTRIB_RESOURCE_URL, this.xmlSkinDoc_.getDocumentElement().getAttribute(ATTRIB_RESOURCE_URL));
+//			docToAddTo.getDocumentElement().setAttribute(ATTRIB_RESOURCE_URL, this.xmlSkinDoc_.getDocumentElement().getAttribute(ATTRIB_RESOURCE_URL));
 			
 			/* Get a list of all child nodes */
 			XPath xp =   XPathFactory.newInstance().newXPath();
@@ -316,7 +322,8 @@ public class XMLSkin extends Skin
 		}
 		
 		/* Set the resource url for this skin */
-		this.resourceUrl_ = extractString(NODE_SKIN + "/@" + ATTRIB_RESOURCE_URL);
+//		this.resourceUrl_ = extractString(NODE_SKIN + "/@" + ATTRIB_RESOURCE_URL);
+		this.resourceUrl_ = skinFile.getParent();
 		
 
 	}
@@ -482,6 +489,39 @@ public class XMLSkin extends Skin
 		
 		String value = extractString(NODE_SKIN + "/" + NODE_COLOR + "[@" + ATTRIB_NAME + "='" + colorName + "']/@" + ATTRIB_VALUE );
 		return value;
+	}
+	
+	
+	/********************************************************
+	 * given the font resource name, find the font definition, and
+	 * return an instance of this font.  When a font is loaded
+	 * it's cached for future reuse.
+	 * 
+	 * @param fontName
+	 * @return
+	 * @throws Exception
+	 *******************************************************/
+	private Font getFont(String fontName) throws Exception
+	{
+		Font f = null;
+		
+		if (this.fontCache_.containsKey(fontName))
+		{
+			f = this.fontCache_.get(fontName);
+		}
+		else
+		{
+			
+			String fontSource = extractString(NODE_SKIN + "/" + NODE_FONT + "[@" + ATTRIB_NAME + "='" + fontName + "']/@" + ATTRIB_SRC );
+			f = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(new File(this.resourceUrl_ + File.separatorChar + fontSource)));
+		}
+		
+		if (f == null)
+		{
+			throw new Exception("Unable to load font: " + fontName + " the font for some reason is null");
+		}
+			
+		return f;
 	}
 	
 	/*******************************************************
@@ -1149,34 +1189,35 @@ public class XMLSkin extends Skin
 		double x = extractDouble(shapePath + "/@" + ATTRIB_X);
 		double y = extractDouble(shapePath + "/@" + ATTRIB_Y);
 		String format = extractString(shapePath + "/@" + ATTRIB_FORMAT);
-		String fontFile = extractString(shapePath + "/@" + ATTRIB_FONT);
+		String fontName = extractString(shapePath + "/@" + ATTRIB_FONT);
 		Font font = null;
 		
-		if (fontFile == null)
+		if (fontName == null)
 		{
 			throw new Exception("text shape must have a font attribute");
 		}
 		
+		/* Get the font */
+		font = getFont(fontName);
 		
-		
-		/* If the font named is our digital meta fond, then we'll setup the path and load it manualy */
-		if (fontFile.equals(VALUE_JDASH_DIGITAL))
-		{
-			font = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream(PATH_TO_DIGITAL_FONT));
-		}
-		else
-		{
-			
-			/* Load the font */
-			if (fontFile.endsWith(".ttf"))
-			{
-				font = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream(this.resourceUrl_ + "/" + fontFile));
-			}
-			else
-			{
-				font = new Font(fontFile, Font.BOLD, 1);
-			}
-		}
+//		/* If the font named is our digital meta fond, then we'll setup the path and load it manualy */
+//		if (fontFile.equals(VALUE_JDASH_DIGITAL))
+//		{
+//			font = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream(PATH_TO_DIGITAL_FONT));
+//		}
+//		else
+//		{
+//			
+//			/* Load the font */
+//			if (fontFile.endsWith(".ttf"))
+//			{
+//				font = Font.createFont(Font.TRUETYPE_FONT, this.getClass().getResourceAsStream(this.resourceUrl_ + "/" + fontFile));
+//			}
+//			else
+//			{
+//				font = new Font(fontFile, Font.BOLD, 1);
+//			}
+//		}
 			
 		TextShape textShape = new TextShape(x, y, format, font);
 		

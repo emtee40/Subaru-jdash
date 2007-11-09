@@ -91,8 +91,7 @@ public class ECUParameter extends Parameter
     public void setResult(double r)
     {
         _result = r;
-        setChanged();
-        notifyObservers();
+        fireValueChangedEvent();
     }
     
     

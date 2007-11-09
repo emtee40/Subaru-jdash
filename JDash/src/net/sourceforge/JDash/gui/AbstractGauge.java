@@ -43,15 +43,15 @@ import net.sourceforge.JDash.ecu.param.Parameter;
  * of this class to do the heavy lifting and making it
  * look like it should.
  ******************************************************/
-public abstract class AbstractGauge implements Observer
+public abstract class AbstractGauge // implements Observer
 {
 	
 	
 	/** The ECU parameter that this gauge is setup to display values for */
 	private Parameter parameter_ = null;
 	
-	/** The owner panel */
-	private GaugePanel parentPanel_ = null;
+//	/** The owner panel */
+//	private GaugePanel parentPanel_ = null;
 	
 	/** The previous render bounds */
 	private Rectangle previousBounds_ = null;
@@ -63,29 +63,29 @@ public abstract class AbstractGauge implements Observer
 	 * @param parentPanel IN - the parent gauge panel this gauge will
 	 * be drawn inside. We'll need it's getScalingTransform() method.
 	 ******************************************************/
-	public AbstractGauge(Parameter parameter, GaugePanel parentPanel)
+	public AbstractGauge(Parameter parameter)
 	{
 		this.parameter_ = parameter;
 		
-		/* It's possible for the parameter to be null */
-		if (this.parameter_ != null)
-		{
-			this.parameter_.addObserver(this);
-		}
-		
-		this.parentPanel_ = parentPanel;
+//		/* It's possible for the parameter to be null */
+//		if (this.parameter_ != null)
+//		{
+//			this.parameter_.addObserver(this);
+//		}
+//		
+//		this.parentPanel_ = parentPanel;
 		
 	}
 
 	
-	/*******************************************************
-	 * Get the parent gauge panel
-	 * @return the parent gauge panel.
-	 *******************************************************/
-	public GaugePanel getParentPanel()
-	{
-		return this.parentPanel_;
-	}
+//	/*******************************************************
+//	 * Get the parent gauge panel
+//	 * @return the parent gauge panel.
+//	 *******************************************************/
+//	public GaugePanel getParentPanel()
+//	{
+//		return this.parentPanel_;
+//	}
 	
 	/*******************************************************
 	 * Drawing of a gauge requires a 2 step process.  First, when
@@ -116,7 +116,7 @@ public abstract class AbstractGauge implements Observer
 	 * gaugae will not cause a repaint.  It will be assumed that a null
 	 * means that nothing has changed, and a redraw is not needed.
 	 *******************************************************/
-	public abstract Rectangle preGenerate(AffineTransform scalingTransform, boolean force);
+//	public abstract Rectangle preGenerate(AffineTransform scalingTransform, boolean force);
 	
 	
 	/*******************************************************
@@ -143,12 +143,13 @@ public abstract class AbstractGauge implements Observer
 	 * make the methods synchronized. This should work for most cases. But, don't assume
 	 * it's a perfect fix.
 	 * 
+	 * @param panel IN = the gauge panel to paint the gage to.
 	 * @param g2 IN - the graphics context to draw with.
 	 * @param scalingTransform IN - the tranform to apply that will
 	 * adjust to the size of the parent panel. This is the same
 	 * transform that would be returned if calling getParent().getScalingTransform()
 	 *******************************************************/
-	public abstract void paint(Graphics2D g2, AffineTransform scalingTransform);
+	public abstract void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform);
 
 
 	
@@ -163,61 +164,61 @@ public abstract class AbstractGauge implements Observer
 	
 	
 
-	/*******************************************************
-	 * This method is called when a gauges parameter value has changed.
-	 * The underlying monitor is sending update messages as each 
-	 * value comes in.  When an update is detected, then 
-	 * each of the valueChanged listeners will get fired. 
-	 * 
-	 * @param obs IN - the observable paramerer. This object is not used since
-	 * this gauge can only respond to one parameter anyway.
-	 * @param obj IN - the extra object value. This is also not normally used except 
-	 * for when a GaugePanel resize event occurs.  the gauge panel will
-	 * call update() on all gauges, passing a Boolean.TRUE into the obj param.
-	 * 
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 *******************************************************/
-	public void update(Observable obs, Object obj)
-	{
-		
-		/* If the parent gauge panel is flaged updates as suspended, then we'll stop here */
-		if (getParentPanel().isGaugeDisplayUpdateSuspended() == true)
-		{
-			return;
-		}
-		
-		
-		/* Get the to-be-drawn bounds */
-		Rectangle repaintBoundsActual = preGenerate(getParentPanel().getScalingTransform(),  Boolean.TRUE.equals(obj));
-		
-		/* If the bounds are null, then nothing new is needed to be drawn */
-		if (repaintBoundsActual == null)
-		{
-			return;
-		}
-		
-		/* Increase the rect by a bit to compensate for rounding errors in all directions */
-		repaintBoundsActual = new Rectangle(repaintBoundsActual.x - 2,
-											repaintBoundsActual.y - 2,
-											repaintBoundsActual.width + 4,
-											repaintBoundsActual.height + 4);
-		
-		Rectangle repaintBoundsNew = (Rectangle)repaintBoundsActual.clone();
-		
-		
-		/* Add the previous bounds to the actual */
-		if (this.previousBounds_ != null)
-		{
-			repaintBoundsActual.add(this.previousBounds_);
-		}
-		
-		/* Remember the new bounds as the next previous */
-		this.previousBounds_ = repaintBoundsNew; 
-		
-		/* Call the repaint */
-		this.parentPanel_.repaint(repaintBoundsActual);
-		
-		
-	}
+//	/*******************************************************
+//	 * This method is called when a gauges parameter value has changed.
+//	 * The underlying monitor is sending update messages as each 
+//	 * value comes in.  When an update is detected, then 
+//	 * each of the valueChanged listeners will get fired. 
+//	 * 
+//	 * @param obs IN - the observable paramerer. This object is not used since
+//	 * this gauge can only respond to one parameter anyway.
+//	 * @param obj IN - the extra object value. This is also not normally used except 
+//	 * for when a GaugePanel resize event occurs.  the gauge panel will
+//	 * call update() on all gauges, passing a Boolean.TRUE into the obj param.
+//	 * 
+//	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+//	 *******************************************************/
+//	public void update(Observable obs, Object obj)
+//	{
+//		
+////		/* If the parent gauge panel is flaged updates as suspended, then we'll stop here */
+////		if (getParentPanel().isGaugeDisplayUpdateSuspended() == true)
+////		{
+////			return;
+////		}
+//		
+//		
+//		/* Get the to-be-drawn bounds */
+//		Rectangle repaintBoundsActual = preGenerate(getParentPanel().getScalingTransform(),  Boolean.TRUE.equals(obj));
+//		
+//		/* If the bounds are null, then nothing new is needed to be drawn */
+//		if (repaintBoundsActual == null)
+//		{
+//			return;
+//		}
+//		
+//		/* Increase the rect by a bit to compensate for rounding errors in all directions */
+//		repaintBoundsActual = new Rectangle(repaintBoundsActual.x - 2,
+//											repaintBoundsActual.y - 2,
+//											repaintBoundsActual.width + 4,
+//											repaintBoundsActual.height + 4);
+//		
+//		Rectangle repaintBoundsNew = (Rectangle)repaintBoundsActual.clone();
+//		
+//		
+//		/* Add the previous bounds to the actual */
+//		if (this.previousBounds_ != null)
+//		{
+//			repaintBoundsActual.add(this.previousBounds_);
+//		}
+//		
+//		/* Remember the new bounds as the next previous */
+//		this.previousBounds_ = repaintBoundsNew; 
+//		
+//		/* Call the repaint */
+//		this.parentPanel_.repaint(repaintBoundsActual);
+//		
+//		
+//	}
 	
 }

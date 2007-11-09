@@ -68,9 +68,9 @@ public class DigitalGauge extends AbstractGauge
 	 * @param textShape IN - the text shape object this gauge will
 	 * display.
 	 ******************************************************/
-	public DigitalGauge(Parameter p, GaugePanel parentPanel, TextShape textShape)
+	public DigitalGauge(Parameter p, TextShape textShape)
 	{
-		super(p, parentPanel);
+		super(p);
 		
 		this.textShape_ = textShape;
 	}
@@ -122,20 +122,11 @@ public class DigitalGauge extends AbstractGauge
 	 * Override
 	 * @see net.sourceforge.JDash.gui.AbstractGauge#getBounds()
 	 *******************************************************/
-	@Override
-	public synchronized Rectangle preGenerate(AffineTransform scalingTransform, boolean force)
+	private Rectangle preRender(Graphics2D g2, AffineTransform scalingTransform)
 	{
 
-		/* It's possible that the graphics context isn't yet read when things first startup, 
-		 * so we'll return a zero sized rect and wait for it to be ready */
-		if (getParentPanel().getGraphics() == null)
-		{
-			return null;
-		}
-		
-		
 		/* We'll need this */
-		Graphics2D g2 = (Graphics2D)getParentPanel().getGraphics();
+//		Graphics2D g2 = (Graphics2D)getParentPanel().getGraphics();
 
 		/* Setup the display value */
 		if (this.lowOrHighHold_ != null)
@@ -214,25 +205,16 @@ public class DigitalGauge extends AbstractGauge
 
 	
 	/******************************************************
-	 * Override the paint method so we can draw the gauge.
-	 *
-	 * @see java.awt.Component#paint(java.awt.Graphics)
+	 * Paint this gauge to the panel.
 	 *******************************************************/
-	@Override
-	public synchronized void paint(Graphics2D g2, AffineTransform scalingTransform)
+	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 		
+		/* Pre-render the parts of this gauge */
+		preRender(g2, scalingTransform);
 		
-		/* It's possible to get a paint event without having a sensor event. so 
-		 * we'll just draw a raw gauge */
-		if (this.preRenderedGlyphVector_ == null)
-		{
-			preGenerate(scalingTransform, true);
-		}
-
-		
-		/* Paint the text */
-		getParentPanel().paintGlyphs(g2, this.textShape_, this.preRenderedPoint_.x, this.preRenderedPoint_.y, this.preRenderedGlyphVector_);
+		/* Paint the text onto the main panel */
+		panel.paintGlyphs(g2, this.textShape_, this.preRenderedPoint_.x, this.preRenderedPoint_.y, this.preRenderedGlyphVector_);
 		
 		
 		/* Set the pre-renderd bounds to the size of this glyph vector. So the next preGen can take into account for

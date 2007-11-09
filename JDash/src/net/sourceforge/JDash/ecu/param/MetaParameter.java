@@ -37,7 +37,7 @@ import java.util.Observer;
  * 
  * @see MetaParameter
  ******************************************************/
-public abstract class MetaParameter extends Parameter implements Observer
+public abstract class MetaParameter extends Parameter // implements Observer
 {
 	
 	/*******************************************************
@@ -47,7 +47,7 @@ public abstract class MetaParameter extends Parameter implements Observer
 	 * 
 	 * @return
 	 *******************************************************/
-	public abstract List<Parameter> getDependants();
+	//public abstract List<Parameter> getDependants();
 	
 	/********************************************************
 	 * Set the name of this meta parameter.

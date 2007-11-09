@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
 
 
 
+import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.comm.ECUMonitor;
 import net.sourceforge.JDash.ecu.comm.InitListener;
 import net.sourceforge.JDash.ecu.comm.TestMonitor;
@@ -41,6 +42,7 @@ import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.XMLParameterLoader;
+import net.sourceforge.JDash.gui.AbstractGauge;
 import net.sourceforge.JDash.gui.ConfigureFrame;
 import net.sourceforge.JDash.gui.DashboardFrame;import net.sourceforge.JDash.gui.Splash;
 import net.sourceforge.JDash.logger.DataLogger;
@@ -68,7 +70,7 @@ public class Startup
 	private static JFrame mainFrame_ = null;
 	
 	/** This is the running monitor */
-	private static ECUMonitor monitor_ = null;
+	private static BaseMonitor monitor_ = null;
 	
 	/** This is THE monitor thread */
 	private static Thread monitorThread_ = null;
@@ -134,8 +136,7 @@ public class Startup
 				
 				Startup.splashFrame_.setStatus(20, "Loading ECU Parameters");
 				
-				/* Load the loader */
-				//String ecuParamFile = Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR) + '/' + Setup.getSetup().get(Setup.SETUP_CONFIG_PARAMETER_FILE);
+				/* Load the XML Parameter loader */
 				String ecuParamFile = Setup.getSetup().get(Setup.SETUP_CONFIG_PARAMETER_FILE);
 				final XMLParameterLoader loader = new XMLParameterLoader(new File(Setup.SETUP_CONFIG_ECU_PARAMS_DIR + File.separatorChar + ecuParamFile));
 				
@@ -145,12 +146,12 @@ public class Startup
 
 				Startup.splashFrame_.setStatus(40, "Loading Skin");
 				
-				/* Load the skin factory */
+				/* Load the skin factory and give it the parameter registry */
 				SkinFactory skinFactory = createSkinFactory();
 				skinFactory.setParameterRegistry(paramRegistry);
 				
 				
-				/* Create the desired monitor */
+				/* Create the desired ECU monitor */
 				/* If the test monitor has been checked, then override our default monitor */
 				if (new Boolean(Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_TEST)) == true)
 				{
@@ -210,13 +211,38 @@ public class Startup
 				logger.disableOverride(disableLoggingOverride);
 
 				
-				/* Show the main dashboard frame */
+				/* Generate a list of Gauge Components from the Skin */
+				
+				
+				/* Add the list of displayed parameters to the monitor. */
+				
+				/* Ok.. At this point, we have a skin full of gauges, each linked to
+				 * a Parameter.  Now, we need to inform the Monitor, exactly which parameters
+				 * it needs to work with.  For performance reasons, we only monitor ecu
+				 * parameters that are on display */
+				for (int gaugeIndex = 0; gaugeIndex < skinFactory.getDefaultSkin().getGaugeCount(); gaugeIndex++)
+				{
+					AbstractGauge gauge = skinFactory.getDefaultSkin().getGauge(gaugeIndex);
+					
+					/* Don't add gauge parameters with no parameters linked to them */
+					if ( gauge.getParameter() != null)
+					{
+						Startup.monitor_.addParam(gauge.getParameter());
+					}
+				}
+				
+				
+				
+				/* create the main dashboard frame */
 				displayFrame = new DashboardFrame(skinFactory.getDefaultSkin(), Startup.monitor_, logger);
 				if (Startup.monitor_ instanceof LoggerPlaybackMonitor)
 				{
 					((LoggerPlaybackMonitor)Startup.monitor_).init((DashboardFrame)displayFrame, logger);
 				}
 				Startup.splashFrame_.setStatus(100 ,"Done");
+				
+				
+				/* Show the main dashboard frame */
 				displayFrame.setVisible(true);
 
 
@@ -232,6 +258,7 @@ public class Startup
 				Startup.monitorThread_ = new Thread(Startup.monitor_);
 				Startup.monitorThread_.start();
 
+				
 				
 			}
 
@@ -272,7 +299,7 @@ public class Startup
 	 * @return
 	 * @throws Exception
 	 ******************************************************/
-	private ECUMonitor createMonitor(XMLParameterLoader loader) throws Exception
+	private BaseMonitor createMonitor(XMLParameterLoader loader) throws Exception
 	{
 		String monitorClass = loader.getMonitorClass();
 		
@@ -294,7 +321,7 @@ public class Startup
 		}
 		
 		/* Cast the monitor */
-		return (ECUMonitor)monitor;
+		return (BaseMonitor)monitor;
 					
 
 	}

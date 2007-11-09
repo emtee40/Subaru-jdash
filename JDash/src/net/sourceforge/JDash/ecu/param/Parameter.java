@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.ecu.param;
 
+import java.util.ArrayList;
 import java.util.Observable;
 
 
@@ -31,12 +32,15 @@ import java.util.Observable;
  * This basic parameter class is simple class whos
  * sole purpose is to provide data to the renderers/Observers.
  *****************************************************/
-public abstract class Parameter extends Observable implements DoubleParameter
+public abstract class Parameter implements DoubleParameter
 {
 	
 	
 	private ParameterRegistry ownerRegistry_ = null;
 	
+	
+	/* The linked listeners */
+	private ArrayList<ParameterEventListener> eventListeners_ = new ArrayList<ParameterEventListener>();
 	
 	
 	/*******************************************************
@@ -48,6 +52,35 @@ public abstract class Parameter extends Observable implements DoubleParameter
 	public ParameterRegistry getOwnerRegistry()
 	{
 		return this.ownerRegistry_;
+	}
+	
+	
+	/********************************************************
+	 * @param l
+	 *******************************************************/
+	public void addEventListener(ParameterEventListener l)
+	{
+		this.eventListeners_.add(l);
+	}
+	
+	/*******************************************************
+	 * @param l
+	 *******************************************************/
+	public void removeEventListener(ParameterEventListener l)
+	{
+		this.eventListeners_.remove(l);
+	}
+	
+	/*******************************************************
+	 * Call this method to send the valueChanged() event
+	 * message to all the event listeners.
+	 *******************************************************/
+	public void fireValueChangedEvent()
+	{
+		for (ParameterEventListener l : this.eventListeners_)
+		{
+			l.valueChanged();
+		}
 	}
 	
 	/********************************************************

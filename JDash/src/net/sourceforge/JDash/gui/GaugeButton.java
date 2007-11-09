@@ -54,7 +54,7 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 	/** The action string that defines a button as being a high-reset type of button */
 	public static final String BUTTON_ACTION_HIGH_RESET = "high-reset";
 
-	/** The action string that defines a button as being a log-reset type of button */
+	/** The action string that defines a button as being a low-reset type of button */
 	public static final String BUTTON_ACTION_LOW_RESET = "low-reset";
 	
 	/** The action string that defines a button as being a logger-toggle type of button */
@@ -100,6 +100,15 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 				(BUTTON_TYPE_TOGGLE.equalsIgnoreCase(shape.getType()) == false))
 			{
 				throw new Exception("Button Shape with action: " + shape.getAction() + " has an unsupported type code of: " + shape.getType()); 
+			}
+			
+			/* Make sure the action is a valid action code */
+			if ((BUTTON_ACTION_HIGH_RESET.equalsIgnoreCase(shape.getAction()) == false) &&
+				(BUTTON_ACTION_LOW_RESET.equalsIgnoreCase(shape.getAction()) == false) &&
+				(BUTTON_ACTION_LOGGER_TOGGLE.equalsIgnoreCase(shape.getAction()) == false) &&
+				(BUTTON_ACTION_DTC_RESET.equalsIgnoreCase(shape.getAction()) == false))
+			{
+				throw new Exception("Button Shape : " + shape.getType() + " with image: " + shape.getUpImageName() + " has an unupported action type code of: " + shape.getAction());
 			}
 			
 			this.upImage_ = skin.getImage(shape.getUpImageName()).getImage();

@@ -41,6 +41,7 @@ import javax.swing.KeyStroke;
 
 import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.Startup;
+import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.comm.ECUMonitor;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
@@ -72,7 +73,7 @@ public class DashboardFrame extends JFrame
 	 *  
 	 *  @param skin IN - the skin to render this frame with.
 	 ******************************************************/
-	public DashboardFrame(Skin skin, ECUMonitor monitor, DataLogger logger)
+	public DashboardFrame(Skin skin, BaseMonitor monitor, DataLogger logger)
 	{
 		super();
 		
@@ -127,6 +128,8 @@ public class DashboardFrame extends JFrame
 			initGraphics(monitor, logger);
 						
 			
+			
+			
 		}
 		catch(Exception e)
 		{
@@ -141,7 +144,7 @@ public class DashboardFrame extends JFrame
 	/********************************************************
 	 * Initialize the graphics.
 	 *******************************************************/
-	private void initGraphics(ECUMonitor monitor, DataLogger logger) throws Exception
+	private void initGraphics(BaseMonitor monitor, DataLogger logger) throws Exception
 	{
 		
 		
@@ -158,16 +161,18 @@ public class DashboardFrame extends JFrame
 		this.gaugePanel_ = new GaugePanel(this, this.skin_, monitor, logger);
 		mainPanel.add(gaugePanel_);
 		
-		/* Setup the list of parameters */
-		for (AbstractGauge gauge : gaugePanel_.getGauges())
-		{
-			
-			/* Don't add gauge parameters with no parameters linked to them */
-			if ( gauge.getParameter() != null)
-			{
-				monitor.addParam(gauge.getParameter());
-			}
-		}
+
+		
+//		/* Setup the list of parameters */
+//		for (AbstractGauge gauge : gaugePanel_.getGauges())
+//		{
+//			
+//			/* Don't add gauge parameters with no parameters linked to them */
+//			if ( gauge.getParameter() != null)
+//			{
+//				monitor.addParam(gauge.getParameter());
+//			}
+//		}
 		
 
 		/* Respond to the f1 key for the about box */

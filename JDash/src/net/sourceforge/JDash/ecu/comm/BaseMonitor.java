@@ -58,7 +58,12 @@ public abstract class BaseMonitor implements ECUMonitor
      * out of the loop, and exit the run() method */
     protected Boolean doRun_;
 
+    /** the list of all parameters */
     private ParameterRegistry paramRegistry_ = null;
+    
+    
+    /** This is a list of objects that wish to be informed of monitor events */
+    List<MonitorEventListener> monitorListeners_ = new ArrayList<MonitorEventListener>();
     
     /******************************************************
      * Create a new base monitor instance.  This is the core monitor for
@@ -95,6 +100,58 @@ public abstract class BaseMonitor implements ECUMonitor
     public ParameterRegistry getParameterRegistry()
     {
     	return this.paramRegistry_;
+    }
+    
+    /********************************************************
+     * @param l
+     *******************************************************/
+    public void addMonitorListener(MonitorEventListener l)
+    {
+    	this.monitorListeners_.add(l);
+    }
+    
+    /********************************************************
+     * @param l
+     *******************************************************/
+    public void removeMonitorListener(MonitorEventListener l)
+    {
+    	this.monitorListeners_.remove(l);
+    }
+    
+    
+    /********************************************************
+     * 
+     *******************************************************/
+    public void fireProcessingStartedEvent()
+    {
+    	for (MonitorEventListener l : this.monitorListeners_)
+    	{
+    		l.processingStarted();
+    	}
+    }
+    
+    
+    /********************************************************
+     * 
+     *******************************************************/
+    public void fireProcessingFinishedEvent()
+    {
+    	for (MonitorEventListener l : this.monitorListeners_)
+    	{
+    		l.processingFinished();
+    	}
+    }
+    
+    
+    /*********************************************************
+     * @param p
+     *******************************************************/
+    public void fireProcessingParameterEvent(Parameter p)
+    {
+    	for (MonitorEventListener l : this.monitorListeners_)
+    	{
+    		l.processedParameter(p);
+    	}
     }
     
     /******************************************************

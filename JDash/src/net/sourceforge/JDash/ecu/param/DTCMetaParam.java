@@ -116,8 +116,7 @@ public class DTCMetaParam extends MetaParameter implements StringParameter
 	public void setDTCCode(String dtc)
 	{
 		this.dtcValue_ = dtc;
-		setChanged();
-        notifyObservers();
+		fireValueChangedEvent();
 	}
 	
 	
@@ -149,15 +148,15 @@ public class DTCMetaParam extends MetaParameter implements StringParameter
 		return this.getDTCCode();
 	}
 
-	/*******************************************************
-	 * Override
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 *******************************************************/
-	public void update(Observable parameter, Object arg1)
-	{
-
-	}
-	
+//	/*******************************************************
+//	 * Override
+//	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+//	 *******************************************************/
+//	public void update(Observable parameter, Object arg1)
+//	{
+//
+//	}
+//	
 	
 	
 }

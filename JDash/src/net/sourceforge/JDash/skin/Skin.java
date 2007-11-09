@@ -54,6 +54,9 @@ public abstract class Skin
 	
 	/* The cache of images */
 	private HashMap<String, ImageIcon> imageCache_ = new HashMap<String, ImageIcon>();
+	
+	/* the cache of all created gauges */
+	private HashMap<Integer, AbstractGauge> gaugeCache_= new HashMap<Integer, AbstractGauge>();
 
 	/******************************************************
 	 * create a new skin class.  Don't do anything special
@@ -233,6 +236,32 @@ public abstract class Skin
 	 * @param parentPanel IN - the parent panel this guage will belong to
 	 * @return
 	 *******************************************************/
-	public abstract AbstractGauge createGauge(int index, GaugePanel parentPanel) throws Exception;
+	public AbstractGauge getGauge(int index) throws Exception
+	{
+		/* If the gauge has not yet been created, then create and cache it first */
+		if (this.gaugeCache_.containsKey(new Integer(index)) == false)
+		{
+			this.gaugeCache_.put(new Integer(index), this.createGauge(index));
+		}
+			
+		return this.gaugeCache_.get(new Integer(index));
+		
+	}
 
+	
+	
+	
+	
+	/*******************************************************
+	 * You must implement this method so the actual gauge itself can be created.  
+	 * This method should NOT be called by any other object.  It is used internaly
+	 * in this object, and the returned gauge is cached for future use.
+	 * 
+	 * @param index
+	 * @param parentPanel
+	 * @return
+	 * @throws Exception
+	 *******************************************************/
+	protected abstract AbstractGauge createGauge(int index) throws Exception;
+	
 }

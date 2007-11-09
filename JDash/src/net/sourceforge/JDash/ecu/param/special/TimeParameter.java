@@ -69,8 +69,8 @@ public class TimeParameter extends Parameter
     public void marktime(long time)
     {
     	_mark = time;
-    	this.setChanged();
-    	this.notifyObservers();
+//    	this.setChanged();
+//    	this.notifyObservers();
     }
     
     

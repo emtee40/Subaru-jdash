@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.gui;
 
 
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
-import net.sourceforge.JDash.gui.shapes.ButtonShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
 
 
@@ -107,6 +107,8 @@ public class AnalogGauge extends AbstractGauge
 	private ArrayList<AbstractShape> preGenShapes_ = null;
 	private ArrayList<Shape> preGenAwtShapes_ = null;
 
+	/* The list of buttons associated with this gauge */
+	private ArrayList<GaugeButton> gaugeButtons_ = new ArrayList<GaugeButton>();
 	
 	/* Cached low and high needle values */
 	private double lowNeedleValueInDegrees_ = Double.MAX_VALUE;
@@ -128,9 +130,9 @@ public class AnalogGauge extends AbstractGauge
 	 * @param p IN - the parameter this gauge will display values for.
 	 * @param parentPanel IN - the owner parent gauge panel.
 	 ******************************************************/
-	public AnalogGauge(Parameter p, GaugePanel parentPanel)
+	public AnalogGauge(Parameter p)
 	{
-		super(p, parentPanel);
+		super(p);
 	}
 
 	/*******************************************************
@@ -228,13 +230,11 @@ public class AnalogGauge extends AbstractGauge
 	 * 
 	 * @param button IN - the button to add.
 	 ******************************************************/
-	public void addButton(ButtonShape button)
+	public void addButton(GaugeButton gaugeButton)
 	{
 
-		/* Create the button */
-		GaugeButton gaugeButton = new GaugeButton(getParentPanel().getSkin(), button);
 		
-		if (GaugeButton.BUTTON_ACTION_HIGH_RESET.equals(button.getAction()) == true)
+		if (GaugeButton.BUTTON_ACTION_HIGH_RESET.equals(gaugeButton.getButtonShape().getAction()) == true)
 		{
 			gaugeButton.addActionListener(new ActionListener()
 			{
@@ -244,7 +244,7 @@ public class AnalogGauge extends AbstractGauge
 				}
 			});
 		}
-		else if (GaugeButton.BUTTON_ACTION_LOW_RESET.equals(button.getAction()) == true)
+		else if (GaugeButton.BUTTON_ACTION_LOW_RESET.equals(gaugeButton.getButtonShape().getAction()) == true)
 		{
 			gaugeButton.addActionListener(new ActionListener()
 			{
@@ -256,12 +256,13 @@ public class AnalogGauge extends AbstractGauge
 		}
 		else
 		{
-			throw new RuntimeException("Cannot add a button of action [" + button.getAction() + "] to an analog gague.\nOnly support for buttons of action: [" + 
+			throw new RuntimeException("Cannot add a button of action [" + gaugeButton.getButtonShape().getAction() + "] to an analog gague.\nOnly support for buttons of action: [" + 
 					GaugeButton.BUTTON_ACTION_HIGH_RESET + " / " + GaugeButton.BUTTON_ACTION_LOW_RESET + "]");
 		}
 		
-		/* Add the button */		
-		this.getParentPanel().add(gaugeButton, button.getShape().getBounds());
+		/* Add the button to our list for future placement */		
+		this.gaugeButtons_.add(gaugeButton);
+
 	}
 	
 	
@@ -286,8 +287,7 @@ public class AnalogGauge extends AbstractGauge
 	 * Override
 	 * @see net.sourceforge.JDash.gui.AbstractGauge#getBounds()
 	 *******************************************************/
-	@Override
-	public synchronized Rectangle preGenerate(AffineTransform scalingTransform, boolean force)
+	private Rectangle preRender(AffineTransform scalingTransform, boolean force)
 	{
 		this.preGenShapes_ = new ArrayList<AbstractShape>();
 		this.preGenAwtShapes_ = new ArrayList<Shape>();
@@ -477,22 +477,38 @@ public class AnalogGauge extends AbstractGauge
 	 *
 	 * @see java.awt.Component#paint(java.awt.Graphics)
 	 *******************************************************/
-	@Override
-	public synchronized void paint(Graphics2D g2, AffineTransform scalingTransform)
+	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
-		/* It's possible to get a paint event without having a sensor event. so 
-		 * we'll just draw a raw gauge */
-		if (this.preGenAwtShapes_ == null)
-		{
-			preGenerate(scalingTransform, true);
-		}
-		
+//		/* It's possible to get a paint event without having a sensor event. so 
+//		 * we'll just draw a raw gauge */
+//		if (this.preGenAwtShapes_ == null)
+//		{
+			preRender(scalingTransform, true);
+//		}
+//		
 		for (int index = 0; index < this.preGenShapes_.size(); index++)
 		{
-			getParentPanel().paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
+			panel.paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
 		}
+		
+		
+		/** Add the buttons */
+		for (GaugeButton button : this.gaugeButtons_)
+		{
 
-
+			/* don't add it, if ti's allreayd been added */
+			for (Component comp : panel.getComponents())
+			{
+				if (comp == button)
+				{
+					return;
+				}
+			}
+			
+			/* Add it to the gauge panel */
+			panel.add(button, button.getButtonShape().getShape().getBounds());
+			
+		}
 
 	}
 	

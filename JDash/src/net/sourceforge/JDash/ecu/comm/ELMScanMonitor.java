@@ -117,19 +117,19 @@ public class ELMScanMonitor extends RS232Monitor
 		String buffer = null;
 
 		
-		/* Have this monitor be an observer to the MIL_STATUS parameter.. if there even is one */
-		Parameter milStatus = reg.getParamForName(ParameterRegistry.PARAM_NAME_MIL_STATUS);
-		if (milStatus != null)
-		{
-			milStatus.addObserver(new Observer()
-			{
-				public void update(Observable arg0, Object arg1)
-				{
-					doMilCheck();
-				}
-			});
-		}
-		
+//		/* Have this monitor be an observer to the MIL_STATUS parameter.. if there even is one */
+//		Parameter milStatus = reg.getParamForName(ParameterRegistry.PARAM_NAME_MIL_STATUS);
+//		if (milStatus != null)
+//		{
+//			milStatus.addObserver(new Observer()
+//			{
+//				public void update(Observable arg0, Object arg1)
+//				{
+//					doMilCheck();
+//				}
+//			});
+//		}
+//		
 		getPort().setRTS(false);
 		
 		/* Perform a complete ELM reset */

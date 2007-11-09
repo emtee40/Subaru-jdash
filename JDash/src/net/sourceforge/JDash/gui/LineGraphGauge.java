@@ -91,7 +91,6 @@ public class LineGraphGauge extends AbstractGauge
 	 * @throws Exception
 	 ******************************************************/
 	public LineGraphGauge(Parameter p,
-							GaugePanel parentPanel, 
 							double x, 
 							double y, 
 							double width, 
@@ -106,7 +105,7 @@ public class LineGraphGauge extends AbstractGauge
 							TextShape highText) throws Exception
 							
 	{
-		super(p, parentPanel);
+		super(p);
 		
 		this.lowParameter_.setName(label + " low");
 		this.highParameter_.setName(label + " high");
@@ -169,19 +168,19 @@ public class LineGraphGauge extends AbstractGauge
 		
 		if (valueText != null)
 		{
-			this.valueGauge_ = new DigitalGauge(getParameter(), getParentPanel(), valueText);
+			this.valueGauge_ = new DigitalGauge(getParameter(), valueText);
 			props.put("plot/curveFactory/value/lineAttributes/lineColor", "" + Color.decode(valueText.getAttribute(PROPS.COLOR)).getRGB());
 		}
 		
 		if (lowText != null)
 		{
-			this.lowGauge_ = new DigitalGauge(this.lowParameter_, getParentPanel(), lowText);
+			this.lowGauge_ = new DigitalGauge(this.lowParameter_, lowText);
 			props.put("plot/curveFactory/low/lineAttributes/lineColor", "" + Color.decode(lowText.getAttribute(PROPS.COLOR)).getRGB());
 		}
 		
 		if (highText != null)
 		{
-			this.highGauge_ = new DigitalGauge(this.highParameter_, getParentPanel(), highText);
+			this.highGauge_ = new DigitalGauge(this.highParameter_, highText);
 			props.put("plot/curveFactory/high/lineAttributes/lineColor", "" + Color.decode(highText.getAttribute(PROPS.COLOR)).getRGB());
 		}
 
@@ -195,37 +194,36 @@ public class LineGraphGauge extends AbstractGauge
 		rect.width = (int)width;
 		rect.height = (int)height;
 		
-		parentPanel.add(this.plotCanvas_.getGraphicsCanvas(), rect);
+//		parentPanel.add(this.plotCanvas_.getGraphicsCanvas(), rect);
 	}
 
 	
 	
-	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.gui.AbstractGauge#getBounds()
-	 *******************************************************/
-	@Override
-	public Rectangle preGenerate(AffineTransform scalingTransform, boolean force)
-	{
-		Rectangle rect = new Rectangle(0,0,0,0);
-		
-		if (this.valueGauge_ != null)
-		{
-			rect.add(this.valueGauge_.preGenerate(scalingTransform, force));
-		}
-		
-		if (this.lowGauge_ != null)
-		{
-			rect.add(this.lowGauge_.preGenerate(scalingTransform, force));
-		}
-		
-		if (this.highGauge_ != null)
-		{
-			rect.add(this.highGauge_.preGenerate(scalingTransform, force));
-		}
-		
-		return rect;
-	}
+//	/*******************************************************
+//	 * Override
+//	 * @see net.sourceforge.JDash.gui.AbstractGauge#getBounds()
+//	 *******************************************************/
+//	private Rectangle preRender(AffineTransform scalingTransform, boolean force)
+//	{
+//		Rectangle rect = new Rectangle(0,0,0,0);
+//		
+//		if (this.valueGauge_ != null)
+//		{
+//			rect.add(this.valueGauge_.preGenerate(scalingTransform, force));
+//		}
+//		
+//		if (this.lowGauge_ != null)
+//		{
+//			rect.add(this.lowGauge_.preGenerate(scalingTransform, force));
+//		}
+//		
+//		if (this.highGauge_ != null)
+//		{
+//			rect.add(this.highGauge_.preGenerate(scalingTransform, force));
+//		}
+//		
+//		return rect;
+//	}
 
 	
 	/******************************************************
@@ -233,21 +231,21 @@ public class LineGraphGauge extends AbstractGauge
 	 *
 	 * @see java.awt.Component#paint(java.awt.Graphics)
 	 *******************************************************/
-	public void paint(Graphics2D g2, AffineTransform scalingTransform)
+	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 		if (this.valueGauge_ != null)
 		{
-			this.valueGauge_.paint(g2, scalingTransform);
+			this.valueGauge_.paint(panel, g2, scalingTransform);
 		}
 		
 		if (this.lowGauge_ != null)
 		{
-			this.lowGauge_.paint(g2, scalingTransform);
+			this.lowGauge_.paint(panel, g2, scalingTransform);
 		}
 		
 		if (this.highGauge_ != null)
 		{
-			this.highGauge_.paint(g2, scalingTransform);
+			this.highGauge_.paint(panel, g2, scalingTransform);
 		}
 	}
 	

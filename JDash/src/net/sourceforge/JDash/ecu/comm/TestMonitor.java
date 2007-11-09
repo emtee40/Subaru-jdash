@@ -72,6 +72,8 @@ public class TestMonitor extends BaseMonitor
 
         while(doRun_)
         {
+        	fireProcessingStartedEvent();
+        	
         	/* Setup the test list */
             for(ECUParameter p : getParams())
             {
@@ -82,9 +84,14 @@ public class TestMonitor extends BaseMonitor
             		if (p.getResult() >= 0xff)
             		{
             			p.setResult(0);
+            			fireProcessingParameterEvent(p);
             		}
             	}
             }
+            
+            markTime();
+            fireProcessingFinishedEvent();
+            
             
             try
             {
@@ -95,7 +102,7 @@ public class TestMonitor extends BaseMonitor
                 ie.printStackTrace();
             }
             
-            markTime();
+            
         }
     }
 }

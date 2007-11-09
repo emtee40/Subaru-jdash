@@ -28,12 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-
-
-
 import java.lang.Math;
-
 import bsh.Interpreter;
 
 /*******************************************************
@@ -138,7 +133,8 @@ public class BeanShellMetaParam extends MetaParameter
 				/* Add Parameter */
 				Parameter p = getOwnerRegistry().getParamForName(param);
 				dependants_.add(p);
-				p.addObserver(this);
+// TODO
+///				p.addObserver(this);
 			}
 			
 			/* Setup the script method */
@@ -199,26 +195,27 @@ public class BeanShellMetaParam extends MetaParameter
 		
 	}
 
-	/*******************************************************
-	 * Override
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 *******************************************************/
-	public void update(Observable parameter, Object arg1)
-	{
-		/* We want to watch for updates from the params we're watching.  But,
-		 * only notify the observers once ALL params have checked in */
-		
-		this.updatedDependants_.add((Parameter)parameter);
-		
-		if (this.updatedDependants_.size() == this.dependants_.size())
-		{
-			setChanged();
-			notifyObservers();
-			this.updatedDependants_ = new HashSet<Parameter>();
-		}
-
-	}
-	
+// TODO
+//	/*******************************************************
+//	 * Override
+//	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+//	 *******************************************************/
+//	public void update(Observable parameter, Object arg1)
+//	{
+//		/* We want to watch for updates from the params we're watching.  But,
+//		 * only notify the observers once ALL params have checked in */
+//		
+//		this.updatedDependants_.add((Parameter)parameter);
+//		
+//		if (this.updatedDependants_.size() == this.dependants_.size())
+//		{
+//			setChanged();
+//			notifyObservers();
+//			this.updatedDependants_ = new HashSet<Parameter>();
+//		}
+//
+//	}
+//	
 	
 	/********************************************************
 	 * This is a simple method used by the shell script to get
@@ -252,6 +249,7 @@ public class BeanShellMetaParam extends MetaParameter
 	public void setCalculatedValue(double val)
 	{
 		this.value_ = val;
+		fireValueChangedEvent();
 	}
 	
 	/********************************************************

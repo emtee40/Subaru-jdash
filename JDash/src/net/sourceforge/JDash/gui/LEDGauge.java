@@ -82,9 +82,9 @@ public class LEDGauge extends AbstractGauge
 	 * @param p IN - the parameter to display values for.
 	 * @param parentPanel IN - the owner gauge panel.
 	 ******************************************************/
-	public LEDGauge(Parameter p, GaugePanel parentPanel)
+	public LEDGauge(Parameter p)
 	{
-		super(p, parentPanel);
+		super(p);
 	}
 
 
@@ -170,8 +170,7 @@ public class LEDGauge extends AbstractGauge
 	 * Override
 	 * @see net.sourceforge.JDash.gui.AbstractGauge#getBounds()
 	 *******************************************************/
-	@Override
-	public synchronized Rectangle preGenerate(AffineTransform scalingTransform, boolean force)
+	private Rectangle preRender(AffineTransform scalingTransform, boolean force)
 	{
 		
 		/* Clear the current list */
@@ -389,18 +388,18 @@ public class LEDGauge extends AbstractGauge
 	 *
 	 * @see java.awt.Component#paint(java.awt.Graphics)
 	 *******************************************************/
-	public synchronized void paint(Graphics2D g2, AffineTransform scalingTransform)
+	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 		/* It's possible to get a paint event without having a sensor event. so 
 		 * we'll just draw a raw gauge */
 		if (this.preGenAwtShapes_ == null)
 		{
-			preGenerate(scalingTransform, true);
+			preRender(scalingTransform, true);
 		}
 		
 		for (int index = 0; index < this.preGenAwtShapes_.size(); index++)
 		{
-			getParentPanel().paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
+			panel.paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
 		}
 		
 		

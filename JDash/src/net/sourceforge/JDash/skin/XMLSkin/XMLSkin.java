@@ -48,6 +48,7 @@ import net.sourceforge.JDash.gui.AbstractGauge;
 import net.sourceforge.JDash.gui.AnalogGauge;
 import net.sourceforge.JDash.gui.ButtonGauge;
 import net.sourceforge.JDash.gui.DigitalGauge;
+import net.sourceforge.JDash.gui.GaugeButton;
 import net.sourceforge.JDash.gui.GaugePanel;
 import net.sourceforge.JDash.gui.LEDGauge;
 import net.sourceforge.JDash.gui.LineGraphGauge;
@@ -430,6 +431,7 @@ public class XMLSkin extends Skin
 		ArrayList<AbstractShape> backgroundShapes = new ArrayList<AbstractShape>();
 		
 		int shapeCount = extractInt("count(" + NODE_SKIN + "/" + NODE_WINDOW + "/*" + ")");
+
 		for (int shapeIndex = 1; shapeIndex <= shapeCount; shapeIndex++)
 		{
 			AbstractShape shape = createShape(NODE_SKIN + "/" + NODE_WINDOW + "/*[" + shapeIndex + "]");
@@ -446,7 +448,7 @@ public class XMLSkin extends Skin
 	 *******************************************************/
 	public java.awt.Color getBackgroundColor() throws Exception
 	{
-		return Color.decode(extractString(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR));
+		return Color.decode(getColor(extractString(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR)));
 	}
 	
 	/*******************************************************
@@ -456,9 +458,23 @@ public class XMLSkin extends Skin
 	public URL getImageUrl(String imageName) throws Exception
 	{
 		String imageSource = extractString(NODE_SKIN + "/" + NODE_IMAGE + "[@" + ATTRIB_NAME + "='" + imageName + "']/@" + ATTRIB_SRC);
+		imageSource = this.resourceUrl_ + "/" + imageSource;
 		
-       URL url = this.getClass().getResource(this.resourceUrl_ + "/" + imageSource);
+		/* This image source could be a link to a file, or a link to an image inside a jar
+		 * 	file.  this is goverened by what the resourceUrl_ value it.  So.. The easy way.
+		 * Just try to load it as a file first.  If that fails, try it as a resource URL. 
+		 * if that failes.. well.. we give up. */
+		File imageFile = new File(imageSource);
+		if (imageFile.exists() && imageFile.isFile())
+		{
+			return imageFile.toURL();
+		}
+		
+
+		/* Now, try it as a resource file */
+       URL url = this.getClass().getResource(this.resourceUrl_ + "\\" + imageSource);
        
+       /* If the url is still null, we couldn't find the image */
        if (url == null)
        {
     	   throw new Exception("The image resource [" + this.resourceUrl_ + "/" + imageSource + "] does not seem to exist");
@@ -539,7 +555,7 @@ public class XMLSkin extends Skin
 	 * @see net.sourceforge.JDash.skin.Skin#getGauge(int)
 	 *******************************************************/
 	@Override
-	public AbstractGauge createGauge(int index, GaugePanel parentPanel) throws Exception
+	public AbstractGauge createGauge(int index) throws Exception
 	{
 		/* XPath is 1 relative, so increment index */
 		index++;
@@ -551,31 +567,31 @@ public class XMLSkin extends Skin
 		String type = extractString(gaugePath + "/@" + ATTRIB_TYPE);
 		if (GAUGE_TYPE_ANALOG.equalsIgnoreCase(type))
 		{
-			return createAnalogGauge(index, parentPanel);
+			return createAnalogGauge(index);
 		}
 		else if (GAUGE_TYPE_DIGITAL.equalsIgnoreCase(type))
 		{
-			return createDigitalGauge(index, parentPanel);
+			return createDigitalGauge(index);
 		}
 		else if (GAUGE_TYPE_DIGITAL_HIGH.equalsIgnoreCase(type))
 		{
-			return createDigitalHighGauge(index, parentPanel);
+			return createDigitalHighGauge(index);
 		}
 		else if (GAUGE_TYPE_DIGITAL_LOW.equalsIgnoreCase(type))
 		{
-			return createDigitalLowGauge(index, parentPanel);
+			return createDigitalLowGauge(index);
 		}
 		else if (GAUGE_TYPE_LED.equalsIgnoreCase(type))
 		{
-			return createLedGauge(index, parentPanel);
+			return createLedGauge(index);
 		}
 		else if (GAUGE_TYPE_BUTTON.equalsIgnoreCase(type))
 		{
-			return createButtonGauge(index, parentPanel);
+			return createButtonGauge(index);
 		}
 		else if (GAUGE_TYPE_LINE_GRAPH.equalsIgnoreCase(type))
 		{
-			return createLineGraphGauge(index, parentPanel);
+			return createLineGraphGauge(index);
 		}
 		else
 		{
@@ -588,7 +604,7 @@ public class XMLSkin extends Skin
 	 * Create an analog gague from the given gauge index
 	 * @return
 	 ******************************************************/
-	private AbstractGauge createAnalogGauge(int index, GaugePanel parentPanel) throws Exception
+	private AbstractGauge createAnalogGauge(int index) throws Exception
 	{
 
 		/* Get the gauge node */
@@ -611,7 +627,7 @@ public class XMLSkin extends Skin
 		
 		
 		/* Create the Analog Gauge */
-		AnalogGauge analogGauge = new AnalogGauge(param, parentPanel);
+		AnalogGauge analogGauge = new AnalogGauge(param);
 		
 		
 		/* Get the needle pivot point values */
@@ -665,7 +681,8 @@ public class XMLSkin extends Skin
 		for (int shapeIndex = 1; shapeIndex <= buttonShapeCount; shapeIndex++)
 		{
 			AbstractShape shape = createShape(gaugePath + "/" + NODE_BUTTON + "[" + shapeIndex + "]");
-			analogGauge.addButton((ButtonShape)shape);
+			GaugeButton gaugeButton = new GaugeButton(this, (ButtonShape)shape);
+			analogGauge.addButton(gaugeButton);
 		}
 				
 		/* Get the min degree */
@@ -704,9 +721,9 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	private AbstractGauge createDigitalLowGauge(int index, GaugePanel parentPanel) throws Exception
+	private AbstractGauge createDigitalLowGauge(int index) throws Exception
 	{
-		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index, parentPanel);
+		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
 		gauge.enableLowHighHold(false);
 		return gauge;
 	}
@@ -718,9 +735,9 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	private AbstractGauge createDigitalHighGauge(int index, GaugePanel parentPanel) throws Exception
+	private AbstractGauge createDigitalHighGauge(int index) throws Exception
 	{
-		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index, parentPanel);
+		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
 		gauge.enableLowHighHold(true);
 		return gauge;
 	}
@@ -731,7 +748,7 @@ public class XMLSkin extends Skin
 	 * @param index
 	 * @return
 	 *******************************************************/
-	private AbstractGauge createDigitalGauge(int index, GaugePanel parentPanel) throws Exception
+	private AbstractGauge createDigitalGauge(int index) throws Exception
 	{
 		/* Get the gauge node */
 		String gaugePath = NODE_GAUGE + "[" + index + "]";
@@ -754,7 +771,7 @@ public class XMLSkin extends Skin
 		TextShape textShape = createTextShape(gaugePath + "/" + NODE_TEXT);
 
 		/* Create the gague */
-		DigitalGauge digitalGauge = new DigitalGauge(param, parentPanel, textShape);
+		DigitalGauge digitalGauge = new DigitalGauge(param, textShape);
 		
 		/* Return it */
 		return digitalGauge;
@@ -765,7 +782,7 @@ public class XMLSkin extends Skin
 	 * @param index
 	 * @return
 	 *******************************************************/
-	private AbstractGauge createLedGauge(int index, GaugePanel parentPanel) throws Exception
+	private AbstractGauge createLedGauge(int index) throws Exception
 	{
 		
 		/* Get the gauge node */
@@ -782,7 +799,7 @@ public class XMLSkin extends Skin
 		}
 		
 		/* Create the Analog Gauge */
-		LEDGauge ledGauge = new LEDGauge(param, parentPanel);
+		LEDGauge ledGauge = new LEDGauge(param);
 		
 		/* An LED Gauge is made up of n LED comonents.  Each component is made up */
 		int ledCount = extractInt("count(" + gaugePath + "/" + NODE_LED + "[*])");
@@ -850,7 +867,7 @@ public class XMLSkin extends Skin
 	 * Create an analog gague from the given gauge index
 	 * @return
 	 ******************************************************/
-	private AbstractGauge createButtonGauge(int index, GaugePanel parentPanel) throws Exception
+	private AbstractGauge createButtonGauge(int index) throws Exception
 	{
 
 		/* Get the gauge node */
@@ -869,7 +886,10 @@ public class XMLSkin extends Skin
 				
 		/* Add the button */
 		AbstractShape shape = createShape(gaugePath + "/" + NODE_BUTTON + "[1]");
-		ButtonGauge buttonGauge = new ButtonGauge(param, parentPanel, (ButtonShape)shape);
+	// TODO
+		GaugeButton gaugeButton = new GaugeButton(this, (ButtonShape)shape);
+		ButtonGauge buttonGauge = new ButtonGauge(param, gaugeButton);
+		//ButtonGauge buttonGauge = new ButtonGauge(param, (ButtonShape)shape);
 		
 
 		/* Get the range values.  This is only needed if the parameter has been defined. */
@@ -893,7 +913,7 @@ public class XMLSkin extends Skin
 	 * Create a new line graph gauge
 	 * @return
 	 ******************************************************/
-	private AbstractGauge createLineGraphGauge(int index, GaugePanel parentPanel) throws Exception
+	private AbstractGauge createLineGraphGauge(int index) throws Exception
 	{
 
 		/* Get the gauge node */
@@ -948,7 +968,7 @@ public class XMLSkin extends Skin
 		
 		
 		/* Create and return the line graph */
-		LineGraphGauge lineGraphGauge = new LineGraphGauge(param, parentPanel, x, y, width, height, seconds, min, max, format, label, valueText, lowText, highText);
+		LineGraphGauge lineGraphGauge = new LineGraphGauge(param, x, y, width, height, seconds, min, max, format, label, valueText, lowText, highText);
 		return lineGraphGauge;
 		
 	}

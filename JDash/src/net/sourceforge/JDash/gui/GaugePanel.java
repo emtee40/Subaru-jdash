@@ -36,11 +36,15 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
+import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.comm.ECUMonitor;
+import net.sourceforge.JDash.ecu.comm.MonitorEventListener;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
 import net.sourceforge.JDash.gui.shapes.ImageShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
@@ -59,8 +63,10 @@ import net.sourceforge.JDash.util.UTIL;
 public class GaugePanel extends JPanel 
 {
 	
-//	/* The forced screen update interval.  5 seconds */
-//	private static final int FORCED_UPDATE_INTERVAL = 5000;
+	
+	/**	This value defines the minimum number of milliseconds that must pass
+	 * before a display update will be allowed to take place. */
+	public static final int MINIMUM_UPDATE_INTEVAL = 100;
 	
 	public static final long serialVersionUID = 0L;
 	
@@ -70,17 +76,14 @@ public class GaugePanel extends JPanel
 	/* The data logger */
 	private DataLogger logger_ = null;
 	
-	/* The monitor */
-	private ECUMonitor monitor_ = null;
-	
 	/* The owner dashboard frame */
 	private DashboardFrame owner_ = null;
 	
 	/* This array holds the list of shapes that make up the background */
-	private List<AbstractShape> shapes_ = null;
+	private List<AbstractShape> backgroundShapes_ = null;
 	
-	/* This list holds the array of gauges displayed on this panel */
-	private ArrayList<AbstractGauge> gauges_ = new ArrayList<AbstractGauge>();
+//	/* This list holds the array of gauges displayed on this panel */
+//	private ArrayList<AbstractGauge> gauges_ = new ArrayList<AbstractGauge>();
 	
 	/* The background icon */
 	private Image backgroundImage_ = null;
@@ -92,6 +95,9 @@ public class GaugePanel extends JPanel
 	 * this way we can re-scale the icon as needed */
 	private Dimension previousPaintDimension_ = new Dimension(0,0);
 	
+	/** This is the double buffered image.  Rather than create a new one each time, 
+	 * we'll re-use this one. */
+	private BufferedImage doubleBufferedImage_ = null;
 	
 	/** this flag is sed by the logger playback by way of the owner frame. It's used to
 	 * prevent screen redraws to increase performance on data exports */
@@ -102,11 +108,11 @@ public class GaugePanel extends JPanel
 	 * @param backgroundShapes IN - the shapes to be drawn to make up
 	 * the background of this entire panel
 	 ******************************************************/
-	public GaugePanel(DashboardFrame ownerFrame, Skin skin, ECUMonitor monitor, DataLogger logger) throws Exception
+	public GaugePanel(DashboardFrame ownerFrame, Skin skin, BaseMonitor monitor, DataLogger logger) throws Exception
 	{
 		this.owner_ = ownerFrame;
 		this.skin_ = skin;
-		this.monitor_ = monitor;
+//		this.monitor_ = monitor;
 		this.logger_ = logger;
 		
 		/* Set the original size of the panel */
@@ -116,7 +122,7 @@ public class GaugePanel extends JPanel
 		this.setLayout(new GaugeComponentLayout());
 		
 		/* The background shapes. */
-		this.shapes_ = getSkin().getWindowShapes();
+		this.backgroundShapes_ = getSkin().getWindowShapes();
 		
 		
 		/* And the background color */
@@ -125,28 +131,39 @@ public class GaugePanel extends JPanel
 		/* Kick off the generation of the background image. But. we're gong to loop until it gets through one iteration */
 		generateBackgroundImage();
 		
-		/* Add each gauge from the skin */
-		String gaugeProblems = "";
-		for (int gaugeIndex = 0; gaugeIndex < getSkin().getGaugeCount(); gaugeIndex++)
-		{
-			try
-			{
-				this.gauges_.add(getSkin().createGauge(gaugeIndex, this));
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				gaugeProblems += "Unable to add gauge [" + gaugeIndex + "] from this skin. " + e.getMessage() + "\n";
-			}
-			
-		}
-
-		/* Report all gauge generation problems at once. */
-		if (gaugeProblems.length() > 0)
-		{
-			getDashboardFrame().showMessage(DashboardFrame.MESSAGE_TYPE.WARNING, "Gauge Setup Problem", gaugeProblems);
-		}
 		
+		/* Listen for Monitor events */
+		monitor.addMonitorListener(new MonitorEventListener.MonitorEventAdapter()
+		{
+			@Override
+			public void processingFinished()
+			{
+				updateDisplay();
+			}
+		});
+		
+//		/* Add each gauge from the skin */
+//		String gaugeProblems = "";
+//		for (int gaugeIndex = 0; gaugeIndex < getSkin().getGaugeCount(); gaugeIndex++)
+//		{
+//			try
+//			{
+//				this.gauges_.add(getSkin().createGauge(gaugeIndex, this));
+//			}
+//			catch(Exception e)
+//			{
+//				e.printStackTrace();
+//				gaugeProblems += "Unable to add gauge [" + gaugeIndex + "] from this skin. " + e.getMessage() + "\n";
+//			}
+//			
+//		}
+//
+//		/* Report all gauge generation problems at once. */
+//		if (gaugeProblems.length() > 0)
+//		{
+//			getDashboardFrame().showMessage(DashboardFrame.MESSAGE_TYPE.WARNING, "Gauge Setup Problem", gaugeProblems);
+//		}
+//		
 		
 		
 //		/* Startup a forced update timer.  This timer simply does a forced frame redraw just in case
@@ -158,8 +175,9 @@ public class GaugePanel extends JPanel
 //						setBounds(getBounds());
 //					};
 //				}, 
-//				FORCED_UPDATE_INTERVAL, FORCED_UPDATE_INTERVAL);
-		
+//				1,1);
+//				//FORCED_UPDATE_INTERVAL, FORCED_UPDATE_INTERVAL);
+//		
 		
 	}
 
@@ -188,13 +206,13 @@ public class GaugePanel extends JPanel
 		return this.logger_;
 	}
 	
-	/*******************************************************
-	 * @return
-	 *******************************************************/
-	public ECUMonitor getMonitor()
-	{
-		return this.monitor_;
-	}
+//	/*******************************************************
+//	 * @return
+//	 *******************************************************/
+//	public ECUMonitor getMonitor()
+//	{
+//		return this.monitor_;
+//	}
 	
 	/*******************************************************
 	 * Override
@@ -215,14 +233,14 @@ public class GaugePanel extends JPanel
 	{
 		super.setBounds(x, y, w, h);
 		
-		/* force a re-gen on each gauge */
-		for (AbstractGauge gauge : getGauges())
-		{
-			if (gauge.getParameter() != null)
-			{
-				gauge.update(null, Boolean.TRUE);
-			}
-		}
+//		/* force a re-gen on each gauge */
+//		for (AbstractGauge gauge : getGauges())
+//		{
+//			if (gauge.getParameter() != null)
+//			{
+//				gauge.update(null, Boolean.TRUE);
+//			}
+//		}
 
 		/* Tell the layout manager to relayout this container */
 		getLayout().layoutContainer(this);
@@ -230,16 +248,16 @@ public class GaugePanel extends JPanel
 	}
 	
 	
-	/*******************************************************
-	 * Get the gauges this panel is holding.
-	 * @return the list of gauges.
-	 *******************************************************/
-	public List<AbstractGauge> getGauges()
-	{
-		return this.gauges_;
-	}
-	
-	
+//	/*******************************************************
+//	 * Get the gauges this panel is holding.
+//	 * @return the list of gauges.
+//	 *******************************************************/
+//	public List<AbstractGauge> getGauges()
+//	{
+//		return this.gauges_;
+//	}
+//	
+
 	/*******************************************************
 	 * Always return the size of the original background image.
 	 * Override
@@ -304,9 +322,8 @@ public class GaugePanel extends JPanel
 			Graphics2D g2 = bufferedImage.createGraphics();
 			
 			/* Draw each shape */
-			for (AbstractShape shape : this.shapes_)
+			for (AbstractShape shape : this.backgroundShapes_)
 			{
-				
 				
 				/* Text Shape */
 				if (shape instanceof TextShape)
@@ -326,8 +343,9 @@ public class GaugePanel extends JPanel
 			/* Set our new background image */
 			Dimension d = UTIL.scale(this, new ImageIcon(bufferedImage), UTIL.SCALE.ASPECT);
 			this.backgroundImage_ = bufferedImage.getScaledInstance(d.width, d.height, Image.SCALE_SMOOTH);
-			
-
+		
+			/* force the creation of a new DB image */
+			this.doubleBufferedImage_ = null;
 		}
 
 		/* Setup a new previous size for the next call to this method */
@@ -338,6 +356,19 @@ public class GaugePanel extends JPanel
 
 	}
 	
+	
+	/*******************************************************
+	 * This method is fired when something has happened, that requires 
+	 * a redraw or refresh.  This... is the heavy lifter.
+	 *******************************************************/
+	private void updateDisplay()
+	{
+
+		repaint();
+
+	}
+	
+	
 	/******************************************************
 	 * Override the paint method so we can draw the gauge.
 	 *
@@ -346,26 +377,45 @@ public class GaugePanel extends JPanel
 	public void paintComponent(java.awt.Graphics g)
 	{
 		
-		
-		/* Generate the background image.. if needed */
+		/* Generate the background image.. if needed.  This method knows if the panel has resized */
 		generateBackgroundImage();
 
 		/* Tell the panel to paint it's default background */
 		super.paintComponent(g);
-		
-		Graphics2D g2 = (Graphics2D)g;
-		
 
-		/* Paint the image */
-		g.drawImage(this.backgroundImage_, 0, 0, null);
 		
-		
-		/* Paint each gauge */
-		for (AbstractGauge gauge : this.gauges_)
+		/* Create an instance double buffer image, correctly sized */
+		if (this.doubleBufferedImage_ == null)
 		{
-			gauge.paint((Graphics2D)g2.create(), getScalingTransform());
+			this.doubleBufferedImage_ = new BufferedImage((int)this.getSize().getWidth(), (int)this.getSize().getHeight(), BufferedImage.TYPE_INT_RGB);
 		}
 		
+
+
+		/* Get the g2 from the db image */
+		Graphics2D g2 = (Graphics2D)this.doubleBufferedImage_.getGraphics();
+
+		/* Paint the background image */
+		g2.drawImage(this.backgroundImage_, 0, 0, null);
+		
+		
+		try
+		{
+			/* Paint each gauge */
+			for (int index = 0; index < this.skin_.getGaugeCount(); index++)
+			{
+				AbstractGauge gauge = this.skin_.getGauge(index);
+				gauge.paint(this, (Graphics2D)g2.create(), getScalingTransform());
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+			
+		
+		/* Now, paint the double buffered image to the window */
+		g.drawImage(this.doubleBufferedImage_, 0, 0, null);
 		
 	}
 

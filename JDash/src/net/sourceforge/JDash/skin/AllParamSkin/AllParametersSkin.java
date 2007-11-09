@@ -206,11 +206,11 @@ public class AllParametersSkin extends Skin
 	 * @see net.sourceforge.JDash.skin.Skin#getGauge(int)
 	 *******************************************************/
 	@Override
-	public AbstractGauge createGauge(int index, GaugePanel parentPanel) throws Exception
+	public AbstractGauge createGauge(int index) throws Exception
 	{
 		if (this.allGauges_ == null)
 		{
-			setupGauges(parentPanel);
+			setupGauges();
 		}
 		
 		return this.allGauges_.get(index);
@@ -220,7 +220,7 @@ public class AllParametersSkin extends Skin
 	/********************************************************
 	 * @param parentPanel
 	 *******************************************************/
-	private void setupGauges(GaugePanel parentPanel) throws Exception
+	private void setupGauges() throws Exception
 	{
 
 		this.allGauges_ = new ArrayList<AbstractGauge>();
@@ -251,7 +251,7 @@ public class AllParametersSkin extends Skin
 			textShape.addAttribute(AbstractShape.PROPS.FILL_COLOR, COLORS[columnIndex]);
 			textShape.addAttribute(AbstractShape.PROPS.SIZE, "" + fontSize);
 		
-			DigitalGauge digitalGauge = new DigitalGauge(p, parentPanel, textShape);
+			DigitalGauge digitalGauge = new DigitalGauge(p, textShape);
 			
 			this.allGauges_.add(digitalGauge);
 
@@ -277,7 +277,8 @@ public class AllParametersSkin extends Skin
 													GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE, 
 													LOGGER_IMAGE_UP, 
 													LOGGER_IMAGE_DOWN);
-		ButtonGauge compGauge = new ButtonGauge(null, parentPanel, buttonShape);
+		GaugeButton gaugeButton = new GaugeButton(this, buttonShape);
+		ButtonGauge compGauge = new ButtonGauge(null, gaugeButton);
 		this.allGauges_.add(compGauge);
 
 	}

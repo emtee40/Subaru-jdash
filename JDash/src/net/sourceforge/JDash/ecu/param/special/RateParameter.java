@@ -50,7 +50,7 @@ public class RateParameter extends MetaParameter {
     	try
     	{
 	        this.timeParam_ = time;
-	        this.timeParam_.addObserver(this);
+//	        this.timeParam_.addObserver(this);
     	}
     	catch(Exception e)
     	{
@@ -74,26 +74,31 @@ public class RateParameter extends MetaParameter {
         return ParameterRegistry.RATE_PARAM;
     }
 
-    public double getResult() {
-        return this.rate_;
+    public double getResult()
+    {
+      double interval = this.timeParam_.getResult() - this.lastTime_;
+      this.lastTime_ = this.timeParam_.getResult();        
+      this.rate_ = 1000D / interval;
+      return this.rate_;
+    	
     }
 
-    /******************************************************
-     * When an update on this parameter gets called, it's because this
-     * parameter is "Observing" the TIME parameter.  When ever a time
-     * event is het, this method will re-calculate the current 
-     * rate.
-     * 
-     * Override
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     *******************************************************/
-    public void update(Observable o, Object arg) {
-
-        double interval = this.timeParam_.getResult() - this.lastTime_;
-        this.lastTime_ = this.timeParam_.getResult();        
-        this.rate_ = 1000D / interval;
-
-        this.setChanged();
-        this.notifyObservers();
-    }
+//    /******************************************************
+//     * When an update on this parameter gets called, it's because this
+//     * parameter is "Observing" the TIME parameter.  When ever a time
+//     * event is hit, this method will re-calculate the current 
+//     * rate.
+//     * 
+//     * Override
+//     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+//     *******************************************************/
+//    public void update(Observable o, Object arg) {
+//
+//        double interval = this.timeParam_.getResult() - this.lastTime_;
+//        this.lastTime_ = this.timeParam_.getResult();        
+//        this.rate_ = 1000D / interval;
+//
+//        this.setChanged();
+//        this.notifyObservers();
+//    }
 }

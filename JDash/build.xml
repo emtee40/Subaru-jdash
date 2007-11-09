@@ -52,12 +52,13 @@
 		<echo message="Creating JDash jar file"/>
 		
 		<delete file="manifest.txt" />
+
 		<touch file="manifest.txt" />
 <echo file="manifest.txt">Manifest-Version: 1.0
 Created-By: Shane Powell (Copyright 2006)
 Main-Class: net.sourceforge.JDash.Startup</echo>
 		<echo message="Creating jar file..."/>
-		
+
 		<copy todir="${outputDir}">
 			<fileset dir="${sourceDir}">
 				<exclude name="**/*.java"/>

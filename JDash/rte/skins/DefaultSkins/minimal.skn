@@ -8,12 +8,15 @@
   <description>This skin will put the RPM, MPH, Lambda and Vacuum/Boost values on the screen as text</description>
   
     <!-- Main Window -->
-  <window width="300" height="300" type="window:50"  fill-color="#000000">
-<!--    <image name="background" x="0" y="0" width="-1" height="-1" />  -->
+  <window width="600" height="400" type="window:50"  fill-color="dark-red">
+    <image name="background" x="0" y="0" width="-1" height="-1" />
   </window>
   
   <!-- Images -->
-  <image name="background"                  src="blank_black.jpg"/> 
+  <image name="background" src="blank_black_border.jpg"/> 
+  <image name="red-push-off"                src="red-push-switch-off.jpg"/> 
+  <image name="red-push-on"                 src="red-push-switch-on.jpg"/> 
+  
   
   <!-- Color definitions -->
   <color name="red"        value="#ff0000" />
@@ -24,21 +27,58 @@
   
   <!-- Font Definitions -->
   <font name="digital" src="digital.ttf" />
-   
+  
+  <!-- Gauges --> 
   <gauge sensor="RPM" type="digital">
-     <text color="green" size="25" x="20" y="50" format="%02.2f" font="digital"/>
+     <text color="green" size="25" x="20" y="50" format="RPM: %02.2f" font="digital"/>
   </gauge>
   
   <gauge sensor="MPH" type="digital">
-     <text color="green" size="25" x="20" y="100" format="%02.2f" font="digital"/>
+     <text color="green" size="25" x="20" y="100" format="MPH: %02.2f" font="digital"/>
   </gauge>
   
   <gauge sensor="LAMBDA_1" type="digital">
-     <text color="green" size="25" x="20" y="150" format="%02.2f" font="digital"/>
+     <text color="green" size="25" x="20" y="150" format="O2: %02.2f" font="digital"/>
   </gauge>
   
-  <gauge sensor="VAC_BOOST_PSI" type="digital">
-     <text color="green" size="25" x="20" y="200" format="%02.2f" font="digital"/>
+  <gauge sensor="RATE" type="digital">
+     <text color="green" size="25" x="20" y="200" format="Rate: %02.2f" font="digital"/>
+  </gauge>
+  
+  <gauge sensor="RPM" type="analog" x="150" y="250">
+  
+    <button 
+    	type="push-button" 
+    	x="20" 
+    	y="300" 
+    	width="60" 
+    	height="60" 
+    	action="high-reset" 
+    	up-image="red-push-off" 
+    	down-image="red-push-on"/>
+    
+    <needle type="high" delay="-1">
+      <polygon color="#0000ff" fill-color="blue" line-width="2">
+        <point x="-5"  y="10"/>
+        <point x="-1" y="-140"/>
+        <point x="1"  y="-140"/>
+        <point x="5"  y="10"/>
+      </polygon>
+      <ellipse color="blue" fill-color="blue" line-width="2" x="-5" y="-140" width="10" height="10" />
+    </needle>
+    
+    <needle type="main">
+      <polygon color="red" fill-color="red" line-width="2">
+        <point x="-5"  y="10"/>
+        <point x="-1" y="-140"/>
+        <point x="1"  y="-140"/>
+        <point x="5"  y="10"/>
+      </polygon>
+      <ellipse color="#000000" fill-color="#cccccc" line-width="2" x="-8" y="-8" width="16" height="16" />      
+    </needle>
+    
+    <range sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125" />
+    
   </gauge>
   
 </skin>

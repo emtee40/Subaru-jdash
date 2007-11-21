@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.gui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -41,6 +42,7 @@ import jcckit.util.PropertiesBasedConfigData;
 
 
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.special.TimeParameter;
 import net.sourceforge.JDash.gui.shapes.TextShape;
@@ -62,7 +64,9 @@ public class LineGraphGauge extends AbstractGauge
 	
 	private ArrayList<DataPoint> plotValues_ = new ArrayList<DataPoint>();
 	
+	private boolean addedToPanel_ = false;
 	private GraphicsPlotCanvas plotCanvas_ = null;
+	private Rectangle plotCanvasRect_ = null;
 	
 	
 	private DigitalGauge valueGauge_ = null;
@@ -185,16 +189,15 @@ public class LineGraphGauge extends AbstractGauge
 		}
 
 				
-		/* Setup the plot */
+		/* Setup the plot canvas, and it's rect */
 		this.plotCanvas_ = new GraphicsPlotCanvas(config);
+		this.plotCanvasRect_ = new Rectangle();
+		this.plotCanvasRect_.x = (int)x;
+		this.plotCanvasRect_.y = (int)y;
+		this.plotCanvasRect_.width = (int)width;
+		this.plotCanvasRect_.height = (int)height;
 		
-		Rectangle rect = new Rectangle();
-		rect.x = (int)x;
-		rect.y = (int)y;
-		rect.width = (int)width;
-		rect.height = (int)height;
 		
-//		parentPanel.add(this.plotCanvas_.getGraphicsCanvas(), rect);
 	}
 
 	
@@ -227,12 +230,28 @@ public class LineGraphGauge extends AbstractGauge
 
 	
 	/******************************************************
-	 * Override the paint method so we can draw the gauge.
+	 * Override does nothing.  Just returns.
 	 *
 	 * @see java.awt.Component#paint(java.awt.Graphics)
 	 *******************************************************/
 	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
+
+		/* This is where this component gets placed onto the parent panel, and
+		 * where the digital high/low numbers get painted */
+		
+		/* don't add it, if ti's allreayd been added */
+		if (this.addedToPanel_ == false)
+		{
+			/* Add to the parent panel, then revlidate so it gets drawn.  We need
+			 * the revalidate because at this point, the panel has already been rendered  */
+			panel.add(this.plotCanvas_.getGraphicsCanvas(), this.plotCanvasRect_);
+			panel.revalidate();
+			this.addedToPanel_ = true;
+		}
+		
+		updateDataPoints();
+		
 		if (this.valueGauge_ != null)
 		{
 			this.valueGauge_.paint(panel, g2, scalingTransform);
@@ -249,18 +268,42 @@ public class LineGraphGauge extends AbstractGauge
 		}
 	}
 	
+	
+//	/******************************************************
+//	 * Override the paint method so we can draw the gauge.
+//	 *
+//	 * @see java.awt.Component#paint(java.awt.Graphics)
+//	 *******************************************************/
+//	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
+//	{
+//		if (this.valueGauge_ != null)
+//		{
+//			this.valueGauge_.paint(panel, g2, scalingTransform);
+//		}
+//		
+//		if (this.lowGauge_ != null)
+//		{
+//			this.lowGauge_.paint(panel, g2, scalingTransform);
+//		}
+//		
+//		if (this.highGauge_ != null)
+//		{
+//			this.highGauge_.paint(panel, g2, scalingTransform);
+//		}
+//	}
+//	
 
 	/*******************************************************
 	 * We need to trap the update messages so we can add the value.
 	 * Override
 	 * @see net.sourceforge.JDash.gui.AbstractGauge#update(java.util.Observable, java.lang.Object)
 	 *******************************************************/
-	@Override
-	public void update(Observable obs, Object obj)
+	private void updateDataPoints()
 	{
 		
 		/* If the parent gauge panel is flaged updates as suspended, then we'll stop here */
-		if (getParentPanel().isGaugeDisplayUpdateSuspended() == true)
+//		if (getParentPanel().isGaugeDisplayUpdateSuspended() == true)
+		if (1==2)
 		{
 			return;
 		}
@@ -401,8 +444,7 @@ public class LineGraphGauge extends AbstractGauge
 		public void setValue(double v)
 		{
 			this.value_ = v;
-			setChanged();
-			notifyObservers();
+			fireValueChangedEvent();
 		}
 	}
 	

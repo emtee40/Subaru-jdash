@@ -199,18 +199,22 @@ public abstract class BaseMonitor implements ECUMonitor
      *******************************************************/
     private void addAllParams(List<Parameter> params)
     {
+    	/* Make sure a null parameter is not beeing added */
     	for (int index = 0; index < params.size(); index++)
     	{
     		if (params.get(index) == null)
     		{
     			throw new RuntimeException("Cannot add a null parameter to this monitor.  Index [" + index + "]");
     		}
-    		
+
     	}
-    	
-        List<Parameter> l = new ArrayList<Parameter>(params.size());
+
+    	/* Recursivly add the parameters.  We do this with a copy of
+    	 * the original list, because the recursion method modifies the
+    	 * list as it processes it's entries */
+        ArrayList<Parameter> l = new ArrayList<Parameter>(params.size());
         l.addAll(params);
-        recurseParam(l);
+        recursivlyAddParams(l);
     }
 
     /******************************************************
@@ -227,28 +231,38 @@ public abstract class BaseMonitor implements ECUMonitor
     /*******************************************************
      * @param params
      *******************************************************/
-    private void recurseParam(List<Parameter> params)
+    private void recursivlyAddParams(ArrayList<Parameter> params)
     {
-            if(params.size() == 0) return;
+    	/* If this list is not empty, then stop here */
+        if(params.size() == 0)
+        {
+        	return;
+        }
 
-            if(params.get(0) instanceof MetaParameter)
+        /* Meta parametes are not added themselves, rather their dependants are added.
+         * Note, that we use the addAll method so that we can correctly resurse through 
+         * the dependants */
+        if(params.get(0) instanceof MetaParameter)
+        {
+        	this.addAllParams(((MetaParameter) params.get(0)).getDependants());
+        }
+        else if (params.get(0) instanceof TimeParameter)
+        {
+            /*do nothing.  The TimeParameter is a special parameter that must be
+             * manually delt with in each monitor */
+        }
+        else
+        {
+        	/* If this param has already been added, then no need to add it again */
+            if(!this.params_.contains(params.get(0)))
             {
-                params.addAll( ((MetaParameter) params.get(0)).getDependants());
+            	this.params_.add((ECUParameter)params.get(0));
             }
-            else if (params.get(0) instanceof TimeParameter)
-            {
-                /*do nothing*/
-            }
-            else
-            {
-                if(!this.params_.contains(params.get(0)))
-                {
-                	this.params_.add((ECUParameter)params.get(0));
-                }
-            }
-            
-            params.remove(0);
-            recurseParam(params);
+        }
+        
+        /* Remove this now added parameter from the list, and recurse to the next one */
+        params.remove(0);
+        recursivlyAddParams(params);
     }
     
     

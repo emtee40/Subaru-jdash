@@ -45,7 +45,7 @@ public abstract class Renderer implements Observer {
     public Renderer(List<Parameter> params) {
         this._params = params;
         for(Parameter p : params) {
-            p.addObserver(this);
+//            p.addObserver(this);
         }
     }
 
@@ -57,13 +57,13 @@ public abstract class Renderer implements Observer {
         if(_params != null) detach();
         _params = params;
         for(Parameter p : _params) {
-            p.addObserver(this);
+//            p.addObserver(this);
         }
     }
 
     private void detach() {
          for(Parameter p : _params) {
-            p.deleteObserver(this);
+//            p.deleteObserver(this);
         }
     }
 

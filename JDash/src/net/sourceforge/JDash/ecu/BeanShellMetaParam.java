@@ -33,6 +33,7 @@ import java.util.Observable;
 
 import net.sourceforge.JDash.ecu.param.MetaParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterException;
 
 import java.lang.Math;
@@ -138,7 +139,13 @@ public class BeanShellMetaParam extends MetaParameter
 				/* Add Parameter */
 				Parameter p = getOwnerRegistry().getParamForName(param);
 				dependants_.add(p);
-				p.addObserver(this);
+				p.addEventListener(new ParameterEventListener()
+				{
+					public void valueChanged(Parameter p)
+					{
+						dependantValueChanged(p);
+					}
+				});
 			}
 			
 			/* Setup the script method */
@@ -204,18 +211,17 @@ public class BeanShellMetaParam extends MetaParameter
 	 * Override
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 *******************************************************/
-	public void update(Observable parameter, Object arg1)
+	public void dependantValueChanged(Parameter p)
 	{
 		/* We want to watch for updates from the params we're watching.  But,
 		 * only notify the observers once ALL params have checked in */
 		
-		this.updatedDependants_.add((Parameter)parameter);
+		this.updatedDependants_.add(p);
 		
 		if (this.updatedDependants_.size() == this.dependants_.size())
 		{
-			setChanged();
-			notifyObservers();
-			this.updatedDependants_ = new HashSet<Parameter>();
+			this.fireValueChangedEvent();
+			this.updatedDependants_.clear();
 		}
 
 	}

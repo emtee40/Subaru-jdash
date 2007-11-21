@@ -142,6 +142,8 @@ public class GaugePanel extends JPanel
 			}
 		});
 		
+		
+		
 //		/* Add each gauge from the skin */
 //		String gaugeProblems = "";
 //		for (int gaugeIndex = 0; gaugeIndex < getSkin().getGaugeCount(); gaugeIndex++)

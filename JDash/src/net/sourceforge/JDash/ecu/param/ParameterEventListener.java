@@ -34,6 +34,6 @@ public interface ParameterEventListener
 	 * When the value of a parameter has changed, it will
 	 * fire this message to each listener.
 	 *******************************************************/
-	public void valueChanged();
+	public void valueChanged(Parameter p);
 	
 }

@@ -79,7 +79,7 @@ public abstract class Parameter implements DoubleParameter
 	{
 		for (ParameterEventListener l : this.eventListeners_)
 		{
-			l.valueChanged();
+			l.valueChanged(this);
 		}
 	}
 	

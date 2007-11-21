@@ -982,7 +982,7 @@
     <meta-parameter name="MPH">
         <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
         <args>
-            <arg name="script" value="(float)~KPH~ * 0.6215"/>
+            <arg name="script" value="(double)~KPH~ * 0.6215"/>
         </args>
     </meta-parameter>
     
@@ -1010,7 +1010,7 @@
      <meta-parameter name="CRUISE_MPH">
         <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
         <args>
-            <arg name="script" value="(float)~CRUISE_KPH~ * 0.6215"/>
+            <arg name="script" value="(double)~CRUISE_KPH~ * 0.6215"/>
         </args>
     </meta-parameter>
     

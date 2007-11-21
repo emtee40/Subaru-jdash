@@ -45,40 +45,19 @@
      <text color="green" size="25" x="20" y="200" format="Rate: %02.2f" font="digital"/>
   </gauge>
   
-  <gauge sensor="RPM" type="analog" x="150" y="250">
   
+  <!-- A component gauge for special buttons and such -->
+  <gauge type="button">
     <button 
-    	type="push-button" 
-    	x="20" 
-    	y="300" 
-    	width="60" 
-    	height="60" 
-    	action="high-reset" 
-    	up-image="red-push-off" 
-    	down-image="red-push-on"/>
-    
-    <needle type="high" delay="-1">
-      <polygon color="#0000ff" fill-color="blue" line-width="2">
-        <point x="-5"  y="10"/>
-        <point x="-1" y="-140"/>
-        <point x="1"  y="-140"/>
-        <point x="5"  y="10"/>
-      </polygon>
-      <ellipse color="blue" fill-color="blue" line-width="2" x="-5" y="-140" width="10" height="10" />
-    </needle>
-    
-    <needle type="main">
-      <polygon color="red" fill-color="red" line-width="2">
-        <point x="-5"  y="10"/>
-        <point x="-1" y="-140"/>
-        <point x="1"  y="-140"/>
-        <point x="5"  y="10"/>
-      </polygon>
-      <ellipse color="#000000" fill-color="#cccccc" line-width="2" x="-8" y="-8" width="16" height="16" />      
-    </needle>
-    
-    <range sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125" />
-    
+      type="toggle" 
+      x="300" 
+      y="340" 
+      width="55" 
+      height="55" 
+      action="logger-toggle" 
+      up-image="red-push-off" 
+      down-image="red-push-on" />
   </gauge>
+  
   
 </skin>

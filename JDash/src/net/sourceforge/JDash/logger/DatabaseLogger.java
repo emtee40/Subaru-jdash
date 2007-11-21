@@ -40,7 +40,9 @@ import java.util.Properties;
 
 import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.ecu.param.ECUParameter;
+import net.sourceforge.JDash.ecu.param.MetaParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 
 
@@ -49,7 +51,7 @@ import net.sourceforge.JDash.ecu.param.ParameterRegistry;
  * Whant to read and/or write parameter values to a database,
  * then use this DAO.  Note that we only work with HSQLDB.
  ******************************************************/
-public class DatabaseLogger extends DataLogger
+public class DatabaseLogger extends DataLogger implements ParameterEventListener
 {
 
 	/* By default allow ologging, But, it can be overridden */
@@ -68,8 +70,6 @@ public class DatabaseLogger extends DataLogger
 	
 	private Connection conn_ = null;
 
-	private boolean pause_ = false;
-	
 	private PreparedStatement insertStatement_ = null;
 	
 	private int sequencialLogErrors_ = 0;
@@ -90,6 +90,7 @@ public class DatabaseLogger extends DataLogger
 	{
 		this.logIdSuffix_ = logIdSuffix;
 		this.parameterList_ = new ArrayList<Parameter>();
+		initSchema();
 	}
 	
 	
@@ -223,26 +224,26 @@ public class DatabaseLogger extends DataLogger
 
 	
 	
-	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.logger.DataLogger#setParameters(java.util.List)
-	 *******************************************************/
-	@Override
-	public void setParameters(List<Parameter> parameters) throws Exception
-	{
-		if (this.parameterList_ != null)
-		{
-			enable(false);
-		}
-		
-		/* Copy the ECU Parameters, into our internal array list of parameters */
-		for (Parameter p : parameters)
-		{
-			addParameter(p);
-		}
-
-	}
-	
+//	/*******************************************************
+//	 * Override
+//	 * @see net.sourceforge.JDash.logger.DataLogger#setParameters(java.util.List)
+//	 *******************************************************/
+//	@Override
+//	public void setParameters(List<Parameter> parameters) throws Exception
+//	{
+//		if (this.parameterList_ != null)
+//		{
+//			enable(false);
+//		}
+//		
+//		/* Copy the ECU Parameters, into our internal array list of parameters */
+//		for (Parameter p : parameters)
+//		{
+//			addParameter(p);
+//		}
+//
+//	}
+//	
 	
 	/*******************************************************
 	 * Add a parameter to the log.  We only track ECUParameters and the TIME parameter, any
@@ -253,25 +254,60 @@ public class DatabaseLogger extends DataLogger
 	@Override
 	public void addParameter(Parameter param) throws Exception
 	{
+		/* If the parameter is already in our list, then don't add it again */
+		if (this.parameterList_.contains(param))
+		{
+			return;
+		}
+		
+		/* Never add the rate parameter */
+		if (param.getName().equals(ParameterRegistry.RATE_PARAM) == true)
+		{
+			return;
+		}
+		
 		/* Force the adding of the TIME parameter */
 		if (param.getName().equals(ParameterRegistry.TIME_PARAM) == true)
 		{
 			this.parameterList_.add(param);
-			return;
 		}
 		
 		
 		/* we only track ECU parameters, and the time parameter */
-		if (param instanceof ECUParameter == false)
-		{
-			return;
-		}
-		else
+		if (param instanceof ECUParameter == true)
 		{		
 			this.parameterList_.add(param);
 		}
 		
+		
+		/* If it's a meta parameter, then add the ecu parameters */
+		if (param instanceof MetaParameter)
+		{
+			for (Parameter p : ((MetaParameter)param).getDependants())
+			{
+				this.addParameter(p);
+			}
+		}
+		
+		
+		/* Listen to this parameter for update values */
+		param.addEventListener(this);
+		
 	}
+	
+	
+	
+	/*******************************************************
+	 * This is the method called when the parameter fires an update event
+	 * to it's list of listeners.  We are added as a listener to each paramter.
+	 * Override
+	 * @see net.sourceforge.JDash.ecu.param.ParameterEventListener#valueChanged(net.sourceforge.JDash.ecu.param.Parameter)
+	 *******************************************************/
+	public void valueChanged(Parameter p)
+	{
+		recordParameterValue(p);
+	}
+	
 	
 	/*******************************************************
 	 * Override
@@ -297,6 +333,7 @@ public class DatabaseLogger extends DataLogger
 	 *******************************************************/
 	public void enable(boolean enable) throws Exception
 	{
+		System.out.println("Enable Database Logger: " + enable);
 		
 		/* The override is disabled */
 		if (this.disableLoggingOverride_ == true)
@@ -317,30 +354,30 @@ public class DatabaseLogger extends DataLogger
 			
 			
 			/* Enable or disable */
-			if (enable == true)
+			if (this.currentLogId_ == null)
 			{
+				
 				/* Open the database */
 				Calendar now = GregorianCalendar.getInstance();
 				this.currentLogId_ = String.format("%tF %tI:%tM:%tS %tp %tZ - %s", now, now, now, now, now, now, this.logIdSuffix_);
-				initSchema();
 				
-				/* Observe the parameters */
-				for (Parameter p : this.parameterList_)
-				{
-					p.addObserver(this);
-				}
+//				/* Observe the parameters */
+//				for (Parameter p : this.parameterList_)
+//				{
+//					p.addObserver(this);
+//				}
 			}
 			else
 			{
-				/* Stop observing the parameters */
-				for (Parameter p : this.parameterList_)
-				{
-					p.deleteObserver(this);
-				}
+//				/* Stop observing the parameters */
+//				for (Parameter p : this.parameterList_)
+//				{
+//					p.deleteObserver(this);
+//				}
 				
 				/* Close the database */
 				this.currentLogId_ = null;
-				finalize(); /* This will close the database */
+				
 			}
 		}
 		catch(Throwable e)
@@ -358,17 +395,20 @@ public class DatabaseLogger extends DataLogger
 	 * Override
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 *******************************************************/
-	public void update(Observable observable, Object obj)
+	private void recordParameterValue(Parameter param)
 	{
+		
+		
+		/* If the logID is set to anything, then we'll log the values */
+		if (this.currentLogId_ == null)
+		{
+			return;
+		}
+		
 		try
 		{
-			if (this.pause_ == true)
-			{
-				return;
-			}
 			
 			/* We only care about ECU Parameters */
-			Parameter param = (Parameter)observable;
 			if (param instanceof ECUParameter)
 			{
 				addParamToDatabase(param);
@@ -396,6 +436,7 @@ public class DatabaseLogger extends DataLogger
 	 ******************************************************/
 	private void addParamToDatabase(Parameter param) throws RuntimeException
 	{
+		System.out.println("Adding to Database: "  + param.getName());
 		try
 		{
 			
@@ -403,6 +444,7 @@ public class DatabaseLogger extends DataLogger
 			if (this.insertStatement_ == null)
 			{
 				String stmt = "insert into " + TABLE_LOG + " (" + COL_LOG_ID + "," + COL_TIMESTAMP + "," + COL_PARAM_NAME + "," + COL_PARAM_VALUE + ") values (?,?,?,?)";
+				System.out.println("---" + this.conn_ == null);
 				this.insertStatement_ = this.conn_.prepareStatement(stmt);
 			}
 

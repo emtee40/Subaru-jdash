@@ -60,7 +60,10 @@ public abstract class Parameter implements DoubleParameter
 	 *******************************************************/
 	public void addEventListener(ParameterEventListener l)
 	{
-		this.eventListeners_.add(l);
+		if (this.eventListeners_.contains(l) == false)
+		{
+			this.eventListeners_.add(l);
+		}
 	}
 	
 	/*******************************************************

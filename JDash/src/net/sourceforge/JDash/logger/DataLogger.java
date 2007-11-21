@@ -34,7 +34,7 @@ import net.sourceforge.JDash.ecu.param.Parameter;
  * This is the interface needed to implement in order for
  * a class to be a logger.
  ******************************************************/
-public abstract class DataLogger implements Observer
+public abstract class DataLogger 
 {
 	
 		/********************************************************
@@ -46,13 +46,6 @@ public abstract class DataLogger implements Observer
 		 *******************************************************/
 		public abstract void disableOverride(boolean enableOverride) throws Exception;
 	
-		/********************************************************
-		 * Once an instance of a logger is created, this method will
-		 * be called to set the parameters list that this logger
-		 * needs to keep track of, and log values for.
-		 * @param parameters
-		 *******************************************************/
-		public abstract void setParameters(List<Parameter> parameters) throws Exception;
 		
 		/********************************************************
 		 * Add a single parameter to this logger.

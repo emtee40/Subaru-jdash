@@ -31,6 +31,10 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
+
+import javax.swing.JOptionPane;
+
+import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.param.Parameter;
 
 /*******************************************************
@@ -46,8 +50,9 @@ public class ButtonGauge extends AbstractGauge implements ActionListener
 	
 	public static final long serialVersionUID = 0L;
 	
-//	private ButtonShape buttonShape_ = null;
 	private GaugeButton gaugeButton_ = null;
+	
+	private GaugePanel gaugePanel_ = null;
 	
 	private Double sensorMin_ = null;
 	private Double sensorMax_ = null;
@@ -175,6 +180,9 @@ public class ButtonGauge extends AbstractGauge implements ActionListener
 		/* Add it to the gauge panel */
 		panel.add(this.gaugeButton_, this.gaugeButton_.getButtonShape().getShape().getBounds());
 		
+		/* We'll need the paranet gauge panel for action reference */
+		this.gaugePanel_ = panel;
+		
 	}
 	
 	
@@ -187,46 +195,46 @@ public class ButtonGauge extends AbstractGauge implements ActionListener
 	public void actionPerformed(ActionEvent ae)
 	{
 		
-		System.out.println("Button Triggered: "+ getParameter());
+		System.out.println("Button Triggered: "+ getParameter() + "  " + this.gaugeButton_.isSelected());
 		
-//		try
-//		{
-//				
-//			/* Logger Toggle Button */
-//			if (GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE.equalsIgnoreCase(this.buttonShape_.getAction()))
-//			{
-//				
-//				getParentPanel().getLogger().enable(this.gaugeButton_.isPressed());
-//				return;
-//				
-//			} /* end if Logger Button */
-//				
-//			
-//			/* Logger Toggle Button */
-//			if (GaugeButton.BUTTON_ACTION_DTC_RESET.equalsIgnoreCase(this.buttonShape_.getAction()))
-//			{
-//				/* Ask the user before doing a reset */
-//				if (JOptionPane.YES_OPTION ==
-//						JOptionPane.showConfirmDialog(getParentPanel(), "Are you sure you want to reset the ECUs trouble codes?\n" +
-//						"This will result in the loss of any stored codes, and cause a reset of all learned values.", 
-//						"DTC Reset. Are you sure?", JOptionPane.YES_NO_OPTION))
-//				{
-//	// TODO. Relink to the monitor some how
-////					getParentPanel().getMonitor().resetDTCs();
-//				}
-//				return;
-//					
-//			} /* end if Logger Button */
-//			
-//			
-//			/* If we got here, then the button action was not supported */
-//			throw new Exception("The Component pressed does not appear to be propertly supported");
-//			
-//		}
-//		catch(Exception e)
-//		{
-//			Startup.showException(e, false);
-//		}
+		try
+		{
+				
+			/* Logger Toggle Button */
+			if (GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
+			{
+				
+				this.gaugePanel_.getLogger().enable(this.gaugeButton_.isSelected());
+				return;
+				
+			} /* end if Logger Button */
+				
+			
+			/* Logger Toggle Button */
+			if (GaugeButton.BUTTON_ACTION_DTC_RESET.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
+			{
+				/* Ask the user before doing a reset */
+				if (JOptionPane.YES_OPTION ==
+						JOptionPane.showConfirmDialog(this.gaugePanel_, "Are you sure you want to reset the ECUs trouble codes?\n" +
+						"This will result in the loss of any stored codes, and cause a reset of all learned values.", 
+						"DTC Reset. Are you sure?", JOptionPane.YES_NO_OPTION))
+				{
+	// TODO. Relink to the monitor some how
+//					getParentPanel().getMonitor().resetDTCs();
+				}
+				return;
+					
+			} /* end if Logger Button */
+			
+			
+			/* If we got here, then the button action was not supported */
+			throw new Exception("The Component pressed does not appear to be propertly supported");
+			
+		}
+		catch(Exception e)
+		{
+			Startup.showException(e, false);
+		}
 		
 	}
 }

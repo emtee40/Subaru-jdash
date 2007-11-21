@@ -32,7 +32,9 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JToggleButton;
 
 import net.sourceforge.JDash.gui.shapes.ButtonShape;
 import net.sourceforge.JDash.skin.Skin;
@@ -43,11 +45,8 @@ import net.sourceforge.JDash.skin.Skin;
  * and feel of a gauge.  It is also capable of being
  * triggered by a parameter.
  ******************************************************/
-public class GaugeButton extends JLabel implements MouseListener //, Observer
+public class GaugeButton extends JToggleButton
 {
-	
-	/* This flag keeps track of the state of this button */
-	private boolean isPressed_ = false;
 	
 	
 	
@@ -71,11 +70,8 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 	
 	public static final long serialVersionUID = 0L;
 
-	private Image upImage_ = null;
-	private Image downImage_ = null;
-	
 	private ButtonShape buttonShape_ = null;
-	private ArrayList<ActionListener> actionListeners_ = new ArrayList<ActionListener>();
+
 	
 	/*******************************************************
 	 * Create a new standard button.  If you wish to setup 
@@ -90,7 +86,7 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 	 ******************************************************/
 	public GaugeButton(Skin skin, ButtonShape shape)
 	{
-		super();
+		super(shape.getAction());
 		
 		try
 		{
@@ -111,19 +107,22 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 				throw new Exception("Button Shape : " + shape.getType() + " with image: " + shape.getUpImageName() + " has an unupported action type code of: " + shape.getAction());
 			}
 			
-			this.upImage_ = skin.getImage(shape.getUpImageName()).getImage();
-			this.downImage_ = skin.getImage(shape.getDownImageName()).getImage();
+//			this.upImage_ = skin.getImage(shape.getUpImageName()).getImage();
+//			this.downImage_ = skin.getImage(shape.getDownImageName()).getImage();
+			
+			/* Set the icon images */
+			setIcon(new ImageIcon(skin.getImage(shape.getUpImageName()).getImage()));
+			setPressedIcon(new ImageIcon(skin.getImage(shape.getDownImageName()).getImage()));
+			setSelectedIcon(getPressedIcon());
 
 			super.setBounds(shape.getShape().getBounds());
 
-			setPressed(false);
-			
 			this.buttonShape_ = shape;
 			
 			this.setOpaque(false);
 			
-			/* Add the mouse listener, but ONLY if this button doesn't have a parameter trigger */
-			addMouseListener(this);
+			/* If this button has a paramter trigger, then disable any mouse listeners */
+// TODO			
 			
 		}
 		catch(Exception e)
@@ -135,36 +134,6 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 
 	
 	
-	/*******************************************************
-	 * Returns true of this button is currently in a pressed state.
-	 * @return true if pressed, false if not.
-	 *******************************************************/
-	public boolean isPressed()
-	{
-		return this.isPressed_;
-	}
-	
-
-	/********************************************************
-	 * Set the pressed status of this button.
-	 * @param pressed IN - set to pressed or not.
-	 *******************************************************/
-	public void setPressed(boolean pressed)
-	{
-		this.isPressed_ = pressed;
-		
-		if (isPressed())
-		{
-			setIcon(new ImageIcon(this.downImage_.getScaledInstance(getBounds().width, getBounds().height, Image.SCALE_SMOOTH)));
-		}
-		else
-		{
-			setIcon(new ImageIcon(this.upImage_.getScaledInstance(getBounds().width,getBounds().height,Image.SCALE_SMOOTH)));
-		}
-		
-
-	}
-	
 	
 	/*******************************************************
 	 * Override
@@ -174,7 +143,6 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 	public void setBounds(int x, int y, int w, int h)
 	{
 		super.setBounds(x, y, w, h);
-		setPressed(isPressed());
 	}
 	
 	
@@ -188,119 +156,5 @@ public class GaugeButton extends JLabel implements MouseListener //, Observer
 	}
 	
 	
-	/*******************************************************
-	 * Add an action listener just like a regular JButton.
-	 * When the button is pressed or triggered, the listeners
-	 * will get an actionPerformed event.
-	 * 
-	 * @param l IN - the listener to add.
-	 *******************************************************/
-	public void addActionListener(ActionListener l)
-	{
-		this.actionListeners_.add(l);
-	}
-	
-	/*******************************************************
-	 * Fire an action event to all listeners.
-	 *******************************************************/
-	private void fireActionEvent()
-	{
-		for (ActionListener l : this.actionListeners_)
-		{
-			l.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-		}
-	}
-	
-	
-	/*******************************************************
-	 * Override does Nothing
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 *******************************************************/
-	public void mouseClicked(MouseEvent mev)
-	{
-
-
-		/* If this is a pushbutton, then reset the image */
-		if (BUTTON_TYPE_PUSHBUTTON.equalsIgnoreCase(getButtonShape().getType()) == true)
-		{
-			setPressed(false);
-		}
-		
-	}
-	
-	
-	/*******************************************************
-	 * Override does Nothing
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 *******************************************************/
-	public void mouseEntered(MouseEvent me)
-	{
-		
-	}
-	
-	
-	/*******************************************************
-	 * Override does Nothing
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 *******************************************************/
-	public void mouseExited(MouseEvent me)
-	{
-		
-	}
-	
-	/*******************************************************
-	 * Override tracks the user clicking th emouse.
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 *******************************************************/
-	public void mousePressed(MouseEvent me)
-	{
-		
-
-		/* If this is a pushbutton, set it's image to down */
-		if (BUTTON_TYPE_PUSHBUTTON.equalsIgnoreCase(getButtonShape().getType()) == true)
-		{
-			setPressed(true);
-		}
-
-		
-		/* If this is a toggle button, then togle the state */
-		if (BUTTON_TYPE_TOGGLE.equalsIgnoreCase(getButtonShape().getType()) == true)
-		{
-			
-			if (isPressed() == true)
-			{
-				setPressed(false);
-			}
-			else
-			{
-				setPressed(true);
-			}
-			
-		}
-		
-		/* A press ALWAYS fires an event */
-		fireActionEvent();
-
-
-	}
-	
-	/*******************************************************
-	 * Override
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 *******************************************************/
-	public void mouseReleased(MouseEvent me)
-	{
-		
-		/* If it's a push button, then bring the button back up */
-		if (BUTTON_TYPE_PUSHBUTTON.equalsIgnoreCase(getButtonShape().getType()) == true)
-		{
-			setPressed(false);
-		}
-		
-		/* A press ALWAYS fires an event */
-		fireActionEvent();
-
-		
-	}
 	
 }

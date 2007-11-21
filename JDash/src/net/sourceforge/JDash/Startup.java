@@ -157,7 +157,7 @@ public class Startup
 				{
 					Startup.splashFrame_.setStatus(60, "Initializing Test Monitor");
 					
-					disableLoggingOverride = true;
+//					disableLoggingOverride = true;
 					Startup.monitor_ = new TestMonitor();
 				}
 				else
@@ -208,14 +208,10 @@ public class Startup
 				/* Create a logger instance */
 				Startup.splashFrame_.setStatus(80, "Initializing Logger");
 				DataLogger logger = new DatabaseLogger(loader.getName());
+				logger.addParameter(paramRegistry.getParamForName(ParameterRegistry.TIME_PARAM));
 				logger.disableOverride(disableLoggingOverride);
 
-				
-				/* Generate a list of Gauge Components from the Skin */
-				
-				
-				/* Add the list of displayed parameters to the monitor. */
-				
+			
 				/* Ok.. At this point, we have a skin full of gauges, each linked to
 				 * a Parameter.  Now, we need to inform the Monitor, exactly which parameters
 				 * it needs to work with.  For performance reasons, we only monitor ecu
@@ -228,6 +224,7 @@ public class Startup
 					if ( gauge.getParameter() != null)
 					{
 						Startup.monitor_.addParam(gauge.getParameter());
+						logger.addParameter(gauge.getParameter());
 					}
 				}
 				
@@ -245,15 +242,6 @@ public class Startup
 				/* Show the main dashboard frame */
 				displayFrame.setVisible(true);
 
-
-				/* Put the parameters from the monitor into the logger */
-				logger.addParameter(paramRegistry.getParamForName(ParameterRegistry.TIME_PARAM));
-				for (ECUParameter p : Startup.monitor_.getParams())
-				{
-					logger.addParameter(p);
-				}
-
-				
 				/* Startup the monitor thread */
 				Startup.monitorThread_ = new Thread(Startup.monitor_);
 				Startup.monitorThread_.start();

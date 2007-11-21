@@ -199,7 +199,8 @@ public class LoggerExporter extends JDialog implements Observer
 	{
 		if (v == true)
 		{
-			this.monitor_.getTime().addObserver(this);
+// TODO
+//			this.monitor_.getTime().addObserver(this);
 			
 			/* Start the export */
 			this.monitor_.setPaused(false);
@@ -207,7 +208,8 @@ public class LoggerExporter extends JDialog implements Observer
 		}
 		else
 		{
-			this.monitor_.getTime().deleteObserver(this);
+// TODO
+//			this.monitor_.getTime().deleteObserver(this);
 			this.monitor_ = null;
 		}
 		

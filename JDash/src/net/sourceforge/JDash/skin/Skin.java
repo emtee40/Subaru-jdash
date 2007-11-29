@@ -34,6 +34,7 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.AbstractGauge;
 import net.sourceforge.JDash.gui.GaugePanel;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
@@ -296,6 +297,33 @@ public abstract class Skin
 	}
 
 	
+	/********************************************************
+	 * This method will return a list off the Parameter objects
+	 * that this skin references.  In other words, for every
+	 * gauge being displayed, and every component that uses 
+	 * a parameter, the returned list will reference it.
+	 * 
+	 * @return
+	 * @throws Exception
+	 *******************************************************/
+	public List<Parameter> getReferencedParameters() throws Exception
+	{
+		List<Parameter> pList = new ArrayList<Parameter>();
+		
+		for (int gaugeIndex = 0; gaugeIndex < getGaugeCount(); gaugeIndex++)
+		{
+			AbstractGauge gauge = getGauge(gaugeIndex);
+			
+			/* Don't add gauge parameters with no parameters linked to them */
+			if ( gauge.getParameter() != null)
+			{
+				pList.add(gauge.getParameter());
+			}
+		
+		}
+		
+		return pList;
+	}
 	
 	
 	

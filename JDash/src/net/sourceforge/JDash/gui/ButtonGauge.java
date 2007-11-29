@@ -28,13 +28,8 @@ package net.sourceforge.JDash.gui;
 
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 
-import javax.swing.JOptionPane;
-
-import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.param.Parameter;
 
 /*******************************************************
@@ -52,8 +47,6 @@ public class ButtonGauge extends AbstractGauge
 	
 	private GaugeButton gaugeButton_ = null;
 	
-	private GaugePanel gaugePanel_ = null;
-	
 	private Double sensorMin_ = null;
 	private Double sensorMax_ = null;
 	
@@ -64,7 +57,6 @@ public class ButtonGauge extends AbstractGauge
 	{
 		super(p);
 
-//		this.buttonShape_ = buttonShape;
 		this.gaugeButton_ = gaugeButton;
 		
 		
@@ -120,44 +112,6 @@ public class ButtonGauge extends AbstractGauge
 		return this.sensorMax_;
 	}
 	
-//	/*******************************************************
-//	 * We need to trap the update message, to watch for value changes so we can
-//	 * trip the button.
-//	 * Override
-//	 * @see net.sourceforge.JDash.gui.AbstractGauge#update(java.util.Observable, java.lang.Object)
-//	 *******************************************************/
-//	@Override
-//	public void update(Observable obs, Object obj)
-//	{
-//		
-//		/* If a parameter is linked to this gauge, then we'll see if the button respnods to it */
-//		if (getParameter() != null)
-//		{
-//			
-//			Parameter param = getParameter();
-//			
-//			/* If it's in the range */
-//			if ((param.getResult() >= getSensorMin()) && 
-//				(param.getResult() <= getSensorMax()))
-//			{
-//
-//				/* turn the botton on only if it's currently off */
-//				if (this.gaugeButton_.isPressed() == false)
-//				{
-//					this.gaugeButton_.mousePressed(null);
-//				}
-//			}
-//			else
-//			{
-//				/* Turn the button off only if it's currently on */
-//				if (this.gaugeButton_.isPressed() == true)
-//				{
-//					this.gaugeButton_.mousePressed(null);
-//				}
-//			}
-//
-//		}
-//	}
 	
 	/******************************************************
 	 * Override does nothing.  Just returns.
@@ -181,61 +135,7 @@ public class ButtonGauge extends AbstractGauge
 		/* Add it to the gauge panel */
 		panel.add(this.gaugeButton_.getButtonComponent(), this.gaugeButton_.getButtonShape().getShape().getBounds());
 		
-		/* We'll need the paranet gauge panel for action reference */
-		this.gaugePanel_ = panel;
-		
 	}
 	
 	
-//	/*******************************************************
-//	 * Respond to component actions.  At the moment only the logger
-//	 * toggle button is supported. 
-//	 * Override
-//	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-//	 *******************************************************/
-//	public void actionPerformed(ActionEvent ae)
-//	{
-//		
-//		System.out.println("Button Triggered: "+ getParameter() + "  " + this.gaugeButton_.getButtonComponent().isSelected());
-//		
-//		try
-//		{
-//				
-//			/* Logger Toggle Button */
-//			if (GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
-//			{
-//				
-//				this.gaugePanel_.getLogger().enable(this.gaugeButton_.getButtonComponent().isSelected());
-//				return;
-//				
-//			} /* end if Logger Button */
-//				
-//			
-//			/* Logger Toggle Button */
-//			if (GaugeButton.BUTTON_ACTION_DTC_RESET.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
-//			{
-//				/* Ask the user before doing a reset */
-//				if (JOptionPane.YES_OPTION ==
-//						JOptionPane.showConfirmDialog(this.gaugePanel_, "Are you sure you want to reset the ECUs trouble codes?\n" +
-//						"This will result in the loss of any stored codes, and cause a reset of all learned values.", 
-//						"DTC Reset. Are you sure?", JOptionPane.YES_NO_OPTION))
-//				{
-//	// TODO. Relink to the monitor some how
-////					getParentPanel().getMonitor().resetDTCs();
-//				}
-//				return;
-//					
-//			} /* end if Logger Button */
-//			
-//			
-//			/* If we got here, then the button action was not supported */
-//			throw new Exception("The Component pressed does not appear to be propertly supported");
-//			
-//		}
-//		catch(Exception e)
-//		{
-//			Startup.showException(e, false);
-//		}
-//		
-//	}
 }

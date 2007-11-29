@@ -148,44 +148,34 @@ public class DashboardFrame extends JFrame
 	{
 		
 		
-		/* Setup the main content panel */
-		JPanel mainPanel = new JPanel();
-		mainPanel.setFocusable(true);
-		setContentPane(mainPanel);
-		
-		/* Set the background color */
-		mainPanel.setBackground(this.skin_.getBackgroundColor());
-		mainPanel.setLayout(new GaugeLayout());
+//		/* Setup the main content panel */
+//		JPanel mainPanel = new JPanel();
+//		mainPanel.setFocusable(true);
+//		setContentPane(mainPanel);
+//		
+//		/* Set the background color */
+//		mainPanel.setBackground(this.skin_.getBackgroundColor());
+//		mainPanel.setLayout(new GaugeLayout());
 		
 		/* Setup the main panel */
+		this.setLayout(new GaugeLayout());
 		this.gaugePanel_ = new GaugePanel(this, this.skin_, monitor, logger);
-		mainPanel.add(gaugePanel_);
+		setContentPane(this.gaugePanel_);
+//		mainPanel.add(gaugePanel_);
 		
 
 		
-//		/* Setup the list of parameters */
-//		for (AbstractGauge gauge : gaugePanel_.getGauges())
+//		/* Respond to the f1 key for the about box */
+//		InputMap i = mainPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+//		i.put(KeyStroke.getKeyStroke("F1"), "ABOUT");
+//		mainPanel.getActionMap().put("ABOUT", new AbstractAction()
 //		{
-//			
-//			/* Don't add gauge parameters with no parameters linked to them */
-//			if ( gauge.getParameter() != null)
+//			public static final long serialVersionUID =0L;
+//			public void actionPerformed(ActionEvent arg0)
 //			{
-//				monitor.addParam(gauge.getParameter());
+//				doShowAbout();
 //			}
-//		}
-		
-
-		/* Respond to the f1 key for the about box */
-		InputMap i = mainPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		i.put(KeyStroke.getKeyStroke("F1"), "ABOUT");
-		mainPanel.getActionMap().put("ABOUT", new AbstractAction()
-		{
-			public static final long serialVersionUID =0L;
-			public void actionPerformed(ActionEvent arg0)
-			{
-				doShowAbout();
-			}
-		}); 
+//		}); 
 
 				
 	}

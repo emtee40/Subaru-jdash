@@ -83,9 +83,6 @@ public class GaugePanel extends JPanel
 	/* This array holds the list of shapes that make up the background */
 	private List<AbstractShape> backgroundShapes_ = null;
 	
-//	/* This list holds the array of gauges displayed on this panel */
-//	private ArrayList<AbstractGauge> gauges_ = new ArrayList<AbstractGauge>();
-	
 	/* The background icon */
 	private Image backgroundImage_ = null;
 
@@ -113,7 +110,6 @@ public class GaugePanel extends JPanel
 	{
 		this.owner_ = ownerFrame;
 		this.skin_ = skin;
-//		this.monitor_ = monitor;
 		this.logger_ = logger;
 		
 		/* Set the original size of the panel */
@@ -209,13 +205,7 @@ public class GaugePanel extends JPanel
 		return this.logger_;
 	}
 	
-//	/*******************************************************
-//	 * @return
-//	 *******************************************************/
-//	public ECUMonitor getMonitor()
-//	{
-//		return this.monitor_;
-//	}
+
 	
 	/*******************************************************
 	 * Override
@@ -237,6 +227,7 @@ public class GaugePanel extends JPanel
 		super.setBounds(x, y, w, h);
 		
 //		/* force a re-gen on each gauge */
+// TODO
 //		for (AbstractGauge gauge : getGauges())
 //		{
 //			if (gauge.getParameter() != null)

@@ -8,18 +8,18 @@
   <description>This skin is an extension to the Default Skin, with your Rear Window Defogger linked to logging. Turn on your defogger, and it will turn on logging.   If your monitor doesn't support the ability to detect the rear-window defogger, then the defogger light on the screen will respond to a mouse click.  For example, the ELM module only works with the OBD-II protocol, and it doesn't seem to support detection of the defogger.</description>
 
   <!-- A component gauge for special buttons and such -->
-  <gauge sensor="DEFOG_SW" type="button">
+  <gauge type="button">
     <button 
       type="toggle" 
       x="300" 
       y="360" 
       width="55" 
       height="55" 
-      action="logger-toggle" 
+      down-action="logger/enable"
+      up-action="logger/disable"
       up-image="red-indicator-light-off" 
       down-image="red-indicator-light-on" />
     <range sensor-min="1" sensor-max="1" gauge-min="1" gauge-max="1"/>
   </gauge>
-
 
 </skin>

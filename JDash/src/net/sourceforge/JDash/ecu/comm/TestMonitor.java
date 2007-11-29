@@ -84,6 +84,11 @@ public class TestMonitor extends BaseMonitor
         	/* Setup the test list */
             for(ECUParameter p : getParams())
             {
+            	if (p.isEnabled() == false)
+            	{
+            		continue;
+            	}
+            	
             	if (p.getLastFetchTime() + p.getPreferedRate() < System.currentTimeMillis())
             	{
             		p.setLastFetchTime(System.currentTimeMillis());

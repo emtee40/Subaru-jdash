@@ -149,7 +149,8 @@ public class XMLSkin extends Skin
 	private static final String ATTRIB_VALUE		= "value";
 	private static final String ATTRIB_UP_IMAGE		= "up-image";
 	private static final String ATTRIB_DOWN_IMAGE	= "down-image";
-	private static final String ATTRIB_ACTION		= "action";
+	private static final String ATTRIB_UP_ACTION	= "up-action";
+	private static final String ATTRIB_DOWN_ACTION	= "down-action";
 	private static final String ATTRIB_SECONDS      = "seconds";
 	private static final String ATTRIB_LABEL		= "label";
 	private static final String ATTRIB_REVERSE		= "reverse";
@@ -1292,12 +1293,19 @@ public class XMLSkin extends Skin
 		double y = extractDouble(shapePath + "/@" + ATTRIB_Y);
 		double w = extractDouble(shapePath + "/@" + ATTRIB_WIDTH);
 		double h = extractDouble(shapePath + "/@" + ATTRIB_HEIGHT);
-		String action = extractString(shapePath + "/@" + ATTRIB_ACTION);
+		
+		String upAction = null;
+		String downAction = null;
+		
+		try {upAction = extractString(shapePath + "/@" + ATTRIB_UP_ACTION);} catch(Exception e) {}
+		try {downAction = extractString(shapePath + "/@" + ATTRIB_DOWN_ACTION);} catch(Exception e) {}
+		
+		
 		String upImageName = extractString(shapePath + "/@" + ATTRIB_UP_IMAGE);
 		String downImageName = extractString(shapePath + "/@" + ATTRIB_DOWN_IMAGE);
 		
 		/* Create the shape */
-		ButtonShape buttonShape = new ButtonShape(type, x, y, w, h, action, upImageName, downImageName);
+		ButtonShape buttonShape = new ButtonShape(type, x, y, w, h, upAction, downAction, upImageName, downImageName);
 
 		/* Return the shape */
 		return buttonShape;

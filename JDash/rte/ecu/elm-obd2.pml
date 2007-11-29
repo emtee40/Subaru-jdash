@@ -136,7 +136,6 @@ Bytes 2,3 and 4 represent info about on-board tests
 		</address>
 	</parameter>
 	
-	
 	<parameter name="E_ATMO">
 		<description>Atmospheric Pressure - {in kPa absolute}</description>
 		<address>
@@ -144,170 +143,236 @@ Bytes 2,3 and 4 represent info about on-board tests
 		</address>
 	</parameter>
 
-
-
-
 	<!-- The ELM monitor REQUIRES this meta parameter for CEL processing -->
 	<meta-parameter name="MIL_STATUS">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" BSH.bitcheck(~E_MIL_STATUS~, 32) " />
+            <arg name="script">
+            	return meta.bitcheck(meta.getParamValue("E_MIL_STATUS"), 32)
+            </arg>
+            <arg name="dependant" value="E_MIL_STATUS"/>
         </args>
     </meta-parameter>	
 
 
 	<meta-parameter name="LOAD">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~E_LOAD~ * 100.0 / 255.0 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_LOAD") * 100.0 / 255.0 
+			</arg>
+			<arg name="dependant" value="E_LOAD"/>
         </args>
     </meta-parameter>	
 		
 	<meta-parameter name="COOLANT_TEMP_C">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<description>Coolan Temp in C - {n - 40}</description>
 		<args>
-            <arg name="script" value=" ~E_COOLANT_TEMP~ - 4.0 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_COOLANT_TEMP") - 4.0 
+			</arg>
+			<arg name="dependant" value="E_COOLANT_TEMP"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="COOLANT_TEMP_F">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" (~COOLANT_TEMP_C~ * (9.0/5.0)) + 32.0 " />
+            <arg name="script">
+            	 return (meta.getParamValue("COOLANT_TEMP_C") * (9.0/5.0)) + 32.0 
+			</arg>
+			<arg name="dependant" value="COOLANT_TEMP_C"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="STFT_1">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" 0.7812 * (~E_STFT_1~ - 128.0) " />
+            <arg name="script">
+            	 return 0.7812 * (meta.getParamValue("E_STFT_1") - 128.0) 
+			</arg>
+			<arg name="dependant" value="E_STFT_1"/>
         </args>
     </meta-parameter>	
 	
 	<meta-parameter name="LTFT_1">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" 0.7812 * (~E_LTFT_1~ - 128.0) " />
+            <arg name="script">
+            	 return 0.7812 * (meta.getParamValue("E_LTFT_1") - 128.0) 
+			</arg>
+			<arg name="dependant" value="E_LTFT_1"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="STFT_2">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" 0.7812 * (~E_STFT_2~ - 128.0) " />
+            <arg name="script">
+            	 return 0.7812 * (meta.getParamValue("E_STFT_2") - 128.0) 
+			</arg>
+			<arg name="dependant" value="E_STFT_2"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="LTFT_2">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" 0.7812 * (~E_LTFT_2~ - 128.0) " />
+            <arg name="script">
+            	 return 0.7812 * (meta.getParamValue("E_LTFT_2") - 128.0) 
+			</arg>
+			<arg name="dependant" value="E_LTFT_2"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="FUEL_PRESSURE_PSI">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" (~E_FUEL_PRESSURE~ * 3) / 0.14504 " />
+            <arg name="script">
+            	 return (meta.getParamValue("E_FUEL_PRESSURE") * 3) / 0.14504 
+			</arg>
+			<arg name="dependant" value="E_FUEL_PRESSURE"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="MAP_PSI">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~E_MAP~ / 0.14504 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_MAP") / 0.14504 
+			</arg>
+			<arg name="dependant" value="E_MAP"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="ATMO_PSI">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~E_ATMO~ / 0.14504 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_ATMO") / 0.14504 
+			</arg>
+			<arg name="dependant" value="E_ATMO"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="VAC_BOOST_PSI">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~MAP_PSI~ - ~ATMO_PSI~" /> 
+            <arg name="script">
+            	 return meta.getParamValue("MAP_PSI") - "ATMO_PSI"
+			</arg>
+			<arg name="dependant" value="MAP_PSI"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="RPM">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_RPM~ / 4.0 " />
-        </args>
+            <arg name="script">
+            	 return meta.getParamValue("E_RPM") / 4.0 
+			</arg>
+			<arg name="dependant" value="E_RPM"/>
+		</args>
     </meta-parameter>	
 
     <meta-parameter name="MPH">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~KPH~ / 0.62134 " />
+            <arg name="script">
+            	 return meta.getParamValue("KPH") / 0.62134 
+			</arg>
+			<arg name="dependant" value="KPH"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="IG_TIMING_DEG">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_TIMING~ / 2.0 - 64.0 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_TIMING") / 2.0 - 64.0 
+			</arg>
+			<arg name="dependant" value="E_TIMING"/>
         </args>
     </meta-parameter>	
 		
 	<meta-parameter name="INTAKE_AIR_TEMP_C">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~E_INTAKE_AIR_TEMP~ - 40.0 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_INTAKE_AIR_TEMP") - 40.0 
+			</arg>
+			<arg name="dependant" value="E_INTAKE_AIR_TEMP"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="INTAKE_AIR_TEMP_C">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~E_INTAKE_AIR_TEMP~ - 40.0 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_INTAKE_AIR_TEMP") - 40.0 
+			</arg>
+			<arg name="dependant" value="E_INTAKE_AIR_TEMP"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="INTAKE_AIR_TEMP_F">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-                <arg name="script" value=" (~INTAKE_AIR_TEMP_C~ * (9.0/5.0)) + 32.0 " />
+                <arg name="script">
+            	 return (meta.getParamValue("INTAKE_AIR_TEMP_C") * (9.0/5.0)) + 32.0 
+			</arg>
+			<arg name="dependant" value="INTAKE_AIR_TEMP_C"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="E_MAF_GPS">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~E_MAF~ / 100.0 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_MAF") / 100.0 
+			</arg>
+			<arg name="dependant" value="E_MAF"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="TPS">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" ~E_TPS~ * 100.0 / 255.0 " />
+            <arg name="script">
+            	 return meta.getParamValue("E_TPS") * 100.0 / 255.0 
+			</arg>
+			<arg name="dependant" value="E_TPS"/>
         </args>
     </meta-parameter>	
     
 	<meta-parameter name="O2_SENSOR_PRESENT_B1_S1">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" BSH.bitcheck(~E_O2_SENSOR_PRESENT~, 0) " />
+            <arg name="script">
+            	 return meta.bitcheck(meta.getParamValue("E_O2_SENSOR_PRESENT"), 0) 
+			</arg>
+			<arg name="dependant" value="E_O2_SENSOR_PRESENT"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="O2_SENSOR_PRESENT_B1_S2">
-		<handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+		<handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
 		<args>
-            <arg name="script" value=" BSH.bitcheck(~E_O2_SENSOR_PRESENT~, 1) " />
+            <arg name="script">
+            	 return meta.bitcheck(meta.getParamValue("E_O2_SENSOR_PRESENT"), 1) 
+			</arg>
+			<arg name="dependant" value="E_O2_SENSOR_PRESENT"/>
         </args>
     </meta-parameter>	
     
     <meta-parameter name="LAMBDA_1">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" (((long)~E_LAMBDA_1~) >> 16) * 0.0000305 " />
+            <arg name="script">
+            	 return meta.bitShiftRight(meta.getParamValue("E_LAMBDA_1"),16) * 0.0000305 
+			</arg>
+			<arg name="dependant" value="E_LAMBDA_1"/>
         </args>
     </meta-parameter>
 	

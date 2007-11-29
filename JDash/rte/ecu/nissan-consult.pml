@@ -30,17 +30,24 @@
 
 	
     <meta-parameter name="RPM">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" Math.round((BSH.makeint(~E_RPM_H~, ~E_RPM_L~) 12.5 " />
+            <arg name="script">
+            	return Math.round(meta.makeint(meta.getParamValue("E_RPM_H"), meta.getParamValue("E_RPM_L")) * 12.5)
+            </arg>
+            <arg name="dependant" value="E_RPM_H"/>
+            <arg name="dependant" value="E_RPM_L"/>
         </args>
     </meta-parameter>
     
     
     <meta-parameter name="KPH">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" Math.round(~E_KPH~ * 2.0) " />
+            <arg name="script">
+            	return Math.round(meta.getParamValue("E_KPH") * 2.0)
+            </arg>
+            <arg name="dependant" value="E_KPH"/>
         </args>
     </meta-parameter>
     

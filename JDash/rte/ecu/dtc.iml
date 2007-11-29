@@ -41,5 +41,54 @@
     <meta-parameter name="DTC_7">
 		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
     </meta-parameter>	
+    
+    <meta-parameter name="DTC_8">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_9">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+
+
+	<meta-parameter name="DTC_HIST_0">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_1">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_2">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_3">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_4">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_5">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_6">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_7">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_8">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_9">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
 
 </parameters>

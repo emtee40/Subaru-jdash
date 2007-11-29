@@ -1,15 +1,15 @@
 <!-- ======================================================
      Including the standard Subaru ECU values, this file defines the addresses specific to the MY98-MY00
      ====================================================== -->
-<parameters name="Generic Subaru SSM/OBD-II with OpenPort cable">
+<parameters name="Subaru SSM/OBD-II (USDM MY00)">
 
-    <description>This parameter definition will communicate with any OBD-II/SSM Subaru ECU through the Tactrix OpenPort cable using the SSM Protocol</description>
+    <description>Same as the Generic Subaru definition file, but can also read the 2000 Subaru DTC Codes.</description>
 
     <!-- The standard known subaru SSM addresses -->
-    <include file="subaru-ssm-obd2.iml"/>
+    <include file="subaru-ssm-obd2-common.iml"/>
 
     <!-- The standard subaru DTC conversions -->
-    <include file="subaru-dtc-obd2.iml"/>
+    <include file="subaru-ssm-obd2-dtc-meta.iml"/>
 
     
 	<parameter name="E_DTC_CUR_0H" rate="10000">

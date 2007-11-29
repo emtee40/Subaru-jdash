@@ -1,7 +1,7 @@
 <!-- ======================================================
      EVERY known to us  SSM parameter
      ====================================================== -->
-<parameters name="A30113 Subaru SSM/OBD-1" monitor-class="net.sourceforge.JDash.ecu.comm.SSMOBD1Monitor">
+<parameters name="Subaru SSM/OBD-1 (A30113)" monitor-class="net.sourceforge.JDash.ecu.comm.SSMOBD1Monitor">
 
     <description>This parameter include file contains the known set of SSM parameter addresses on an OBD-I subaru with a ROM-ID of A30113 such as the 97/98 EDM Impreza GT. 
 However, this monitor is still not working as I don't have easy access to an OBD-I subaru.</description>
@@ -156,137 +156,191 @@ However, this monitor is still not working as I don't have easy access to an OBD
 	
 	<!-- The MIL Status is not yet supported by our SSM implementation. We don't know the memory location -->
 	<meta-parameter name="MIL_STATUS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" 0.0 " />
+            <arg name="script" value=" return 0.0 " />
         </args>
     </meta-parameter>
 	
 	
 	<meta-parameter name="BATTERY_VOLTS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_BATTERY_VOLTS~ * 0.08 " />
+            <arg name="script">
+            	return meta.getParamValue("E_BATTERY_VOLTS") * 0.08 
+            </arg>
+            <arg name="dependant" value="E_BATTERY_VOLTS"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="KPH">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_KPH~ * 2.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_KPH") * 2.0  
+            </arg>
+            <arg name="dependant" value="E_KPH"/>
         </args>
     </meta-parameter>
     
     <meta-parameter name="MPH">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value="(float)~KPH~ * 0.6215"/>
+            <arg name="script">
+            	return meta.getParamValue("KPH") * 0.6215 
+            </arg>
+            <arg name="dependant" value="KPH"/>
         </args>
     </meta-parameter>
 	
 	<meta-parameter name="RPM">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_RPM~ * 25.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_RPM") * 25.0  
+            </arg>
+            <arg name="dependant" value="E_RPM"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="COOLANT_TEMP_C">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_COOLANT_TEMP~ - 50.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_COOLANT_TEMP") - 50.0  
+            </arg>
+            <arg name="dependant" value="E_COOLANT_TEMP"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="MAF_VOLTS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_MAF~ * 0.08 " />
+            <arg name="script">
+            	return meta.getParamValue("E_MAF") * 0.08  
+            </arg>
+            <arg name="dependant" value="E_MAF"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="TPS_VOLTS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_TPS~ * 5.0 / 256.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_TPS") * 5.0 / 256.0  
+            </arg>
+            <arg name="dependant" value="E_TPS"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="INJ_1_PULS_MS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_INJ_1_PULSE~ * 256.0 / 1000.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_INJ_1_PULSE") * 256.0 / 1000.0  
+            </arg>
+            <arg name="dependant" value="E_INJ_1_PULSE"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="ISU_DUTY_VALVE_DC">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_ISU_DUTY_VALVE~ * 100.0 / 256.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_ISU_DUTY_VALVE") * 100.0 / 256.0  
+            </arg>
+            <arg name="dependant" value="E_ISU_DUTY_VALVE"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="O2_AVERAGE_VOLTS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_O2_AVERAGE~ * 5000.0 / 512.0 * 1000 " />
+            <arg name="script">
+            	return meta.getParamValue("E_O2_AVERAGE") * 5000.0 / 512.0 * 1000  
+            </arg>
+            <arg name="dependant" value="E_O2_AVERAGE"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="O2_MINIMUM_VOLTS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_O2_MINIMUM~ * 5000.0 / 256.0 * 1000 " />
+            <arg name="script">
+            	return meta.getParamValue("E_O2_MINIMUM") * 5000.0 / 256.0 * 1000  
+            </arg>
+            <arg name="dependant" value="E_O2_MINIMUM"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="O2_MAXIMUM_VOLTS">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_O2_MAXIMUM~ * 5000.0 / 256.0 * 1000 " />
+            <arg name="script">
+            	return meta.getParamValue("E_O2_MAXIMUM") * 5000.0 / 256.0 * 1000  
+            </arg>
+            <arg name="dependant" value="E_O2_MAXIMUM"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="AF_COR_1_PERCENT">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_AF_COR_1~ - 128.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_AF_COR_1") - 128.0  
+            </arg>
+            <arg name="dependant" value="E_AF_COR_1"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="ATMO_MMHG">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_ATMO~ * 8.0 " /> 
+            <arg name="script">
+            	return meta.getParamValue("E_ATMO") * 8.0  
+            </arg>
+            <arg name="dependant" value="E_ATMO"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="ATMO_PSI">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~ATMO_MMHG~ * 0.01933677 " /> 
+            <arg name="script">
+            	return meta.getParamValue("ATMO_MMHG") * 0.01933677  
+            </arg>
+            <arg name="dependant" value="ATMO_MMHG"/>
         </args>
     </meta-parameter>
     
 	<meta-parameter name="VAC_BOOST_BAR">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" (~E_VAC_BOOST~ - 128.0) / 85.0 " />
+            <arg name="script">
+            	return (meta.getParamValue("E_VAC_BOOST") - 128.0) / 85.0  
+            </arg>
+            <arg name="dependant" value="E_VAC_BOOST"/>
         </args>
     </meta-parameter>
     
     <meta-parameter name="VAC_BOOST_PSI">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~VAC_BOOST_BAR~ *  14.5037737730209 " />
+            <arg name="script">
+            	return meta.getParamValue("VAC_BOOST_BAR") *  14.5037737730209  
+            </arg>
+            <arg name="dependant" value="VAC_BOOST_BAR"/>
         </args>
     </meta-parameter>
     
 	BoostSolenoidDutyCycleAddress
 	<meta-parameter name="BOOST_SOL_DC">
-        <handler>net.sourceforge.JDash.ecu.param.BeanShellMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
         <args>
-            <arg name="script" value=" ~E_BOOST_SOL_DC~ * 100.0 / 256.0 " />
+            <arg name="script">
+            	return meta.getParamValue("E_BOOST_SOL_DC") * 100.0 / 256.0  
+            </arg>
+            <arg name="dependant" value="E_BOOST_SOL_DC"/>
         </args>
     </meta-parameter>
     

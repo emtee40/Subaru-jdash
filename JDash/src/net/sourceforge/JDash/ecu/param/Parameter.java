@@ -36,6 +36,7 @@ public abstract class Parameter implements DoubleParameter
 {
 	
 	
+	
 	private ParameterRegistry ownerRegistry_ = null;
 	
 	
@@ -53,6 +54,9 @@ public abstract class Parameter implements DoubleParameter
 	{
 		return this.ownerRegistry_;
 	}
+	
+	
+
 	
 	
 	/********************************************************

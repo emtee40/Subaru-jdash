@@ -36,6 +36,7 @@ import java.util.List;
 
 
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.StringParameter;
 import net.sourceforge.JDash.gui.AbstractGauge;
 import net.sourceforge.JDash.gui.ButtonGauge;
 import net.sourceforge.JDash.gui.DigitalGauge;
@@ -246,7 +247,15 @@ public class AllParametersSkin extends Skin
 			
 			Parameter p = parameterList.get(parameterIndex);
 			
-			TextShape textShape = new TextShape(x, y , p.getName() + ": [%03.02f]", Font.decode("Arial"));
+			TextShape textShape = null;
+			if (p instanceof StringParameter)
+			{
+				textShape = new TextShape(x, y , p.getName() + ": [%s]", Font.decode("Arial"));
+			}
+			else
+			{
+				textShape = new TextShape(x, y , p.getName() + ": [%03.02f]", Font.decode("Arial"));
+			}
 			textShape.addAttribute(AbstractShape.PROPS.COLOR, COLORS[columnIndex]);
 			textShape.addAttribute(AbstractShape.PROPS.FILL_COLOR, COLORS[columnIndex]);
 			textShape.addAttribute(AbstractShape.PROPS.SIZE, "" + fontSize);
@@ -268,18 +277,19 @@ public class AllParametersSkin extends Skin
 		}
 		
 		
-		/* And, finally, add the logger button */
-		ButtonShape buttonShape = new ButtonShape(GaugeButton.BUTTON_TYPE_TOGGLE, 
-													2, 
-													2, 
-													IMAGE_WIDTH, 
-													Math.min(IMAGE_HEIGHT, fontSize), 
-													GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE, 
-													LOGGER_IMAGE_UP, 
-													LOGGER_IMAGE_DOWN);
-		GaugeButton gaugeButton = new GaugeButton(this, buttonShape);
-		ButtonGauge compGauge = new ButtonGauge(null, gaugeButton);
-		this.allGauges_.add(compGauge);
+		// TODO
+//		/* And, finally, add the logger button */
+//		ButtonShape buttonShape = new ButtonShape(GaugeButton.BUTTON_TYPE_TOGGLE, 
+//													2, 
+//													2, 
+//													IMAGE_WIDTH, 
+//													Math.min(IMAGE_HEIGHT, fontSize), 
+//													GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE, 
+//													LOGGER_IMAGE_UP, 
+//													LOGGER_IMAGE_DOWN);
+//		GaugeButton gaugeButton = new GaugeButton(this, buttonShape);
+//		ButtonGauge compGauge = new ButtonGauge(null, gaugeButton);
+//		this.allGauges_.add(compGauge);
 
 	}
 	

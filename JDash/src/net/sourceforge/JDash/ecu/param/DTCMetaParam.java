@@ -80,12 +80,12 @@ public class DTCMetaParam extends MetaParameter implements StringParameter
 
 	/*******************************************************
 	 * Override
-	 * @see net.sourceforge.JDash.ecu.param.MetaParameter#setArgs(java.util.Map)
+	 * @see net.sourceforge.JDash.ecu.param.MetaParameter#addArg(java.lang.String, java.lang.String)
 	 *******************************************************/
 	@Override
-	public void setArgs(Map<String, String> args) throws ParameterException
+	public void addArg(String name, String value) throws ParameterException
 	{
-		
+		/* Do Nothing */
 		
 	}
 
@@ -148,15 +148,7 @@ public class DTCMetaParam extends MetaParameter implements StringParameter
 		return this.getDTCCode();
 	}
 
-//	/*******************************************************
-//	 * Override
-//	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-//	 *******************************************************/
-//	public void update(Observable parameter, Object arg1)
-//	{
-//
-//	}
-//	
+
 	
 	
 }

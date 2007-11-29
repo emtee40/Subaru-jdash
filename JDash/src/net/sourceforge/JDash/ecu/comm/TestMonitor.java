@@ -27,6 +27,7 @@ package net.sourceforge.JDash.ecu.comm;
 
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 
@@ -69,6 +70,12 @@ public class TestMonitor extends BaseMonitor
      *******************************************************/
     public void run()
     {
+    	Random r = new Random(System.currentTimeMillis());
+    	/* Randomize the parameters */
+    	for (ECUParameter p : getParams())
+    	{
+    		p.setResult(r.nextDouble() * 0xff);
+    	}
 
         while(doRun_)
         {

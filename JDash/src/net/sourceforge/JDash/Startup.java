@@ -392,6 +392,11 @@ public class Startup
 		
 		String msg = Setup.APPLICATION + "\n" + e.getMessage();
 		
+		if (e.getCause() != null)
+		{
+			msg += "\n" + e.getCause().getMessage();
+		}
+		
 		if (e instanceof NullPointerException)
 		{
 			msg += "\n" + NullPointerException.class.getName();

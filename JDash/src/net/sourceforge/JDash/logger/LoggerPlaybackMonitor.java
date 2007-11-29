@@ -207,7 +207,8 @@ public class LoggerPlaybackMonitor extends BaseMonitor
 			
 			while (doRun_)
 			{
-				/* If paused, then sleep for a bit, and continue the loop */
+				/* If paused, then sleep for a bit, and continue the loop, The
+				 * reason for the sleep is to play fair with other threads */
 				if (this.paused_)
 				{
 					Thread.sleep(100);
@@ -317,6 +318,7 @@ public class LoggerPlaybackMonitor extends BaseMonitor
 	    	if (param instanceof ECUParameter)
 	    	{
 	    		((ECUParameter)param).setResult(value);
+	    		fireProcessingParameterEvent(param);
 	    	}
 	    	else
 	    	{

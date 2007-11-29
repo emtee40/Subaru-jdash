@@ -66,8 +66,10 @@ public class RateParameter extends MetaParameter {
         //Do nothing
     }
 
-    public void setArgs(Map<String, String> args) throws ParameterException {
-        //Do nothing
+    @Override
+    public void addArg(String name, String value) throws ParameterException {
+    	// TODO Auto-generated method stub
+    	
     }
 
     public String getName() {

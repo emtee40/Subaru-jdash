@@ -3,7 +3,7 @@
  *  @author spowell
  *  BeanShellMetaParam.java
  *  Aug 16, 2006
- *  $Id: BeanShellMetaParam.java,v 1.3 2006/09/14 02:03:42 shaneapowell Exp $
+ *  $Id: BeanShellMetaParam.java,v 1.1 2006/12/31 16:59:09 shaneapowell Exp $
  *
 Copyright (C) 2006  Shane Powell
 
@@ -22,23 +22,17 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  ******************************************************/
-package net.sourceforge.JDash.ecu;
+package net.sourceforge.JDash.ecu.param;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-
-
-import net.sourceforge.JDash.ecu.param.MetaParameter;
-import net.sourceforge.JDash.ecu.param.Parameter;
-import net.sourceforge.JDash.ecu.param.ParameterEventListener;
-import net.sourceforge.JDash.ecu.param.ParameterException;
-
 import java.lang.Math;
 
-import bsh.Interpreter;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+
 
 /*******************************************************
  * This meta param will take a single parameter named "script"
@@ -46,36 +40,36 @@ import bsh.Interpreter;
  * The variables substitutions are done before hand though.
  * Variables are named as 
  ******************************************************/
-public class BeanShellMetaParam extends MetaParameter
+public class JSMetaParam extends MetaParameter
 {
 
 	
-	private static final String SCRIPT_PARAM = "script";
+	private static final String ARG_NAME_SCRIPT = "script";
+	private static final String ARG_NAME_DEPENDANT = "dependant"; 
 	
-	private static final String PARAM_OPEN_BRACE = "~";
-	private static final String PARAM_CLOSE_BRACE = "~";
-	
-	private static final String SHELL_FUNCTION = " calc() ";
-	private static final String SHELL_THIS_REFERENCE = "BSH";
-	private static final String SHELL_VAR = "var";
+	private static final String JS_THIS_REFERENCE = "meta";
+
 	
 	private String script_ = null;
 	private List<Parameter> dependants_ = new ArrayList<Parameter>();
 	private String name_ = null;
 	
-	
-	private HashSet<Parameter> updatedDependants_ = new HashSet<Parameter>();
-	
-	
-	private double value_ = 0l;
-	
-	/* The beah shell */
-	private Interpreter bshInterpreter_ = new Interpreter();
 
+	private Context rhinoContext_ = null;
+	private Scriptable rhinoScope_ = null;
+	private Script rhinoScript_ = null;
+
+	
+	
+	/* The value object is an Object instead of the literal double, because beanshell parameters can be quite
+	 * crafty.  The usual is to return a double value, but once in a while, a metaparameter is setup that
+	 * returns a string.  */
+	private Double value_ = new Double(0);
+	
 	
 	static
 	{
-		/* A lame cheat to prevent the not-used warning in Eclupse */
+		/* A lame cheat to prevent the not-used warning in Eclupse, because the Math pack is used in the script. */
 		Math.max(1,2);
 	}
 	
@@ -83,9 +77,11 @@ public class BeanShellMetaParam extends MetaParameter
 	/*****************************************************
 	 * Create a new bean shell parameter.
 	 ******************************************************/
-	public BeanShellMetaParam()
+	public JSMetaParam()
 	{
 	}
+	
+	
 	
 	/*******************************************************
 	 * Override
@@ -108,69 +104,48 @@ public class BeanShellMetaParam extends MetaParameter
 
 	}
 
-	/*******************************************************
+
+	/******************************************************
 	 * Override
-	 * @see net.sourceforge.JDash.ecu.param.MetaParameter#setArgs(java.util.Map)
+	 * @see net.sourceforge.JDash.ecu.param.MetaParameter#addArg(java.lang.String, java.lang.String)
 	 *******************************************************/
 	@Override
-	public void setArgs(Map<String, String> args) throws ParameterException
+	public void addArg(String name, String value) throws ParameterException
 	{
 		try
 		{
-			
-			/* Get the script */
-			this.script_ = args.get(SCRIPT_PARAM);
-			if ((this.script_ == null) || (this.script_.length() == 0))
+			/* If it's a script arg */
+			if (ARG_NAME_SCRIPT.equals(name))
 			{
-				throw new ParameterException(getClass().getName() + "  "  + getName() + " is missing it's " + SCRIPT_PARAM + " argument");
-			}
-			
-	
-			/* Find all the param instances */
-			int braceIndex = -1;
-			while ((braceIndex = this.script_.indexOf(PARAM_OPEN_BRACE)) != -1)
-			{
+				this.script_ = 	"function _js() \n" +
+								"{ \n /********/\n" + value + "\n/********/\n}\n  meta.setValue(_js())\n";
 				
-				/* Extract the parameter */
-				String param = this.script_.substring(braceIndex + PARAM_OPEN_BRACE.length(), 
-														this.script_.indexOf(PARAM_CLOSE_BRACE, braceIndex + PARAM_OPEN_BRACE.length()));
-				this.script_ = this.script_.replaceAll(PARAM_OPEN_BRACE + param + PARAM_CLOSE_BRACE, " " + SHELL_THIS_REFERENCE +".getParamValue(\"" + param + "\") ");
-				
-				/* Add Parameter */
-				Parameter p = getOwnerRegistry().getParamForName(param);
-				dependants_.add(p);
-				p.addEventListener(new ParameterEventListener()
+				if ((this.script_ == null) || (this.script_.length() == 0))
 				{
-					public void valueChanged(Parameter p)
-					{
-						dependantValueChanged(p);
-					}
-				});
+					throw new ParameterException(getClass().getName() + "  "  + getName() + " is missing it's " + ARG_NAME_SCRIPT + " argument");
+				}
+				
 			}
 			
-			/* Setup the script method */
-			this.script_ = " double " + SHELL_VAR + " = " + this.script_ + ";";
-			this.script_ += "\n" + SHELL_THIS_REFERENCE + ".setCalculatedValue(" + SHELL_VAR + "); ";
-			this.script_ = SHELL_FUNCTION + "{\n " + this.script_ + " \n}";
 			
-			/* DEBUG */
-			//System.out.println(this.script_);
-			
-			/* If no params were added from the script, then warn the user */
-			if (this.dependants_.size() == 0)
+			/* The only other thing we care about are dependant arguments */
+			if (ARG_NAME_DEPENDANT.equals(name))
 			{
-				throw new ParameterException(getClass().getName() + "  " + getName() + " did not include any " + PARAM_OPEN_BRACE + "PARM" + PARAM_CLOSE_BRACE + " parts"); 
+				Parameter p = getOwnerRegistry().getParamForName(value);
+				if (p == null)
+				{
+					throw new ParameterException(getClass().getName() + " " + getName() +  " references an unknown dependant " + value);
+				}
+				this.dependants_.add(p);
 			}
-	
-			/* Setup the bean shell, and call the script once */
-
-			this.bshInterpreter_.set(SHELL_THIS_REFERENCE, this);
-			this.bshInterpreter_.eval(this.script_);
+			
+			
 		}
-		catch(Exception e)
+		finally
 		{
-			throw new ParameterException("Formula Error.\nOriginal:\n" + args.get(SCRIPT_PARAM) + "\nConverted:\n" + this.script_ + "\n", e);
+			this.rhinoContext_ = null;
 		}
+		
 
 		
 	}
@@ -193,39 +168,45 @@ public class BeanShellMetaParam extends MetaParameter
 	 *******************************************************/
 	public double getResult()
 	{
+		
 		try
 		{
-			/* Call our shell script */
-			this.bshInterpreter_.eval(SHELL_FUNCTION);
-			return value_;
+
+			if (this.rhinoContext_ == null)
+			{
+				
+					this.rhinoContext_ = Context.enter();
+					this.rhinoScope_ = this.rhinoContext_.initStandardObjects();
+		
+		
+					this.rhinoScript_ = this.rhinoContext_.compileString(this.script_, "JSMetaParam", 1, null);
+					ScriptableObject.putProperty(this.rhinoScope_, JS_THIS_REFERENCE, Context.javaToJS(this, this.rhinoScope_));
+		
+					this.rhinoScript_.exec(this.rhinoContext_, this.rhinoScope_);
+					
+			}
+		
+			/* Call our rhino script */
+			this.rhinoScript_.exec(this.rhinoContext_, this.rhinoScope_);
+			return this.value_;
 		}
 		catch(Exception e)
 		{
-			throw new RuntimeException("Unable to evaluate script\n" + this.script_ + "\n", e);
+			throw new RuntimeException("JSMetaParam error in " + this.getName() + "\n", e);
 		}
 
 		
 	}
 
-	/*******************************************************
-	 * Override
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 *******************************************************/
-	public void dependantValueChanged(Parameter p)
-	{
-		/* We want to watch for updates from the params we're watching.  But,
-		 * only notify the observers once ALL params have checked in */
-		
-		this.updatedDependants_.add(p);
-		
-		if (this.updatedDependants_.size() == this.dependants_.size())
-		{
-			this.fireValueChangedEvent();
-			this.updatedDependants_.clear();
-		}
-
-	}
 	
+	
+	/******************************************************/
+	/******************************************************/
+	/******************************************************
+	 * Below this point, these are designed to be utility functions
+	 * available to the shell script
+	 *******************************************************/
+
 	
 	/********************************************************
 	 * This is a simple method used by the shell script to get
@@ -236,18 +217,38 @@ public class BeanShellMetaParam extends MetaParameter
 	 * @param paramName IN - the parameter name to get the value for.
 	 * @return IN - the parameter value.
 	 ******************************************************/
-	public int getParamValue(String paramName) throws Exception
+	public double getParamValue(String paramName) throws Exception
 	{
+		
 		Parameter p = getOwnerRegistry().getParamForName(paramName);
+		
+		/* For help in problems, and debugging, lets make sure that this parameter
+		 * was identified as a dependant */
+		if (this.dependants_.contains(p) == false)
+		{
+			throw new Exception("a call to getParamValue(\"" + paramName + "\") in the script for [" + getName() + "] was made.\n" +
+					" But this parameter was never identified in the dependants list.");
+		}
+		
+
 		
 		if (p == null)
 		{
 			throw new Exception("Meta Parameter attempted to retrive value for a non-existant parameter: " + paramName);
 		}
 		
-		return (int)p.getResult();
+		return p.getResult();
 	}
 	
+	
+	
+	/********************************************************
+	 * @return
+	 *******************************************************/
+	public double getValue()
+	{
+		return this.value_;
+	}
 
 	/********************************************************
 	 * This method is used by the beanshell script to set the value
@@ -256,41 +257,13 @@ public class BeanShellMetaParam extends MetaParameter
 	 * 
 	 * @param val IN - the value to set.
 	 *******************************************************/
-	public void setCalculatedValue(double val)
+	public void setValue(double val)
 	{
 		this.value_ = val;
-	}
-	
-	/********************************************************
-	 * This method is used by the beanshell script to set the value
-	 * variable.  This is just to simplify the setting of this meta-parameters
-	 * return value.
-	 * @param val IN - the value to set
-	 *******************************************************/
-	public void setCalculatedValue(String val)
-	{
-		setCalculatedValue(Double.parseDouble(val));
-	}
-	
-	/********************************************************
-	 * This method is used by the beanshell script to set the value
-	 * variable.  This is just to simplify the setting of this meta-parameters
-	 * return value.
-	 * @param val IN - the value to set
-	 *******************************************************/
-	public void setCalculatedValue(int val)
-	{
-		setCalculatedValue((double)val);
+		fireValueChangedEvent();
 	}
 	
 
-	
-	/******************************************************/
-	/******************************************************/
-	/******************************************************
-	 * Below this point, these are designed to be utility functions
-	 * available to the shell script
-	 *******************************************************/
 	
 	/*******************************************************
 	 * This utility function is made available to the shell script
@@ -326,5 +299,32 @@ public class BeanShellMetaParam extends MetaParameter
 		{
 			return 0;
 		}
+		
 	}
+	
+	
+	/********************************************************
+	 * This utility method simply converts the double to a long, then
+	 * shifts the bits right "bits" number of bits.
+	 * @param d
+	 * @param bits
+	 * @return
+	 *******************************************************/
+	public long bitShiftRight(double d, int bits)
+	{
+		return ((long)d) >> bits;
+	}
+	
+	/********************************************************
+	 * This utility method simply converts the double to a long, then
+	 * shifts the bits right "bits" number of bits.
+	 * @param d
+	 * @param bits
+	 * @return
+	 *******************************************************/
+	public long bitShiftLeft(double d, int bits)
+	{
+		return ((long)d) << bits;
+	}
+	
 }

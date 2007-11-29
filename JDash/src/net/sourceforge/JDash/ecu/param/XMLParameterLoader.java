@@ -69,6 +69,7 @@ public class XMLParameterLoader
     public static final String ATTR_VALUE 			= "value";
     public static final String ATTR_FILE 			= "file";
     public static final String ATTR_RATE 			= "rate";
+    public static final String ATTR_DEPENDANT		= "dependant";
 
     private File file_ = null;
     
@@ -353,7 +354,7 @@ public class XMLParameterLoader
             mp.setOwnerRegistry(reg);
             if (mp == null) throw new ParameterException("Meta-parameter must declare a handler");
             mp.setName(aParam.getAttributeValue(ATTR_NAME));
-            mp.setArgs(getMetaArgs(aParam));
+            setMetaArgs(aParam, mp);
             reg.add(mp);
             
         }
@@ -364,7 +365,7 @@ public class XMLParameterLoader
      * @param aParam
      * @return
      *******************************************************/
-    private Map<String, String> getMetaArgs(Element aParam)
+    private void setMetaArgs(Element aParam, MetaParameter p) throws ParameterException
     {
     	
     	if (aParam.getChild(NODE_ARGS) != null)
@@ -372,17 +373,25 @@ public class XMLParameterLoader
 	        List args = aParam.getChild(NODE_ARGS).getChildren();
 	        Map<String, String> argMap = new HashMap<String, String>(args.size());
 	        Iterator i = args.iterator();
+	        
 	        while(i.hasNext())
 	        {
 	            Element anArg = (Element) i.next();
-	            argMap.put(anArg.getAttributeValue(ATTR_NAME), anArg.getAttributeValue(ATTR_VALUE));
+	            
+	            /* If the arg does NOT have a value attribute, then it's value is assumed to
+	             * be the child text node */
+	            if (anArg.getAttributeValue(ATTR_VALUE) == null)
+	            {
+	            	p.addArg(anArg.getAttributeValue(ATTR_NAME), anArg.getTextTrim());
+	            }
+	            else
+	            {
+	            	p.addArg(anArg.getAttributeValue(ATTR_NAME), anArg.getAttributeValue(ATTR_VALUE));
+	            }
 	        }
-	        return argMap;
+
     	}
-    	else
-    	{
-    		return new HashMap<String, String>();
-    	}
+
     }
 
     /*******************************************************

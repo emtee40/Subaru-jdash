@@ -42,6 +42,7 @@ import java.util.TimerTask;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
+import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.comm.ECUMonitor;
 import net.sourceforge.JDash.ecu.comm.MonitorEventListener;
@@ -303,7 +304,7 @@ public class GaugePanel extends JPanel
 	 * was not. A false isn't actually an error. It just means the image is
 	 * still loading and scaling. An error will result in an exception
 	 *******************************************************/
-	private boolean generateBackgroundImage()
+	private boolean generateBackgroundImage() throws Exception
 	{
 		
 		/* If the width isn't yet known, then the image isn't loaded yet.. but 
@@ -322,6 +323,14 @@ public class GaugePanel extends JPanel
 			/* Create a new GC to draw into */
 			BufferedImage bufferedImage = new BufferedImage(this.originalImageDimension_.width, this.originalImageDimension_.height, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g2 = bufferedImage.createGraphics();
+			
+			/* Draw a big rect for our initial background */
+			g2.setColor(this.skin_.getBackgroundColor());
+			g2.setBackground(this.skin_.getBackgroundColor());
+			Rectangle bgRect = new Rectangle(this.originalImageDimension_.width, this.originalImageDimension_.height);
+			g2.fill(bgRect);
+			g2.draw(bgRect);
+
 			
 			/* Draw each shape */
 			for (AbstractShape shape : this.backgroundShapes_)
@@ -379,45 +388,56 @@ public class GaugePanel extends JPanel
 	public void paintComponent(java.awt.Graphics g)
 	{
 		
-		/* Generate the background image.. if needed.  This method knows if the panel has resized */
-		generateBackgroundImage();
-
-		/* Tell the panel to paint it's default background */
-		super.paintComponent(g);
-
-		
-		/* Create an instance double buffer image, correctly sized */
-		if (this.doubleBufferedImage_ == null)
+		if (isGaugeDisplayUpdateSuspended())
 		{
-			this.doubleBufferedImage_ = new BufferedImage((int)this.getSize().getWidth(), (int)this.getSize().getHeight(), BufferedImage.TYPE_INT_RGB);
+			return;
 		}
-		
-
-
-		/* Get the g2 from the db image */
-		Graphics2D g2 = (Graphics2D)this.doubleBufferedImage_.getGraphics();
-
-		/* Paint the background image */
-		g2.drawImage(this.backgroundImage_, 0, 0, null);
-		
 		
 		try
 		{
+
+		
+			/* Generate the background image.. if needed.  This method knows if the panel has resized */
+			generateBackgroundImage();
+	
+			/* Tell the panel to paint it's default background */
+			super.paintComponent(g);
+			
+	
+			
+			/* Create an instance double buffer image, correctly sized */
+			if (this.doubleBufferedImage_ == null)
+			{
+				this.doubleBufferedImage_ = new BufferedImage((int)this.getSize().getWidth(), (int)this.getSize().getHeight(), BufferedImage.TYPE_INT_RGB);
+			}
+			
+			/* Get the g2 from the db image */
+			Graphics2D g2 = (Graphics2D)this.doubleBufferedImage_.getGraphics();
+
+	
+			/* clear the image contents, and Paint the background image */
+			g2.drawImage(this.backgroundImage_, 0, 0, null);
+		
+		
 			/* Paint each gauge */
 			for (int index = 0; index < this.skin_.getGaugeCount(); index++)
 			{
 				AbstractGauge gauge = this.skin_.getGauge(index);
 				gauge.paint(this, (Graphics2D)g2.create(), getScalingTransform());
 			}
+			
+			/* Now, paint the double buffered image to the window */
+			((Graphics2D)g).drawImage(this.doubleBufferedImage_, 0, 0, null);
+
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			
+			this.suspendGaugeDisplayUpdates(true);
+			Startup.showException(e, true);
 		}
 			
 		
-		/* Now, paint the double buffered image to the window */
-		g.drawImage(this.doubleBufferedImage_, 0, 0, null);
 		
 	}
 

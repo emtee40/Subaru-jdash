@@ -31,8 +31,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
@@ -40,6 +38,8 @@ import java.util.ArrayList;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
+import net.sourceforge.JDash.skin.SkinEvent;
+import net.sourceforge.JDash.skin.SkinEventListener;
 
 
 /*******************************************************
@@ -80,13 +80,20 @@ import net.sourceforge.JDash.gui.shapes.TextShape;
  * needle to rotoate right ot left for increasing values, then the values you set with the setDegreeMin() and setDegreeMax()
  * simply need to be reversed.  IN otherwords, make the minimum greater than the maximum.
  ******************************************************/
-public class AnalogGauge extends AbstractGauge
+public class AnalogGauge extends AbstractGauge implements SkinEventListener
 {
 	
 	
 	
 	public static final long serialVersionUID = 0L;
 	
+	
+	/** The aciton string expected by a SkinEvent when a high-reset button is pressed */
+	public static final String ACTION_HIGH_RESET = "high-reset";
+
+	/** The aciton string expected by a SkinEvent when a low-reset button is pressed */
+	public static final String ACTION_LOW_RESET = "low-reset";
+
 //	
 //	private double previousTheta_ = -99D;
 //	private double previousHighTheta_ = -99D;
@@ -234,35 +241,51 @@ public class AnalogGauge extends AbstractGauge
 	{
 
 		
-		if (GaugeButton.BUTTON_ACTION_HIGH_RESET.equals(gaugeButton.getButtonShape().getAction()) == true)
-		{
-			gaugeButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent ae)
-				{
-					resetHighNeedle();
-				}
-			});
-		}
-		else if (GaugeButton.BUTTON_ACTION_LOW_RESET.equals(gaugeButton.getButtonShape().getAction()) == true)
-		{
-			gaugeButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent ae)
-				{
-					resetLowNeedle();
-				}
-			});
-		}
-		else
-		{
-			throw new RuntimeException("Cannot add a button of action [" + gaugeButton.getButtonShape().getAction() + "] to an analog gague.\nOnly support for buttons of action: [" + 
-					GaugeButton.BUTTON_ACTION_HIGH_RESET + " / " + GaugeButton.BUTTON_ACTION_LOW_RESET + "]");
-		}
-		
 		/* Add the button to our list for future placement */		
 		this.gaugeButtons_.add(gaugeButton);
+		
+		
+		/* Inspect the buttons SkinEvents.  If any of them contain a null destination, then
+		 * this indicates the buttons action is destined for us.  So, replace the SkinEvent
+		 * with one we'll expect to see */
+		for (SkinEvent se : gaugeButton.getUpActions())
+		{
+			if (se.getDestination() == null)
+			{
+				se.setDestination("" + this.hashCode());
+			}
+		}
+		
+		for (SkinEvent se : gaugeButton.getDownActions())
+		{
+			if (se.getDestination() == null)
+			{
+				se.setDestination("" + this.hashCode());
+			}
+		}
 
+	}
+	
+	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
+	 *******************************************************/
+	public void actionPerformed(SkinEvent e)
+	{
+		if (("" + hashCode()).equals(e.getDestination()))
+		{
+			if (ACTION_HIGH_RESET.equals(e.getAction()))
+			{
+				resetHighNeedle();
+			}
+			
+			if (ACTION_LOW_RESET.equals(e.getAction()))
+			{
+				resetLowNeedle();
+			}
+		}
+		
 	}
 	
 	
@@ -479,6 +502,8 @@ public class AnalogGauge extends AbstractGauge
 	 *******************************************************/
 	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
+
+		
 //		/* It's possible to get a paint event without having a sensor event. so 
 //		 * we'll just draw a raw gauge */
 //		if (this.preGenAwtShapes_ == null)
@@ -499,14 +524,14 @@ public class AnalogGauge extends AbstractGauge
 			/* don't add it, if ti's allreayd been added */
 			for (Component comp : panel.getComponents())
 			{
-				if (comp == button)
+				if (comp == button.getButtonComponent())
 				{
 					return;
 				}
 			}
 			
 			/* Add it to the gauge panel */
-			panel.add(button, button.getButtonShape().getShape().getBounds());
+			panel.add(button.getButtonComponent(), button.getButtonShape().getShape().getBounds());
 			
 		}
 

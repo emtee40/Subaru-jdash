@@ -333,7 +333,6 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	 *******************************************************/
 	public void enable(boolean enable) throws Exception
 	{
-		System.out.println("Enable Database Logger: " + enable);
 		
 		/* The override is disabled */
 		if (this.disableLoggingOverride_ == true)
@@ -436,7 +435,7 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	 ******************************************************/
 	private void addParamToDatabase(Parameter param) throws RuntimeException
 	{
-		System.out.println("Adding to Database: "  + param.getName());
+
 		try
 		{
 			
@@ -444,7 +443,6 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 			if (this.insertStatement_ == null)
 			{
 				String stmt = "insert into " + TABLE_LOG + " (" + COL_LOG_ID + "," + COL_TIMESTAMP + "," + COL_PARAM_NAME + "," + COL_PARAM_VALUE + ") values (?,?,?,?)";
-				System.out.println("---" + this.conn_ == null);
 				this.insertStatement_ = this.conn_.prepareStatement(stmt);
 			}
 

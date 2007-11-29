@@ -390,6 +390,7 @@ public class LEDGauge extends AbstractGauge
 	 *******************************************************/
 	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
+
 		/* It's possible to get a paint event without having a sensor event. so 
 		 * we'll just draw a raw gauge */
 		if (this.preGenAwtShapes_ == null)

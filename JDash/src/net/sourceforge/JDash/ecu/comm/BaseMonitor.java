@@ -244,6 +244,10 @@ public abstract class BaseMonitor implements ECUMonitor
          * the dependants */
         if(params.get(0) instanceof MetaParameter)
         {
+        	if(((MetaParameter) params.get(0)).getDependants().size() == 0)
+        	{
+        		System.out.println("Warning: Metaparameter " + params.get(0).getName() + " does not have any dependants identified");
+        	}
         	this.addAllParams(((MetaParameter) params.get(0)).getDependants());
         }
         else if (params.get(0) instanceof TimeParameter)

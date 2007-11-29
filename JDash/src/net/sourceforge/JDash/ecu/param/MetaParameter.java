@@ -57,12 +57,12 @@ public abstract class MetaParameter extends Parameter // implements Observer
 	public abstract void setName(String name);
 	
 	/*******************************************************
-	 * When loaded from the xml parameter file, the argument values
-	 * are passed into this method.
+	 * When loaded from the xml parameter file each arg will
+	 * be loaded, and passed to this method one at a time, and in order
 	 * 
 	 * @param args
 	 * @throws ParameterException
 	 *******************************************************/
-	public abstract void setArgs(Map<String, String> args) throws ParameterException;
+	public abstract void addArg(String name, String value) throws ParameterException;
 	
 }

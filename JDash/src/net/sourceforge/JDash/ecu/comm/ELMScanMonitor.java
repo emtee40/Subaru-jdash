@@ -29,6 +29,7 @@ import gnu.io.RXTXPort;
 import net.sourceforge.JDash.ecu.param.DTCMetaParam;
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterException;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 
@@ -117,19 +118,19 @@ public class ELMScanMonitor extends RS232Monitor
 		String buffer = null;
 
 		
-//		/* Have this monitor be an observer to the MIL_STATUS parameter.. if there even is one */
-//		Parameter milStatus = reg.getParamForName(ParameterRegistry.PARAM_NAME_MIL_STATUS);
-//		if (milStatus != null)
-//		{
-//			milStatus.addObserver(new Observer()
-//			{
-//				public void update(Observable arg0, Object arg1)
-//				{
-//					doMilCheck();
-//				}
-//			});
-//		}
-//		
+		/* Have this monitor be an observer to the MIL_STATUS parameter.. if there even is one */
+		Parameter milStatus = reg.getParamForName(ParameterRegistry.PARAM_NAME_MIL_STATUS);
+		if (milStatus != null)
+		{
+			milStatus.addEventListener(new ParameterEventListener()
+			{
+				public void valueChanged(Parameter p)
+				{
+					doMilCheck();
+				}
+			});
+		}
+		
 		getPort().setRTS(false);
 		
 		/* Perform a complete ELM reset */

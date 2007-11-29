@@ -41,21 +41,23 @@ public class ButtonShape extends AbstractShape
 	private double y_ = 0;
 	private double w_ = 0;
 	private double h_ = 0;
-	private String action_ = null;
+	private String upAction_ = null;
+	private String downAction_ = null;
 	private String upImageName_ = null;
 	private String downImageName_ = null;
 	
 	/*******************************************************
 	 * Create a new Rectangle shape
 	 ******************************************************/
-	public ButtonShape(String type, double x, double y, double width, double height, String action, String upImageName, String downImageName)
+	public ButtonShape(String type, double x, double y, double width, double height, String upAction, String downAction, String upImageName, String downImageName)
 	{
 		this.type_ = type;
 		this.x_ = x;
 		this.y_ = y;
 		this.w_ = width;
 		this.h_ = height;
-		this.action_ = action;
+		this.upAction_ = upAction;
+		this.downAction_ = downAction;
 		this.upImageName_ = upImageName;
 		this.downImageName_ = downImageName;
 	}
@@ -76,9 +78,17 @@ public class ButtonShape extends AbstractShape
 	/*******************************************************
 	 * @return
 	 *******************************************************/
-	public String getAction()
+	public String getUpAction()
 	{
-		return this.action_;
+		return this.upAction_;
+	}
+	
+	/*******************************************************
+	 * @return
+	 *******************************************************/
+	public String getDownAction()
+	{
+		return this.downAction_;
 	}
 	
 	/*******************************************************

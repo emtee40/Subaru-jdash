@@ -50,12 +50,13 @@ public class DigitalGauge extends AbstractGauge
 	private TextShape textShape_ = null;
 	
 	private GlyphVector preRenderedGlyphVector_ = null;
-	private Rectangle preRenderedBounds_ = null;
+//	private Rectangle preRenderedBounds_ = null;
 	private Point preRenderedPoint_ = null;
 	
 //	private AffineTransform previousScalingTransform_ = null;
 	
-	private Object displayValue_ = "";
+	private Double dDisplayValue_ = null;
+	private String sDisplayValue_ = null;
 	
 	private Boolean lowOrHighHold_ = null;
 	
@@ -71,7 +72,6 @@ public class DigitalGauge extends AbstractGauge
 	public DigitalGauge(Parameter p, TextShape textShape)
 	{
 		super(p);
-		
 		this.textShape_ = textShape;
 	}
 
@@ -90,11 +90,11 @@ public class DigitalGauge extends AbstractGauge
 		
 		if (lowOrHigh == false)
 		{
-			this.displayValue_ = java.lang.Double.MAX_VALUE + "";
+			this.dDisplayValue_ = java.lang.Double.MAX_VALUE;
 		}
 		else
 		{
-			this.displayValue_ = java.lang.Double.MIN_VALUE + "";
+			this.dDisplayValue_ = java.lang.Double.MIN_VALUE;
 		}
 		
 	}
@@ -122,11 +122,9 @@ public class DigitalGauge extends AbstractGauge
 	 * Override
 	 * @see net.sourceforge.JDash.gui.AbstractGauge#getBounds()
 	 *******************************************************/
-	private Rectangle preRender(Graphics2D g2, AffineTransform scalingTransform)
+	private void preRender(Graphics2D g2, AffineTransform scalingTransform)
 	{
-
-		/* We'll need this */
-//		Graphics2D g2 = (Graphics2D)getParentPanel().getGraphics();
+		
 
 		/* Setup the display value */
 		if (this.lowOrHighHold_ != null)
@@ -134,11 +132,11 @@ public class DigitalGauge extends AbstractGauge
 			/* Low value hold */
 			if (this.lowOrHighHold_.equals(Boolean.FALSE))
 			{
-				this.displayValue_ = Math.min(new Double(this.displayValue_+""), getParameter().getResult());
+				this.dDisplayValue_ = Math.min(this.dDisplayValue_, getParameter().getResult());
 			}
 			else /* High value hold */
 			{
-				this.displayValue_ = Math.max(new Double(this.displayValue_+""), getParameter().getResult());
+				this.dDisplayValue_ = Math.max(this.dDisplayValue_, getParameter().getResult());
 			}
 		}
 		else
@@ -146,18 +144,17 @@ public class DigitalGauge extends AbstractGauge
 			
 			if (getParameter() instanceof StringParameter)
 			{
-				this.displayValue_ = getParameter().toString();
+				this.sDisplayValue_ = getParameter().toString();
+				this.textShape_.setValue(this.sDisplayValue_);
 			}
 			else
 			{
-				this.displayValue_ = getParameter().getResult();
+				this.dDisplayValue_ = getParameter().getResult();
+				this.textShape_.setValue(this.dDisplayValue_);
 			}
 			
 		}
 		
-		/* Set the display text */
-		this.textShape_.setValue(this.displayValue_);
-
 
 		/* This isn't working */
 //		if ((this.previousScalingTransform_ != null) && 
@@ -188,19 +185,19 @@ public class DigitalGauge extends AbstractGauge
 		position = scalingTransform.createTransformedShape(position);
 		this.preRenderedPoint_ = new Point(position.getBounds().x, position.getBounds().y);
 		
-		/* The bounds, with the previous bounds added for drawing overlap */
-		Rectangle newBounds = this.preRenderedGlyphVector_.getPixelBounds(g2.getFontRenderContext(), position.getBounds().x, position.getBounds().y);
-		if (this.preRenderedBounds_ == null)
-		{
-			this.preRenderedBounds_ = newBounds;
-		}
-		else
-		{
-			this.preRenderedBounds_.add(newBounds);
-		}
-		
-		/* Send the re-draw area back */
-		return this.preRenderedBounds_;
+//		/* The bounds, with the previous bounds added for drawing overlap */
+//		Rectangle newBounds = this.preRenderedGlyphVector_.getPixelBounds(g2.getFontRenderContext(), position.getBounds().x, position.getBounds().y);
+//		if (this.preRenderedBounds_ == null)
+//		{
+//			this.preRenderedBounds_ = newBounds;
+//		}
+//		else
+//		{
+//			this.preRenderedBounds_.add(newBounds);
+//		}
+//		
+//		/* Send the re-draw area back */
+//		return this.preRenderedBounds_;
 	}
 
 	
@@ -209,6 +206,7 @@ public class DigitalGauge extends AbstractGauge
 	 *******************************************************/
 	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
+		
 		
 		/* Pre-render the parts of this gauge */
 		preRender(g2, scalingTransform);
@@ -219,7 +217,7 @@ public class DigitalGauge extends AbstractGauge
 		
 		/* Set the pre-renderd bounds to the size of this glyph vector. So the next preGen can take into account for
 		 * the bounds rect being created */
-		this.preRenderedBounds_ = this.preRenderedGlyphVector_.getPixelBounds(g2.getFontRenderContext(), this.preRenderedPoint_.x, this.preRenderedPoint_.y);
+//		this.preRenderedBounds_ = this.preRenderedGlyphVector_.getPixelBounds(g2.getFontRenderContext(), this.preRenderedPoint_.x, this.preRenderedPoint_.y);
 	}
 
 

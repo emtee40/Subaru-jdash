@@ -45,7 +45,7 @@ import net.sourceforge.JDash.ecu.param.Parameter;
  * controllable. If the parameter is set, then it will be
  * parameter controllable.
  ******************************************************/
-public class ButtonGauge extends AbstractGauge implements ActionListener
+public class ButtonGauge extends AbstractGauge
 {
 	
 	public static final long serialVersionUID = 0L;
@@ -79,7 +79,8 @@ public class ButtonGauge extends AbstractGauge implements ActionListener
 //		this.gaugeButton_ = new GaugeButton(getParentPanel().getSkin(), this.buttonShape_);
 		
 		/* Link to the button */
-		this.gaugeButton_.addActionListener(this);
+		// TODO Link the button to the parameter
+//		this.gaugeButton_.getButtonComponent().addActionListener(this);
 		
 		/* Add the button */		
 //		this.getParentPanel().add(this.gaugeButton_, buttonShape.getShape().getBounds());
@@ -171,14 +172,14 @@ public class ButtonGauge extends AbstractGauge implements ActionListener
 		/* don't add it, if ti's allreayd been added */
 		for (Component comp : panel.getComponents())
 		{
-			if (comp == this.gaugeButton_)
+			if (comp == this.gaugeButton_.getButtonComponent())
 			{
 				return;
 			}
 		}
 		
 		/* Add it to the gauge panel */
-		panel.add(this.gaugeButton_, this.gaugeButton_.getButtonShape().getShape().getBounds());
+		panel.add(this.gaugeButton_.getButtonComponent(), this.gaugeButton_.getButtonShape().getShape().getBounds());
 		
 		/* We'll need the paranet gauge panel for action reference */
 		this.gaugePanel_ = panel;
@@ -186,55 +187,55 @@ public class ButtonGauge extends AbstractGauge implements ActionListener
 	}
 	
 	
-	/*******************************************************
-	 * Respond to component actions.  At the moment only the logger
-	 * toggle button is supported. 
-	 * Override
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 *******************************************************/
-	public void actionPerformed(ActionEvent ae)
-	{
-		
-		System.out.println("Button Triggered: "+ getParameter() + "  " + this.gaugeButton_.isSelected());
-		
-		try
-		{
-				
-			/* Logger Toggle Button */
-			if (GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
-			{
-				
-				this.gaugePanel_.getLogger().enable(this.gaugeButton_.isSelected());
-				return;
-				
-			} /* end if Logger Button */
-				
-			
-			/* Logger Toggle Button */
-			if (GaugeButton.BUTTON_ACTION_DTC_RESET.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
-			{
-				/* Ask the user before doing a reset */
-				if (JOptionPane.YES_OPTION ==
-						JOptionPane.showConfirmDialog(this.gaugePanel_, "Are you sure you want to reset the ECUs trouble codes?\n" +
-						"This will result in the loss of any stored codes, and cause a reset of all learned values.", 
-						"DTC Reset. Are you sure?", JOptionPane.YES_NO_OPTION))
-				{
-	// TODO. Relink to the monitor some how
-//					getParentPanel().getMonitor().resetDTCs();
-				}
-				return;
-					
-			} /* end if Logger Button */
-			
-			
-			/* If we got here, then the button action was not supported */
-			throw new Exception("The Component pressed does not appear to be propertly supported");
-			
-		}
-		catch(Exception e)
-		{
-			Startup.showException(e, false);
-		}
-		
-	}
+//	/*******************************************************
+//	 * Respond to component actions.  At the moment only the logger
+//	 * toggle button is supported. 
+//	 * Override
+//	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+//	 *******************************************************/
+//	public void actionPerformed(ActionEvent ae)
+//	{
+//		
+//		System.out.println("Button Triggered: "+ getParameter() + "  " + this.gaugeButton_.getButtonComponent().isSelected());
+//		
+//		try
+//		{
+//				
+//			/* Logger Toggle Button */
+//			if (GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
+//			{
+//				
+//				this.gaugePanel_.getLogger().enable(this.gaugeButton_.getButtonComponent().isSelected());
+//				return;
+//				
+//			} /* end if Logger Button */
+//				
+//			
+//			/* Logger Toggle Button */
+//			if (GaugeButton.BUTTON_ACTION_DTC_RESET.equalsIgnoreCase(this.gaugeButton_.getButtonShape().getAction()))
+//			{
+//				/* Ask the user before doing a reset */
+//				if (JOptionPane.YES_OPTION ==
+//						JOptionPane.showConfirmDialog(this.gaugePanel_, "Are you sure you want to reset the ECUs trouble codes?\n" +
+//						"This will result in the loss of any stored codes, and cause a reset of all learned values.", 
+//						"DTC Reset. Are you sure?", JOptionPane.YES_NO_OPTION))
+//				{
+//	// TODO. Relink to the monitor some how
+////					getParentPanel().getMonitor().resetDTCs();
+//				}
+//				return;
+//					
+//			} /* end if Logger Button */
+//			
+//			
+//			/* If we got here, then the button action was not supported */
+//			throw new Exception("The Component pressed does not appear to be propertly supported");
+//			
+//		}
+//		catch(Exception e)
+//		{
+//			Startup.showException(e, false);
+//		}
+//		
+//	}
 }

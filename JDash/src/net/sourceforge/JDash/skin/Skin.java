@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.MediaTracker;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -46,8 +47,17 @@ import net.sourceforge.JDash.gui.shapes.AbstractShape;
 public abstract class Skin
 {
 	
+	/** A value used by the skins to identify a windows mode */
 	public static final String STATE_WINDOW 		= "window";
+	
+	/** The value used by the skins to identify a fullscreen mode */
 	public static final String STATE_FULLSCREEN 	= "fullscreen";
+	
+	/** Common to ALL skins, is this deliminator character ':' */
+	public static final char VALUE_DELIM			= ':';
+	
+	/** A less commonly used deliminator character '/' */
+	public static final char VALUE_DELIM_2			= '/';
 
 	/* A human readable string name for this Skin */
 	private SkinFactory ownerFactory_ = null;
@@ -57,6 +67,10 @@ public abstract class Skin
 	
 	/* the cache of all created gauges */
 	private HashMap<Integer, AbstractGauge> gaugeCache_= new HashMap<Integer, AbstractGauge>();
+	
+	
+	/* The list of event listeners that respond to things like button presses */
+	private ArrayList<SkinEventListener> skinEventListeners_ = new ArrayList<SkinEventListener>();
 
 	/******************************************************
 	 * create a new skin class.  Don't do anything special
@@ -111,6 +125,39 @@ public abstract class Skin
 		return getName();
 	}
 	
+	/*******************************************************
+	 * Add a skin event listener to our list of listeners.
+	 * @param l
+	 *******************************************************/
+	public void addSkinEventListener(SkinEventListener l)
+	{
+		if (this.skinEventListeners_.contains(l) == false)
+		{
+			this.skinEventListeners_.add(l);
+		}
+	}
+	
+	
+	/*******************************************************
+	 * remove a skin event listener from the list.
+	 * @param l
+	 *******************************************************/
+	public void removeSkinEventListener(SkinEventListener l)
+	{
+		this.skinEventListeners_.remove(l);
+	}
+	
+	/********************************************************
+	 * Inform each listener of the skin event.
+	 * @param e
+	 *******************************************************/
+	public void fireSkinEvent(SkinEvent e)
+	{
+		for (SkinEventListener l : this.skinEventListeners_)
+		{
+			l.actionPerformed(e);
+		}
+	}
 	
 	/********************************************************
 	 * Get the initial window startup state.  This will be one 
@@ -177,7 +224,7 @@ public abstract class Skin
 	 * @param imageName IN - the name of the image to be fetched.
 	 * @return
 	 *******************************************************/
-	public final ImageIcon getImage(String imageName) throws Exception
+	public final ImageIcon getImage(String imageName)
 	{
 		
 		try

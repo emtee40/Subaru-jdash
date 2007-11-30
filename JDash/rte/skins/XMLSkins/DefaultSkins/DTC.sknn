@@ -1,0 +1,87 @@
+<!-- ======================================================================
+ This is a JDash XMLSkin definition file.  See website for details
+ http://jdash.sourceforge.net
+  $Id: DTC.sknn,v 1.2 2006/09/14 02:03:45 shaneapowell Exp $
+     ====================================================================== -->
+<skin name="Diagnostic Trouble Codes" resource-url="/net/sourceforge/JDash/skin/XMLSkin/DefaultSkin" fill-color="#000000">
+
+  <description>This skin will layout a series of 5 current Trouble Code Values and 5 Trouble Code History values.</description>
+  
+  <image name="background"                  src="blank_black.jpg"/> 
+
+  <!-- Color definitions -->
+  <color name="red"        value="#ff0000" />
+  <color name="dark-red"   value="#990000" />
+  <color name="green"      value="#00ff00" />
+  <color name="blue"       value="#0000ff" />
+  <color name="yellow"     value="#fffb0b" />
+  
+  <!-- Main Window -->
+  <window width="751" height="411" type="window:20">
+    <image name="background" x="0" y="0" width="800" height="400" /> 
+  </window>
+
+ 
+  <!-- Digital DTC_CUR_0 -->
+  <gauge sensor="DTC_CUR_0" type="digital">
+     <text color="blue" size="25" x="10" y="50" format="DTC 0: %05.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_CUR_1 -->
+  <gauge sensor="DTC_CUR_1" type="digital">
+     <text color="blue" size="25" x="10" y="100" format="DTC 1: %05.0f" font="digital.ttf"/>
+  </gauge>
+
+  <!-- Digital DTC_CUR_2 -->
+  <gauge sensor="DTC_CUR_2" type="digital">
+     <text color="blue" size="25" x="10" y="150" format="DTC 2: %05.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_CUR_3 -->
+  <gauge sensor="DTC_CUR_3" type="digital">
+     <text color="blue" size="25" x="10" y="200" format="DTC 3: %05.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_CUR_4 -->
+  <gauge sensor="DTC_CUR_4"  type="digital">
+     <text color="blue" size="25" x="10" y="250" format="DTC 4: %05.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_HIST_0 -->
+  <gauge sensor="DTC_HIST_0"  type="digital">
+     <text color="green" size="25" x="250" y="50" format="DTC HIST 0: %4.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_HIST_1 -->
+  <gauge sensor="DTC_HIST_1"  type="digital">
+     <text color="green" size="25" x="250" y="100" format="DTC HIST 1: %4.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_HIST_2 -->
+  <gauge sensor="DTC_HIST_2"  type="digital">
+     <text color="green" size="25" x="250" y="150" format="DTC HIST 2: %4.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_HIST_3 -->
+  <gauge sensor="DTC_HIST_3"  type="digital">
+     <text color="green" size="25" x="250" y="200" format="DTC HIST 3: %4.0f" font="digital.ttf"/>
+  </gauge>
+  
+  <!-- Digital DTC_HIST_4 -->
+  <gauge sensor="DTC_HIST_4" type="digital">
+     <text color="green" size="25" x="250" y="250" format="DTC HIST 4: %4.0f" font="digital.ttf"/>
+  </gauge>
+  
+  
+  <!-- Digital DTC_HIST_4 -->
+  <gauge sensor="M_REAR_O2_VOLTS" type="digital">
+     <text color="yellow" size="25" x="25" y="300"  format="REAR O2V: %01.4f" font="digital.ttf"/>
+  </gauge>
+
+  <!-- Digital Defog Switch -->
+  <gauge sensor="M_DEFOG_SW" type="digital">
+     <text color="yellow" size="25" x="25" y="350" format="Defog: %03.0f" font="digital.ttf"/>
+  </gauge>
+
+
+</skin>

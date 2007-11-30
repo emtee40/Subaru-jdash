@@ -28,28 +28,31 @@ package net.sourceforge.JDash.skin.XMLSkin;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.MediaTracker;
 import java.awt.Point;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.AbstractGauge;
+import net.sourceforge.JDash.gui.AbstractGaugePanel;
 import net.sourceforge.JDash.gui.AnalogGauge;
 import net.sourceforge.JDash.gui.ButtonGauge;
+import net.sourceforge.JDash.gui.DashboardFrame;
 import net.sourceforge.JDash.gui.DigitalGauge;
 import net.sourceforge.JDash.gui.GaugeButton;
-import net.sourceforge.JDash.gui.GaugePanel;
 import net.sourceforge.JDash.gui.LEDGauge;
 import net.sourceforge.JDash.gui.LineGraphGauge;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
@@ -61,7 +64,9 @@ import net.sourceforge.JDash.gui.shapes.PolygonShape;
 import net.sourceforge.JDash.gui.shapes.RectangleShape;
 import net.sourceforge.JDash.gui.shapes.RoundRectangleShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
+import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
+import net.sourceforge.JDash.skin.SkinEventListener;
 import net.sourceforge.JDash.skin.SkinFactory;
 
 import org.w3c.dom.Document;
@@ -173,10 +178,18 @@ public class XMLSkin extends Skin
 	/** The cache of fonts */
 	private HashMap<String, Font> fontCache_ = new HashMap<String,Font>();
 
+	/* The cache of images */
+	private HashMap<String, ImageIcon> imageCache_ = new HashMap<String, ImageIcon>();
+	
+	/* the cache of all created gauges */
+	private HashMap<Integer, AbstractGauge> gaugeCache_= new HashMap<Integer, AbstractGauge>();
+
+	
 	private String id_ = null;
 	private String name_ = null;
 	private String description_ = null;
-
+	private Integer gaugeCount_ = null;
+	private Dimension windowSize_ = null;
 	
 	/******************************************************
 	 * Create a new xml skin class.
@@ -219,14 +232,24 @@ public class XMLSkin extends Skin
 	private XMLSkin(SkinFactory ownerFactory, URL skinXmlFile, Document docToAddTo) throws Exception
 	{
 		super(ownerFactory);
-
+		
+		if (ownerFactory == null)
+		{
+			throw new Exception("Unable to create skin. No ownerFactory object provided.");
+		}
+		
+		if (skinXmlFile == null)
+		{
+			throw new RuntimeException("Unable to create skin, No skin file provided." 
+					+
+					(docToAddTo==null?"":"This occured during an attempt to extend a skin"));
+		}
+		
 		loadSkin(skinXmlFile);
 		
 		/* if the add to is not null, then add the child nodes */
 		if (docToAddTo != null)
 		{
-			/* Copy over the resource-url attribute */
-//			docToAddTo.getDocumentElement().setAttribute(ATTRIB_RESOURCE_URL, this.xmlSkinDoc_.getDocumentElement().getAttribute(ATTRIB_RESOURCE_URL));
 			
 			/* Get a list of all child nodes */
 			XPath xp =   XPathFactory.newInstance().newXPath();
@@ -256,6 +279,16 @@ public class XMLSkin extends Skin
 		}
 	}
 	
+	
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.Skin#createGaugePanel(net.sourceforge.JDash.gui.DashboardFrame, net.sourceforge.JDash.ecu.comm.BaseMonitor, net.sourceforge.JDash.logger.DataLogger)
+	 *******************************************************/
+	@Override
+	public AbstractGaugePanel createGaugePanel(DashboardFrame dashFrame, BaseMonitor monitor, DataLogger logger) throws Exception
+	{
+		return new XMLGaugePanel(dashFrame, this, monitor, logger);
+	}
 	
 	/*******************************************************
 	 * Override
@@ -316,11 +349,12 @@ public class XMLSkin extends Skin
 		try
 		{
 			extendedSkinName = extractString(NODE_SKIN + "/@" + ATTRIB_EXTENDS);
-			new XMLSkin(getOwnerFactory(), this.getClass().getResource(extendedSkinName), this.xmlSkinDoc_);
 		}
-		catch(Exception e)
+		catch(Exception e) {}
+		if (extendedSkinName != null)
 		{
-			/* Do Nothign, it just means this is not an extension */
+			File extSkinFile = new File(skinFile.getParent(), extendedSkinName);
+			new XMLSkin(getOwnerFactory(), extSkinFile.toURL(), this.xmlSkinDoc_);
 		}
 		
 		/* Set the resource url for this skin */
@@ -417,10 +451,65 @@ public class XMLSkin extends Skin
 	 *******************************************************/
 	public Dimension getWindowSize() throws Exception
 	{
-		int w = extractInt(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_WIDTH);
-		int h = extractInt(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_HEIGHT);
+		if (this.windowSize_ == null)
+		{
+			int w = extractInt(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_WIDTH);
+			int h = extractInt(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_HEIGHT);
+			this.windowSize_ = new Dimension(w,h);
+		}
 		
-		return new Dimension(w,h);
+		return this.windowSize_;
+	}
+	
+	/********************************************************
+	 * the getImage() method is final to enforce caching of images.
+	 * Once an image is loaded, it's cached into a hashmap, and returned
+	 * from it for future calls.
+	 * 
+	 * @param imageName IN - the name of the image to be fetched.
+	 * @return
+	 *******************************************************/
+	private ImageIcon getImage(String imageName)
+	{
+		
+		try
+		{
+			
+			/* Look first in the cache */
+			if (this.imageCache_.containsKey(imageName) == true)
+			{
+				return this.imageCache_.get(imageName);
+			}
+			
+			
+			/* Load the image */
+			URL imageUrl = getImageUrl(imageName);
+			if (imageUrl == null)
+			{
+				throw new Exception("image [" + imageName + "] does not appear to exist");
+			}
+			ImageIcon image = new ImageIcon(getImageUrl(imageName));
+			
+			/* Wait for the image to load */
+			while (image.getImageLoadStatus() == MediaTracker.LOADING);
+
+			/* We gotta have something!! */
+			if (image.getImageLoadStatus() != MediaTracker.COMPLETE)
+			{
+				throw new RuntimeException("Unable to load image: " + getImageUrl(imageName));
+			}
+			
+			/* Cache the image and return it */
+			this.imageCache_.put(imageName, image);
+			return image;
+
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 	
 	/*******************************************************
@@ -542,21 +631,41 @@ public class XMLSkin extends Skin
 	}
 	
 	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getGaugeCount()
+	 * 
 	 *******************************************************/
-	@Override
 	public int getGaugeCount() throws Exception
 	{
-		return extractInt("count(" + NODE_GAUGE + ")");
+		if (this.gaugeCount_ == null)
+		{
+			this.gaugeCount_ = new Integer(extractInt("count(" + NODE_GAUGE + ")"));
+		}
+		
+		return this.gaugeCount_.intValue();
+	}
+	
+	/********************************************************
+	 * get the guage at the given index. Throw an exception if
+	 * a problem occurs.  do NOT return null.
+	 * @param index IN - the index of which gauge to create.
+	 * @param parentPanel IN - the parent panel this guage will belong to
+	 * @return
+	 *******************************************************/
+	public AbstractGauge getGauge(int index) throws Exception
+	{
+		/* If the gauge has not yet been created, then create and cache it first */
+		if (this.gaugeCache_.containsKey(new Integer(index)) == false)
+		{
+			this.gaugeCache_.put(new Integer(index), this.createGauge(index));
+		}
+			
+		return this.gaugeCache_.get(new Integer(index));
+		
 	}
 	
 	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getGauge(int)
+	 * 
 	 *******************************************************/
-	@Override
-	public AbstractGauge createGauge(int index) throws Exception
+	private AbstractGauge createGauge(int index) throws Exception
 	{
 		/* XPath is 1 relative, so increment index */
 		index++;
@@ -564,41 +673,53 @@ public class XMLSkin extends Skin
 		/* Get the gauge node */
 		String gaugePath = NODE_GAUGE + "[" + index + "]";
 		
+		AbstractGauge gauge = null;
+		
 		/* Get the gauge type */
 		String type = extractString(gaugePath + "/@" + ATTRIB_TYPE);
 		if (GAUGE_TYPE_ANALOG.equalsIgnoreCase(type))
 		{
-			return createAnalogGauge(index);
+			gauge = createAnalogGauge(index);
 		}
 		else if (GAUGE_TYPE_DIGITAL.equalsIgnoreCase(type))
 		{
-			return createDigitalGauge(index);
+			gauge = createDigitalGauge(index);
 		}
 		else if (GAUGE_TYPE_DIGITAL_HIGH.equalsIgnoreCase(type))
 		{
-			return createDigitalHighGauge(index);
+			gauge = createDigitalHighGauge(index);
 		}
 		else if (GAUGE_TYPE_DIGITAL_LOW.equalsIgnoreCase(type))
 		{
-			return createDigitalLowGauge(index);
+			gauge = createDigitalLowGauge(index);
 		}
 		else if (GAUGE_TYPE_LED.equalsIgnoreCase(type))
 		{
-			return createLedGauge(index);
+			gauge = createLedGauge(index);
 		}
 		else if (GAUGE_TYPE_BUTTON.equalsIgnoreCase(type))
 		{
-			return createButtonGauge(index);
+			gauge = createButtonGauge(index);
 		}
 		else if (GAUGE_TYPE_LINE_GRAPH.equalsIgnoreCase(type))
 		{
-			return createLineGraphGauge(index);
+			gauge = createLineGraphGauge(index);
 		}
 		else
 		{
 			throw new Exception("Invalud Gauge Type of [" + type + "] at index: " + index);
 		}
+		
+		
+		/* If this gauge is a skin event listener, then we can go ahead and automatically
+		 * add it to our listener list */
+		if (gauge instanceof SkinEventListener)
+		{
+			addSkinEventListener((SkinEventListener)gauge);
+		}
 			
+		
+		return gauge;
 	}
 	
 	/********************************************************
@@ -1305,7 +1426,7 @@ public class XMLSkin extends Skin
 		String downImageName = extractString(shapePath + "/@" + ATTRIB_DOWN_IMAGE);
 		
 		/* Create the shape */
-		ButtonShape buttonShape = new ButtonShape(type, x, y, w, h, upAction, downAction, upImageName, downImageName);
+		ButtonShape buttonShape = new ButtonShape(type, x, y, w, h, upAction, downAction, getImage(upImageName), getImage(downImageName));
 
 		/* Return the shape */
 		return buttonShape;

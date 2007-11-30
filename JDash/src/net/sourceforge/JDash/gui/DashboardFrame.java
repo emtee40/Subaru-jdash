@@ -64,7 +64,7 @@ public class DashboardFrame extends JFrame
 	private Skin skin_ = null;
 	
 	/* the one and only gauge panel */
-	private GaugePanel gaugePanel_ = null;
+	private AbstractGaugePanel gaugePanel_ = null;
 	
 	public static final URL ICON = Setup.class.getResource("icon.png");
 	
@@ -88,7 +88,8 @@ public class DashboardFrame extends JFrame
 			
 			/* Setup the screenlayout */
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			Dimension frameSize = new Dimension(screenSize);
+			//Dimension frameSize = new Dimension(screenSize);
+			Dimension frameSize = skin.getWindowSize();
 			String windowState = this.skin_.getWindowStartupState();
 			
 			/* Windowed */
@@ -103,13 +104,16 @@ public class DashboardFrame extends JFrame
 				}
 				else
 				{
-					/* A default size of 1/2 the screen */
-					frameSize = new Dimension(screenSize.width / 2, screenSize.height / 2);
+					/* Default to the full size of the window, unless it's bigger than the screen */
+					frameSize.width = Math.min(frameSize.width, screenSize.width);
+					frameSize.height = Math.min(frameSize.height, screenSize.height);
+					
 				}
 			}
 			else if (windowState.startsWith(Skin.STATE_FULLSCREEN) == true)
 			{
 				/* Turn off some of the window controls */
+				throw new RuntimeException("Window state " + Skin.STATE_FULLSCREEN + " not Yet Supported");
 				
 			}
 			else
@@ -124,8 +128,9 @@ public class DashboardFrame extends JFrame
 			/* And the location in the center of the screen */
 			setLocation(((screenSize.width - frameSize.width) / 2), ((screenSize.height - frameSize.height) / 2));
 			
-			/* Setup the display */
-			initGraphics(monitor, logger);
+			/* Setup the main panel */
+			this.gaugePanel_ = this.skin_.createGaugePanel(this, monitor, logger);
+			setContentPane(this.gaugePanel_);
 						
 			
 			
@@ -140,45 +145,6 @@ public class DashboardFrame extends JFrame
 		
 	}
 	
-	
-	/********************************************************
-	 * Initialize the graphics.
-	 *******************************************************/
-	private void initGraphics(BaseMonitor monitor, DataLogger logger) throws Exception
-	{
-		
-		
-//		/* Setup the main content panel */
-//		JPanel mainPanel = new JPanel();
-//		mainPanel.setFocusable(true);
-//		setContentPane(mainPanel);
-//		
-//		/* Set the background color */
-//		mainPanel.setBackground(this.skin_.getBackgroundColor());
-//		mainPanel.setLayout(new GaugeLayout());
-		
-		/* Setup the main panel */
-		this.setLayout(new GaugeLayout());
-		this.gaugePanel_ = new GaugePanel(this, this.skin_, monitor, logger);
-		setContentPane(this.gaugePanel_);
-//		mainPanel.add(gaugePanel_);
-		
-
-		
-//		/* Respond to the f1 key for the about box */
-//		InputMap i = mainPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-//		i.put(KeyStroke.getKeyStroke("F1"), "ABOUT");
-//		mainPanel.getActionMap().put("ABOUT", new AbstractAction()
-//		{
-//			public static final long serialVersionUID =0L;
-//			public void actionPerformed(ActionEvent arg0)
-//			{
-//				doShowAbout();
-//			}
-//		}); 
-
-				
-	}
 	
 
 	
@@ -199,6 +165,7 @@ public class DashboardFrame extends JFrame
 	/*******************************************************
 	 * Show the about dialog box
 	 ******************************************************/
+	// TODO
 	private void doShowAbout()
 	{
 		showMessage(MESSAGE_TYPE.INFO, "About", Setup.getSetup().APPLICATION + "\n" +

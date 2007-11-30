@@ -42,7 +42,7 @@ import net.sourceforge.JDash.gui.shapes.TextShape;
  * will display text on the screen.
  * 
  ******************************************************/
-public class DigitalGauge extends AbstractGauge
+public class DigitalGauge extends AbstractGauge implements PaintableGauge
 {
 	
 	public static final long serialVersionUID = 0L;
@@ -204,7 +204,7 @@ public class DigitalGauge extends AbstractGauge
 	/******************************************************
 	 * Paint this gauge to the panel.
 	 *******************************************************/
-	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
+	public void paint(AbstractGaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 		
 		

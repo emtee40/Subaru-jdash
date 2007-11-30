@@ -35,29 +35,22 @@ import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.StringParameter;
 
 /*******************************************************
- *
+ * A simple table model that presents a list of parameters.
  ******************************************************/
-public class TableGaugeModel extends Object implements TableModel
+public class GaugeTableModel implements TableModel
 {
 
-	private List<Parameter> params_ = null;
+	/** The underlying data */
+	protected List<Parameter> params_ = null;
 	
 	/*******************************************************
-	 *
+	 * Creates a new table gauge model
 	 ******************************************************/
-	public TableGaugeModel(List<Parameter> params)
+	public GaugeTableModel(List<Parameter> params)
 	{
 		this.params_ = params;
-		
-		/* Start each ECU Parameter in a disabled mode */
-		for (Parameter p : params)
-		{
-			if (p instanceof ECUParameter)
-			{
-				((ECUParameter)p).setEnabled(false);
-			}
-		}
 	}
+	
 	
 	/*******************************************************
 	 *
@@ -73,14 +66,7 @@ public class TableGaugeModel extends Object implements TableModel
 	 ******************************************************/
 	public Class<?> getColumnClass(int col)
 	{
-		if (col == 0)
-		{
-			return Boolean.class;
-		}
-		else
-		{
-			return String.class;
-		}
+		return String.class;
 	}
 
 	/*******************************************************
@@ -88,7 +74,7 @@ public class TableGaugeModel extends Object implements TableModel
 	 ******************************************************/
 	public int getColumnCount()
 	{
-		return 3;
+		return 2;
 	}
 
 	/*******************************************************
@@ -99,12 +85,9 @@ public class TableGaugeModel extends Object implements TableModel
 		switch(col)
 		{
 			case 0:
-				return "Enable";
+				return "ECU";
 			
 			case 1:
-				return "ECU P";
-			
-			case 2:
 				return "Value";
 				
 			default:
@@ -130,19 +113,9 @@ public class TableGaugeModel extends Object implements TableModel
 		switch(col)
 		{
 			case 0:
-				if (p instanceof ECUParameter)
-				{
-					return ((ECUParameter)p).isEnabled();
-				}
-				else
-				{
-					return null;
-				}
-				
-			case 1:
 				return p.getName();
 				
-			case 2:
+			case 1:
 				if (p instanceof StringParameter)
 				{
 					return p.toString();
@@ -162,21 +135,7 @@ public class TableGaugeModel extends Object implements TableModel
 	 ******************************************************/
 	public boolean isCellEditable(int row, int col)
 	{
-		if (col != 0)
-		{
-			return false;
-		}
-		
-		Parameter p = this.params_.get(row);
-		
-		if (p instanceof ECUParameter)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 
 	/*******************************************************
@@ -193,17 +152,6 @@ public class TableGaugeModel extends Object implements TableModel
 	 ******************************************************/
 	public void setValueAt(Object v, int row, int col)
 	{
-		if (col != 0)
-		{
-			throw new RuntimeException("Cannot edit any columns except the Enable column");
-		}
-
-		Parameter p = this.params_.get(row);
-		
-		if (p instanceof ECUParameter)
-		{
-			((ECUParameter)p).setEnabled(new Boolean(v.toString()));
-		}
 		
 	}
 

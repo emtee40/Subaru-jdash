@@ -33,6 +33,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.List;
 
 
 import net.sourceforge.JDash.ecu.param.Parameter;
@@ -80,7 +81,7 @@ import net.sourceforge.JDash.skin.SkinEventListener;
  * needle to rotoate right ot left for increasing values, then the values you set with the setDegreeMin() and setDegreeMax()
  * simply need to be reversed.  IN otherwords, make the minimum greater than the maximum.
  ******************************************************/
-public class AnalogGauge extends AbstractGauge implements SkinEventListener
+public class AnalogGauge extends AbstractGauge implements SkinEventListener, PaintableGauge, SwingComponentGauge
 {
 	
 	
@@ -267,12 +268,28 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener
 	}
 	
 	
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.gui.SwingComponentGauge#getGaugeComponent()
+	 *******************************************************/
+	public List<Component> getGaugeComponents()
+	{
+		List<Component> cList = new ArrayList<Component>();
+		
+		for (GaugeButton gb : this.gaugeButtons_)
+		{
+			cList.add(gb.getButtonComponent());
+		}
+		return cList;
+	}
+	
 	/******************************************************
 	 * Override
 	 * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
 	 *******************************************************/
 	public void actionPerformed(SkinEvent e)
 	{
+		
 		if (("" + hashCode()).equals(e.getDestination()))
 		{
 			if (ACTION_HIGH_RESET.equals(e.getAction()))
@@ -491,16 +508,13 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener
 			return bounds;
 		}
 
-
 		
 	}
 
 	/******************************************************
-	 * Override the paint method so we can draw the gauge.
-	 *
-	 * @see java.awt.Component#paint(java.awt.Graphics)
+	 * 
 	 *******************************************************/
-	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
+	public void paint(AbstractGaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 
 		
@@ -508,35 +522,47 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener
 //		 * we'll just draw a raw gauge */
 //		if (this.preGenAwtShapes_ == null)
 //		{
-			preRender(scalingTransform, true);
+		preRender(scalingTransform, true);
 //		}
 //		
+		/* Paint each shape */
 		for (int index = 0; index < this.preGenShapes_.size(); index++)
 		{
 			panel.paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
 		}
 		
 		
-		/** Add the buttons */
-		for (GaugeButton button : this.gaugeButtons_)
-		{
-
-			/* don't add it, if ti's allreayd been added */
-			for (Component comp : panel.getComponents())
-			{
-				if (comp == button.getButtonComponent())
-				{
-					return;
-				}
-			}
-			
-			/* Add it to the gauge panel */
-			panel.add(button.getButtonComponent(), button.getButtonShape().getShape().getBounds());
-			
-		}
+//		// TODO, we might be able to move this to the skin 
+//		/** Add the buttons, if they have not yet been added. */
+//		for (GaugeButton button : this.gaugeButtons_)
+//		{
+//
+//			/* don't add it, if ti's allreayd been added */
+//			for (Component comp : panel.getComponents())
+//			{
+//				if (comp == button.getButtonComponent())
+//				{
+//					return;
+//				}
+//			}
+//			
+//			/* Add it to the gauge panel */
+//			panel.add(button.getButtonComponent(), button.getButtonShape().getShape().getBounds());
+//			
+//		}
 
 	}
+
 	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.gui.SwingComponentGauge#updateDisplay()
+	 *******************************************************/
+	public void updateDisplay()
+	{
+		// TODO Auto-generated method stub
+		
+	}
 
 	/********************************************************
 	 * Set the needle pivot point in screen corrds. 

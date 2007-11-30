@@ -50,10 +50,10 @@ public abstract class SkinFactory
 	private String defaultSkinId_ = null;
 
 	/*******************************************************
-	 * The constructor is private because this is NOT
-	 * an instanceable class.
+	 * The constructor is protected becase we really only want
+	 * to used extensions of this class.
 	 *****************************************************/
-	public SkinFactory()
+	protected SkinFactory()
 	{
 	}
 	

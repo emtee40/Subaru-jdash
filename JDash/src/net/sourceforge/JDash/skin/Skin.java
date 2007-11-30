@@ -24,20 +24,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.skin;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.MediaTracker;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
-import javax.swing.ImageIcon;
 
-import net.sourceforge.JDash.ecu.param.Parameter;
-import net.sourceforge.JDash.gui.AbstractGauge;
-import net.sourceforge.JDash.gui.GaugePanel;
-import net.sourceforge.JDash.gui.shapes.AbstractShape;
+import net.sourceforge.JDash.ecu.comm.BaseMonitor;
+import net.sourceforge.JDash.gui.AbstractGaugePanel;
+import net.sourceforge.JDash.gui.DashboardFrame;
+import net.sourceforge.JDash.logger.DataLogger;
 
 
 /*******************************************************
@@ -62,12 +56,6 @@ public abstract class Skin
 
 	/* A human readable string name for this Skin */
 	private SkinFactory ownerFactory_ = null;
-	
-	/* The cache of images */
-	private HashMap<String, ImageIcon> imageCache_ = new HashMap<String, ImageIcon>();
-	
-	/* the cache of all created gauges */
-	private HashMap<Integer, AbstractGauge> gaugeCache_= new HashMap<Integer, AbstractGauge>();
 	
 	
 	/* The list of event listeners that respond to things like button presses */
@@ -186,157 +174,21 @@ public abstract class Skin
 	public abstract Dimension getWindowSize() throws Exception;
 	
 	
-	/*******************************************************
-	 * get the list of shapes that make up the background for the
-	 * primary gauge panel.
-	 * @return
-	 * @throws Exception
-	 *******************************************************/
-	public abstract List<AbstractShape> getWindowShapes() throws Exception;
-	
-	/*******************************************************
-	 * Get the default background color to be fill into the 
-	 * entire frame.
-	 * @return
-	 * @throws Exception
-	 *******************************************************/
-	public abstract Color getBackgroundColor() throws Exception;
-	
 	/********************************************************
-	 * Images are requested via resource names.  If an 
-	 * image is requested, it is the job of the extended class
-	 * to return the URL to the image desired according to
-	 * the imageResource parameter.  Once the image for
-	 * the given resoure has been loaded once, it will be
-	 * cached by this class, and returned from the class for
-	 * all future requests.
-	 * 
-	 * @param imageName IN - the name of the image to return
-	 * @return the URL to the image.
-	 * @throws If there was any sort of problem getting the image.
-	 *******************************************************/
-	public abstract URL getImageUrl(String imageName) throws Exception;
-	
-	/********************************************************
-	 * the getImage() method is final to enforce caching of images.
-	 * Once an image is loaded, it's cached into a hashmap, and returned
-	 * from it for future calls.
-	 * 
-	 * @param imageName IN - the name of the image to be fetched.
-	 * @return
-	 *******************************************************/
-	public final ImageIcon getImage(String imageName)
-	{
-		
-		try
-		{
-			
-			/* Look first in the cache */
-			if (this.imageCache_.containsKey(imageName) == true)
-			{
-				return this.imageCache_.get(imageName);
-			}
-			
-			
-			/* Load the image */
-			URL imageUrl = getImageUrl(imageName);
-			if (imageUrl == null)
-			{
-				throw new Exception("image [" + imageName + "] does not appear to exist");
-			}
-			ImageIcon image = new ImageIcon(getImageUrl(imageName));
-			
-			/* Wait for the image to load */
-			while (image.getImageLoadStatus() == MediaTracker.LOADING);
-
-			/* We gotta have something!! */
-			if (image.getImageLoadStatus() != MediaTracker.COMPLETE)
-			{
-				throw new RuntimeException("Unable to load image: " + getImageUrl(imageName));
-			}
-			
-			/* Cache the image and return it */
-			this.imageCache_.put(imageName, image);
-			return image;
-
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-
-	}
-	
-	
-	/*******************************************************
-	 * return the number of gauges present in this skin.
-	 * Throw an exception if a problem occurs.
-	 * @return
-	 *******************************************************/
-	public abstract int getGaugeCount() throws Exception;
-	
-	
-	/********************************************************
-	 * get the guage at the given index. Throw an exception if
-	 * a problem occurs.  do NOT return null.
-	 * @param index IN - the index of which gauge to create.
-	 * @param parentPanel IN - the parent panel this guage will belong to
-	 * @return
-	 *******************************************************/
-	public AbstractGauge getGauge(int index) throws Exception
-	{
-		/* If the gauge has not yet been created, then create and cache it first */
-		if (this.gaugeCache_.containsKey(new Integer(index)) == false)
-		{
-			this.gaugeCache_.put(new Integer(index), this.createGauge(index));
-		}
-			
-		return this.gaugeCache_.get(new Integer(index));
-		
-	}
-
-	
-	/********************************************************
-	 * This method will return a list off the Parameter objects
-	 * that this skin references.  In other words, for every
-	 * gauge being displayed, and every component that uses 
-	 * a parameter, the returned list will reference it.
+	 * Return this skins gauge panel.  It is up to each individual skin
+	 * to create an instnace of, and return the GaugePanel it want's placed 
+	 * in the Dashboard.  The reason for this, is because most skins have
+	 * some sort of relationship between the components the skin defines, and
+	 * the Panel they will be shown on.  This gives the skin the ability
+	 * to define just what is shown to the user, beyond just the gauges
+	 * and buttons.   This also gives the skin the chance to initialize anything
+	 * special about the panel before it gets added to the frame.
+	 * This method should only be called once, therefor, it
+	 * is OK to create a new instance of a gaugPanel on each call.
 	 * 
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	public List<Parameter> getReferencedParameters() throws Exception
-	{
-		List<Parameter> pList = new ArrayList<Parameter>();
-		
-		for (int gaugeIndex = 0; gaugeIndex < getGaugeCount(); gaugeIndex++)
-		{
-			AbstractGauge gauge = getGauge(gaugeIndex);
-			
-			/* Don't add gauge parameters with no parameters linked to them */
-			if ( gauge.getParameter() != null)
-			{
-				pList.add(gauge.getParameter());
-			}
-		
-		}
-		
-		return pList;
-	}
-	
-	
-	
-	/*******************************************************
-	 * You must implement this method so the actual gauge itself can be created.  
-	 * This method should NOT be called by any other object.  It is used internaly
-	 * in this object, and the returned gauge is cached for future use.
-	 * 
-	 * @param index
-	 * @param parentPanel
-	 * @return
-	 * @throws Exception
-	 *******************************************************/
-	protected abstract AbstractGauge createGauge(int index) throws Exception;
+	public abstract AbstractGaugePanel createGaugePanel(DashboardFrame dashFrame, BaseMonitor monitor, DataLogger logger) throws Exception;
 	
 }

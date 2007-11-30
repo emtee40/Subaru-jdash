@@ -157,6 +157,7 @@ public class Startup
 				{
 					Startup.splashFrame_.setStatus(60, "Initializing Test Monitor");
 					
+// TODO: Reenable this
 //					disableLoggingOverride = true;
 					Startup.monitor_ = new TestMonitor();
 				}
@@ -180,7 +181,6 @@ public class Startup
 				
 				System.out.println("Monitor: " + Startup.monitor_.getClass().getName());
 
-				/* Init the monitor */
 				List<Parameter> supportedParams = Startup.monitor_.init(paramRegistry, new InitListener(loader.getName())
 				{
 					public void update(String message, int step, int max)
@@ -212,23 +212,6 @@ public class Startup
 				logger.disableOverride(disableLoggingOverride);
 
 			
-				/* Ok.. At this point, we have a skin full of gauges, each linked to
-				 * a Parameter.  Now, we need to inform the Monitor, exactly which parameters
-				 * it needs to work with.  For performance reasons, we only monitor ecu
-				 * parameters that are on display */
-				for (int gaugeIndex = 0; gaugeIndex < skinFactory.getDefaultSkin().getGaugeCount(); gaugeIndex++)
-				{
-					AbstractGauge gauge = skinFactory.getDefaultSkin().getGauge(gaugeIndex);
-					
-					/* Don't add gauge parameters with no parameters linked to them */
-					if ( gauge.getParameter() != null)
-					{
-						Startup.monitor_.addParam(gauge.getParameter());
-						logger.addParameter(gauge.getParameter());
-					}
-				}
-				
-				
 				
 				/* create the main dashboard frame */
 				displayFrame = new DashboardFrame(skinFactory.getDefaultSkin(), Startup.monitor_, logger);

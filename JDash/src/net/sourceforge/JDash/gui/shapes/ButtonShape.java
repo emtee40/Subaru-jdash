@@ -28,6 +28,8 @@ package net.sourceforge.JDash.gui.shapes;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.ImageIcon;
+
 
 /*******************************************************
  * Creates a Rectangle shape for use within a gauge as a button
@@ -43,13 +45,13 @@ public class ButtonShape extends AbstractShape
 	private double h_ = 0;
 	private String upAction_ = null;
 	private String downAction_ = null;
-	private String upImageName_ = null;
-	private String downImageName_ = null;
+	private ImageIcon upImage_ = null;
+	private ImageIcon downImage_ = null;
 	
 	/*******************************************************
 	 * Create a new Rectangle shape
 	 ******************************************************/
-	public ButtonShape(String type, double x, double y, double width, double height, String upAction, String downAction, String upImageName, String downImageName)
+	public ButtonShape(String type, double x, double y, double width, double height, String upAction, String downAction, ImageIcon upImageName, ImageIcon downImageName)
 	{
 		this.type_ = type;
 		this.x_ = x;
@@ -58,8 +60,8 @@ public class ButtonShape extends AbstractShape
 		this.h_ = height;
 		this.upAction_ = upAction;
 		this.downAction_ = downAction;
-		this.upImageName_ = upImageName;
-		this.downImageName_ = downImageName;
+		this.upImage_ = upImageName;
+		this.downImage_ = downImageName;
 	}
 	
 	
@@ -92,21 +94,21 @@ public class ButtonShape extends AbstractShape
 	}
 	
 	/*******************************************************
-	 * Get the name of the up image.  Get the image itself
-	 * from the default skin using SkinFactory.getSkin().getImage()
+	 * Get the image for the up state.
 	 * @return
 	 ******************************************************/
-	public String getUpImageName()
+	public ImageIcon getUpImage()
 	{
-		return this.upImageName_;
+		return this.upImage_;
 	}
 	
 	/*******************************************************
+	 * Get the image for the down state.
 	 * @return
 	 *******************************************************/
-	public String getDownImageName()
+	public ImageIcon getDownImage()
 	{
-		return this.downImageName_;
+		return this.downImage_;
 	}
 	
 	/*******************************************************

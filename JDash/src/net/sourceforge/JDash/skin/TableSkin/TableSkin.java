@@ -25,27 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.skin.TableSkin;
 
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
-
-import net.sourceforge.JDash.ecu.param.Parameter;
-import net.sourceforge.JDash.ecu.param.ParameterComparator;
-import net.sourceforge.JDash.ecu.param.StringParameter;
-import net.sourceforge.JDash.gui.AbstractGauge;
-import net.sourceforge.JDash.gui.ButtonGauge;
-import net.sourceforge.JDash.gui.DigitalGauge;
-import net.sourceforge.JDash.gui.GaugeButton;
-import net.sourceforge.JDash.gui.GaugePanel;
-import net.sourceforge.JDash.gui.shapes.AbstractShape;
-import net.sourceforge.JDash.gui.shapes.ButtonShape;
-import net.sourceforge.JDash.gui.shapes.TextShape;
+import net.sourceforge.JDash.ecu.comm.BaseMonitor;
+import net.sourceforge.JDash.gui.AbstractGaugePanel;
+import net.sourceforge.JDash.gui.DashboardFrame;
+import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
 import net.sourceforge.JDash.skin.SkinFactory;
 
@@ -70,18 +55,14 @@ import net.sourceforge.JDash.skin.SkinFactory;
 public class TableSkin extends Skin
 {
 	
-	/* Standard 4:3 ratio monitor */
-	private static int STARTUP_SIZE = 40;
-	private static int PANEL_WIDTH = 100 * 3;
-	private static int PANEL_HEIGHT = 100 * 6;
+	private static int PANEL_WIDTH = 600;
+	private static int PANEL_HEIGHT = 800;
 
 	
 	private String name_ = "Table of Parameters";
 	private String description_ = "This Skin will put ALL of the parameters on the screen in simple Table Format." +
 			" You will be able to enable and disable the parameters you want updated.";
 
-	
-	private TableGauge theTableGauge_ = null;
 	
 	/******************************************************
 	 * Create a new xml skin class.
@@ -91,6 +72,16 @@ public class TableSkin extends Skin
 		super(ownerFactory);
 	}
 	
+	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.Skin#createGaugePanel(net.sourceforge.JDash.gui.DashboardFrame, net.sourceforge.JDash.ecu.comm.BaseMonitor, net.sourceforge.JDash.logger.DataLogger)
+	 *******************************************************/
+	public AbstractGaugePanel createGaugePanel(DashboardFrame dashFrame, BaseMonitor monitor, DataLogger logger) throws Exception
+	{
+		TableGaugePanel gp = new TableGaugePanel(dashFrame, this, monitor, logger);
+		return gp;
+	}
 	
 	/*******************************************************
 	 * Override
@@ -131,97 +122,20 @@ public class TableSkin extends Skin
 	@Override
 	public String getWindowStartupState() throws Exception
 	{
-		return Skin.STATE_WINDOW + ":" + STARTUP_SIZE;
+		return Skin.STATE_WINDOW;
 	}
 	
 	/*******************************************************
 	 * Override
 	 * @see net.sourceforge.JDash.skin.Skin#getWindowSize()
 	 *******************************************************/
+	@Override
 	public Dimension getWindowSize() throws Exception
 	{
 		return new Dimension(PANEL_WIDTH, PANEL_HEIGHT);
 	}
 	
-	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getWindowShapes()
-	 *******************************************************/
-	public List<AbstractShape> getWindowShapes() throws Exception
-	{
-		/* Return an empty list of shapes */
-		return new ArrayList<AbstractShape>();
-		
-	}
 	
-	/*******************************************************
-	 * get the defined fill color for this skin.
-	 * 
-	 * @return
-	 *******************************************************/
-	public java.awt.Color getBackgroundColor() throws Exception
-	{
-		return Color.LIGHT_GRAY;
-	}
-	
-	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getImageUrl(net.sourceforge.JDash.skin.Skin.IMAGE_RESOURCE)
-	 *******************************************************/
-	public URL getImageUrl(String imageName) throws Exception
-	{
-       return this.getClass().getResource(imageName);
-	}
-	
-	
-	
-	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getGaugeCount()
-	 *******************************************************/
-	@Override
-	public int getGaugeCount() throws Exception
-	{
-		//return getOwnerFactory().getParameterRegistry().getAll().size();
-		return 1;
-	}
-	
-	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getGauge(int)
-	 *******************************************************/
-	@Override
-	public AbstractGauge createGauge(int index) throws Exception
-	{
-		if (this.theTableGauge_ == null)
-		{
-			setupTableGauge();
-		}
-		
-		return this.theTableGauge_;
-	}
-
-	
-	/******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getReferencedParameters()
-	 *******************************************************/
-	@Override
-	public List<Parameter> getReferencedParameters() throws Exception
-	{
-		return new ArrayList<Parameter>(getOwnerFactory().getParameterRegistry().getAll().values());
-	}
-	
-	/*******************************************************
-	 * @throws Exception
-	 *******************************************************/
-	private void setupTableGauge() throws Exception
-	{
-		ArrayList<Parameter> parameterList = new ArrayList<Parameter>(getOwnerFactory().getParameterRegistry().getAll().values());
-		Collections.sort(parameterList, new ParameterComparator());
-		this.theTableGauge_ = new TableGauge(parameterList);
-	}
-
 	
 	
 }

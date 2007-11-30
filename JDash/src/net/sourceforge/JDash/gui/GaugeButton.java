@@ -106,7 +106,7 @@ public class GaugeButton
 			
 			
 			
-			/* Setup the bounds from the shape.  */
+			/* Setup the original bounds from the shape. */
 			this.theButton_.setBounds(shape.getShape().getBounds());
 			this.theButton_.setOpaque(false);
 			
@@ -282,15 +282,16 @@ public class GaugeButton
 	
 
 	/******************************************************
-	 * 
+	 * When the layoutmanager calls the setBounds() for 
+	 * the button, we will resize the images to fit correctly
+	 * in the bounds, and set them to the button.
 	 *******************************************************/
 	private void setButtonBounds(AbstractButton b, int x, int y, int width, int height)
 	{
-		//super.setBounds(x, y, width, height);
 		
 		/* Set the icon images */
-		ImageIcon upIcon = this.skin_.getImage(getButtonShape().getUpImageName());
-		ImageIcon downIcon = this.skin_.getImage(getButtonShape().getDownImageName());
+		ImageIcon upIcon = getButtonShape().getUpImage();
+		ImageIcon downIcon = getButtonShape().getDownImage();
 
 		b.setIcon(new ImageIcon(upIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
 		b.setPressedIcon(new ImageIcon(downIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));

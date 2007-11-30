@@ -30,7 +30,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
-import java.util.Observable;
+import java.util.List;
 import java.util.Properties;
 
 import jcckit.GraphicsPlotCanvas;
@@ -42,7 +42,6 @@ import jcckit.util.PropertiesBasedConfigData;
 
 
 import net.sourceforge.JDash.ecu.param.Parameter;
-import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.special.TimeParameter;
 import net.sourceforge.JDash.gui.shapes.TextShape;
@@ -52,7 +51,7 @@ import net.sourceforge.JDash.gui.shapes.AbstractShape.PROPS;
  * Not yet implemented
  * http://jcckit.sourceforge.net/UserGuide/animatedChart.html
  ******************************************************/
-public class LineGraphGauge extends AbstractGauge
+public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge, PaintableGauge
 {
 	
 	public static final long serialVersionUID = 0L;
@@ -202,56 +201,25 @@ public class LineGraphGauge extends AbstractGauge
 
 	
 	
-//	/*******************************************************
-//	 * Override
-//	 * @see net.sourceforge.JDash.gui.AbstractGauge#getBounds()
-//	 *******************************************************/
-//	private Rectangle preRender(AffineTransform scalingTransform, boolean force)
-//	{
-//		Rectangle rect = new Rectangle(0,0,0,0);
-//		
-//		if (this.valueGauge_ != null)
-//		{
-//			rect.add(this.valueGauge_.preGenerate(scalingTransform, force));
-//		}
-//		
-//		if (this.lowGauge_ != null)
-//		{
-//			rect.add(this.lowGauge_.preGenerate(scalingTransform, force));
-//		}
-//		
-//		if (this.highGauge_ != null)
-//		{
-//			rect.add(this.highGauge_.preGenerate(scalingTransform, force));
-//		}
-//		
-//		return rect;
-//	}
-
 	
-	/******************************************************
-	 * Override does nothing.  Just returns.
-	 *
-	 * @see java.awt.Component#paint(java.awt.Graphics)
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.gui.SwingComponentGauge#getGaugeComponent()
 	 *******************************************************/
-	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
+	public List<Component> getGaugeComponents()
 	{
-
-		/* This is where this component gets placed onto the parent panel, and
-		 * where the digital high/low numbers get painted */
-		
-		/* don't add it, if ti's allreayd been added */
-		if (this.addedToPanel_ == false)
-		{
-			/* Add to the parent panel, then revlidate so it gets drawn.  We need
-			 * the revalidate because at this point, the panel has already been rendered  */
-			panel.add(this.plotCanvas_.getGraphicsCanvas(), this.plotCanvasRect_);
-			panel.revalidate();
-			this.addedToPanel_ = true;
-		}
-		
-		updateDataPoints();
-		
+		List<Component> cList = new ArrayList<Component>();
+		cList.add(this.plotCanvas_.getGraphicsCanvas());
+		return cList;
+	}
+	
+	
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.gui.PaintableGauge#paint(net.sourceforge.JDash.gui.AbstractGaugePanel, java.awt.Graphics2D, java.awt.geom.AffineTransform)
+	 *******************************************************/
+	public void paint(AbstractGaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
+	{
 		if (this.valueGauge_ != null)
 		{
 			this.valueGauge_.paint(panel, g2, scalingTransform);
@@ -266,39 +234,14 @@ public class LineGraphGauge extends AbstractGauge
 		{
 			this.highGauge_.paint(panel, g2, scalingTransform);
 		}
+		
 	}
 	
-	
-//	/******************************************************
-//	 * Override the paint method so we can draw the gauge.
-//	 *
-//	 * @see java.awt.Component#paint(java.awt.Graphics)
-//	 *******************************************************/
-//	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
-//	{
-//		if (this.valueGauge_ != null)
-//		{
-//			this.valueGauge_.paint(panel, g2, scalingTransform);
-//		}
-//		
-//		if (this.lowGauge_ != null)
-//		{
-//			this.lowGauge_.paint(panel, g2, scalingTransform);
-//		}
-//		
-//		if (this.highGauge_ != null)
-//		{
-//			this.highGauge_.paint(panel, g2, scalingTransform);
-//		}
-//	}
-//	
 
-	/*******************************************************
-	 * We need to trap the update messages so we can add the value.
-	 * Override
-	 * @see net.sourceforge.JDash.gui.AbstractGauge#update(java.util.Observable, java.lang.Object)
+
+	/**
 	 *******************************************************/
-	private void updateDataPoints()
+	public void updateDisplay()
 	{
 		
 		/* If the parent gauge panel is flaged updates as suspended, then we'll stop here */

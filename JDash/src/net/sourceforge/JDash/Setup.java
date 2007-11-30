@@ -69,9 +69,6 @@ public class Setup
 	/** The default windows serial port */
 	public static final String SETUP_DEFAULT_WINDOWS_SERIAL_PORT = "com1";
 	
-	/** The get() config key to return the running base directory */
-//	public static final String SETUP_CONFIG_BASE_DIR = "base.dir";
-	
 	/** The name of the log database directory */
 	public static final String SETUP_CONFIG_LOGDB_DIR = "logdb";
 	

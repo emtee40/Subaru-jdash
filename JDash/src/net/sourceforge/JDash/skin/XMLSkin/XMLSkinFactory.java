@@ -43,6 +43,8 @@ import net.sourceforge.JDash.skin.SkinFactory;
 public class XMLSkinFactory extends SkinFactory
 {
 	
+	public static final String XML_SKINS_DIR = "XMLSkins";
+	
 	public static final String SKIN_FILE_EXTENSION = ".skn";
 	
 	private ArrayList<Skin> skins_ = new ArrayList<Skin>();
@@ -54,8 +56,7 @@ public class XMLSkinFactory extends SkinFactory
 	public XMLSkinFactory() throws Exception
 	{
 		/* Get the list of all files in the base directory */
-		//File configDir = new File(Setup.getSetup().get(Setup.SETUP_CONFIG_BASE_DIR));
-		File configDir = new File(Setup.SETUP_CONFIG_SKINS_DIR);
+		File configDir = new File(Setup.SETUP_CONFIG_SKINS_DIR + File.separatorChar + XML_SKINS_DIR);
 		
 		/* Check each jar file */
 		for (File f : configDir.listFiles())

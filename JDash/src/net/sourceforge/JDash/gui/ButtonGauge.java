@@ -29,6 +29,8 @@ package net.sourceforge.JDash.gui;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.sourceforge.JDash.ecu.param.Parameter;
 
@@ -40,12 +42,12 @@ import net.sourceforge.JDash.ecu.param.Parameter;
  * controllable. If the parameter is set, then it will be
  * parameter controllable.
  ******************************************************/
-public class ButtonGauge extends AbstractGauge
+public class ButtonGauge extends AbstractGauge implements SwingComponentGauge
 {
 	
 	public static final long serialVersionUID = 0L;
 	
-	private GaugeButton gaugeButton_ = null;
+	private List<Component> gaugeButton_ = new ArrayList<Component>();
 	
 	private Double sensorMin_ = null;
 	private Double sensorMax_ = null;
@@ -57,25 +59,19 @@ public class ButtonGauge extends AbstractGauge
 	{
 		super(p);
 
-		this.gaugeButton_ = gaugeButton;
+		if (gaugeButton == null)
+		{
+			throw new RuntimeException("Cannot create a ButtonGauge for param [" + p.getName() + "] with a null GaugeButton object");
+		}
+			
+		this.gaugeButton_.add(gaugeButton.getButtonComponent());
 		
 		
-//		/* The button MUST be of one of our known types */
-//		if ((GaugeButton.BUTTON_ACTION_LOGGER_TOGGLE.equalsIgnoreCase(this.buttonShape_.getAction()) == false) &&
-//			(GaugeButton.BUTTON_ACTION_DTC_RESET.equalsIgnoreCase(this.buttonShape_.getAction()) == false))
-//		{
-//			throw new  RuntimeException("Cannot add button of action [" + this.buttonShape_.getAction() + "].  It's not supported by the component gauge class");
-//		}
-
-		/* Create the button */
-//		this.gaugeButton_ = new GaugeButton(getParentPanel().getSkin(), this.buttonShape_);
 		
 		/* Link to the button */
 		// TODO Link the button to the parameter
 //		this.gaugeButton_.getButtonComponent().addActionListener(this);
 		
-		/* Add the button */		
-//		this.getParentPanel().add(this.gaugeButton_, buttonShape.getShape().getBounds());
 		
 	}
 
@@ -113,27 +109,22 @@ public class ButtonGauge extends AbstractGauge
 	}
 	
 	
-	/******************************************************
-	 * Override does nothing.  Just returns.
-	 *
-	 * @see java.awt.Component#paint(java.awt.Graphics)
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.gui.SwingComponentGauge#getGaugeComponent()
 	 *******************************************************/
-	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
+	public List<Component> getGaugeComponents()
 	{
-
-		/* This is where this component gets placed onto the parent panel */
-		
-		/* don't add it, if ti's allreayd been added */
-		for (Component comp : panel.getComponents())
-		{
-			if (comp == this.gaugeButton_.getButtonComponent())
-			{
-				return;
-			}
-		}
-		
-		/* Add it to the gauge panel */
-		panel.add(this.gaugeButton_.getButtonComponent(), this.gaugeButton_.getButtonShape().getShape().getBounds());
+		return this.gaugeButton_;
+	}
+	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.gui.SwingComponentGauge#updateDisplay()
+	 *******************************************************/
+	public void updateDisplay()
+	{
+		// TODO Auto-generated method stub
 		
 	}
 	

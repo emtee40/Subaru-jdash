@@ -48,7 +48,7 @@ import net.sourceforge.JDash.gui.shapes.TextShape;
  * and shrink like an A/F gauge.  This is the clas for you.
  * 
  ******************************************************/
-public class LEDGauge extends AbstractGauge
+public class LEDGauge extends AbstractGauge implements PaintableGauge
 {
 	
 	public static final long serialVersionUID = 0L;
@@ -384,11 +384,9 @@ public class LEDGauge extends AbstractGauge
 	
 	
 	/******************************************************
-	 * Override the paint method so we can draw the gauge.
-	 *
-	 * @see java.awt.Component#paint(java.awt.Graphics)
+	 * 
 	 *******************************************************/
-	public void paint(GaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
+	public void paint(AbstractGaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 
 		/* It's possible to get a paint event without having a sensor event. so 

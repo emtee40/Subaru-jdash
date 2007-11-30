@@ -22,7 +22,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  ******************************************************/
-package net.sourceforge.JDash.gui;
+package net.sourceforge.JDash.skin.XMLSkin;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -34,10 +34,10 @@ import java.util.HashMap;
 
 
 /*******************************************************
- * A simple implementation of the layout manager to place our 
- * gauge panel in the center of the owner panel.
+ * This layout manager will place components on the
+ * panel according to their scalled relative location.
  ******************************************************/
-public class GaugeComponentLayout implements LayoutManager2
+public class XMLGaugeComponentLayout implements LayoutManager2
 {
 	
 	private HashMap<Component, Rectangle> compMap_ = new HashMap<Component, Rectangle>();
@@ -45,7 +45,7 @@ public class GaugeComponentLayout implements LayoutManager2
 	/*******************************************************
 	 * create a new gauge layout.
 	 ******************************************************/
-	public GaugeComponentLayout()
+	public XMLGaugeComponentLayout()
 	{
 	}
 	
@@ -57,15 +57,8 @@ public class GaugeComponentLayout implements LayoutManager2
 	public void addLayoutComponent(Component comp, Object obj)
 	{
 		
-		if (obj instanceof Rectangle)
-		{
-			this.compMap_.put(comp, (Rectangle)obj);
-		}
-		else
-		{
-			throw new RuntimeException("Components added to a Gauge Panel MUST be added with a Rectangle.");
-		}
-		
+		/* Get the current bounds, and store them as the original bounds rect */
+		this.compMap_.put(comp, comp.getBounds());
 
 	}
 
@@ -145,34 +138,32 @@ public class GaugeComponentLayout implements LayoutManager2
 	public void layoutContainer(Container container)
 	{
 		
+		if (container instanceof XMLGaugePanel == false)
+		{
+			throw new RuntimeException("An XMLGaugeComponentLayout manager can only be applied to an XMLGaugePanel.");
+		}
+		
 		/* we only opoerate on gague panels */
-		GaugePanel gaugePanel = (GaugePanel)container;
+		XMLGaugePanel gaugePanel = (XMLGaugePanel)container;
 		
 		/* Place each child comonent according to it's preferred rectangle, 
 		 * but adjusting for the scale */
 		for (Component comp : container.getComponents())
 		{
-			/* Get the rectangle */
+			/* Get the original rectangle */
 			Rectangle origRect = this.compMap_.get(comp);
-		
 
-			
-//			if (comp instanceof GaugeComponent)
-//			{
-//				GaugeComponent gaugeComp = (GaugeComponent)comp;
-//				Rectangle rect = gaugeComp.getOriginalBounds();
-				Rectangle rect = new Rectangle();
-				rect.x = (int)(origRect.getX() * gaugePanel.getXScale());
-				rect.y = (int)(origRect.getY() * gaugePanel.getYScale());
-				rect.width = (int)(origRect.getWidth() * gaugePanel.getXScale());
-				rect.height = (int)(origRect.getHeight() * gaugePanel.getYScale());
+			/* Setup the scaled rect */
+			Rectangle rect = new Rectangle();
+			rect.x = (int)(origRect.getX() * gaugePanel.getXScale());
+			rect.y = (int)(origRect.getY() * gaugePanel.getYScale());
+			rect.width = (int)(origRect.getWidth() * gaugePanel.getXScale());
+			rect.height = (int)(origRect.getHeight() * gaugePanel.getYScale());
 
-				comp.setBounds(rect);
-//			}
-			
+			/* Apply the scaled bounds */
+			comp.setBounds(rect);
 			
 		}
-
 
 	}
 

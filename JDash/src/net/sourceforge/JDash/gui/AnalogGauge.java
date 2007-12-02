@@ -94,6 +94,8 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 
 	/** The aciton string expected by a SkinEvent when a low-reset button is pressed */
 	public static final String ACTION_LOW_RESET = "low-reset";
+	
+	private static final Double NEEDLE_RESET_STEP_IN_DEGREES = 20.0;
 
 //	
 //	private double previousTheta_ = -99D;
@@ -124,11 +126,15 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	
 	/* The last time the needle was reset */
 	private long lowNeedleLastReset_ = 0l;
-	private long highNedleLastReset_ = 0l;
+	private long highNeedleLastReset_ = 0l;
 	
 	/* The delay time between needle resets */
 	private int lowNeedleResetDelay_ = 0;
 	private int highNeedleResetDelay_ = 0;
+	
+	/* When a low/high needle reset is called, this flag is tripped to indicate it */
+	private boolean lowNeedleDoReset_ = false;
+	private boolean highNeedleDoReset_ = false;
 	
 	/* Default to clockwise */
 	private boolean clockwise_ = true;
@@ -311,7 +317,8 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	 *******************************************************/
 	private void resetLowNeedle()
 	{
-		this.lowNeedleLastReset_ = 0L;
+//		this.lowNeedleLastReset_ = 0L;
+		this.lowNeedleDoReset_ = true;
 	}
 	
 	
@@ -320,7 +327,8 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	 ******************************************************/
 	private void resetHighNeedle()
 	{
-		this.highNedleLastReset_ = 0L; 
+//		this.highNedleLastReset_ = 0L;
+		this.highNeedleDoReset_ = true;
 	}
 	
 	/*******************************************************
@@ -364,14 +372,36 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		}
 		
 		
-		/* calculate the low and high needle values */
-		if ((valueInDegrees > this.highNeedleValueInDegrees_) || (System.currentTimeMillis() > (this.highNedleLastReset_ + this.highNeedleResetDelay_)))
+		/* Calculate the high needle angle, Start by checking if a reset has been called */
+		if (this.highNeedleDoReset_)
+		{
+			/* Decrement the high needle */
+			this.highNeedleValueInDegrees_ -= Math.min(NEEDLE_RESET_STEP_IN_DEGREES, this.highNeedleValueInDegrees_ - valueInDegrees);
+			if (this.highNeedleValueInDegrees_ <= getDegreeMin() || this.highNeedleValueInDegrees_ <= valueInDegrees)
+			{
+				this.highNeedleDoReset_ = false;
+				this.highNeedleLastReset_ = System.currentTimeMillis();
+			}
+		}
+		else if ((valueInDegrees > this.highNeedleValueInDegrees_) || (System.currentTimeMillis() > (this.highNeedleLastReset_ + this.highNeedleResetDelay_)))
 		{
 			this.highNeedleValueInDegrees_ = valueInDegrees;
-			this.highNedleLastReset_ = System.currentTimeMillis();
+			this.highNeedleLastReset_ = 0L;
 		}
 		
-		if ((valueInDegrees < this.lowNeedleValueInDegrees_) || (System.currentTimeMillis() > (this.lowNeedleLastReset_ + this.lowNeedleResetDelay_)))
+		/* Calculate the low needle angle, start by checking if a reset has been called */
+		if (this.lowNeedleDoReset_)
+		{
+			/* Increment the low needle */
+			this.lowNeedleValueInDegrees_ += Math.min(NEEDLE_RESET_STEP_IN_DEGREES, valueInDegrees - this.lowNeedleValueInDegrees_);
+			if (this.lowNeedleValueInDegrees_ >= getDegreeMax() || this.lowNeedleValueInDegrees_ >= valueInDegrees)
+			{
+				this.lowNeedleDoReset_ = false;
+				this.lowNeedleLastReset_ = 0L;
+			}
+			
+		}
+		else if ((valueInDegrees < this.lowNeedleValueInDegrees_) || (System.currentTimeMillis() > (this.lowNeedleLastReset_ + this.lowNeedleResetDelay_)))
 		{
 			this.lowNeedleValueInDegrees_ = valueInDegrees;
 			this.lowNeedleLastReset_ = System.currentTimeMillis();
@@ -512,44 +542,21 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	}
 
 	/******************************************************
-	 * 
+	 * Override
+	 * @see net.sourceforge.JDash.gui.PaintableGauge#paint(net.sourceforge.JDash.gui.AbstractGaugePanel, java.awt.Graphics2D, java.awt.geom.AffineTransform)
 	 *******************************************************/
 	public void paint(AbstractGaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 
 		
-//		/* It's possible to get a paint event without having a sensor event. so 
-//		 * we'll just draw a raw gauge */
-//		if (this.preGenAwtShapes_ == null)
-//		{
 		preRender(scalingTransform, true);
-//		}
-//		
+		
 		/* Paint each shape */
 		for (int index = 0; index < this.preGenShapes_.size(); index++)
 		{
 			panel.paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
 		}
 		
-		
-//		// TODO, we might be able to move this to the skin 
-//		/** Add the buttons, if they have not yet been added. */
-//		for (GaugeButton button : this.gaugeButtons_)
-//		{
-//
-//			/* don't add it, if ti's allreayd been added */
-//			for (Component comp : panel.getComponents())
-//			{
-//				if (comp == button.getButtonComponent())
-//				{
-//					return;
-//				}
-//			}
-//			
-//			/* Add it to the gauge panel */
-//			panel.add(button.getButtonComponent(), button.getButtonShape().getShape().getBounds());
-//			
-//		}
 
 	}
 

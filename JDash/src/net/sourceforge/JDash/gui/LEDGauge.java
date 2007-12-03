@@ -125,6 +125,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 	 *******************************************************/
 	public void addLowNeedleShape(AbstractShape shape)
 	{
+		// TODO
 		if (shape instanceof TextShape)
 		{
 			throw new RuntimeException(this.getClass().getName() + " does not support shapes of type " + shape.getClass().getName());
@@ -140,6 +141,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 	 *******************************************************/
 	public void addHighNeedleShape(AbstractShape shape)
 	{
+		// TODO
 		if (shape instanceof TextShape)
 		{
 			throw new RuntimeException(this.getClass().getName() + " does not support shapes of type " + shape.getClass().getName());
@@ -442,7 +444,16 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 		
 		for (int index = 0; index < this.preGenAwtShapes_.size(); index++)
 		{
-			panel.paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
+			// TODO
+			if (this.preGenShapes_.get(index) instanceof TextShape)
+			{
+				//panel.paintGlyphs(g2, this.textShape_, this.preRenderedPoint_.x, this.preRenderedPoint_.y, this.preRenderedGlyphVector_);
+			}
+			else
+			{
+				panel.paintShape(g2, this.preGenShapes_.get(index), this.preGenAwtShapes_.get(index));
+			}
+		
 		}
 		
 		
@@ -494,6 +505,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 		 *******************************************************/
 		public void addShape(AbstractShape shape)
 		{
+			// TODO
 			if (shape instanceof TextShape)
 			{
 				throw new RuntimeException(this.getClass().getName() + " does not support shapes of type " + shape.getClass().getName());

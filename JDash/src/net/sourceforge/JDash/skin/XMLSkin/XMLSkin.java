@@ -163,6 +163,7 @@ public class XMLSkin extends Skin
 	private static final String VALUE_MAIN			= "main";
 	private static final String VALUE_LOW			= "low";
 	private static final String VALUE_HIGH			= "high";
+	private static final String VALUE_SYSTEM		= "system";
 	
 	/** This is the fontfile name to use in a text component is you wish to use the built in digital font */
 //	public static final String VALUE_JDASH_DIGITAL	= "jdash-digital";
@@ -194,9 +195,9 @@ public class XMLSkin extends Skin
 	/******************************************************
 	 * Create a new xml skin class.
 	 ******************************************************/
-	public XMLSkin(SkinFactory ownerFactory, URL skinXmlFile) throws Exception
+	public XMLSkin(SkinFactory ownerFactory, URL skinXmlFile, String id) throws Exception
 	{
-		this(ownerFactory, skinXmlFile, null);
+		this(ownerFactory, skinXmlFile, id, null);
 		
 //		{
 //    	/* Write the xml to the return string */
@@ -229,9 +230,11 @@ public class XMLSkin extends Skin
 	 * @param docToAddTo IN - the xml doc, if any to add nodes to.
 	 * @throws Exception
 	 ******************************************************/
-	private XMLSkin(SkinFactory ownerFactory, URL skinXmlFile, Document docToAddTo) throws Exception
+	private XMLSkin(SkinFactory ownerFactory, URL skinXmlFile, String id, Document docToAddTo) throws Exception
 	{
 		super(ownerFactory);
+		
+		this.id_ = id;
 		
 		if (ownerFactory == null)
 		{
@@ -338,7 +341,6 @@ public class XMLSkin extends Skin
 		
 		/* Setup the unique id */
 		File skinFile = new File(skinUrl.getFile());
-		this.id_ = skinFile.getName() + "-" + getName();
 
 		/* Set the description */
 		this.description_ = extractString(NODE_SKIN + "/" + NODE_DESC);
@@ -354,7 +356,7 @@ public class XMLSkin extends Skin
 		if (extendedSkinName != null)
 		{
 			File extSkinFile = new File(skinFile.getParent(), extendedSkinName);
-			new XMLSkin(getOwnerFactory(), extSkinFile.toURL(), this.xmlSkinDoc_);
+			new XMLSkin(getOwnerFactory(), extSkinFile.toURL(), getId(), this.xmlSkinDoc_);
 		}
 		
 		/* Set the resource url for this skin */
@@ -619,7 +621,15 @@ public class XMLSkin extends Skin
 		{
 			
 			String fontSource = extractString(NODE_SKIN + "/" + NODE_FONT + "[@" + ATTRIB_NAME + "='" + fontName + "']/@" + ATTRIB_SRC );
-			f = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(new File(this.resourceUrl_ + File.separatorChar + fontSource)));
+			
+			if (fontSource.startsWith(VALUE_SYSTEM + VALUE_DELIM))
+			{
+				f = new Font(fontName, Font.BOLD, 1);
+			}
+			else
+			{
+				f = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(new File(this.resourceUrl_ + File.separatorChar + fontSource)));
+			}
 		}
 		
 		if (f == null)

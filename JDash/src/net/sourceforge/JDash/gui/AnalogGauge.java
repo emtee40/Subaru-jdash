@@ -97,10 +97,6 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	
 	private static final Double NEEDLE_RESET_STEP_IN_DEGREES = 20.0;
 
-//	
-//	private double previousTheta_ = -99D;
-//	private double previousHighTheta_ = -99D;
-//	private double previousLowTheta_ = -99D;
 	
 	private Point pivotPoint_ = null;
 	private int needleDegreeMin_ = 0;
@@ -317,7 +313,6 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	 *******************************************************/
 	private void resetLowNeedle()
 	{
-//		this.lowNeedleLastReset_ = 0L;
 		this.lowNeedleDoReset_ = true;
 	}
 	
@@ -327,7 +322,6 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	 ******************************************************/
 	private void resetHighNeedle()
 	{
-//		this.highNedleLastReset_ = 0L;
 		this.highNeedleDoReset_ = true;
 	}
 	
@@ -373,6 +367,11 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		
 		
 		/* Calculate the high needle angle, Start by checking if a reset has been called */
+		if (System.currentTimeMillis() > (this.highNeedleLastReset_ + this.highNeedleResetDelay_))
+		{
+			resetHighNeedle();
+		}
+
 		if (this.highNeedleDoReset_)
 		{
 			/* Decrement the high needle */
@@ -383,13 +382,19 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 				this.highNeedleLastReset_ = System.currentTimeMillis();
 			}
 		}
-		else if ((valueInDegrees > this.highNeedleValueInDegrees_) || (System.currentTimeMillis() > (this.highNeedleLastReset_ + this.highNeedleResetDelay_)))
+		else if (valueInDegrees > this.highNeedleValueInDegrees_)
 		{
 			this.highNeedleValueInDegrees_ = valueInDegrees;
-			this.highNeedleLastReset_ = 0L;
+			this.highNeedleLastReset_ = System.currentTimeMillis();
 		}
 		
+		
 		/* Calculate the low needle angle, start by checking if a reset has been called */
+		if (System.currentTimeMillis() > (this.lowNeedleLastReset_ + this.lowNeedleResetDelay_))
+		{
+			this.resetLowNeedle();
+		}
+
 		if (this.lowNeedleDoReset_)
 		{
 			/* Increment the low needle */
@@ -397,13 +402,14 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 			if (this.lowNeedleValueInDegrees_ >= getDegreeMax() || this.lowNeedleValueInDegrees_ >= valueInDegrees)
 			{
 				this.lowNeedleDoReset_ = false;
-				this.lowNeedleLastReset_ = 0L;
+				this.lowNeedleLastReset_ = System.currentTimeMillis();
 			}
 			
 		}
-		else if ((valueInDegrees < this.lowNeedleValueInDegrees_) || (System.currentTimeMillis() > (this.lowNeedleLastReset_ + this.lowNeedleResetDelay_)))
+		else if (valueInDegrees < this.lowNeedleValueInDegrees_)
 		{
 			this.lowNeedleValueInDegrees_ = valueInDegrees;
+
 			this.lowNeedleLastReset_ = System.currentTimeMillis();
 		}
 		

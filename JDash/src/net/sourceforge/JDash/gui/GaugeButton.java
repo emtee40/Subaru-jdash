@@ -153,8 +153,10 @@ public class GaugeButton
 		{
 			public void actionPerformed(ActionEvent ae)
 			{
+				System.out.println("Button Pressed");
 				for (SkinEvent se : getDownActions())
 				{
+					System.out.println("Sending " + se);
 					skin_.fireSkinEvent(se);
 				}
 			}

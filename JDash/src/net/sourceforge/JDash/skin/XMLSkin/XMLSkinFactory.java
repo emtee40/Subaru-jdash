@@ -58,34 +58,34 @@ public class XMLSkinFactory extends SkinFactory
 		/* Get the list of all files in the base directory */
 		File configDir = new File(Setup.SETUP_CONFIG_SKINS_DIR + File.separatorChar + XML_SKINS_DIR);
 		
-		/* Check each jar file */
-		for (File f : configDir.listFiles())
-		{
-			/* If the file is a jar file, then search it's contents for any .skn files */
-			if (f.getName().endsWith(".jar") == true)
-			{
-				
-				JarFile jarFile = new JarFile(f);
-				
-				/* Get the entries in this jar file, so we can check each one */
-				Enumeration e = jarFile.entries();
-				while (e.hasMoreElements())
-				{
-					/* Get the particular entry */
-					JarEntry jarEntry = (JarEntry)e.nextElement();
-					
-					/* If it's a .skn file, then we'll use it */
-					if (jarEntry.getName().endsWith(SKIN_FILE_EXTENSION) == true)
-					{
-						URL jarEntryUrl = this.getClass().getResource("/" + jarEntry.getName());
-						
-						/* Load the skin so we can get it's name */
-						XMLSkin skin = new XMLSkin(this, jarEntryUrl);
-						this.skins_.add(skin);
-					}
-				}
-			}
-		}
+//		/* Check each jar file */
+//		for (File f : configDir.listFiles())
+//		{
+//			/* If the file is a jar file, then search it's contents for any .skn files */
+//			if (f.getName().endsWith(".jar") == true)
+//			{
+//				
+//				JarFile jarFile = new JarFile(f);
+//				
+//				/* Get the entries in this jar file, so we can check each one */
+//				Enumeration e = jarFile.entries();
+//				while (e.hasMoreElements())
+//				{
+//					/* Get the particular entry */
+//					JarEntry jarEntry = (JarEntry)e.nextElement();
+//					
+//					/* If it's a .skn file, then we'll use it */
+//					if (jarEntry.getName().endsWith(SKIN_FILE_EXTENSION) == true)
+//					{
+//						URL jarEntryUrl = this.getClass().getResource("/" + jarEntry.getName());
+//						
+//						/* Load the skin so we can get it's name */
+//						XMLSkin skin = new XMLSkin(this, jarEntryUrl);
+//						this.skins_.add(skin);
+//					}
+//				}
+//			}
+//		}
 		
 		
 		/* Now..Lets check each sub directory */
@@ -97,7 +97,8 @@ public class XMLSkinFactory extends SkinFactory
 				{
 					if (sf.getName().endsWith(SKIN_FILE_EXTENSION) == true)
 					{
-						XMLSkin skin = new XMLSkin(this, sf.toURL());
+						String id = sf.getName();
+						XMLSkin skin = new XMLSkin(this, sf.toURL(), sf.getParent() + File.separatorChar + sf.getName());
 						this.skins_.add(skin);
 					}
 				}

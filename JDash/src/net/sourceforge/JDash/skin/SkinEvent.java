@@ -34,6 +34,11 @@ import java.util.List;
  ******************************************************/
 public class SkinEvent
 {
+	
+	/** this object represents the special reserved destination "all".  This means that
+	 * any object that wishes to respond to this event, need only check for a destination
+	 * matching this string */
+	public static final String DESTINATION_ALL = "all";
 
 	private String destination_ = null;
 	private String action_ = null;
@@ -74,6 +79,15 @@ public class SkinEvent
 		return this.action_;
 	}
 
+	
+	/*******************************************************
+	 * Override
+	 * @see java.lang.Object#toString()
+	 *******************************************************/
+	public String toString()
+	{
+		return this.getDestination() + Skin.VALUE_DELIM_2 + getAction();
+	}
 	
 }
 

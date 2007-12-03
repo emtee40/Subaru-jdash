@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class TestMonitor extends BaseMonitor
 {
 	
-	private static final int DELAY = 100;
+	private static final int DELAY = 50;
 
 	/*****************************************************
 	 * @param params IN - the list of parameters to monitor.

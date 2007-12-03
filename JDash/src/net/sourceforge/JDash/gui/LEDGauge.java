@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
+import net.sourceforge.JDash.skin.SkinEvent;
+import net.sourceforge.JDash.skin.SkinEventListener;
 
 
 /*******************************************************
@@ -48,10 +50,16 @@ import net.sourceforge.JDash.gui.shapes.TextShape;
  * and shrink like an A/F gauge.  This is the clas for you.
  * 
  ******************************************************/
-public class LEDGauge extends AbstractGauge implements PaintableGauge
+public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEventListener
 {
 	
 	public static final long serialVersionUID = 0L;
+	
+	/** For convience only, this is simply a reference to the same object in AnalogGauge */
+	public static final String ACTION_HIGH_RESET = "high-reset";
+
+	/** For convience only, this is simply a reference to the same object in AnalogGauge */
+	public static final String ACTION_LOW_RESET = "low-reset";
 	
 	private ArrayList<LED> leds_ = new ArrayList<LED>();
 	
@@ -72,6 +80,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge
 	/* Remember which LED has been assigned the low and high indicators */
 	private LED lowNeedleLed_ = null;
 	private LED highNeedleLed_ = null;
+	
 	
 	/* We'll need to remember the needle bounds for when the LED isn't litup */
 	private Rectangle highNeedleLedBounds_ = null;
@@ -165,6 +174,47 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge
 	}
 	
 	
+	/********************************************************
+	 * Force the reset of the low needle.
+	 *******************************************************/
+	private void resetLowNeedle()
+	{
+		this.lowNeedleLastReset_ = 0L;
+	}
+	
+	
+	/*******************************************************
+	 * force the reset of the hight needle 
+	 ******************************************************/
+	private void resetHighNeedle()
+	{
+		this.highNeedleLastReset_ = 0L;
+	}
+	
+	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
+	 *******************************************************/
+	public void actionPerformed(SkinEvent e)
+	{
+		if (SkinEvent.DESTINATION_ALL.equals(e.getDestination()))
+		{
+			
+			if (ACTION_HIGH_RESET.equals(e.getAction()))
+			{
+				this.resetHighNeedle();
+			}
+			
+			if (ACTION_LOW_RESET.equals(e.getAction()))
+			{
+				this.resetLowNeedle();
+			}
+		}
+		
+	}
+	
+	
 	
 	/*******************************************************
 	 * Override
@@ -245,7 +295,6 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge
 						bounds.add(awtShape.getBounds());
 					}
 					
-				
 					/* Add up the highest LED bounds */
 					if (highestLitLED == led)
 					{
@@ -389,12 +438,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge
 	public void paint(AbstractGaugePanel panel, Graphics2D g2, AffineTransform scalingTransform)
 	{
 
-		/* It's possible to get a paint event without having a sensor event. so 
-		 * we'll just draw a raw gauge */
-		if (this.preGenAwtShapes_ == null)
-		{
-			preRender(scalingTransform, true);
-		}
+		preRender(scalingTransform, true);
 		
 		for (int index = 0; index < this.preGenAwtShapes_.size(); index++)
 		{

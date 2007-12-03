@@ -142,7 +142,26 @@ public class XMLGaugePanel extends AbstractGaugePanel
 	@Override
 	public void updateDisplay()
 	{
+		/* Tell this component to repaint itself, which results in each paintable
+		 * gauge getting a paint() method call */
 		repaint();
+		
+		/* Send each swing component gauge an updateDisplay message */
+		try
+		{
+			for (int index = 0; index < ((XMLSkin)getSkin()).getGaugeCount(); index++)
+			{
+				AbstractGauge gauge = ((XMLSkin)getSkin()).getGauge(index);
+				if (gauge instanceof SwingComponentGauge)
+				{
+					((SwingComponentGauge)gauge).updateDisplay();
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 	
 	

@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.gui;
 
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -195,7 +196,7 @@ public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge
 		this.plotCanvasRect_.y = (int)y;
 		this.plotCanvasRect_.width = (int)width;
 		this.plotCanvasRect_.height = (int)height;
-		
+
 		
 	}
 
@@ -209,7 +210,9 @@ public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge
 	public List<Component> getGaugeComponents()
 	{
 		List<Component> cList = new ArrayList<Component>();
-		cList.add(this.plotCanvas_.getGraphicsCanvas());
+		Canvas canvas = this.plotCanvas_.getGraphicsCanvas(); 
+		canvas.setBounds(this.plotCanvasRect_);
+		cList.add(canvas);
 		return cList;
 	}
 	
@@ -239,13 +242,17 @@ public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge
 	
 
 
-	/**
+	
+	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.gui.SwingComponentGauge#updateDisplay()
 	 *******************************************************/
 	public void updateDisplay()
 	{
-		
 		/* If the parent gauge panel is flaged updates as suspended, then we'll stop here */
 //		if (getParentPanel().isGaugeDisplayUpdateSuspended() == true)
+		// TODO
 		if (1==2)
 		{
 			return;

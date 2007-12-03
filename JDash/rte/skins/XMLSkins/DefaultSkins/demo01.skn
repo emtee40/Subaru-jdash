@@ -442,4 +442,11 @@
    </gauge>
   
   
+  <!-- Line Graph for RPM -->
+	<gauge sensor="RPM" label="RPM" type="line-graph" x="370"  y="410"   width="340" height="200" seconds="60" sensor-min="-100"   sensor-max="17000" format="%f">
+      <text-high color="red"   size="20" x="720" y="480"  format="%02.0f" font="digital"/>
+      <text      color="blue"  size="20" x="720" y="520"  format="%02.0f" font="digital"/>
+      <text-low  color="green" size="20" x="720" y="560"  format="%02.0f" font="digital"/>
+    </gauge>
+  
 </skin>

@@ -5,7 +5,7 @@
      ====================================================================== -->
 <skin name="Demo - Gauge Types">
 
-  <description>This skin creates a whole bunch of different types and styles of gauges for the purpose of seeing what is possible to create with JDash.  Each gauge shows the RPM value.</description>
+  <description>This skin creates a whole bunch of different types and styles of gauges for the purpose of seeing what is possible to create with JDash.  Each gauge shows the RPM value in a different way.</description>
   
     <!-- Main Window -->
   <window width="800" height="600" type="window:50"  fill-color="black">

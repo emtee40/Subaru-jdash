@@ -91,13 +91,15 @@ public class LoggerExporter extends JDialog implements ParameterEventListener
 		/* Create an output stream */
 		FileOutputStream fos = new FileOutputStream(file);
 		
-		/* create a new exporter dialog */
+		/* create a new exporter dialog. Note, this exporter is Modal, so it will block on the setVisible() */
 		LoggerExporter exp = new LoggerExporter(owner, monitor, fos);
 		exp.setVisible(true);
 		
 		/* Flush and close the output stream */
 		fos.flush();
 		fos.close();
+		
+		monitor.fireProcessingFinishedEvent();
 	}
 
 	

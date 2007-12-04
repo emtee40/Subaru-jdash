@@ -398,7 +398,6 @@ public class PlaybackControlDialog extends JDialog
 			this.playbackMonitor_.setFastPlayback(true);
 			((DashboardFrame)getOwner()).suspendGaugeDisplayUpdates(true);
 			
-			
 			/* Export */
 			LoggerExporter.export(this, this.playbackMonitor_);
 			

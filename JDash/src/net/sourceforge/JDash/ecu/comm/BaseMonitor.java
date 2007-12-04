@@ -136,7 +136,6 @@ public abstract class BaseMonitor implements ECUMonitor
      *******************************************************/
     public void fireProcessingFinishedEvent()
     {
-    	System.out.println("Marking Time");
         time_.marktime();
         fireProcessingParameterEvent(time_);
 

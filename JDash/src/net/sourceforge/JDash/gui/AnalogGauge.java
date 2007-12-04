@@ -291,7 +291,8 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	public void actionPerformed(SkinEvent e)
 	{
 		
-		if (("" + hashCode()).equals(e.getDestination()))
+		if (("" + hashCode()).equals(e.getDestination()) || 
+			(SkinEvent.DESTINATION_ALL.equals(e.getDestination())))
 		{
 			if (ACTION_HIGH_RESET.equals(e.getAction()))
 			{
@@ -442,7 +443,7 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		for (AbstractShape shape : this.lowNeedleShapes_)
 		{
 			/* Get the awt shape */
-			Shape awtShape = shape.getShape();
+			Shape awtShape = shape.createAWTShape();
 								
 			/* First, rotate the shape */
 			awtShape = AffineTransform.getRotateInstance(lowNeedleTheta).createTransformedShape(awtShape);
@@ -473,7 +474,7 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		for (AbstractShape shape : this.highNeedleShapes_)
 		{
 			/* Get the awt shape */
-			Shape awtShape = shape.getShape();
+			Shape awtShape = shape.createAWTShape();
 								
 			/* First, rotate the shape */
 			awtShape = AffineTransform.getRotateInstance(highNeedleTheta).createTransformedShape(awtShape);
@@ -505,7 +506,7 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		for (AbstractShape shape : this.mainNeedleShapes_)
 		{
 			/* Get the awt shape */
-			Shape awtShape = shape.getShape();
+			Shape awtShape = shape.createAWTShape();
 								
 			/* First, rotate the shape */
 			awtShape = AffineTransform.getRotateInstance(mainNeedleTheta).createTransformedShape(awtShape);

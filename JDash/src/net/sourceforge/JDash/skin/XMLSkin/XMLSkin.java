@@ -116,6 +116,7 @@ public class XMLSkin extends Skin
 	private static final String NODE_LED		= "led";
 	private static final String NODE_POINT		= "point";
 	private static final String NODE_FONT		= "font";
+	private static final String NODE_STATIC		= "static";
 	
 	private static final String NODE_BUTTON				= "button";
 	private static final String NODE_POLYGON			= "polygon";
@@ -722,6 +723,9 @@ public class XMLSkin extends Skin
 		}
 		
 		
+		/* Add any static shapes */
+		addStaticShapes(index, gauge);
+		
 		/* If this gauge is a skin event listener, then we can go ahead and automatically
 		 * add it to our listener list */
 		if (gauge instanceof SkinEventListener)
@@ -899,7 +903,7 @@ public class XMLSkin extends Skin
 		
 		
 		/* Get Text Shape */
-		TextShape textShape = createTextShape(gaugePath + "/" + NODE_TEXT);
+		TextShape textShape = createTextShape(gaugePath + "/" + NODE_TEXT, 0, 0);
 		
 		/* Get the relative point values */
 		int pointX = extractInt(gaugePath + "/@" + ATTRIB_X);
@@ -941,7 +945,7 @@ public class XMLSkin extends Skin
 		/* Create the Analog Gauge */
 		LEDGauge ledGauge = new LEDGauge(param, new Point(pointX, pointY));
 		
-		/* An LED Gauge is made up of n LED comonents.  Each component is made up */
+		/* An LED Gauge is made up of n LED components.  Each component is made up */
 		int ledCount = extractInt("count(" + gaugePath + "/" + NODE_LED + "[*])");
 		for (int ledIndex = 1; ledIndex <= ledCount; ledIndex++)
 		{
@@ -1103,21 +1107,21 @@ public class XMLSkin extends Skin
 		/* value Text */
 		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_MAIN + "'])") > 0)
 		{
-			mainText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_MAIN + "']");
+			mainText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_MAIN + "']", 0, 0);
 		}
 		
 		
 		/* High Text */
 		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_HIGH + "'])") > 0)
 		{
-			highText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_HIGH + "']");
+			highText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_HIGH + "']", 0, 0);
 		}
 		
 		
 		/* Low Text */
 		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_LOW + "'])") > 0)
 		{
-			lowText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_LOW + "']");
+			lowText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_LOW + "']", 0, 0);
 		}
 		
 		
@@ -1128,12 +1132,56 @@ public class XMLSkin extends Skin
 	}
 	
 	
+	/*******************************************************
+	 * Given the xml path to the &lt;static&gt; element, add 
+	 * all child shape elements to the gauges static shapes.
+	 * 
+	 * @param staticPath
+	 * @param gauge
+	 *******************************************************/
+	private void addStaticShapes(int gaugeIndex, AbstractGauge gauge) throws Exception
+	{
+
+		/* Get the gauge node */
+		String gaugePath = NODE_GAUGE + "[" + gaugeIndex + "]";
+	
+		int shapeCount = extractInt("count(" + gaugePath + "/" + NODE_STATIC + "/*)");
+		for (int shapeIndex = 1; shapeIndex <= shapeCount; shapeIndex++)
+		{
+			AbstractShape shape = createShape(gaugePath + "/" + NODE_STATIC + "/*[" + shapeIndex + "]", gauge.getPosition().getX(), gauge.getPosition().getY());
+			
+			if (shape instanceof ButtonShape)
+			{
+				throw new Exception("Buttons are not alloed inside the static shapes element.\n" + gaugePath);
+			}
+			
+			gauge.addStaticShape(shape);
+
+		}
+			
+	}
+	
+	
 	/********************************************************
+	 * Calls createShape with 0,0 for the x and y offset.
+	 * @param shapePath
+	 * @param xOffset
+	 * @return
+	 *******************************************************/
+	private AbstractShape createShape(String shapePath) throws Exception
+	{
+		return createShape(shapePath, 0, 0);
+	}
+	
+	
+	/********************************************************
+	 * The same as createShape(shape, xOffset, yOffset), except that the shapes x and y values
+	 * will be adjusted by the xOffset and yOffset values.
 	 * create a shape from the given shape path.
 	 * @param shapePath
 	 * @return
 	 *******************************************************/
-	private AbstractShape createShape(String shapePath) throws Exception
+	private AbstractShape createShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		/* get the name of this shape */
 		String shapeType = extractString("name(" + shapePath + ")");
@@ -1141,35 +1189,35 @@ public class XMLSkin extends Skin
 		/* Given the shape type, create the property shape */
 		if (NODE_POLYGON.equals(shapeType) == true)
 		{
-			return createPolygonShape(shapePath);
+			return createPolygonShape(shapePath, xOffset, yOffset);
 		}
 		else if (NODE_ELLIPSE.equals(shapeType) == true)
 		{
-			return createElipseShape(shapePath);
+			return createElipseShape(shapePath, xOffset, yOffset);
 		}
 		else if (NODE_LINE.equals(shapeType) == true)
 		{
-			return createLineShape(shapePath);
+			return createLineShape(shapePath, xOffset, yOffset);
 		}
 		else if (NODE_RECTANGLE.equals(shapeType) == true)
 		{
-			return createRectangleShape(shapePath);
+			return createRectangleShape(shapePath, xOffset, yOffset);
 		}
 		else if (NODE_ROUND_RECTANGLE.equals(shapeType) == true)
 		{
-			return createRoundRectangleShape(shapePath);
+			return createRoundRectangleShape(shapePath, xOffset, yOffset);
 		}
 		else if (NODE_TEXT.equals(shapeType) == true)
 		{
-			return createTextShape(shapePath);
+			return createTextShape(shapePath, xOffset, yOffset);
 		}
 		else if (NODE_IMAGE.equals(shapeType) == true)
 		{
-			return createImageShape(shapePath);
+			return createImageShape(shapePath, xOffset, yOffset);
 		}
 		else if (NODE_BUTTON.equals(shapeType) == true)
 		{
-			return createButtonShape(shapePath);
+			return createButtonShape(shapePath, xOffset, yOffset);
 		}
 		else
 		{
@@ -1227,7 +1275,7 @@ public class XMLSkin extends Skin
 	 * @param shapePath
 	 * @return
 	 *******************************************************/
-	private PolygonShape createPolygonShape(String shapePath) throws Exception
+	private PolygonShape createPolygonShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		PolygonShape newPolygon = new PolygonShape();
 		
@@ -1239,6 +1287,10 @@ public class XMLSkin extends Skin
 		{
 			int x = extractInt(shapePath + "/" + NODE_POINT + "[" + pointIndex + "]/@" + ATTRIB_X);
 			int y = extractInt(shapePath + "/" + NODE_POINT + "[" + pointIndex + "]/@" + ATTRIB_Y);
+			
+			x += xOffset;
+			y += yOffset;
+
 			newPolygon.addPoint(x, y);
 		}
 
@@ -1254,7 +1306,7 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	private EllipseShape createElipseShape(String shapePath) throws Exception
+	private EllipseShape createElipseShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		
 		
@@ -1262,6 +1314,9 @@ public class XMLSkin extends Skin
 		double y = extractDouble(shapePath + "/@" + ATTRIB_Y);
 		double w = extractDouble(shapePath + "/@" + ATTRIB_WIDTH);
 		double h = extractDouble(shapePath + "/@" + ATTRIB_HEIGHT);
+		
+		x += xOffset;
+		y += yOffset;
 		
 		EllipseShape ellipse = new EllipseShape(x, y, w, h); 
 		
@@ -1276,7 +1331,7 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 ******************************************************/
-	private LineShape createLineShape(String shapePath) throws Exception
+	private LineShape createLineShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		
 		
@@ -1286,6 +1341,12 @@ public class XMLSkin extends Skin
 		int x2 = extractInt(shapePath + "/" + NODE_POINT + "[2]/@" + ATTRIB_X);
 		int y2 = extractInt(shapePath + "/" + NODE_POINT + "[2]/@" + ATTRIB_Y);
 
+		x1 += xOffset;
+		y1 += yOffset;
+		x2 += xOffset;
+		y2 += yOffset;
+
+		
 		/* Create the line */
 		LineShape lineShape = new LineShape(x1,y1, x2, y2);
 		
@@ -1302,7 +1363,7 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 ******************************************************/
-	private RectangleShape createRectangleShape(String shapePath) throws Exception
+	private RectangleShape createRectangleShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		
 		
@@ -1312,8 +1373,11 @@ public class XMLSkin extends Skin
 		double w = extractDouble(shapePath + "/@" + ATTRIB_WIDTH);
 		double h = extractDouble(shapePath + "/@" + ATTRIB_HEIGHT);
 
+		x += xOffset;
+		y += yOffset;
+		
 		/* Create the line */
-		RectangleShape rectShape = new RectangleShape(x,y, w, h);
+		RectangleShape rectShape = new RectangleShape(x ,y , w, h);
 		
 		/* Add the standard attribues */
 		addShapeAttributes(shapePath, rectShape);
@@ -1328,7 +1392,7 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 ******************************************************/
-	private RoundRectangleShape createRoundRectangleShape(String shapePath) throws Exception
+	private RoundRectangleShape createRoundRectangleShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		
 		
@@ -1340,6 +1404,9 @@ public class XMLSkin extends Skin
 		double aw = extractDouble(shapePath + "/@" + ATTRIB_ARC_WIDTH);
 		double ah = extractDouble(shapePath + "/@" + ATTRIB_ARC_HEIGHT);
 
+		x += xOffset;
+		y += yOffset;
+		
 		/* Create the line */
 		RoundRectangleShape rectShape = new RoundRectangleShape(x,y, w, h, aw, ah);
 		
@@ -1356,7 +1423,7 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 ******************************************************/
-	private TextShape createTextShape(String shapePath) throws Exception
+	private TextShape createTextShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		
 		/* Add each point. There should be 2, and only 2 */
@@ -1365,6 +1432,9 @@ public class XMLSkin extends Skin
 		String format = extractString(shapePath + "/@" + ATTRIB_FORMAT);
 		String fontName = extractString(shapePath + "/@" + ATTRIB_FONT);
 		Font font = null;
+		
+		x += xOffset;
+		y += yOffset;
 		
 		if (fontName == null)
 		{
@@ -1415,7 +1485,7 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	private ImageShape createImageShape(String shapePath) throws Exception
+	private ImageShape createImageShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		/* Add each point. There should be 2, and only 2 */
 		String name = extractString(shapePath + "/@" + ATTRIB_NAME);
@@ -1423,6 +1493,9 @@ public class XMLSkin extends Skin
 		double y = extractDouble(shapePath + "/@" + ATTRIB_Y);
 		double w = extractDouble(shapePath + "/@" + ATTRIB_WIDTH);
 		double h = extractDouble(shapePath + "/@" + ATTRIB_HEIGHT);
+
+		x += xOffset;
+		y += yOffset;
 
 		/* Create the shape */
 		ImageShape imageShape = new ImageShape(getImage(name), x, y, w, h);
@@ -1439,7 +1512,7 @@ public class XMLSkin extends Skin
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	private ButtonShape createButtonShape(String shapePath) throws Exception
+	private ButtonShape createButtonShape(String shapePath, double xOffset, double yOffset) throws Exception
 	{
 		String type = extractString(shapePath + "/@" + ATTRIB_TYPE);
 		double x = extractDouble(shapePath + "/@" + ATTRIB_X);
@@ -1447,6 +1520,9 @@ public class XMLSkin extends Skin
 		double w = extractDouble(shapePath + "/@" + ATTRIB_WIDTH);
 		double h = extractDouble(shapePath + "/@" + ATTRIB_HEIGHT);
 		
+		x += xOffset;
+		y += yOffset;
+
 		String upAction = null;
 		String downAction = null;
 		

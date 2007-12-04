@@ -89,7 +89,7 @@ public abstract class AbstractShape
 	 * Returns the shape that this abstract shape represents.
 	 * @return
 	 *******************************************************/
-	public abstract Shape getShape();
+	public abstract Shape createAWTShape();
 	
 	
 	

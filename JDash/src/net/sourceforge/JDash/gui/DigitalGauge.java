@@ -181,7 +181,7 @@ public class DigitalGauge extends AbstractGauge implements PaintableGauge
 		}
 
 		/* The Position */
-		Rectangle position = this.textShape_.getShape().getBounds();
+		Rectangle position = this.textShape_.createAWTShape().getBounds();
 		position.x += getPosition().x;
 		position.y += getPosition().y;
 		position = scalingTransform.createTransformedShape(position).getBounds();

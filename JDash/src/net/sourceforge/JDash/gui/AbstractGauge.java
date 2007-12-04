@@ -29,10 +29,13 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.gui.shapes.AbstractShape;
 
 /*******************************************************
  * An abstract gauge component.  Most of what is displayed
@@ -51,8 +54,9 @@ public abstract class AbstractGauge
 	/** The ECU parameter that this gauge is setup to display values for */
 	private Parameter parameter_ = null;
 
-	
 	private Point position_ = null;
+	
+	private List<AbstractShape> staticShapes_ = null;
 	
 	/******************************************************
 	 * Create a new default analog gauge.
@@ -85,4 +89,33 @@ public abstract class AbstractGauge
 	}
 
 	
+	/*******************************************************
+	 * A gauge can optionally have a list of static shapes that
+	 * are intended to be painted into the background.
+	 * @return
+	 *******************************************************/
+	public List<AbstractShape> getStaticShapes()
+	{
+		return this.staticShapes_;
+	}
+
+	
+	/*******************************************************
+	 * Set the list of static background shapes.
+	 * @param shapes
+	 *******************************************************/
+	public void addStaticShape(AbstractShape shape)
+	{
+		System.out.println("Adding Static Shape: " + shape.getClass().getName());
+		
+		if (this.staticShapes_ == null)
+		{
+			this.staticShapes_ = new ArrayList<AbstractShape>();
+		}
+		
+		
+		/* Adjust the shapes x and y */
+		
+		this.staticShapes_.add(shape);
+	}
 }

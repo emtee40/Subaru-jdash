@@ -114,7 +114,7 @@ public class GaugeButton
 			
 			
 			/* Setup the original bounds from the shape. Note the position adjustment */
-			Rectangle rect = (Rectangle)shape.getShape().getBounds().clone();
+			Rectangle rect = (Rectangle)shape.createAWTShape().getBounds().clone();
 			rect.x += position.x;
 			rect.y += position.y;
 

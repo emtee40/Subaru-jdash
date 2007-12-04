@@ -317,7 +317,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 				{
 							
 					/* Get the awt shape */
-					Shape awtShape = shape.getShape();
+					Shape awtShape = shape.createAWTShape();
 
 					/* Then the translate transform */
 					awtShape = relativeTranslate.createTransformedShape(awtShape);
@@ -397,7 +397,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 			{
 						
 				/* Get the awt shape */
-				Shape awtShape = shape.getShape();
+				Shape awtShape = shape.createAWTShape();
 				
 				/* Now apply the panels scaling transform */
 				awtShape = scalingTransform.createTransformedShape(awtShape);
@@ -435,7 +435,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 			{
 						
 				/* Get the awt shape */
-				Shape awtShape = shape.getShape();
+				Shape awtShape = shape.createAWTShape();
 				
 				/* Now apply the panels scaling transform */
 				awtShape = scalingTransform.createTransformedShape(awtShape);

@@ -96,7 +96,16 @@ public class XMLGaugePanel extends AbstractGaugePanel
 		
 		/* The background shapes. */
 		this.backgroundShapes_ = skin.getWindowShapes();
-		
+
+		/* Add all static shapes to the background */
+		for (int index = 0; index < skin.getGaugeCount(); index++)
+		{
+			AbstractGauge gauge = skin.getGauge(index);
+			if (gauge.getStaticShapes() != null)
+			{
+				this.backgroundShapes_.addAll(gauge.getStaticShapes());
+			}
+		}
 		
 		/* And the background color */
 		setOpaque(false);
@@ -109,8 +118,14 @@ public class XMLGaugePanel extends AbstractGaugePanel
 		for (int index = 0; index < skin.getGaugeCount(); index++)
 		{
 			AbstractGauge gauge = skin.getGauge(index);
-			monitor.addParam(gauge.getParameter());
-			logger.addParameter(gauge.getParameter());
+			
+			/* Only add parameters, that have been defined */
+			if (gauge.getParameter() != null)
+			{
+				monitor.addParam(gauge.getParameter());
+				logger.addParameter(gauge.getParameter());
+			}
+			
 		}
 		
 		
@@ -259,13 +274,13 @@ public class XMLGaugePanel extends AbstractGaugePanel
 				if (shape instanceof TextShape)
 				{
 					TextShape textShape = (TextShape)shape;
-					Shape awtShape = shape.getShape();
+					Shape awtShape = shape.createAWTShape();
 					paintGlyphs(g2, textShape, awtShape.getBounds().x, awtShape.getBounds().y, textShape.getGlyphVector(g2.getFontRenderContext()));
 				}
 				else
 				{
 					/* All other background shapes */
-					paintShape(g2, shape, shape.getShape());
+					paintShape(g2, shape, shape.createAWTShape());
 				}
 			
 			}

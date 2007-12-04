@@ -85,7 +85,7 @@ public class ImageShape extends AbstractShape
 	 * @see net.sourceforge.JDash.gui.shapes.AbstractShape#getShape(java.util.List)
 	 *******************************************************/
 	@Override
-	public Shape getShape()
+	public Shape createAWTShape()
 	{
 		/* Create the elipse */
 		return new Rectangle2D.Double(this.x_, this.y_, this.w_, this.h_);

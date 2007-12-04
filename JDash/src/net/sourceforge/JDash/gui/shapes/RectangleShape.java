@@ -56,7 +56,7 @@ public class RectangleShape extends AbstractShape
 	 * @see net.sourceforge.JDash.gui.shapes.AbstractShape#getShape(java.util.List)
 	 *******************************************************/
 	@Override
-	public Shape getShape()
+	public Shape createAWTShape()
 	{
 		
 		/* Create the elipse */

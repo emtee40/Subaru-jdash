@@ -5,30 +5,21 @@
      ====================================================================== -->
 <skin name="Demo - Gauge Types">
 
-  <description>This skin creates a whole bunch of different types and styles of gauges for the purpose of seeing what is possible to create with JDash.  Each gauge shows the RPM value in a different way.</description>
+  <description>This skin creates a whole bunch of different types and styles of gauges for the purpose of seeing what is possible to create with JDash. You'll see RPM and Air Fuel values</description>
   
     <!-- Main Window -->
     <window width="800" height="600" type="window:50"  fill-color="black">
-
-      <!-- digital RPM -->
-      <rectangle color="white" fill-color="none" line-width="2" x="5" y="18" width="80" height="40" />
-      <text color="white" size="14" x="5" y="15" format="Digital Text" font="Arial"/>
-    
-      <!-- Analog RPM -->
-      <image name="rpm-01" x="300" y="200" width="200" height="200" /> 
-      <rectangle color="white" fill-color="none" line-width="2" x="300" y="200" width="200" height="200" />
-      <text color="white" size="14" x="300" y="197" format="Analog" font="Arial"/>
-      <text color="dark-red" size="14" x="380" y="388" format="Shift" font="Arial"/>
-    
-      <!-- LED String -->
-      <rectangle color="white" fill-color="none" line-width="2" x="115" y="15" width="455" height="150" />
-      <text color="white" size="14" x="115" y="13" format="LED Strings" font="Arial"/>
-    
+      <text color="yellow" size="14" x="580" y="30"  format="A collection of different" font="Arial"/>
+      <text color="yellow" size="14" x="580" y="50"  format="types of Gauges layed out" font="Arial"/>
+      <text color="yellow" size="14" x="580" y="70"  format="in a few different ways" font="Arial"/>
+      <text color="yellow" size="14" x="580" y="90"  format="to show the flexibility" font="Arial"/>
+      <text color="yellow" size="14" x="580" y="110" format="of JDash XML Skins." font="Arial"/>
     </window>
   
 
   <!-- Images -->
   <image name="rpm-01"                      src="rpm-01.jpg"/> 
+  <image name="af-01"                       src="af-01.jpg"/>
   <image name="red-toggle-off"              src="red-toggle-switch-off.gif"/> 
   <image name="red-toggle-on"               src="red-toggle-switch-on.gif"/> 
   <image name="red-push-off"                src="red-push-switch-off.jpg"/> 
@@ -46,8 +37,8 @@
   <color name="dark-orange"  value="#C35617" />
   <color name="green"        value="#00ff00" />
   <color name="dark-green"   value="#306754" />
-  <color name="blue"         value="#0000ff" />
-  <color name="dark-blue"    value="#151B8D"/>
+  <color name="dark-blue"    value="#0000ff" />
+  <color name="blue"         value="#2554C7"/>
   <color name="yellow"       value="#fffb0b" />
   
   <!-- Font Definitions -->
@@ -55,12 +46,42 @@
   <font name="Arial" src="system:Arial"/>
  
   <!-- Digital RPM -->
-  <gauge sensor="RPM" type="digital" x="10"  y="50">
-	  <text color="green" size="20" x="0" y="0" format="%5.0f"  font="digital"/>
+  <gauge sensor="RPM" type="digital" x="5"  y="20">
+    <static>
+      <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="40" />
+      <text color="white" size="14" x="0" y="-2" format="Digital Text" font="Arial"/>
+    </static>
+    <text color="green" size="20" x="5" y="35" format="%5.0f"  font="digital"/>
+  </gauge>
+
+  <!-- A simple button to reset all low needles -->
+  <gauge type="button" x="10" y="95">
+  
+    <static>
+      <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="50" />
+      <text color="white" size="14" x="0"  y="-2" format="Low Reset Btn" font="Arial"/>
+    </static>  
+  
+    <button 
+    	type="push-button" 
+    	x="10" 
+    	y="5" 
+    	width="36" 
+    	height="36" 
+    	down-action="all/low-reset"
+    	up-image="red-push-off" 
+    	down-image="red-push-on"/>
   </gauge>
 
   <!-- Analog RPM -->
   <gauge sensor="RPM" type="analog" x="400" y="300">
+  
+      <static>
+	      <image name="rpm-01" x="-100" y="-100" width="200" height="200" /> -->
+	      <rectangle color="white" fill-color="none" line-width="2" x="-100" y="-100" width="200" height="200" />
+	      <text color="white" size="14" x="-100" y="-118" format="Analog with High/Low indicators" font="Arial"/>
+	      <text color="white" size="14" x="-100" y="-105" format="and High Reset Button" font="Arial"/>
+      </static>
   
     <button 
     	type="push-button" 
@@ -68,7 +89,7 @@
     	y="20" 
     	width="36" 
     	height="36" 
-    	down-action="high-reset:low-reset:all/high-reset"
+    	down-action="high-reset"
     	up-image="red-push-off" 
     	down-image="red-push-on"/>
     
@@ -104,21 +125,59 @@
     <range sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125" />
     
   </gauge>
-
+  
+  
+   <!-- Analog Air Fuel Ratio -->
+  <gauge sensor="LAMBDA_1" type="analog" x="664" y="293">
+  
+    <static>
+      <image name="af-01" x="-62" y="-62" width="124" height="124" /> 
+      <rectangle color="white" fill-color="none" line-width="2" x="-67" y="-67" width="134" height="134" />
+      <text color="white" size="14" x="-67" y="-70" format="Analog Air Fuel" font="Arial"/>
+    </static>
+  
+    <needle type="main">
+      <rectangle color="yellow" fill-color="orange" line-width="1" x="-2" y="-40" width="4" height="10"/> 
+    </needle>
+    
+    <needle type="high" delay="4000">
+      <rectangle color="red" fill-color="dark-red" line-width="1" x="-2" y="-40" width="4" height="10"/> 
+    </needle>
+    
+    <needle type="low" delay="4000">
+      <rectangle color="green" fill-color="dark-green" line-width="1" x="-2" y="-40" width="4" height="10"/> 
+    </needle>
+    
+    <range sensor-min="0" sensor-max="2" gauge-min="-140" gauge-max="132"  reverse="true"/>
+    
+  </gauge>
+  
+  <!-- Digital AF -->
+  <gauge type="digital" x="662" y="293" sensor="LAMBDA_1">
+    <text color="yellow" size="13" x="-10" y="5" format="%1.2f" font="digital"/>
+  </gauge>
 
    <!-- Shift Light -->
   <gauge sensor="RPM" type="led" x="375" y="375">
+    <static>
+      <text color="dark-red" size="14" x="5" y="12" format="Shift" font="Arial"/> 
+    </static>
     <led sensor-min="6200" sensor-max="99999">
-      <round-rectangle color="dark-red" fill-color="red" line-width="1"  x="0" y="0" width="45" height="12" arcw="4" arch="4"/>
+      <round-rectangle color="dark-red" fill-color="red" line-width="1"  x="0" y="0" width="46" height="14" arcw="4" arch="4"/>
     </led>
   </gauge>
    
   
   <!-- Horizontal LED String -->
    <gauge sensor="RPM" type="led" x="120" y="20">
+   
+      <static>
+        <rectangle color="white" fill-color="none" line-width="2" x="-5" y="-5" width="455" height="150" />
+        <text color="white" size="14" x="-5" y="-10" format="LED Strings with High/Low indicators" font="Arial"/>
+      </static>
  
      <!-- High Needle -->  
-     <needle type="high" delay="-1" position="top">
+     <needle type="high" delay="2000" position="top">
        <polygon color="red" fill-color="dark-red" line-width="1">
          <point x="0"  y="5"/>
          <point x="-10" y="-15"/>
@@ -382,7 +441,7 @@
   
   
    <!-- Verticle LED String -->
-   <gauge sensor="RPM" type="led" x="530" y="140">
+   <gauge sensor="RPM" type="led" x="530" y="130">
      <led sensor-min="0" sensor-max="99999">
      	<rectangle color="dark-blue" fill-color="blue" line-width="1" x="0" y="0" width="35" height="10" />
      </led>
@@ -417,15 +476,13 @@
   
   <!-- Line Graph for RPM -->
 	<gauge sensor="RPM" label="RPM" type="line-graph" x="400"  y="410"  width="300" height="200" seconds="10" sensor-min="-100"   sensor-max="17000" format="%f">
-      <text type="high" color="red"   size="20" x="330" y="70"  format="%02.0f" font="digital"/>
-      <text type="main" color="blue"  size="20" x="330" y="110"  format="%02.0f" font="digital"/>
-      <text type="low"  color="green" size="20" x="330" y="150"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="20" x="310" y="70"  format="H%02.0f" font="digital"/>
+      <text type="main" color="blue"  size="20" x="310" y="110"  format=" %02.0f" font="digital"/>
+      <text type="low"  color="green" size="20" x="310" y="150"  format="L%02.0f" font="digital"/>
     </gauge>
     
     <gauge sensor="RPM" label="RPM" type="line-graph" x="95"  y="410"  width="300" height="200" seconds="150" sensor-min="-100"   sensor-max="17000" format="%f">
-      <text type="high" color="red"   size="20" x="-70" y="70"  format="%02.0f" font="digital"/>
-      <text type="main" color="blue"  size="20" x="-70" y="110"  format="%02.0f" font="digital"/>
-      <text type="low"  color="green" size="20" x="-70" y="150"  format="%02.0f" font="digital"/>
+      <text type="main" color="blue"  size="20" x="-60" y="110"  format="%02.0f ->" font="digital"/>
     </gauge>
     
 

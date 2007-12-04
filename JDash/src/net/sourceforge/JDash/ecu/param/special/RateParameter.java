@@ -26,6 +26,7 @@ package net.sourceforge.JDash.ecu.param.special;
 
 import net.sourceforge.JDash.ecu.param.MetaParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterException;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 
@@ -50,7 +51,14 @@ public class RateParameter extends MetaParameter {
     	try
     	{
 	        this.timeParam_ = time;
-//	        this.timeParam_.addObserver(this);
+	        this.timeParam_.addEventListener(new ParameterEventListener()
+	        {
+	        	public void valueChanged(Parameter p)
+	        	{
+	        		fireValueChangedEvent();
+	        	}
+	        });
+
     	}
     	catch(Exception e)
     	{

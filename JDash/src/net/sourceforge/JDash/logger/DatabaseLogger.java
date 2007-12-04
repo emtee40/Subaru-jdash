@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Observable;
 import java.util.Properties;
 
 import net.sourceforge.JDash.Setup;
@@ -44,6 +43,8 @@ import net.sourceforge.JDash.ecu.param.MetaParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
+import net.sourceforge.JDash.ecu.param.special.TimeParameter;
+import net.sourceforge.JDash.skin.SkinEvent;
 
 
 /*******************************************************
@@ -51,7 +52,7 @@ import net.sourceforge.JDash.ecu.param.ParameterRegistry;
  * Whant to read and/or write parameter values to a database,
  * then use this DAO.  Note that we only work with HSQLDB.
  ******************************************************/
-public class DatabaseLogger extends DataLogger implements ParameterEventListener
+public class DatabaseLogger implements DataLogger, ParameterEventListener
 {
 
 	/* By default allow ologging, But, it can be overridden */
@@ -81,6 +82,8 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	
 	private String currentLogId_ = null;
 	
+	private TimeParameter timeParameter_ = null;
+	
 	/*******************************************************
 	 * Create a new instance of a database logger DAO. This
 	 * constructor will open the existing database, or create
@@ -91,6 +94,8 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 		this.logIdSuffix_ = logIdSuffix;
 		this.parameterList_ = new ArrayList<Parameter>();
 		initSchema();
+		
+
 	}
 	
 	
@@ -126,9 +131,41 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	
 	/*******************************************************
 	 * Override
+	 * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
+	 *******************************************************/
+	public void actionPerformed(SkinEvent se)
+	{
+		
+		try
+		{
+		
+			if (SkinEvent.DESTINATION_LOGGER.equals(se.getDestination()))
+			{
+				if (ACTION_DISABLE.equals(se.getAction()))
+				{
+					this.enable(false);
+				}
+				else if (ACTION_ENABLE.equals(se.getAction()))
+				{
+					this.enable(true);
+				}
+				else
+				{
+					throw new Exception("A SkinEvent message destined for the Logger contained an unknown action\n" + se);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+	/*******************************************************
+	 * Override
 	 * @see net.sourceforge.JDash.logger.DataLogger#enableOverride(boolean)
 	 *******************************************************/
-	@Override
 	public void disableOverride(boolean disableLoggingOverride) throws Exception
 	{
 		this.disableLoggingOverride_ = disableLoggingOverride;
@@ -222,28 +259,7 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 		
 	}
 
-	
-	
-//	/*******************************************************
-//	 * Override
-//	 * @see net.sourceforge.JDash.logger.DataLogger#setParameters(java.util.List)
-//	 *******************************************************/
-//	@Override
-//	public void setParameters(List<Parameter> parameters) throws Exception
-//	{
-//		if (this.parameterList_ != null)
-//		{
-//			enable(false);
-//		}
-//		
-//		/* Copy the ECU Parameters, into our internal array list of parameters */
-//		for (Parameter p : parameters)
-//		{
-//			addParameter(p);
-//		}
-//
-//	}
-//	
+
 	
 	/*******************************************************
 	 * Add a parameter to the log.  We only track ECUParameters and the TIME parameter, any
@@ -251,7 +267,6 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	 * Override
 	 * @see net.sourceforge.JDash.logger.DataLogger#addParameter(net.sourceforge.JDash.ecu.param.Parameter)
 	 *******************************************************/
-	@Override
 	public void addParameter(Parameter param) throws Exception
 	{
 		/* If the parameter is already in our list, then don't add it again */
@@ -266,12 +281,12 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 			return;
 		}
 		
-		/* Force the adding of the TIME parameter */
-		if (param.getName().equals(ParameterRegistry.TIME_PARAM) == true)
+		/* Hang onto the time parameter */
+		if (param instanceof TimeParameter)
 		{
+			this.timeParameter_ = (TimeParameter)param;
 			this.parameterList_.add(param);
 		}
-		
 		
 		/* we only track ECU parameters, and the time parameter */
 		if (param instanceof ECUParameter == true)
@@ -297,23 +312,13 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	
 	
 	
-	/*******************************************************
-	 * This is the method called when the parameter fires an update event
-	 * to it's list of listeners.  We are added as a listener to each paramter.
-	 * Override
-	 * @see net.sourceforge.JDash.ecu.param.ParameterEventListener#valueChanged(net.sourceforge.JDash.ecu.param.Parameter)
-	 *******************************************************/
-	public void valueChanged(Parameter p)
-	{
-		recordParameterValue(p);
-	}
+
 	
 	
 	/*******************************************************
 	 * Override
 	 * @see net.sourceforge.JDash.logger.DataLogger#isEnabled()
 	 *******************************************************/
-	@Override
 	public boolean isEnabled() throws Exception
 	{
 		
@@ -334,6 +339,12 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	public void enable(boolean enable) throws Exception
 	{
 		
+		/* make sure the time parameter was added */
+		if (this.timeParameter_ == null)
+		{
+			throw new Exception("We cannot enable this logger, because the TimeParameter was not added.");
+		}
+		
 		/* The override is disabled */
 		if (this.disableLoggingOverride_ == true)
 		{
@@ -351,29 +362,16 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 		try
 		{
 			
-			
 			/* Enable or disable */
 			if (this.currentLogId_ == null)
 			{
-				
 				/* Open the database */
 				Calendar now = GregorianCalendar.getInstance();
 				this.currentLogId_ = String.format("%tF %tI:%tM:%tS %tp %tZ - %s", now, now, now, now, now, now, this.logIdSuffix_);
 				
-//				/* Observe the parameters */
-//				for (Parameter p : this.parameterList_)
-//				{
-//					p.addObserver(this);
-//				}
 			}
 			else
 			{
-//				/* Stop observing the parameters */
-//				for (Parameter p : this.parameterList_)
-//				{
-//					p.deleteObserver(this);
-//				}
-				
 				/* Close the database */
 				this.currentLogId_ = null;
 				
@@ -389,14 +387,13 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	
 	
 	/*******************************************************
-	 * We've received an update even from atleast one 
-	 * of the monitors.
+	 * This is the method called when the parameter fires an update event
+	 * to it's list of listeners.  We are added as a listener to each paramter.
 	 * Override
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 * @see net.sourceforge.JDash.ecu.param.ParameterEventListener#valueChanged(net.sourceforge.JDash.ecu.param.Parameter)
 	 *******************************************************/
-	private void recordParameterValue(Parameter param)
+	public void valueChanged(Parameter param)
 	{
-		
 		
 		/* If the logID is set to anything, then we'll log the values */
 		if (this.currentLogId_ == null)
@@ -480,7 +477,6 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	 * Override
 	 * @see net.sourceforge.JDash.logger.DataLogger#getLogCount()
 	 *******************************************************/
-	@Override
 	public int getLogCount() throws Exception
 	{
 		initSchema();
@@ -515,7 +511,6 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	 * Override
 	 * @see net.sourceforge.JDash.logger.DataLogger#getLogName(int)
 	 *******************************************************/
-	@Override
 	public String getLogName(int logIndex) throws Exception
 	{
 		
@@ -675,7 +670,6 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	 * Override
 	 * @see net.sourceforge.JDash.logger.DataLogger#getPrevious()
 	 *******************************************************/
-	@Override
 	public LogParameter getPrevious() throws Exception
 	{
 		if (this.playbackResultSet_.isBeforeFirst())
@@ -705,7 +699,6 @@ public class DatabaseLogger extends DataLogger implements ParameterEventListener
 	 * Override
 	 * @see net.sourceforge.JDash.logger.DataLogger#deleteLog(int)
 	 *******************************************************/
-	@Override
 	public void deleteLog(int logIndex) throws Exception
 	{
 		initSchema();

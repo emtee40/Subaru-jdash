@@ -723,7 +723,7 @@ public class XMLSkin extends Skin
 		}
 		
 		
-		/* Add any static shapes */
+		/* Add any static background shapes to this gauge */
 		addStaticShapes(index, gauge);
 		
 		/* If this gauge is a skin event listener, then we can go ahead and automatically

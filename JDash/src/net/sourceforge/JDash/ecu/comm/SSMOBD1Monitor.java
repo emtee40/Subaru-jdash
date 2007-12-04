@@ -91,6 +91,8 @@ public class SSMOBD1Monitor extends RS232Monitor
             	
             	try
             	{
+            		
+            		fireProcessingStartedEvent();
                 
 	                /* define the list of parameters that will be fetched.  This is based on if the
 	                 * packets rate has it ready for an update or not. */
@@ -140,6 +142,7 @@ public class SSMOBD1Monitor extends RS232Monitor
 	                		
 	                		/* Set the result to the parameter */
 	                		param.setResult(rxPacket[2]);
+	                		fireProcessingParameterEvent(param);
 	                		
 	                	} /* end of if statement */
 	                	
@@ -153,7 +156,7 @@ public class SSMOBD1Monitor extends RS232Monitor
 	                
 	                
 	                /* We've gone through the parameters once, so now we'll mark the time parameter */
-	                markTime();
+	                fireProcessingFinishedEvent();
 	                
 
                 }

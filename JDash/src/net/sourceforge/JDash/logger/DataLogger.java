@@ -24,18 +24,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.logger;
 
-import java.util.List;
-import java.util.Observer;
 
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.skin.SkinEventListener;
 
 
 /*******************************************************
  * This is the interface needed to implement in order for
  * a class to be a logger.
  ******************************************************/
-public abstract class DataLogger 
+public interface DataLogger extends SkinEventListener
 {
+	
+		/** When a skin event fires a message destined for loggers, one of the expected
+		 * actions is this one.  To enable logging  */
+		public static final String ACTION_ENABLE = "enable";
+		
+		/** When a skin event fires a message destined for loggers, one of the expected
+		 * actions is this one.  To disable logging  */
+		public static final String ACTION_DISABLE = "disable";
 	
 		/********************************************************
 		 * The enableability of a logger can be overidden with this
@@ -44,7 +51,7 @@ public abstract class DataLogger
 		 * @param enableOverride
 		 * @throws Exception
 		 *******************************************************/
-		public abstract void disableOverride(boolean enableOverride) throws Exception;
+		public void disableOverride(boolean enableOverride) throws Exception;
 	
 		
 		/********************************************************
@@ -53,7 +60,7 @@ public abstract class DataLogger
 		 * @param param IN - the param to add.
 		 * @throws Exception if a problem occured adding the param.
 		 ******************************************************/
-		public abstract void addParameter(Parameter param) throws Exception;
+		public void addParameter(Parameter param) throws Exception;
 		
 		/********************************************************
 		 * Return true if this logger is currently enabled.
@@ -61,7 +68,7 @@ public abstract class DataLogger
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public abstract boolean isEnabled() throws Exception;
+		public boolean isEnabled() throws Exception;
 		
 		/*******************************************************
 		 * Enable or disable logging.  This kinda the same thing
@@ -71,7 +78,7 @@ public abstract class DataLogger
 		 *
 		 * @param enable
 		 *******************************************************/
-		public abstract void enable(boolean enable) throws Exception;
+		public void enable(boolean enable) throws Exception;
 		
 		
 		/*******************************************************
@@ -79,7 +86,7 @@ public abstract class DataLogger
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public abstract int getLogCount() throws Exception;
+		public int getLogCount() throws Exception;
 		
 		
 		/*******************************************************
@@ -88,7 +95,7 @@ public abstract class DataLogger
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public abstract String getLogName(int logIndex) throws Exception;
+		public String getLogName(int logIndex) throws Exception;
 		
 		
 		/*******************************************************
@@ -100,7 +107,7 @@ public abstract class DataLogger
 		 * @param name IN - the new name.
 		 * @throws Exception
 		 *******************************************************/
-		public abstract void setLogName(int logIndex, String name) throws Exception;
+		public void setLogName(int logIndex, String name) throws Exception;
 		
 		
 		/*******************************************************
@@ -110,13 +117,15 @@ public abstract class DataLogger
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public abstract void deleteLog(int logIndex) throws Exception;
+		public void deleteLog(int logIndex) throws Exception;
 
 		
 		/********************************************************
 		 * @throws Exception
 		 *******************************************************/
-		public abstract void deleteAll() throws Exception;
+		public void deleteAll() throws Exception;
+		
+		
 		
 		/*******************************************************
 		 * If your intent is to use this logger for reading parameter
@@ -126,16 +135,24 @@ public abstract class DataLogger
 		 * 
 		 * @param logIndex IN - the log index to prepare.
 		 *******************************************************/
-		public abstract void prepareForPlayback(int logIndex) throws Exception;
+		public void prepareForPlayback(int logIndex) throws Exception;
 		
 		
 		
 		/*******************************************************
 		 * Get the next log parameter in order.  This will return the
 		 * next parameter, or a null of there are no more to return.
+		 * It is the responsibility of the logger to return the special
+		 * parameter TimeParameter between sets of values.  This special
+		 * paremter indicates to whom ever is getting values, that a
+		 * run of a set of values has been returned, and that after 
+		 * this TimeParameter, a new set will be returned.  
+		 * <br>
+		 * Simply put, the LoggerPlaybackMonitor uses the TimeParameter to
+		 * inform the display panel to update it's values.
 		 * @return
 		 *******************************************************/
-		public abstract LogParameter getNext() throws Exception;
+		public LogParameter getNext() throws Exception;
 
 		
 		
@@ -145,6 +162,6 @@ public abstract class DataLogger
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public abstract LogParameter getPrevious() throws Exception;
+		public LogParameter getPrevious() throws Exception;
 
 }

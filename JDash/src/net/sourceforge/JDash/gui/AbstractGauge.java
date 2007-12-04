@@ -106,7 +106,6 @@ public abstract class AbstractGauge
 	 *******************************************************/
 	public void addStaticShape(AbstractShape shape)
 	{
-		System.out.println("Adding Static Shape: " + shape.getClass().getName());
 		
 		if (this.staticShapes_ == null)
 		{

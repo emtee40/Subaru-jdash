@@ -39,6 +39,10 @@ public class SkinEvent
 	 * any object that wishes to respond to this event, need only check for a destination
 	 * matching this string */
 	public static final String DESTINATION_ALL = "all";
+	
+	/** This string represents the reserved destination code for the logger.  All loggers
+	 * must respond to SkinEvent messages with this destination code */
+	public static final String DESTINATION_LOGGER = "logger";
 
 	private String destination_ = null;
 	private String action_ = null;

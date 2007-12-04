@@ -210,6 +210,9 @@ public class SSMOBD2Monitor extends RS232Monitor
                 /* Send the TX packet, and wait for the RX packet */
                 try
                 {
+                	
+                	fireProcessingStartedEvent();
+                	
                     /* Now, we need to check that we are not trying to process TOO many parameters in one go.
                      * There is a maximum number of bytes that can be sent in one packet.  If we are about to
                      * exceed that, then we'll need to chop up our parameters into multiple packets.  Since
@@ -244,7 +247,7 @@ public class SSMOBD2Monitor extends RS232Monitor
                     
 
                     /* Once all packets in this run are sent and received, mark the time */
-                    markTime();
+                    fireProcessingFinishedEvent();
                     
                     /* Reset the packet failure count */
                     packetFailureCount = 0;
@@ -392,6 +395,8 @@ public class SSMOBD2Monitor extends RS232Monitor
     		
     		/* The result data is preceeded by a padding byte, thats why the +1 */
     		p.setResult(rxPacket.getData()[index + 1]);
+    		
+    		fireProcessingParameterEvent(p);
     	}
     }
     

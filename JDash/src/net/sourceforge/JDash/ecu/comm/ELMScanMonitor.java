@@ -275,6 +275,8 @@ public class ELMScanMonitor extends RS232Monitor
                 
                 try
                 {
+                	
+                	fireProcessingStartedEvent();
 					
 					//for (int index = 0; index < thisFetchList.size(); index++)
 					for (ECUParameter param : thisFetchList)
@@ -283,7 +285,7 @@ public class ELMScanMonitor extends RS232Monitor
                     }
 					
                     /* Once all packets in this run are sent and received, mark the time */
-                    markTime();
+                    fireProcessingFinishedEvent();
                     
                     /* Reset the packet failure count */
                     packetFailureCount = 0;
@@ -543,6 +545,8 @@ public class ELMScanMonitor extends RS232Monitor
 
 		/* Put the double value into the ecu parameter */
 		param.setResult((double)resultValue);
+		
+		fireProcessingParameterEvent(param);
 		
 		
 	}

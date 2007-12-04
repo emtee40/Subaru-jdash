@@ -211,6 +211,9 @@ public class Startup
 				logger.addParameter(paramRegistry.getParamForName(ParameterRegistry.TIME_PARAM));
 				logger.disableOverride(disableLoggingOverride);
 
+				
+				/* Add the logger to the skin as a SkinEventListener */
+				skinFactory.getDefaultSkin().addSkinEventListener(logger);
 			
 				
 				/* create the main dashboard frame */

@@ -253,11 +253,24 @@ public class LoggerPlaybackMonitor extends BaseMonitor
 						Thread.sleep(10);
 					}
 				}
+
 				
-				/* Ok.. send the result */
 				this.previousParameterTime_ = p.getEventTime();
 				this.previousSendTime_ = System.currentTimeMillis();
-				sendResult(p.getName(), p.getResult());
+
+				
+				/* If the parameter read was the TIME parameter, then we dont' send it's value, instead 
+				 * we treat it as a batch indicator */
+				if (p.getName().equals(ParameterRegistry.TIME_PARAM))
+				{
+					fireProcessingFinishedEvent();
+					fireProcessingStartedEvent();
+				}
+				else
+				{
+					/* Otherwise, send the result */
+					sendResult(p.getName(), p.getResult());
+				}
 				
 			}
 		}

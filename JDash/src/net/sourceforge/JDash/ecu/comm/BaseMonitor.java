@@ -136,6 +136,11 @@ public abstract class BaseMonitor implements ECUMonitor
      *******************************************************/
     public void fireProcessingFinishedEvent()
     {
+    	System.out.println("Marking Time");
+        time_.marktime();
+        fireProcessingParameterEvent(time_);
+
+    	
     	for (MonitorEventListener l : this.monitorListeners_)
     	{
     		l.processingFinished();
@@ -164,14 +169,6 @@ public abstract class BaseMonitor implements ECUMonitor
         {
             doRun_ = new Boolean(false);
         }
-    }
-
-    /*******************************************************
-     * mark the time in the time parameter.
-     ******************************************************/
-    protected final void markTime()
-    {
-        time_.marktime();
     }
 
     /*******************************************************

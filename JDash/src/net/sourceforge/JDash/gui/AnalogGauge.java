@@ -418,26 +418,6 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		double lowNeedleTheta = Math.toRadians(this.lowNeedleValueInDegrees_);
 		double highNeedleTheta = Math.toRadians(this.highNeedleValueInDegrees_);
 		
-//		/* Not yet working right */
-//		/* If none of the needles has changed, then don't bother with a redraw.  If even one has changed
-//		 * then keep going */
-//		if ((force == false) &&
-//			(mainNeedleTheta == this.previousTheta_) &&
-//			(lowNeedleTheta == this.previousLowTheta_) &&
-//			(highNeedleTheta == this.previousHighTheta_))
-//		{
-//			System.out.println(mainNeedleTheta + "  " + this.previousTheta_);
-//			System.out.println(lowNeedleTheta + "  " + this.previousLowTheta_);
-//			System.out.println(highNeedleTheta + "  " + this.previousHighTheta_);
-//			System.out.println("Not redrawing for analgo gague: " + getParameter().getName());
-//			return null;
-//		}
-//			
-//		
-//		this.previousTheta_ = mainNeedleTheta;
-//		this.previousHighTheta_ = highNeedleTheta;
-//		this.previousLowTheta_ = lowNeedleTheta;
-//		
 		
 		/* Draw each low needle shape */
 		for (AbstractShape shape : this.lowNeedleShapes_)

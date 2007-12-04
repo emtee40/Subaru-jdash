@@ -69,9 +69,9 @@ public class DigitalGauge extends AbstractGauge implements PaintableGauge
 	 * @param textShape IN - the text shape object this gauge will
 	 * display.
 	 ******************************************************/
-	public DigitalGauge(Parameter p, TextShape textShape)
+	public DigitalGauge(Parameter p, Point point, TextShape textShape)
 	{
-		super(p);
+		super(p, point);
 		this.textShape_ = textShape;
 	}
 
@@ -181,8 +181,10 @@ public class DigitalGauge extends AbstractGauge implements PaintableGauge
 		}
 
 		/* The Position */
-		Shape position = this.textShape_.getShape().getBounds();
-		position = scalingTransform.createTransformedShape(position);
+		Rectangle position = this.textShape_.getShape().getBounds();
+		position.x += getPosition().x;
+		position.y += getPosition().y;
+		position = scalingTransform.createTransformedShape(position).getBounds();
 		this.preRenderedPoint_ = new Point(position.getBounds().x, position.getBounds().y);
 		
 //		/* The bounds, with the previous bounds added for drawing overlap */

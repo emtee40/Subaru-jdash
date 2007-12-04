@@ -42,7 +42,7 @@ public class TestMonitor extends BaseMonitor
 {
 	
 	private static final int DELAY = 50;
-
+	
 	/*****************************************************
 	 * @param params IN - the list of parameters to monitor.
 	 * @throws ParameterException
@@ -70,16 +70,24 @@ public class TestMonitor extends BaseMonitor
      *******************************************************/
     public void run()
     {
-    	Random r = new Random(System.currentTimeMillis());
-    	/* Randomize the parameters */
-    	for (ECUParameter p : getParams())
-    	{
-    		p.setResult(r.nextDouble() * 0xff);
-    	}
+    	long lastDirectionChange = 0L;
+    	Random rnd = new Random(System.currentTimeMillis());
+    	boolean increase = true;
+    	int increaseRate = 1;
 
         while(doRun_)
         {
         	fireProcessingStartedEvent();
+        	
+        	/* Random the direction boolean, only every 1 seconds */
+        	if (lastDirectionChange <= (System.currentTimeMillis() - 1000))
+			{
+        		increase = rnd.nextBoolean();
+        		lastDirectionChange = System.currentTimeMillis();
+			}
+
+        	/* Randomly set the change rate */
+    		increaseRate = rnd.nextInt(4) + 1;
         	
         	/* Setup the test list */
             for(ECUParameter p : getParams())
@@ -92,8 +100,17 @@ public class TestMonitor extends BaseMonitor
             	if (p.getLastFetchTime() + p.getPreferedRate() < System.currentTimeMillis())
             	{
             		p.setLastFetchTime(System.currentTimeMillis());
-            		p.setResult(p.getResult()+1);
-            		if (p.getResult() >= 0xff)
+            		
+            		if (increase)
+            		{
+            			p.setResult(p.getResult() + increaseRate);
+            		}
+            		else
+            		{
+            			p.setResult(p.getResult() - increaseRate);
+            		}
+            		
+            		if ((p.getResult() > 0xff) || (p.getResult() < 0))
             		{
             			p.setResult(0);
             			fireProcessingParameterEvent(p);

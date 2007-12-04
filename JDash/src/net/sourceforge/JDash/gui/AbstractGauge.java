@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.gui;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.util.Observable;
@@ -51,17 +52,16 @@ public abstract class AbstractGauge
 	private Parameter parameter_ = null;
 
 	
+	private Point position_ = null;
+	
 	/******************************************************
 	 * Create a new default analog gauge.
 	 * @param parameter IN - the parameter this gauge represents.
-	 * @param parentPanel IN - the parent gauge panel this gauge will
-	 * be drawn inside. We'll need it's getScalingTransform() method.
 	 ******************************************************/
-	public AbstractGauge(Parameter parameter)
+	public AbstractGauge(Parameter parameter, Point position)
 	{
 		this.parameter_ = parameter;
-		
-		
+		this.position_ = position;
 	}
 
 	
@@ -75,7 +75,14 @@ public abstract class AbstractGauge
 		return this.parameter_;
 	}
 	
-	
+
+	/********************************************************
+	 * @return
+	 *******************************************************/
+	public Point getPosition()
+	{
+		return this.position_;
+	}
 
 	
 }

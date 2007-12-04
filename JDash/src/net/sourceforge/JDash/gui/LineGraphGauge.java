@@ -28,6 +28,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
@@ -109,7 +110,7 @@ public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge
 							TextShape highText) throws Exception
 							
 	{
-		super(p);
+		super(p, new Point((int)x,(int)y));
 		
 		this.lowParameter_.setName(label + " low");
 		this.highParameter_.setName(label + " high");
@@ -172,19 +173,19 @@ public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge
 		
 		if (valueText != null)
 		{
-			this.valueGauge_ = new DigitalGauge(getParameter(), valueText);
+			this.valueGauge_ = new DigitalGauge(getParameter(), getPosition(), valueText);
 			props.put("plot/curveFactory/value/lineAttributes/lineColor", "" + Color.decode(valueText.getAttribute(PROPS.COLOR)).getRGB());
 		}
 		
 		if (lowText != null)
 		{
-			this.lowGauge_ = new DigitalGauge(this.lowParameter_, lowText);
+			this.lowGauge_ = new DigitalGauge(this.lowParameter_, getPosition(), lowText);
 			props.put("plot/curveFactory/low/lineAttributes/lineColor", "" + Color.decode(lowText.getAttribute(PROPS.COLOR)).getRGB());
 		}
 		
 		if (highText != null)
 		{
-			this.highGauge_ = new DigitalGauge(this.highParameter_, highText);
+			this.highGauge_ = new DigitalGauge(this.highParameter_, getPosition(), highText);
 			props.put("plot/curveFactory/high/lineAttributes/lineColor", "" + Color.decode(highText.getAttribute(PROPS.COLOR)).getRGB());
 		}
 

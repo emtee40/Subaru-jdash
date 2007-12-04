@@ -28,6 +28,7 @@ package net.sourceforge.JDash.gui;
 
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +56,9 @@ public class ButtonGauge extends AbstractGauge implements SwingComponentGauge
 	/******************************************************
 	 * Create a new button gauge from a button shape.
 	 ******************************************************/
-	public ButtonGauge(Parameter p, GaugeButton gaugeButton)//ButtonShape buttonShape)
+	public ButtonGauge(Parameter p, Point point, GaugeButton gaugeButton)//ButtonShape buttonShape)
 	{
-		super(p);
+		super(p,  point);
 
 		if (gaugeButton == null)
 		{

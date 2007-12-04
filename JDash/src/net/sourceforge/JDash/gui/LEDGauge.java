@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.gui;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -56,10 +57,26 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 	public static final long serialVersionUID = 0L;
 	
 	/** For convience only, this is simply a reference to the same object in AnalogGauge */
-	public static final String ACTION_HIGH_RESET = "high-reset";
+	public static final String ACTION_HIGH_RESET = AnalogGauge.ACTION_HIGH_RESET;
 
 	/** For convience only, this is simply a reference to the same object in AnalogGauge */
-	public static final String ACTION_LOW_RESET = "low-reset";
+	public static final String ACTION_LOW_RESET = AnalogGauge.ACTION_LOW_RESET;
+	
+	/** A position code */
+	public static final String POSITION_CENTER = "center";
+
+	/** A position code */
+	public static final String POSITION_LEFT = "left";
+	
+	/** A position code */
+	public static final String POSITION_RIGHT = "right";
+	
+	/** A position code */
+	public static final String POSITION_TOP = "top";
+	
+	/** A position code */
+	public static final String POSITION_BOTTOM = "bottom";
+	
 	
 	private ArrayList<LED> leds_ = new ArrayList<LED>();
 	
@@ -81,22 +98,25 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 	private LED lowNeedleLed_ = null;
 	private LED highNeedleLed_ = null;
 	
-	
 	/* We'll need to remember the needle bounds for when the LED isn't litup */
 	private Rectangle highNeedleLedBounds_ = null;
 	private Rectangle lowNeedleLedBounds_ = null;
+	
+	/* The relative position codes for the high and low needles */
+	private String highNeedlePosition_ = POSITION_CENTER;
+	private String lowNeedlePosition_ = POSITION_CENTER;
 
 	/******************************************************
 	 * Create a new LED Gauge
 	 * @param p IN - the parameter to display values for.
 	 * @param parentPanel IN - the owner gauge panel.
 	 ******************************************************/
-	public LEDGauge(Parameter p)
+	public LEDGauge(Parameter p, Point point)
 	{
-		super(p);
+		super(p, point);
 	}
 
-
+	
 	/*******************************************************
 	 * Add an led to this led gauge.
 	 * 
@@ -176,6 +196,22 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 	}
 	
 	
+	/*******************************************************
+	 * @param position
+	 *******************************************************/
+	public void setHighNeedlePosition(String position)
+	{
+		this.highNeedlePosition_ = position;
+	}
+	
+	/*******************************************************
+	 * @param position
+	 *******************************************************/
+	public void setLowNeedlePosition(String position)
+	{
+		this.lowNeedlePosition_ = position;
+	}
+	
 	/********************************************************
 	 * Force the reset of the low needle.
 	 *******************************************************/
@@ -241,6 +277,9 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 		LED highestLitLED = null;
 		Rectangle highestLitLEDBounds = null;
 		
+		/* The relative position translate transform */
+		AffineTransform relativeTranslate = AffineTransform.getTranslateInstance(this.getPosition().getX(), getPosition().getY());
+		
 		/* For each LED, find out what ones need drawing */
 		for (LED led : this.leds_)
 		{
@@ -279,7 +318,10 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 							
 					/* Get the awt shape */
 					Shape awtShape = shape.getShape();
-					
+
+					/* Then the translate transform */
+					awtShape = relativeTranslate.createTransformedShape(awtShape);
+
 					/* Now apply the panels scaling transform */
 					awtShape = scalingTransform.createTransformedShape(awtShape);
 
@@ -361,7 +403,8 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 				awtShape = scalingTransform.createTransformedShape(awtShape);
 				
 				/* Now, apply the necessary translate tranform to place over the desired LED */
-				AffineTransform translateTransform = AffineTransform.getTranslateInstance(this.highNeedleLedBounds_.getCenterX(), this.highNeedleLedBounds_.getCenterY());
+				//AffineTransform translateTransform = AffineTransform.getTranslateInstance(this.highNeedleLedBounds_.getCenterX(), this.highNeedleLedBounds_.getCenterY());
+				AffineTransform translateTransform = getHighLowTransform(this.highNeedleLedBounds_, this.highNeedlePosition_);
 				awtShape = translateTransform.createTransformedShape(awtShape);
 				
 				/* Add it to our cache */
@@ -398,7 +441,8 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 				awtShape = scalingTransform.createTransformedShape(awtShape);
 				
 				/* Now, apply the necessary translate tranform to place over the desired LED */
-				AffineTransform translateTransform = AffineTransform.getTranslateInstance(this.lowNeedleLedBounds_.getCenterX(), this.lowNeedleLedBounds_.getCenterY());
+				//AffineTransform translateTransform = AffineTransform.getTranslateInstance(this.lowNeedleLedBounds_.getCenterX(), this.lowNeedleLedBounds_.getCenterY());
+				AffineTransform translateTransform = getHighLowTransform(this.lowNeedleLedBounds_, this.lowNeedlePosition_);
 				awtShape = translateTransform.createTransformedShape(awtShape);
 				
 				/* Add it to our cache */
@@ -459,6 +503,53 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 		
 	}
 
+	
+	/********************************************************
+	 * This utility method will calculate the the correct x/y translate transform
+	 * from the provided rect for the given position code.  The returned transform
+	 * is intended to be used on the high or low needle shapes.
+	 * @param rect
+	 * @param position
+	 * @return
+	 *******************************************************/
+	private AffineTransform getHighLowTransform(Rectangle rect, String position)
+	{
+	
+		double x = 0.0;
+		double y = 0.0;
+		
+		if (POSITION_CENTER.equals(position))
+		{
+			x = rect.getX() + (rect.getWidth() / 2);
+			y = rect.getY() + (rect.getHeight() / 2);
+		}
+		else if (POSITION_LEFT.equals(position))
+		{
+			x = rect.getX();
+			y = rect.getY() + (rect.getHeight() / 2);
+		}
+		else if (POSITION_RIGHT.equals(position))
+		{
+			x = rect.getX() + rect.getWidth();
+			y = rect.getY() + (rect.getHeight() / 2);
+		}
+		else if (POSITION_TOP.equals(position))
+		{
+			x = rect.getX() + (rect.getWidth() / 2);
+			y = rect.getY();
+		}
+		else if (POSITION_BOTTOM.equals(position))
+		{
+			x = rect.getX() + (rect.getWidth() / 2);
+			y = rect.getY() + rect.getHeight();
+		}
+		else
+		{
+			throw new RuntimeException("The position code [" + position + "] provided for the high/low needle on the LED Gauge for parameter [" + this.getParameter().getName() + "] is not a valid code.");
+		}
+		
+		return AffineTransform.getTranslateInstance(x, y);
+	}
 	
 	/*******************************************************
 	 * Since each LEd Gauge is made up of 1-n LEDs, this

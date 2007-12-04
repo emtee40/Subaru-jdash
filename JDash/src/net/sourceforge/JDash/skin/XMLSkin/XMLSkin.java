@@ -125,8 +125,8 @@ public class XMLSkin extends Skin
 	private static final String NODE_ROUND_RECTANGLE 	= "round-rectangle";
 	private static final String NODE_TEXT				= "text";
 	private static final String NODE_RANGE				= "range";
-	private static final String NODE_TEXT_HIGH			= NODE_TEXT + "-high";
-	private static final String NODE_TEXT_LOW			= NODE_TEXT + "-low";
+//	private static final String NODE_TEXT_HIGH			= NODE_TEXT + "-high";
+//	private static final String NODE_TEXT_LOW			= NODE_TEXT + "-low";
 	
 	private static final String ATTRIB_NAME 		= "name";
 	private static final String ATTRIB_EXTENDS		= "extends";
@@ -159,6 +159,7 @@ public class XMLSkin extends Skin
 	private static final String ATTRIB_SECONDS      = "seconds";
 	private static final String ATTRIB_LABEL		= "label";
 	private static final String ATTRIB_REVERSE		= "reverse";
+	private static final String ATTRIB_POSITION		= "position";
 	
 	private static final String VALUE_MAIN			= "main";
 	private static final String VALUE_LOW			= "low";
@@ -756,17 +757,15 @@ public class XMLSkin extends Skin
 		{
 			throw new Exception("Parameter Registry could not find a parameter with the name: " + sensor);
 		}
-		
-		
-		/* Create the Analog Gauge */
-		AnalogGauge analogGauge = new AnalogGauge(param);
-		
-		
+
 		/* Get the needle pivot point values */
 		int pivotX = extractInt(gaugePath + "/@" + ATTRIB_X);
 		int pivotY = extractInt(gaugePath + "/@" + ATTRIB_Y);
-		analogGauge.setPivot(new Point(pivotX, pivotY));
 
+		
+		/* Create the Analog Gauge */
+		AnalogGauge analogGauge = new AnalogGauge(param, new Point(pivotX, pivotY));
+		
 		/* There can be as many as 3 needles, each one of 3 types */
 		
 		/* Add the main needle */
@@ -813,7 +812,7 @@ public class XMLSkin extends Skin
 		for (int shapeIndex = 1; shapeIndex <= buttonShapeCount; shapeIndex++)
 		{
 			AbstractShape shape = createShape(gaugePath + "/" + NODE_BUTTON + "[" + shapeIndex + "]");
-			GaugeButton gaugeButton = new GaugeButton(this, (ButtonShape)shape);
+			GaugeButton gaugeButton = new GaugeButton(this, new Point(pivotX, pivotY), (ButtonShape)shape);
 			analogGauge.addButton(gaugeButton);
 		}
 				
@@ -901,9 +900,14 @@ public class XMLSkin extends Skin
 		
 		/* Get Text Shape */
 		TextShape textShape = createTextShape(gaugePath + "/" + NODE_TEXT);
+		
+		/* Get the relative point values */
+		int pointX = extractInt(gaugePath + "/@" + ATTRIB_X);
+		int pointY = extractInt(gaugePath + "/@" + ATTRIB_Y);
+
 
 		/* Create the gague */
-		DigitalGauge digitalGauge = new DigitalGauge(param, textShape);
+		DigitalGauge digitalGauge = new DigitalGauge(param, new Point(pointX, pointY), textShape);
 		
 		/* Return it */
 		return digitalGauge;
@@ -930,8 +934,12 @@ public class XMLSkin extends Skin
 			throw new Exception("Parameter Registry could not find a parameter with the name: " + sensor);
 		}
 		
+		/* Get the relative point values */
+		int pointX = extractInt(gaugePath + "/@" + ATTRIB_X);
+		int pointY = extractInt(gaugePath + "/@" + ATTRIB_Y);
+		
 		/* Create the Analog Gauge */
-		LEDGauge ledGauge = new LEDGauge(param);
+		LEDGauge ledGauge = new LEDGauge(param, new Point(pointX, pointY));
 		
 		/* An LED Gauge is made up of n LED comonents.  Each component is made up */
 		int ledCount = extractInt("count(" + gaugePath + "/" + NODE_LED + "[*])");
@@ -976,18 +984,24 @@ public class XMLSkin extends Skin
 		}
 		
 		
-		/* Set the high / low needle delay */
+		/* Set the high / low needle delay and position */
 		int lowNeedleDelay = 0;
 		int highNeedleDelay = 0;
+		String highPosition = LEDGauge.POSITION_CENTER;
+		String lowPosition = LEDGauge.POSITION_CENTER;
 		if (lowShapeCount > 0)
 		{
 			lowNeedleDelay = extractInt(gaugePath + "/" + NODE_NEEDLE + "[@" + ATTRIB_TYPE + "='" + VALUE_LOW + "']/@" + ATTRIB_DELAY);
+			lowPosition = extractString(gaugePath + "/" + NODE_NEEDLE + "[@" + ATTRIB_TYPE + "='" + VALUE_LOW + "']/@" + ATTRIB_POSITION);
 		}
 		if (highShapeCount > 0)
 		{
 			highNeedleDelay = extractInt(gaugePath + "/" + NODE_NEEDLE + "[@" + ATTRIB_TYPE + "='" + VALUE_HIGH + "']/@" + ATTRIB_DELAY);
+			highPosition = extractString(gaugePath + "/" + NODE_NEEDLE + "[@" + ATTRIB_TYPE + "='" + VALUE_HIGH + "']/@" + ATTRIB_POSITION);
 		}
 		ledGauge.setNeedleResetDelays(lowNeedleDelay, highNeedleDelay);
+		ledGauge.setHighNeedlePosition(highPosition);
+		ledGauge.setLowNeedlePosition(lowPosition);
 		
 		/* Return our new gauge */
 		return ledGauge;
@@ -1018,9 +1032,15 @@ public class XMLSkin extends Skin
 				
 		/* Add the button */
 		AbstractShape shape = createShape(gaugePath + "/" + NODE_BUTTON + "[1]");
+		
+		/* Get the relative point values */
+		int pointX = extractInt(gaugePath + "/@" + ATTRIB_X);
+		int pointY = extractInt(gaugePath + "/@" + ATTRIB_Y);
+
+		
 	// TODO
-		GaugeButton gaugeButton = new GaugeButton(this, (ButtonShape)shape);
-		ButtonGauge buttonGauge = new ButtonGauge(param, gaugeButton);
+		GaugeButton gaugeButton = new GaugeButton(this, new Point(pointX, pointY), (ButtonShape)shape);
+		ButtonGauge buttonGauge = new ButtonGauge(param, new Point(pointX, pointY), gaugeButton);
 		//ButtonGauge buttonGauge = new ButtonGauge(param, (ButtonShape)shape);
 		
 
@@ -1074,33 +1094,35 @@ public class XMLSkin extends Skin
 		String label = extractString(gaugePath + "/@" + ATTRIB_LABEL);
 
 		
-		TextShape valueText = null;
+		TextShape mainText = null;
 		TextShape lowText = null;
 		TextShape highText = null;
 		
+		/* For each text node, extract them into the possible text shapes of high, main, and low */
+		
 		/* value Text */
-		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT + ")") > 0)
+		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_MAIN + "'])") > 0)
 		{
-			valueText = createTextShape(gaugePath + "/" + NODE_TEXT);
+			mainText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_MAIN + "']");
 		}
 		
 		
 		/* High Text */
-		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT_HIGH + ")") > 0)
+		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_HIGH + "'])") > 0)
 		{
-			highText = createTextShape(gaugePath + "/" + NODE_TEXT_HIGH);
+			highText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_HIGH + "']");
 		}
 		
 		
 		/* Low Text */
-		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT_LOW + ")") > 0)
+		if (extractInt("count(" + gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_LOW + "'])") > 0)
 		{
-			lowText = createTextShape(gaugePath + "/" + NODE_TEXT_LOW);
+			lowText = createTextShape(gaugePath + "/" + NODE_TEXT + "[@" + ATTRIB_TYPE + "='" + VALUE_LOW + "']");
 		}
 		
 		
 		/* Create and return the line graph */
-		LineGraphGauge lineGraphGauge = new LineGraphGauge(param, x, y, width, height, seconds, min, max, format, label, valueText, lowText, highText);
+		LineGraphGauge lineGraphGauge = new LineGraphGauge(param, x, y, width, height, seconds, min, max, format, label, mainText, lowText, highText);
 		return lineGraphGauge;
 		
 	}

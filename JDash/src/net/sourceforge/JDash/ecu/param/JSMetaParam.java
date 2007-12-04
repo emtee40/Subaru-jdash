@@ -166,7 +166,7 @@ public class JSMetaParam extends MetaParameter
 	 * Override
 	 * @see net.sourceforge.JDash.ecu.param.Parameter#getResult()
 	 *******************************************************/
-	public double getResult()
+	public synchronized double getResult()
 	{
 		
 		try
@@ -192,7 +192,7 @@ public class JSMetaParam extends MetaParameter
 		}
 		catch(Exception e)
 		{
-			throw new RuntimeException("JSMetaParam error in " + this.getName() + "\n", e);
+			throw new RuntimeException("JSMetaParam error getting result from " + this.getName() + "\n", e);
 		}
 
 		

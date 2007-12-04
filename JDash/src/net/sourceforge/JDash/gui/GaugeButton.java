@@ -26,6 +26,8 @@ package net.sourceforge.JDash.gui;
 
 
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -57,6 +59,8 @@ public class GaugeButton
 	/** A button type code string to represent a toggle/checkbox button */
 	public static final String BUTTON_TYPE_TOGGLE = "toggle";
 	
+	private Point position_ = null;
+	
 	public static final long serialVersionUID = 0L;
 
 	private ButtonShape buttonShape_ = null;
@@ -76,15 +80,18 @@ public class GaugeButton
 	 * Instead, this button will ONLY respond to the parameter values
 	 * changing according to the values defined within the button shape.
 	 * 
+	 * @param skin - IN the skin used to create this button.
+	 * @param position IN - the position within the parent panel to place this button.
+	 * @param shape IN - the button definition shape.
 	 * @see ButtonShape
 	 ******************************************************/
-	public GaugeButton(Skin skin, ButtonShape shape)
+	public GaugeButton(Skin skin, Point position, ButtonShape shape)
 	{
 		super();
 		
 		this.buttonShape_ = shape;
 		this.skin_ = skin;
-
+		this.position_ = position;
 		
 		try
 		{
@@ -106,8 +113,12 @@ public class GaugeButton
 			
 			
 			
-			/* Setup the original bounds from the shape. */
-			this.theButton_.setBounds(shape.getShape().getBounds());
+			/* Setup the original bounds from the shape. Note the position adjustment */
+			Rectangle rect = (Rectangle)shape.getShape().getBounds().clone();
+			rect.x += position.x;
+			rect.y += position.y;
+
+			this.theButton_.setBounds(rect);
 			this.theButton_.setOpaque(false);
 			
 			
@@ -153,10 +164,8 @@ public class GaugeButton
 		{
 			public void actionPerformed(ActionEvent ae)
 			{
-				System.out.println("Button Pressed");
 				for (SkinEvent se : getDownActions())
 				{
-					System.out.println("Sending " + se);
 					skin_.fireSkinEvent(se);
 				}
 			}

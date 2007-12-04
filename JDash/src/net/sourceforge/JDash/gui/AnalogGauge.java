@@ -95,10 +95,10 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	/** The aciton string expected by a SkinEvent when a low-reset button is pressed */
 	public static final String ACTION_LOW_RESET = "low-reset";
 	
+	/** The reset step rate */
 	private static final Double NEEDLE_RESET_STEP_IN_DEGREES = 20.0;
 
 	
-	private Point pivotPoint_ = null;
 	private int needleDegreeMin_ = 0;
 	private int needleDegreeMax_ = 0;
 	private double valueMin_ = 0L;
@@ -138,11 +138,10 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 	/******************************************************
 	 * Create a new analog gauge.
 	 * @param p IN - the parameter this gauge will display values for.
-	 * @param parentPanel IN - the owner parent gauge panel.
 	 ******************************************************/
-	public AnalogGauge(Parameter p)
+	public AnalogGauge(Parameter p, Point point)
 	{
-		super(p);
+		super(p, point);
 	}
 
 	/*******************************************************
@@ -449,7 +448,7 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 			awtShape = AffineTransform.getRotateInstance(lowNeedleTheta).createTransformedShape(awtShape);
 			
 			/* Next, translate the shape */
-			awtShape = AffineTransform.getTranslateInstance(getPivot().getX(), getPivot().getY()).createTransformedShape(awtShape);
+			awtShape = AffineTransform.getTranslateInstance(getPosition().getX(), getPosition().getY()).createTransformedShape(awtShape);
 			
 			/* Now apply the panels scaling transform */
 			awtShape = scalingTransform.createTransformedShape(awtShape);
@@ -480,7 +479,7 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 			awtShape = AffineTransform.getRotateInstance(highNeedleTheta).createTransformedShape(awtShape);
 			
 			/* Next, translate the shape */
-			awtShape = AffineTransform.getTranslateInstance(getPivot().getX(), getPivot().getY()).createTransformedShape(awtShape);
+			awtShape = AffineTransform.getTranslateInstance(getPosition().getX(), getPosition().getY()).createTransformedShape(awtShape);
 			
 			/* Now apply the panels scaling transform */
 			awtShape = scalingTransform.createTransformedShape(awtShape);
@@ -512,7 +511,7 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 			awtShape = AffineTransform.getRotateInstance(mainNeedleTheta).createTransformedShape(awtShape);
 			
 			/* Next, translate the shape */
-			awtShape = AffineTransform.getTranslateInstance(getPivot().getX(), getPivot().getY()).createTransformedShape(awtShape);
+			awtShape = AffineTransform.getTranslateInstance(getPosition().getX(), getPosition().getY()).createTransformedShape(awtShape);
 			
 			/* Now apply the panels scaling transform */
 			awtShape = scalingTransform.createTransformedShape(awtShape);
@@ -577,25 +576,8 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		
 	}
 
-	/********************************************************
-	 * Set the needle pivot point in screen corrds. 
-	 * 
-	 * @param x IN - the x coord.
-	 * @param y IN - the y coord.
-	 *******************************************************/
-	public void setPivot(Point p)
-	{
-		this.pivotPoint_ = p;
-	}
-	
-	/*******************************************************
-	 * return the pivot point.
-	 * @return IN the pivot Point.
-	 *******************************************************/
-	public Point getPivot()
-	{
-		return this.pivotPoint_;
-	}
+
+
 	
 	/********************************************************
 	 * Set the minimum parameter value that this gague can display.

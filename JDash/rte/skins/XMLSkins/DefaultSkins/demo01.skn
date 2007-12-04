@@ -44,7 +44,7 @@
   <!-- Font Definitions -->
   <font name="digital" src="digital.ttf" />
   <font name="Arial" src="system:Arial"/>
- 
+  
   <!-- Digital RPM -->
   <gauge sensor="RPM" type="digital" x="5"  y="20">
     <static>
@@ -56,13 +56,11 @@
 
   <!-- A simple button to reset all low needles -->
   <gauge type="button" x="10" y="95">
-  
     <static>
       <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="50" />
       <text color="white" size="14" x="0"  y="-2" format="Low Reset Btn" font="Arial"/>
     </static>  
-  
-    <button 
+     <button 
     	type="push-button" 
     	x="10" 
     	y="5" 
@@ -72,6 +70,26 @@
     	up-image="red-push-off" 
     	down-image="red-push-on"/>
   </gauge>
+  
+  <!-- Logging -->
+  <gauge type="button" x="10" y="170">
+    <static>
+      <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="50" />
+      <text color="white" size="14" x="0"  y="-2" format="Logging Btn" font="Arial"/>
+    </static>  
+    <button 
+      type="toggle" 
+      x="10" 
+      y="5" 
+      width="35" 
+      height="35" 
+      down-action="logger/enable"
+      up-action="logger/disable"
+      up-image="red-indicator-light-off" 
+      down-image="red-indicator-light-on" />
+  </gauge>
+ 
+  
 
   <!-- Analog RPM -->
   <gauge sensor="RPM" type="analog" x="400" y="300">

@@ -32,8 +32,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -43,6 +41,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 
 /*******************************************************
@@ -55,7 +54,7 @@ import net.sourceforge.JDash.ecu.param.ParameterRegistry;
  * time even is fired, all of the values from the monitors
  * list of parameters will be
  ******************************************************/
-public class LoggerExporter extends JDialog implements Observer
+public class LoggerExporter extends JDialog implements ParameterEventListener
 {
 
 	public static final long serialVersionUID = 0L;
@@ -120,6 +119,10 @@ public class LoggerExporter extends JDialog implements Observer
 		
 		/* Get the parameters */
 		this.params_ = new ArrayList<Parameter>(this.monitor_.getTime().getOwnerRegistry().getAll().values());
+		
+		
+		/* Respond to update events on the TIME parameter */
+		this.monitor_.getTime().addEventListener(this);
 		
 		/* Sort for readability */
 		Collections.sort(this.params_, new Comparator<Parameter>()
@@ -199,17 +202,12 @@ public class LoggerExporter extends JDialog implements Observer
 	{
 		if (v == true)
 		{
-// TODO
-//			this.monitor_.getTime().addObserver(this);
-			
 			/* Start the export */
 			this.monitor_.setPaused(false);
 
 		}
 		else
 		{
-// TODO
-//			this.monitor_.getTime().deleteObserver(this);
 			this.monitor_ = null;
 		}
 		
@@ -221,7 +219,7 @@ public class LoggerExporter extends JDialog implements Observer
 	 * Override
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 *******************************************************/
-	public void update(Observable o, Object obj)
+	public void valueChanged(Parameter param)
 	{
 		
 		StringBuffer buffer = new StringBuffer();

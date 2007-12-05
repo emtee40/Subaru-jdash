@@ -24,13 +24,24 @@
 		<property name="outputDir" value="build" />
 		<property name="rteDir" value="rte" />
 		<property name="docDir" value="doc" />
+		<property name="manifest" value="manifest.txt"/>
+		<property name="JDashJar" value="${projectName}.jar"/>
+		<property name="jar01" value="RXTXcomm.jar"/>
+		<property name="jar02" value="js.jar"/>
+		<property name="jar03" value="jdom.jar"/>
+		<property name="jar04" value="junit.jar"/>
+		<property name="jar05" value="jcckit.jar"/>
+		<property name="jar06" value="jl1.0.jar"/>
+		<property name="jar07" value="SuperWaba.jar"/>
+		<property name="jar08" value="h2.jar"/>
 		<property name="classpath"
-			  value="${rteDir}/RXTXcomm.jar:${rteDir}/bsh-core-2.0b4.jar:${rteDir}/hsqldb.jar:${rteDir}/jdom.jar:${rteDir}/junit.jar:${rteDir}/jcckit.jar" />
+			  value="${rteDir}/${jar01}:${rteDir}/${jar02}:${rteDir}/${jar03}:${rteDir}/${jar04}:${rteDir}/${jar05}:${rteDir}/${jar06}:${rteDir}/${jar07}:${rteDir}/${jar08}:" />
 		<mkdir dir="${outputDir}" />
+		<echo message="CLASSPATH=${classpath}"/>
 	</target>
 	
 	<!-- ALL -->
-	<target name="all" depends="init,rte">
+	<target name="all" depends="init,rte" description="Build all of JDash, but not the install or zip.">
 		<echo message="JDash build complete"/>
 	</target>
 	
@@ -50,28 +61,21 @@
 	<!-- Jar -->
 	<target name="jar" depends="init,compile">
 		<echo message="Creating JDash jar file"/>
-		
-		<delete file="manifest.txt" />
 
-		<touch file="manifest.txt" />
-<echo file="manifest.txt">Manifest-Version: 1.0
-Created-By: Shane Powell (Copyright 2006)
-Main-Class: net.sourceforge.JDash.Startup</echo>
 		<echo message="Creating jar file..."/>
-
-		<copy todir="${outputDir}">
-			<fileset dir="${sourceDir}">
-				<exclude name="**/*.java"/>
-			</fileset>
-		</copy>
+		<delete file="${manifest}" />
+		<manifest file="${manifest}">
+			<attribute name="Built-By" value="${user.name} (Copyright 2007)"/>
+			<attribute name="Main-Class" value="net.sourceforge.JDash.Startup"/>
+			<attribute name="Class-Path" value="${jar01} ${jar02} ${jar03} ${jar04} ${jar05} ${jar06} ${jar07} ${jar08}"/>
+		</manifest>
 		
-		<jar destfile="rte/JDash.jar"
-		     basedir="build"
+		<jar destfile="${rteDir}/${JDashJar}"
+		     basedir="${outputDir}"
 		     includes="**/*"
-		     manifest="manifest.txt"
+		     manifest="${manifest}"
          	/>
-		
-		<delete file="manifest.txt" />
+		<delete file="${manifest}" />
 	</target>
 	
 	<!-- RTE -->
@@ -123,27 +127,27 @@ Main-Class: net.sourceforge.JDash.Startup</echo>
 	<target name="clean" depends="init">
 		<echo message="Cleaning..." />
 		<delete failonerror="no" dir="${outputDir}" />
-		<delete failonerror="no" file="${rte}/JDash.jar" />
+		<delete failonerror="no" file="${rteDir}/${JDashJar}" />
 	</target>
 	
 	<!-- Launch -->
 	<target name="launch" depends="rte">
-		<exec executable="java">
-			<arg line="-jar rte/JDash.jar"/>
-		</exec>
+		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true"/>
 	</target>
 
-	<target name="launch-jmp" depends="rte">
-		<exec executable="java">
-			<arg line="-Xrunjmp -jar rte/JDash.jar"/>
-		</exec>
-	</target>
-	
 	<!-- Launch Config -->
 	<target name="launch-config" depends="rte">
-		<exec executable="java">
-			<arg line="-jar rte/JDash.jar -config"/>
-		</exec>
+		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true">
+			<arg line="-config"/>
+		</java>
 	</target>
+
+	<!-- Launch JDash and enable the JMP Java memory profiler plugin -->
+	<target name="launch-jmp" depends="rte">
+		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true">
+			<jvmarg line="-Xrunjmp"/>
+		</java>
+	</target>
+
 	
 </project>

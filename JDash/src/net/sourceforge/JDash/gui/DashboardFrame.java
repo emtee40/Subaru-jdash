@@ -27,22 +27,15 @@ package net.sourceforge.JDash.gui;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.net.URL;
 
-import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 
 import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.comm.BaseMonitor;
-import net.sourceforge.JDash.ecu.comm.ECUMonitor;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
 

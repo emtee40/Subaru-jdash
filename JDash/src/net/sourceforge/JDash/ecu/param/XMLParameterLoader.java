@@ -36,10 +36,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -371,7 +369,6 @@ public class XMLParameterLoader
     	if (aParam.getChild(NODE_ARGS) != null)
     	{
 	        List args = aParam.getChild(NODE_ARGS).getChildren();
-	        Map<String, String> argMap = new HashMap<String, String>(args.size());
 	        Iterator i = args.iterator();
 	        
 	        while(i.hasNext())

@@ -26,8 +26,6 @@ package net.sourceforge.JDash.ecu.param;
 
 
 import java.util.List;
-import java.util.Map;
-import java.util.Observer;
 
 /******************************************************
  * A MetaParameter is an abstract class that represents a parameter value that is

@@ -28,32 +28,22 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.font.GlyphVector;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
-import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.comm.MonitorEventListener;
-import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
 import net.sourceforge.JDash.gui.shapes.ButtonShape;
-import net.sourceforge.JDash.gui.shapes.GlyphShape;
 import net.sourceforge.JDash.gui.shapes.ImageShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
-import net.sourceforge.JDash.skin.SkinEvent;
-import net.sourceforge.JDash.skin.SkinEventTrigger;
-import net.sourceforge.JDash.util.UTIL;
 
 /*******************************************************
  * This is the base class that ALL GaugePanel classes must

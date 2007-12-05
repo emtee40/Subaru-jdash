@@ -27,8 +27,6 @@ package net.sourceforge.JDash.skin;
 import java.awt.Dimension;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javazoom.jl.player.Player;
 

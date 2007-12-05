@@ -25,12 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.skin.XMLSkin;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.skin.Skin;
@@ -97,7 +93,6 @@ public class XMLSkinFactory extends SkinFactory
 				{
 					if (sf.getName().endsWith(SKIN_FILE_EXTENSION) == true)
 					{
-						String id = sf.getName();
 						XMLSkin skin = new XMLSkin(this, sf.toURL(), sf.getParent() + File.separatorChar + sf.getName());
 						this.skins_.add(skin);
 					}

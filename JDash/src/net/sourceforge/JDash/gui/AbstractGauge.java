@@ -25,14 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.gui;
 
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;

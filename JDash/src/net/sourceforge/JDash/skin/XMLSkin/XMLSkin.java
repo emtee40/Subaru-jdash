@@ -121,6 +121,7 @@ public class XMLSkin extends Skin
 	private static final String NODE_STATIC		= "static";
 	private static final String NODE_TRIGGER	= "trigger";
 	private static final String NODE_SOUND		= "sound";
+	private static final String NODE_EVENT		= "event";
 	
 	private static final String NODE_BUTTON				= "button";
 	private static final String NODE_POLYGON			= "polygon";
@@ -130,13 +131,10 @@ public class XMLSkin extends Skin
 	private static final String NODE_ROUND_RECTANGLE 	= "round-rectangle";
 	private static final String NODE_TEXT				= "text";
 	private static final String NODE_RANGE				= "range";
-//	private static final String NODE_TEXT_HIGH			= NODE_TEXT + "-high";
-//	private static final String NODE_TEXT_LOW			= NODE_TEXT + "-low";
 	
 	private static final String ATTRIB_NAME 		= "name";
 	private static final String ATTRIB_EXTENDS		= "extends";
 	private static final String ATTRIB_DELAY		= "delay";
-//	private static final String ATTRIB_RESOURCE_URL	= "resource-url";
 	private static final String ATTRIB_SRC 			= "src";
 	private static final String ATTRIB_SENSOR 		= "sensor";
 	private static final String ATTRIB_TYPE			= "type";
@@ -159,23 +157,18 @@ public class XMLSkin extends Skin
 	private static final String ATTRIB_VALUE		= "value";
 	private static final String ATTRIB_UP_IMAGE		= "up-image";
 	private static final String ATTRIB_DOWN_IMAGE	= "down-image";
-	private static final String ATTRIB_ENTER_RANGE_ACTION	= "enter-range-action";
-	private static final String ATTRIB_EXIT_RANGE_ACTION	= "exit-range-action";
-	private static final String ATTRIB_UP_ACTION	= "up-action";
-	private static final String ATTRIB_DOWN_ACTION	= "down-action";
 	private static final String ATTRIB_SECONDS      = "seconds";
 	private static final String ATTRIB_LABEL		= "label";
 	private static final String ATTRIB_REVERSE		= "reverse";
 	private static final String ATTRIB_POSITION		= "position";
+	private static final String ATTRIB_ACTION		= "action";
+	private static final String ATTRIB_DESTINATION	= "destination";
 	
 	private static final String VALUE_MAIN			= "main";
 	private static final String VALUE_LOW			= "low";
 	private static final String VALUE_HIGH			= "high";
 	private static final String VALUE_SYSTEM		= "system";
 	
-	/** This is the fontfile name to use in a text component is you wish to use the built in digital font */
-//	public static final String VALUE_JDASH_DIGITAL	= "jdash-digital";
-
 	
 	
 	/** The url to the image files.  This is used to get the relative path to the images */
@@ -560,11 +553,12 @@ public class XMLSkin extends Skin
 		return Color.decode(getColor(extractString(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR)));
 	}
 	
-//	
-//	/********************************************************
-//	 * This method creates the event triggers, and initializes them.
-//	 * @throws Exception
-//	 *******************************************************/
+
+	/********************************************************
+	 * get the list of SkinEventTriggers.
+	 * @return
+	 * @throws Exception
+	 *******************************************************/
 	public List<SkinEventTrigger> getTriggers() throws Exception
 	{
 		ArrayList<SkinEventTrigger> triggers = new ArrayList<SkinEventTrigger>();
@@ -580,32 +574,18 @@ public class XMLSkin extends Skin
 			Double sensorMin = extractDouble(triggerPath + "[" + index + "]/@" + ATTRIB_SENSOR_MIN);
 			Double sensorMax = extractDouble(triggerPath + "[" + index + "]/@" + ATTRIB_SENSOR_MAX);
 			
-			String enterRangeAction = null;
-			String exitRangeAction = null;
 			
-			try
-			{
-				enterRangeAction = extractString(triggerPath + "[" + index + "]/@" + ATTRIB_ENTER_RANGE_ACTION);
-			}
-			catch(Exception e) {}
-			
-			try
-			{
-				exitRangeAction = extractString(triggerPath + "[" + index + "]/@" + ATTRIB_EXIT_RANGE_ACTION);
-			}
-			catch(Exception e) {}
-			
-			if ((enterRangeAction == null) && (exitRangeAction == null))
-			{
-				throw new Exception("Unable to create " + NODE_TRIGGER + " You must provide atleast one " + ATTRIB_ENTER_RANGE_ACTION + " or " + ATTRIB_EXIT_RANGE_ACTION);
-			}
-			
-			/* Create the trigger. */
-			List<SkinEvent> enterActions = SkinEvent.extractActions(enterRangeAction);
-			List<SkinEvent> exitActions = SkinEvent.extractActions(exitRangeAction);
-			SkinEventTrigger tgr = new SkinEventTrigger(this, sensor, sensorMin, sensorMax, enterActions, exitActions);
+			/* Create the trigger */
+			SkinEventTrigger tgr = new SkinEventTrigger(this, sensor, sensorMin, sensorMax);
 			triggers.add(tgr);
 			
+			/** Add it's skin events */
+			List<SkinEvent> events = createEvents(triggerPath + "[" + index + "]");
+			for (SkinEvent se : events)
+			{
+				tgr.addSkinEvent(se);
+			}
+		
 		}
 		
 		return triggers;
@@ -1552,21 +1532,65 @@ public class XMLSkin extends Skin
 		x += xOffset;
 		y += yOffset;
 
-		String upAction = null;
-		String downAction = null;
-		
-		try {upAction = extractString(shapePath + "/@" + ATTRIB_UP_ACTION);} catch(Exception e) {}
-		try {downAction = extractString(shapePath + "/@" + ATTRIB_DOWN_ACTION);} catch(Exception e) {}
-		
 		
 		String upImageName = extractString(shapePath + "/@" + ATTRIB_UP_IMAGE);
 		String downImageName = extractString(shapePath + "/@" + ATTRIB_DOWN_IMAGE);
 		
 		/* Create the shape */
-		ButtonShape buttonShape = new ButtonShape(type, x, y, w, h, upAction, downAction, getImage(upImageName), getImage(downImageName));
+		ButtonShape buttonShape = new ButtonShape(type, x, y, w, h, getImage(upImageName), getImage(downImageName));
+		
+		/* Get the events, and add them to the button */
+		List<SkinEvent> events = createEvents(shapePath);
+		for (SkinEvent se : events)
+		{
+			buttonShape.addSkinEvent(se);
+		}
 
 		/* Return the shape */
 		return buttonShape;
+	}
+	
+	/********************************************************
+	 * Given the parentPath string, look for all child event nodes, and
+	 * create a list of SkinEvents from them all.
+	 * @param parentPath
+	 * @return
+	 *******************************************************/
+	private List<SkinEvent> createEvents(String parentPath) throws Exception
+	{
+		List<SkinEvent> events = new ArrayList<SkinEvent>();
+		
+		int eventCount = extractInt("count(" + parentPath + "/" + NODE_EVENT + ")");
+
+		for (int index = 1; index <= eventCount; index++)
+		{
+			events.add(createEvent(parentPath + "/" + NODE_EVENT + "[" + index + "]"));
+		}
+		
+		return events;
+	}
+	
+	/*******************************************************
+	 * Give the XPath to an event node, create the skin event from it.
+	 * @param eventPath
+	 * @return
+	 *******************************************************/
+	private SkinEvent createEvent(String eventPath) throws Exception
+	{
+		
+		String destination = null;
+		String type = extractString(eventPath + "/@" + ATTRIB_TYPE);
+		String action = extractString(eventPath + "/@" + ATTRIB_ACTION);
+		
+		try
+		{
+			destination = extractString(eventPath + "/@" + ATTRIB_DESTINATION);
+		}
+		catch(Exception e)
+		{}
+		
+		return new SkinEvent(type, destination, action);
+		
 	}
 	
 }

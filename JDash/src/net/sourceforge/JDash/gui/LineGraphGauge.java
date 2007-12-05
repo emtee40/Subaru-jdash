@@ -65,7 +65,6 @@ public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge
 	
 	private ArrayList<DataPoint> plotValues_ = new ArrayList<DataPoint>();
 	
-	private boolean addedToPanel_ = false;
 	private GraphicsPlotCanvas plotCanvas_ = null;
 	private Rectangle plotCanvasRect_ = null;
 	
@@ -254,11 +253,6 @@ public class LineGraphGauge extends AbstractGauge implements SwingComponentGauge
 		/* If the parent gauge panel is flaged updates as suspended, then we'll stop here */
 //		if (getParentPanel().isGaugeDisplayUpdateSuspended() == true)
 		// TODO
-		if (1==2)
-		{
-			return;
-		}
-		
 		
 		/* Create the point */
 		DataPoint newPoint = new DataPoint(this.timeParam_.getResult() + 

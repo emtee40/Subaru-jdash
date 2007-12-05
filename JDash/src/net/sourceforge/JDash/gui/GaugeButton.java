@@ -27,13 +27,11 @@ package net.sourceforge.JDash.gui;
 
 import java.awt.Component;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
@@ -59,6 +57,13 @@ public class GaugeButton implements SwingComponent
 	
 	/** A button type code string to represent a toggle/checkbox button */
 	public static final String BUTTON_TYPE_TOGGLE = "toggle";
+	
+	
+	/** Buttons can have events with only specific types.  This is for "up" events */
+	public static final String EVENT_TYPE_UP = "up";
+	
+	/** Buttons can have events with only specific types.  This is for "down" events */
+	public static final String EVENT_TYPE_DOWN = "down";
 	
 	public static final long serialVersionUID = 0L;
 
@@ -105,38 +110,41 @@ public class GaugeButton implements SwingComponent
 			}
 			else
 			{
-				throw new Exception("Button Shape with up-action: " + shape.getUpAction() + " has an unsupported type code of: " + shape.getType()); 
+				throw new Exception("Button Shape has an unsupported type code of: " + shape.getType()); 
 			}
 			
 			
 			
 			/* Setup the original bounds from the shape. Note the position adjustment */
 			Rectangle rect = (Rectangle)shape.createAWTShape().getBounds().clone();
-//			rect.x += position.x;
-//			rect.y += position.y;
 
 			this.theButton_.setBounds(rect);
 			this.theButton_.setOpaque(false);
-			
+
 			
 			/* Setup the up and down action skin events */
-//			this.upActions_ = extractActions(getButtonShape().getUpAction());
-//			this.downActions_ = extractActions(getButtonShape().getDownAction());
-			this.upActions_ = SkinEvent.extractActions(getButtonShape().getUpAction());
-			this.downActions_ = SkinEvent.extractActions(getButtonShape().getDownAction());
-			
-			
-			/* If this button has a paramter trigger, then disable any mouse listeners */
-// TODO
-			
+			for (SkinEvent se : shape.getSkinEvents())
+			{
+				if (EVENT_TYPE_UP.equals(se.getType()))
+				{
+					this.upActions_.add(se);
+				}
+				else if (EVENT_TYPE_DOWN.equals(se.getType()))
+				{
+					this.downActions_.add(se);
+				}
+				else
+				{
+					throw new Exception("The button with type code " + shape.getType() + " has an unsupported type event with a type code [" + se.getType() + "].");
+				}
+			}
 			
 			
 			
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
-			throw new RuntimeException("Unable setup gauge button [" + shape.getUpAction() + "][" + shape.getDownAction() + "]\n" + e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -214,45 +222,6 @@ public class GaugeButton implements SwingComponent
 		return b;
 	}
 	
-//	/*******************************************************
-//	 * Given the string parameter, extract the SkinEvent
-//	 * objects and return them.
-//	 * @return
-//	 *******************************************************/
-//	private List<SkinEvent> extractActions(String action)
-//	{
-//		List<SkinEvent> skinEvents = new ArrayList<SkinEvent>();
-//		
-//		/* If no action is defined, then just return the empty list */
-//		if (action == null)
-//		{
-//			return skinEvents;
-//		}
-//		
-//		/* Don't bother if no action is defined */
-//		if (getButtonShape().getDownAction() != null)
-//		{
-//			/* Break out each action */
-//			StringTokenizer st = new StringTokenizer(action, "" + Skin.VALUE_DELIM);
-//			while(st.hasMoreElements())
-//			{
-//				String cmd = st.nextToken();
-//				String dest = null;
-//				
-//				/* Each action can optionally have a specific destination */
-//				if (cmd.indexOf(Skin.VALUE_DELIM_2) != -1)
-//				{
-//					dest = cmd.substring(0, cmd.indexOf(Skin.VALUE_DELIM_2));
-//					cmd = cmd.substring(dest.length() + 1, cmd.length());
-//				}
-//				
-//				skinEvents.add(new SkinEvent(dest, cmd));
-//			}
-//		}
-//		
-//		return skinEvents;
-//	}
-
 	
 	/********************************************************
 	 * reutrn the list of up action event object.

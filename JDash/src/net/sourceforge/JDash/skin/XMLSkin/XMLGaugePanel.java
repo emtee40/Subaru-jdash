@@ -49,7 +49,6 @@ import net.sourceforge.JDash.gui.shapes.AbstractShape;
 import net.sourceforge.JDash.gui.shapes.ButtonShape;
 import net.sourceforge.JDash.gui.shapes.ComponentShape;
 import net.sourceforge.JDash.gui.shapes.GlyphShape;
-import net.sourceforge.JDash.gui.shapes.TextShape;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.SkinEventTrigger;
 import net.sourceforge.JDash.util.UTIL;

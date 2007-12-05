@@ -27,8 +27,12 @@ package net.sourceforge.JDash.gui.shapes;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
+
+import net.sourceforge.JDash.skin.SkinEvent;
 
 
 /*******************************************************
@@ -43,23 +47,22 @@ public class ButtonShape extends AbstractShape implements ComponentShape
 	private double y_ = 0;
 	private double w_ = 0;
 	private double h_ = 0;
-	private String upAction_ = null;
-	private String downAction_ = null;
 	private ImageIcon upImage_ = null;
 	private ImageIcon downImage_ = null;
+	
+	private List<SkinEvent> events_ = new ArrayList<SkinEvent>();
+
 	
 	/*******************************************************
 	 * Create a new Rectangle shape
 	 ******************************************************/
-	public ButtonShape(String type, double x, double y, double width, double height, String upAction, String downAction, ImageIcon upImageName, ImageIcon downImageName)
+	public ButtonShape(String type, double x, double y, double width, double height, ImageIcon upImageName, ImageIcon downImageName)
 	{
 		this.type_ = type;
 		this.x_ = x;
 		this.y_ = y;
 		this.w_ = width;
 		this.h_ = height;
-		this.upAction_ = upAction;
-		this.downAction_ = downAction;
 		this.upImage_ = upImageName;
 		this.downImage_ = downImageName;
 	}
@@ -77,20 +80,21 @@ public class ButtonShape extends AbstractShape implements ComponentShape
 		return this.type_;
 	}
 
-	/*******************************************************
-	 * @return
+
+	/********************************************************
+	 * @param se
 	 *******************************************************/
-	public String getUpAction()
+	public void addSkinEvent(SkinEvent se)
 	{
-		return this.upAction_;
+		this.events_.add(se);
 	}
 	
-	/*******************************************************
+	/********************************************************
 	 * @return
 	 *******************************************************/
-	public String getDownAction()
+	public List<SkinEvent> getSkinEvents()
 	{
-		return this.downAction_;
+		return this.events_;
 	}
 	
 	/*******************************************************

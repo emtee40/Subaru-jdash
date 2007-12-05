@@ -27,9 +27,6 @@ package net.sourceforge.JDash.gui;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.util.List;
-
-import net.sourceforge.JDash.gui.shapes.AbstractShape;
 
 /*******************************************************
  * A gauge that implements this interface will have it's

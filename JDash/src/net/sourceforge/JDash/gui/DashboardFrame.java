@@ -27,11 +27,16 @@ package net.sourceforge.JDash.gui;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.net.URL;
 
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 
 import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.Startup;
@@ -126,7 +131,18 @@ public class DashboardFrame extends JFrame
 			setContentPane(this.gaugePanel_);
 						
 			
-			
+			/* Respond to the f1 key for the about box */
+			InputMap i = this.gaugePanel_.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+			i.put(KeyStroke.getKeyStroke("F1"), "ABOUT");
+			this.gaugePanel_.getActionMap().put("ABOUT", new AbstractAction()
+			{
+				public static final long serialVersionUID =0L;
+				public void actionPerformed(ActionEvent arg0)
+				{
+					doShowAbout();
+				}
+			}); 
+
 			
 		}
 		catch(Exception e)

@@ -44,7 +44,6 @@ import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.special.TimeParameter;
-import net.sourceforge.JDash.skin.SkinEvent;
 
 
 /*******************************************************
@@ -52,7 +51,7 @@ import net.sourceforge.JDash.skin.SkinEvent;
  * Whant to read and/or write parameter values to a database,
  * then use this DAO.  Note that we only work with HSQLDB.
  ******************************************************/
-public class DatabaseLogger implements DataLogger, ParameterEventListener
+public class DatabaseLogger extends DataLogger  implements ParameterEventListener
 {
 
 	/* By default allow ologging, But, it can be overridden */
@@ -129,38 +128,7 @@ public class DatabaseLogger implements DataLogger, ParameterEventListener
 		this.conn_ = null;
 	}
 	
-	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
-	 *******************************************************/
-	public void actionPerformed(SkinEvent se)
-	{
-		
-		try
-		{
-		
-			if (SkinEvent.DESTINATION_LOGGER.equals(se.getDestination()))
-			{
-				if (ACTION_DISABLE.equals(se.getAction()))
-				{
-					this.enable(false);
-				}
-				else if (ACTION_ENABLE.equals(se.getAction()))
-				{
-					this.enable(true);
-				}
-				else
-				{
-					throw new Exception("A SkinEvent message destined for the Logger contained an unknown action\n" + se);
-				}
-			}
-		}
-		catch(Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		
-	}
+
 	
 	/*******************************************************
 	 * Override

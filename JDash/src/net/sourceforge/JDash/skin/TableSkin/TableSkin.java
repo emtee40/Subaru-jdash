@@ -26,6 +26,7 @@ package net.sourceforge.JDash.skin.TableSkin;
 
 
 import java.awt.Dimension;
+import java.io.InputStream;
 
 import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.gui.AbstractGaugePanel;
@@ -136,6 +137,16 @@ public class TableSkin extends Skin
 	}
 	
 	
+	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.Skin#getSound(java.lang.String)
+	 *******************************************************/
+	public InputStream getSound(String name) throws Exception
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 }

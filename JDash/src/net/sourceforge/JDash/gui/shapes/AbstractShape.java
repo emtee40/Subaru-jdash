@@ -31,7 +31,10 @@ import java.util.Properties;
 /*******************************************************
  * This abstract class represents a holding place for all
  * shapes that we draw on the screen.  Our polygons, circles,
- * and arcs, etc.. are extensions of this class.
+ * and arcs, etc.. are extensions of this class.  If you extend 
+ * this class, but do NOT implement "GlyphShape" or "ComponentShape"
+ * then all objects that use this shape, will assume it's a paintable
+ * object.
  ******************************************************/
 public abstract class AbstractShape
 {
@@ -86,7 +89,7 @@ public abstract class AbstractShape
 	}
 	
 	/*******************************************************
-	 * Returns the shape that this abstract shape represents.
+	 * Returns the AWT shape that this abstract shape represents.
 	 * @return
 	 *******************************************************/
 	public abstract Shape createAWTShape();

@@ -34,7 +34,7 @@ import javax.swing.ImageIcon;
 /*******************************************************
  * Creates a Rectangle shape for use within a gauge as a button
  ******************************************************/
-public class ButtonShape extends AbstractShape
+public class ButtonShape extends AbstractShape implements ComponentShape
 {
 
 	private String type_ = null;

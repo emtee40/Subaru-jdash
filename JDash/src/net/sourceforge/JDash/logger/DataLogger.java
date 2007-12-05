@@ -26,6 +26,7 @@ package net.sourceforge.JDash.logger;
 
 
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.skin.SkinEvent;
 import net.sourceforge.JDash.skin.SkinEventListener;
 
 
@@ -33,7 +34,7 @@ import net.sourceforge.JDash.skin.SkinEventListener;
  * This is the interface needed to implement in order for
  * a class to be a logger.
  ******************************************************/
-public interface DataLogger extends SkinEventListener
+public abstract class DataLogger implements SkinEventListener
 {
 	
 		/** When a skin event fires a message destined for loggers, one of the expected
@@ -43,6 +44,39 @@ public interface DataLogger extends SkinEventListener
 		/** When a skin event fires a message destined for loggers, one of the expected
 		 * actions is this one.  To disable logging  */
 		public static final String ACTION_DISABLE = "disable";
+		
+		/*******************************************************
+		 * Override
+		 * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
+		 *******************************************************/
+		public void actionPerformed(SkinEvent se)
+		{
+			
+			try
+			{
+			
+				if (SkinEvent.DESTINATION_LOGGER.equals(se.getDestination()))
+				{
+					if (ACTION_DISABLE.equals(se.getAction()))
+					{
+						this.enable(false);
+					}
+					else if (ACTION_ENABLE.equals(se.getAction()))
+					{
+						this.enable(true);
+					}
+					else
+					{
+						throw new Exception("A SkinEvent message destined for the Logger contained an unknown action\n" + se);
+					}
+				}
+			}
+			catch(Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+			
+		}
 	
 		/********************************************************
 		 * The enableability of a logger can be overidden with this
@@ -51,7 +85,7 @@ public interface DataLogger extends SkinEventListener
 		 * @param enableOverride
 		 * @throws Exception
 		 *******************************************************/
-		public void disableOverride(boolean enableOverride) throws Exception;
+		public abstract void disableOverride(boolean enableOverride) throws Exception;
 	
 		
 		/********************************************************
@@ -60,7 +94,7 @@ public interface DataLogger extends SkinEventListener
 		 * @param param IN - the param to add.
 		 * @throws Exception if a problem occured adding the param.
 		 ******************************************************/
-		public void addParameter(Parameter param) throws Exception;
+		public abstract void addParameter(Parameter param) throws Exception;
 		
 		/********************************************************
 		 * Return true if this logger is currently enabled.
@@ -68,7 +102,7 @@ public interface DataLogger extends SkinEventListener
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public boolean isEnabled() throws Exception;
+		public abstract boolean isEnabled() throws Exception;
 		
 		/*******************************************************
 		 * Enable or disable logging.  This kinda the same thing
@@ -78,7 +112,7 @@ public interface DataLogger extends SkinEventListener
 		 *
 		 * @param enable
 		 *******************************************************/
-		public void enable(boolean enable) throws Exception;
+		public abstract void enable(boolean enable) throws Exception;
 		
 		
 		/*******************************************************
@@ -86,7 +120,7 @@ public interface DataLogger extends SkinEventListener
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public int getLogCount() throws Exception;
+		public abstract int getLogCount() throws Exception;
 		
 		
 		/*******************************************************
@@ -95,7 +129,7 @@ public interface DataLogger extends SkinEventListener
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public String getLogName(int logIndex) throws Exception;
+		public abstract String getLogName(int logIndex) throws Exception;
 		
 		
 		/*******************************************************
@@ -107,7 +141,7 @@ public interface DataLogger extends SkinEventListener
 		 * @param name IN - the new name.
 		 * @throws Exception
 		 *******************************************************/
-		public void setLogName(int logIndex, String name) throws Exception;
+		public abstract void setLogName(int logIndex, String name) throws Exception;
 		
 		
 		/*******************************************************
@@ -117,13 +151,13 @@ public interface DataLogger extends SkinEventListener
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public void deleteLog(int logIndex) throws Exception;
+		public abstract void deleteLog(int logIndex) throws Exception;
 
 		
 		/********************************************************
 		 * @throws Exception
 		 *******************************************************/
-		public void deleteAll() throws Exception;
+		public abstract void deleteAll() throws Exception;
 		
 		
 		
@@ -135,7 +169,7 @@ public interface DataLogger extends SkinEventListener
 		 * 
 		 * @param logIndex IN - the log index to prepare.
 		 *******************************************************/
-		public void prepareForPlayback(int logIndex) throws Exception;
+		public abstract void prepareForPlayback(int logIndex) throws Exception;
 		
 		
 		
@@ -152,7 +186,7 @@ public interface DataLogger extends SkinEventListener
 		 * inform the display panel to update it's values.
 		 * @return
 		 *******************************************************/
-		public LogParameter getNext() throws Exception;
+		public abstract LogParameter getNext() throws Exception;
 
 		
 		
@@ -162,6 +196,6 @@ public interface DataLogger extends SkinEventListener
 		 * @return
 		 * @throws Exception
 		 *******************************************************/
-		public LogParameter getPrevious() throws Exception;
+		public abstract LogParameter getPrevious() throws Exception;
 
 }

@@ -361,12 +361,14 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 		
 		
 		
-		/* Now that we know the highest light up LED, we can use it to calculate the high and low needles */
+		/* Now that we know the highest light up LED, we can use it to calculate the high and low needles.
+		 * Caution... At initial startup, we might not have a high LED yet light up */
 		
 		
 		/* Calculate the high needle.  It's simply the LED with the highest MIN value, unless the timeout has been hit, then
 		 * it's hew new high LED value.  Unless the timeout has fired, then it's the current High LED */
 		if ((this.highNeedleShapes_.size() > 0 ) &&
+			(highestLitLED != null) &&
 			((highestLitLED.getMin() >= this.highNeedleLed_.getMin())  || 
 			 (System.currentTimeMillis() > this.highNeedleLastReset_ + this.highNeedleResetDelay_)))
 		{
@@ -379,6 +381,7 @@ public class LEDGauge extends AbstractGauge implements PaintableGauge, SkinEvent
 		/* Calculate the low needle.  It's the current high LED if it's MIN value is lower than the currently set low LED.  
 		 * Unless the timeout has fired, then it's the current HIGH LED */
 		if ((this.lowNeedleShapes_.size() > 0 ) &&
+			(highestLitLED != null) &&
 			((highestLitLED.getMin() <= this.lowNeedleLed_.getMin())  || 
 			 (System.currentTimeMillis() > this.lowNeedleLastReset_ + this.lowNeedleResetDelay_)))
 		{

@@ -25,9 +25,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.skin;
 
 import java.awt.Dimension;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javazoom.jl.player.Player;
 
 
+import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.gui.AbstractGaugePanel;
 import net.sourceforge.JDash.gui.DashboardFrame;
@@ -39,7 +45,7 @@ import net.sourceforge.JDash.logger.DataLogger;
  * can get all the skinnable attributes used
  * to define the user interface.
  ******************************************************/
-public abstract class Skin
+public abstract class Skin implements SkinEventListener
 {
 	
 	/** A value used by the skins to identify a windows mode */
@@ -60,6 +66,7 @@ public abstract class Skin
 	
 	/* The list of event listeners that respond to things like button presses */
 	private ArrayList<SkinEventListener> skinEventListeners_ = new ArrayList<SkinEventListener>();
+	
 
 	/******************************************************
 	 * create a new skin class.  Don't do anything special
@@ -72,8 +79,42 @@ public abstract class Skin
 	public Skin(SkinFactory ownerFactory)
 	{
 		this.ownerFactory_ = ownerFactory;
+		
+		/* Add this skin to the event listeners, because there are a few
+		 * events that we watch for */
+		addSkinEventListener(this);
 	}
 	
+	
+	/*******************************************************
+	 * respond to specific skin events.  At present, the Skin
+	 * class responds only to stdout events. 
+	 * 
+	 * @see SkinEvent
+	 * 
+	 * Override
+	 * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
+	 *******************************************************/
+	public void actionPerformed(SkinEvent se)
+	{
+		try
+		{
+			/* STDOUT events */
+			if (SkinEvent.DESTINATION_STDOUT.equals(se.getDestination()))
+			{
+				System.out.println(se.getAction());
+			}
+			
+			if (SkinEvent.DESTINATION_SOUND.equals(se.getDestination()))
+			{
+				playSound(se.getAction());
+			}
+		}
+		catch(Exception e)
+		{
+			Startup.showException(e, true);
+		}
+	}
 	
 	/********************************************************
 	 * Get the factory that created this skin.
@@ -190,5 +231,51 @@ public abstract class Skin
 	 * @throws Exception
 	 *******************************************************/
 	public abstract AbstractGaugePanel createGaugePanel(DashboardFrame dashFrame, BaseMonitor monitor, DataLogger logger) throws Exception;
+
 	
+	/*******************************************************
+	 * Plays the given sound name.  The concrete skin is
+	 * asked for the sound object by it's soundName reference
+	 * with the method getSound(). then the sound is played.
+	 * The sound is played in it's own thread, so it will not
+	 * block the gauges.  
+	 * @param soundName
+	 *******************************************************/
+	public void playSound(String soundName) throws Exception
+	{
+		SoundRunnable sr = new SoundRunnable(getSound(soundName));
+		new Thread(sr).start();
+		
+	}
+	
+	/********************************************************
+	 * Returns a sound object so the skin can play it back through the sound interface.
+	 * @param name
+	 * @throws Exception
+	 * @return an input stream of the sound.
+	 ******************************************************/
+	public abstract InputStream getSound(String name) throws Exception;
+	
+	
+	private static class SoundRunnable implements Runnable
+	{
+		private InputStream is_ = null;
+		public SoundRunnable(InputStream is)
+		{
+			this.is_ = is;
+		}
+		public void run()
+		{
+			try
+			{
+				Player player = new Player(this.is_);
+				player.play();
+				this.is_.close();
+			}
+			catch(Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+	}
 }

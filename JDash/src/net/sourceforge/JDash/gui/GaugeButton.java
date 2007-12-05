@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.gui;
 
 
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -49,7 +50,7 @@ import net.sourceforge.JDash.skin.SkinEvent;
  * and feel of a gauge.  It is also capable of being
  * triggered by a parameter.
  ******************************************************/
-public class GaugeButton
+public class GaugeButton implements SwingComponent
 {
 	
 	
@@ -58,8 +59,6 @@ public class GaugeButton
 	
 	/** A button type code string to represent a toggle/checkbox button */
 	public static final String BUTTON_TYPE_TOGGLE = "toggle";
-	
-	private Point position_ = null;
 	
 	public static final long serialVersionUID = 0L;
 
@@ -81,17 +80,15 @@ public class GaugeButton
 	 * changing according to the values defined within the button shape.
 	 * 
 	 * @param skin - IN the skin used to create this button.
-	 * @param position IN - the position within the parent panel to place this button.
 	 * @param shape IN - the button definition shape.
 	 * @see ButtonShape
 	 ******************************************************/
-	public GaugeButton(Skin skin, Point position, ButtonShape shape)
+	public GaugeButton(Skin skin, ButtonShape shape)
 	{
 		super();
 		
 		this.buttonShape_ = shape;
 		this.skin_ = skin;
-		this.position_ = position;
 		
 		try
 		{
@@ -115,16 +112,18 @@ public class GaugeButton
 			
 			/* Setup the original bounds from the shape. Note the position adjustment */
 			Rectangle rect = (Rectangle)shape.createAWTShape().getBounds().clone();
-			rect.x += position.x;
-			rect.y += position.y;
+//			rect.x += position.x;
+//			rect.y += position.y;
 
 			this.theButton_.setBounds(rect);
 			this.theButton_.setOpaque(false);
 			
 			
 			/* Setup the up and down action skin events */
-			this.upActions_ = extractActions(getButtonShape().getUpAction());
-			this.downActions_ = extractActions(getButtonShape().getDownAction());
+//			this.upActions_ = extractActions(getButtonShape().getUpAction());
+//			this.downActions_ = extractActions(getButtonShape().getDownAction());
+			this.upActions_ = SkinEvent.extractActions(getButtonShape().getUpAction());
+			this.downActions_ = SkinEvent.extractActions(getButtonShape().getDownAction());
 			
 			
 			/* If this button has a paramter trigger, then disable any mouse listeners */
@@ -215,44 +214,44 @@ public class GaugeButton
 		return b;
 	}
 	
-	/*******************************************************
-	 * Given the string parameter, extract the SkinEvent
-	 * objects and return them.
-	 * @return
-	 *******************************************************/
-	private List<SkinEvent> extractActions(String action)
-	{
-		List<SkinEvent> skinEvents = new ArrayList<SkinEvent>();
-		
-		/* If no action is defined, then just return the empty list */
-		if (action == null)
-		{
-			return skinEvents;
-		}
-		
-		/* Don't bother if no action is defined */
-		if (getButtonShape().getDownAction() != null)
-		{
-			/* Break out each action */
-			StringTokenizer st = new StringTokenizer(action, "" + Skin.VALUE_DELIM);
-			while(st.hasMoreElements())
-			{
-				String cmd = st.nextToken();
-				String dest = null;
-				
-				/* Each action can optionally have a specific destination */
-				if (cmd.indexOf(Skin.VALUE_DELIM_2) != -1)
-				{
-					dest = cmd.substring(0, cmd.indexOf(Skin.VALUE_DELIM_2));
-					cmd = cmd.substring(dest.length() + 1, cmd.length());
-				}
-				
-				skinEvents.add(new SkinEvent(dest, cmd));
-			}
-		}
-		
-		return skinEvents;
-	}
+//	/*******************************************************
+//	 * Given the string parameter, extract the SkinEvent
+//	 * objects and return them.
+//	 * @return
+//	 *******************************************************/
+//	private List<SkinEvent> extractActions(String action)
+//	{
+//		List<SkinEvent> skinEvents = new ArrayList<SkinEvent>();
+//		
+//		/* If no action is defined, then just return the empty list */
+//		if (action == null)
+//		{
+//			return skinEvents;
+//		}
+//		
+//		/* Don't bother if no action is defined */
+//		if (getButtonShape().getDownAction() != null)
+//		{
+//			/* Break out each action */
+//			StringTokenizer st = new StringTokenizer(action, "" + Skin.VALUE_DELIM);
+//			while(st.hasMoreElements())
+//			{
+//				String cmd = st.nextToken();
+//				String dest = null;
+//				
+//				/* Each action can optionally have a specific destination */
+//				if (cmd.indexOf(Skin.VALUE_DELIM_2) != -1)
+//				{
+//					dest = cmd.substring(0, cmd.indexOf(Skin.VALUE_DELIM_2));
+//					cmd = cmd.substring(dest.length() + 1, cmd.length());
+//				}
+//				
+//				skinEvents.add(new SkinEvent(dest, cmd));
+//			}
+//		}
+//		
+//		return skinEvents;
+//	}
 
 	
 	/********************************************************
@@ -283,14 +282,15 @@ public class GaugeButton
 	}
 	
 	
+	
 	/******************************************************
-	 * @return
+	 * Override
+	 * @see net.sourceforge.JDash.gui.SwingComponent#getComponent()
 	 *******************************************************/
-	public AbstractButton getButtonComponent()
+	public Component getComponent()
 	{
 		return this.theButton_;
 	}
-	
 
 	/******************************************************
 	 * When the layoutmanager calls the setBounds() for 

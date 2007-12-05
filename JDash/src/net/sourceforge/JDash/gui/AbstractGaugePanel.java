@@ -43,11 +43,16 @@ import javax.swing.JPanel;
 import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.comm.MonitorEventListener;
+import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
+import net.sourceforge.JDash.gui.shapes.ButtonShape;
+import net.sourceforge.JDash.gui.shapes.GlyphShape;
 import net.sourceforge.JDash.gui.shapes.ImageShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
+import net.sourceforge.JDash.skin.SkinEvent;
+import net.sourceforge.JDash.skin.SkinEventTrigger;
 import net.sourceforge.JDash.util.UTIL;
 
 /*******************************************************
@@ -109,6 +114,7 @@ public abstract class AbstractGaugePanel extends JPanel
 				updateDisplay();
 			}
 		});
+		
 		
 		
 	}
@@ -184,6 +190,8 @@ public abstract class AbstractGaugePanel extends JPanel
 		}
 	}
 	
+	
+
 	
 	/*******************************************************
 	 * This method is fired when something has happened, that requires 
@@ -271,6 +279,10 @@ public abstract class AbstractGaugePanel extends JPanel
 			{
 				throw new RuntimeException("you cannot paint text with the paintShapes() method, you must use the paintGlyphs() method.");
 			}
+			else if (shape instanceof ButtonShape)
+			{
+				throw new RuntimeException("you cannot paint a button with the paintShapes() method.  This should have been added as a component.");
+			}
 			else
 			{
 				/* Fill the shape, if requested */
@@ -299,17 +311,16 @@ public abstract class AbstractGaugePanel extends JPanel
 	 * This paint method acts like the paintShapes() method, except
 	 * it's designed for text glyphs, rather than AWT shapes.
 s	 * @param g2 IN - the graphics context to draw to.s
-	 * @param textShape IN - the text shape these glyphs represent. The color attibute is what is needed here.
+	 * @param color IN - the color string to paint the text with.
 	 * @param x IN - the x position to put the glyphs. They should have alrady been sized.
 	 * @param y IN - the y position to put the glyphs, they should have already been sized.
 	 * @param glyphs IN - the glyph vector to draw.
 	 *******************************************************/
-	protected void paintGlyphs(Graphics2D g2, TextShape textShape, int x, int y, GlyphVector glyphs)
+	protected void paintGlyphs(Graphics2D g2, String color, int x, int y, GlyphVector glyphs)
 	{
 		
 		/* Set the line color */
-		String strColor = textShape.getAttribute(AbstractShape.PROPS.COLOR);
-		g2.setColor(Color.decode(strColor));
+		g2.setColor(Color.decode(color));
 		
 
 		/* Draw it */
@@ -321,8 +332,9 @@ s	 * @param g2 IN - the graphics context to draw to.s
 			}
 			catch(Exception e)
 			{
+				// TODO
 				e.printStackTrace();
-				System.err.println("Warning, unable to draw the text glyphs for parameter value: " + textShape.getFormattedValue());
+				System.err.println("Warning, unable to draw the text glyphs ");
 			}
 		}
 

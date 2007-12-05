@@ -38,14 +38,20 @@ import javax.swing.ImageIcon;
 
 import net.sourceforge.JDash.Startup;
 import net.sourceforge.JDash.ecu.comm.BaseMonitor;
+import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.AbstractGauge;
 import net.sourceforge.JDash.gui.AbstractGaugePanel;
 import net.sourceforge.JDash.gui.DashboardFrame;
+import net.sourceforge.JDash.gui.GaugeButton;
 import net.sourceforge.JDash.gui.PaintableGauge;
 import net.sourceforge.JDash.gui.SwingComponentGauge;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
+import net.sourceforge.JDash.gui.shapes.ButtonShape;
+import net.sourceforge.JDash.gui.shapes.ComponentShape;
+import net.sourceforge.JDash.gui.shapes.GlyphShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
 import net.sourceforge.JDash.logger.DataLogger;
+import net.sourceforge.JDash.skin.SkinEventTrigger;
 import net.sourceforge.JDash.util.UTIL;
 
 /*******************************************************
@@ -96,6 +102,32 @@ public class XMLGaugePanel extends AbstractGaugePanel
 		
 		/* The background shapes. */
 		this.backgroundShapes_ = skin.getWindowShapes();
+		
+		/* Strip any component/button shapes from the background shapes, and place them accordingly */
+		for (int index = 0; index < this.backgroundShapes_.size(); index++)
+		{
+			AbstractShape bgShape = this.backgroundShapes_.get(index);
+
+			/* We only want component shapes */
+			if (bgShape instanceof ComponentShape)
+			{
+				/* Remove it from the shape list */
+				this.backgroundShapes_.remove(index);
+				index--;
+
+				/* At present, we only know how to deal with Button Shapes */
+				if (bgShape instanceof ButtonShape)
+				{
+					GaugeButton bgButton = new GaugeButton(skin, (ButtonShape)bgShape);
+					add(bgButton.getComponent());
+				}
+				else
+				{
+					throw new Exception("Attempt to place an incompatible ComponentShape [" + bgShape.getClass().getName() + "] into the main window.");
+				}
+			}
+			
+		}
 
 		/* Add all static shapes to the background */
 		for (int index = 0; index < skin.getGaugeCount(); index++)
@@ -142,6 +174,18 @@ public class XMLGaugePanel extends AbstractGaugePanel
 			}
 		}
 		
+		
+		/* Initialize the triggers by attaching them to their referenced parameters */
+		List<SkinEventTrigger> triggers = skin.getTriggers();
+		for (SkinEventTrigger t : triggers)
+		{
+			Parameter p = monitor.getParameterRegistry().getParamForName(t.getParameterName());
+			if (p == null)
+			{
+				throw new Exception("Unable to setup trigger, it references a sensor that does not exist [" + t.getParameterName() + "]");
+			}
+			t.attachToParameter(p);
+		}
 		
 	}
 	
@@ -271,11 +315,12 @@ public class XMLGaugePanel extends AbstractGaugePanel
 			{
 				
 				/* Text Shape */
-				if (shape instanceof TextShape)
+				if (shape instanceof GlyphShape)
 				{
-					TextShape textShape = (TextShape)shape;
+					GlyphShape textShape = (GlyphShape)shape;
 					Shape awtShape = shape.createAWTShape();
-					paintGlyphs(g2, textShape, awtShape.getBounds().x, awtShape.getBounds().y, textShape.getGlyphVector(g2.getFontRenderContext()));
+					String color = shape.getAttribute(AbstractShape.PROPS.COLOR);
+					paintGlyphs(g2, color, awtShape.getBounds().x, awtShape.getBounds().y, textShape.getGlyphVector(g2.getFontRenderContext()));
 				}
 				else
 				{

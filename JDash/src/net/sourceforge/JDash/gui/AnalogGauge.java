@@ -246,6 +246,12 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		/* Add the button to our list for future placement */		
 		this.gaugeButtons_.add(gaugeButton);
 		
+		/* Modify it's bounds */
+		Rectangle r = gaugeButton.getComponent().getBounds();
+		r.x += getPosition().x;
+		r.y += getPosition().y;
+		gaugeButton.getComponent().setBounds(r);
+		
 		
 		/* Inspect the buttons SkinEvents.  If any of them contain a null destination, then
 		 * this indicates the buttons action is destined for us.  So, replace the SkinEvent
@@ -279,7 +285,7 @@ public class AnalogGauge extends AbstractGauge implements SkinEventListener, Pai
 		
 		for (GaugeButton gb : this.gaugeButtons_)
 		{
-			cList.add(gb.getButtonComponent());
+			cList.add(gb.getComponent());
 		}
 		return cList;
 	}

@@ -34,6 +34,7 @@ import java.awt.geom.AffineTransform;
 
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.StringParameter;
+import net.sourceforge.JDash.gui.shapes.AbstractShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
 
 
@@ -214,7 +215,8 @@ public class DigitalGauge extends AbstractGauge implements PaintableGauge
 		preRender(g2, scalingTransform);
 		
 		/* Paint the text onto the main panel */
-		panel.paintGlyphs(g2, this.textShape_, this.preRenderedPoint_.x, this.preRenderedPoint_.y, this.preRenderedGlyphVector_);
+		String color = this.textShape_.getAttribute(AbstractShape.PROPS.COLOR);
+		panel.paintGlyphs(g2, color, this.preRenderedPoint_.x, this.preRenderedPoint_.y, this.preRenderedGlyphVector_);
 		
 		
 		/* Set the pre-renderd bounds to the size of this glyph vector. So the next preGen can take into account for

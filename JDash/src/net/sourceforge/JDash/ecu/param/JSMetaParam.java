@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.ecu.param;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.lang.Math;
 
@@ -60,6 +61,8 @@ public class JSMetaParam extends MetaParameter
 	private Script rhinoScript_ = null;
 
 	
+	/* We track when dependants have updated values */
+	private HashSet<Parameter> updatedDependants_ = new HashSet<Parameter>();
 	
 	/* The value object is an Object instead of the literal double, because beanshell parameters can be quite
 	 * crafty.  The usual is to return a double value, but once in a while, a metaparameter is setup that
@@ -132,11 +135,28 @@ public class JSMetaParam extends MetaParameter
 			if (ARG_NAME_DEPENDANT.equals(name))
 			{
 				Parameter p = getOwnerRegistry().getParamForName(value);
-				if (p == null)
+				
+				/* don't add, already added dependants */
+				if (this.dependants_.contains(p) == false)
 				{
-					throw new ParameterException(getClass().getName() + " " + getName() +  " references an unknown dependant " + value);
+					
+					if (p == null)
+					{
+						throw new ParameterException(getClass().getName() + " " + getName() +  " references an unknown dependant " + value);
+					}
+					
+					
+					this.dependants_.add(p);
+					
+					p.addEventListener(new ParameterEventListener()
+					{
+						public void valueChanged(Parameter p)
+						{
+							dependantValueChanged(p);
+						}
+					});
+					
 				}
-				this.dependants_.add(p);
 			}
 			
 			
@@ -161,12 +181,46 @@ public class JSMetaParam extends MetaParameter
 	}
 	
 	
+	
 
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.ecu.param.Parameter#getResult()
+	 *******************************************************/
+	public double getResult()
+	{
+		return value_.doubleValue();
+	}
+
+	
+	/********************************************************
+	 * We need to watch for dependant parameters haveing their
+	 * vlaues changed.  Once each has checked in, we'll calculate
+	 * this parameters value.
+	 * 
+	 * @param p
+	 *******************************************************/
+	private void dependantValueChanged(Parameter p)
+	{
+		
+		/* Add this dependant to the watch list */
+		this.updatedDependants_.add(p);
+		
+		/* If the number of elements in the watch list is equal to the depenant list, then
+		 * they have all checked in */
+		if (this.updatedDependants_.size() == this.dependants_.size())
+		{
+			this.updatedDependants_.clear();
+			calculateResult();
+		}
+		
+	}
+	
 	/*******************************************************
 	 * Override
 	 * @see net.sourceforge.JDash.ecu.param.Parameter#getResult()
 	 *******************************************************/
-	public synchronized double getResult()
+	private synchronized double calculateResult()
 	{
 		
 		try

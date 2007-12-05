@@ -38,7 +38,7 @@ import java.awt.font.GlyphVector;
  * Cool font tricks
  * http://www.java2s.com/Code/Java/2D-Graphics-GUI/Paints.htm
  ******************************************************/
-public class TextShape extends LineShape
+public class TextShape extends LineShape implements GlyphShape
 {
 	
 	private Object displayValue_ = null;
@@ -67,15 +67,16 @@ public class TextShape extends LineShape
 		return this.font_;
 	}
 	
+	
 	/*******************************************************
-	 * @return
+	 * Override
+	 * @see net.sourceforge.JDash.gui.shapes.GlyphShape#getGlyphVector(java.awt.font.FontRenderContext)
 	 *******************************************************/
 	public GlyphVector getGlyphVector(FontRenderContext ctx)
 	{
 		Font f = getFont().deriveFont(Font.BOLD, Integer.parseInt(this.getAttribute(PROPS.SIZE)));
 		return f.createGlyphVector(ctx, getFormattedValue());
 	}
-	
 	
 	
 	/********************************************************

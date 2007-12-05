@@ -27,6 +27,7 @@ package net.sourceforge.JDash.skin.TableSkin;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.skin.Skin;
 import net.sourceforge.JDash.skin.SkinFactory;
 
@@ -44,6 +45,7 @@ public class TableSkinFactory extends SkinFactory
 		 ******************************************************/
 		public TableSkinFactory() throws Exception
 		{
+			super();
 			this.allSkins_.add(new TableSkin(this));
 		}
 		

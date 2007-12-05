@@ -32,6 +32,7 @@ import java.awt.MediaTracker;
 import java.awt.Point;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,12 +50,12 @@ import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.gui.AbstractGauge;
 import net.sourceforge.JDash.gui.AbstractGaugePanel;
 import net.sourceforge.JDash.gui.AnalogGauge;
-import net.sourceforge.JDash.gui.ButtonGauge;
 import net.sourceforge.JDash.gui.DashboardFrame;
 import net.sourceforge.JDash.gui.DigitalGauge;
 import net.sourceforge.JDash.gui.GaugeButton;
 import net.sourceforge.JDash.gui.LEDGauge;
 import net.sourceforge.JDash.gui.LineGraphGauge;
+import net.sourceforge.JDash.gui.SwingComponent;
 import net.sourceforge.JDash.gui.shapes.AbstractShape;
 import net.sourceforge.JDash.gui.shapes.ButtonShape;
 import net.sourceforge.JDash.gui.shapes.EllipseShape;
@@ -66,7 +67,9 @@ import net.sourceforge.JDash.gui.shapes.RoundRectangleShape;
 import net.sourceforge.JDash.gui.shapes.TextShape;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
+import net.sourceforge.JDash.skin.SkinEvent;
 import net.sourceforge.JDash.skin.SkinEventListener;
+import net.sourceforge.JDash.skin.SkinEventTrigger;
 import net.sourceforge.JDash.skin.SkinFactory;
 
 import org.w3c.dom.Document;
@@ -103,7 +106,6 @@ public class XMLSkin extends Skin
 	private static final String GAUGE_TYPE_DIGITAL_LOW	= "digital-low";
 	private static final String GAUGE_TYPE_DIGITAL_HIGH	= "digital-high";
 	private static final String GAUGE_TYPE_LED	 		= "led";
-	private static final String GAUGE_TYPE_BUTTON		= "button";
 	private static final String GAUGE_TYPE_LINE_GRAPH	= "line-graph";
 	
 	private static final String NODE_SKIN 		= "/skin";
@@ -117,6 +119,8 @@ public class XMLSkin extends Skin
 	private static final String NODE_POINT		= "point";
 	private static final String NODE_FONT		= "font";
 	private static final String NODE_STATIC		= "static";
+	private static final String NODE_TRIGGER	= "trigger";
+	private static final String NODE_SOUND		= "sound";
 	
 	private static final String NODE_BUTTON				= "button";
 	private static final String NODE_POLYGON			= "polygon";
@@ -155,6 +159,8 @@ public class XMLSkin extends Skin
 	private static final String ATTRIB_VALUE		= "value";
 	private static final String ATTRIB_UP_IMAGE		= "up-image";
 	private static final String ATTRIB_DOWN_IMAGE	= "down-image";
+	private static final String ATTRIB_ENTER_RANGE_ACTION	= "enter-range-action";
+	private static final String ATTRIB_EXIT_RANGE_ACTION	= "exit-range-action";
 	private static final String ATTRIB_UP_ACTION	= "up-action";
 	private static final String ATTRIB_DOWN_ACTION	= "down-action";
 	private static final String ATTRIB_SECONDS      = "seconds";
@@ -217,7 +223,6 @@ public class XMLSkin extends Skin
 //        
 //	}
 
-		
 	}
 	
 	
@@ -517,8 +522,8 @@ public class XMLSkin extends Skin
 	}
 	
 	/*******************************************************
-	 * Override
-	 * @see net.sourceforge.JDash.skin.Skin#getWindowShapes()
+	 * @return
+	 * @throws Exception
 	 *******************************************************/
 	public List<AbstractShape> getWindowShapes() throws Exception
 	{
@@ -535,6 +540,16 @@ public class XMLSkin extends Skin
 		return backgroundShapes;
 	}
 	
+	
+	/********************************************************
+	 * @throws Exception
+	 *******************************************************/
+	public List<SwingComponent> getWindowComponents() throws Exception 
+	{
+		return null;
+	}
+	
+	
 	/*******************************************************
 	 * get the defined fill color for this skin.
 	 * 
@@ -543,6 +558,57 @@ public class XMLSkin extends Skin
 	public java.awt.Color getBackgroundColor() throws Exception
 	{
 		return Color.decode(getColor(extractString(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR)));
+	}
+	
+//	
+//	/********************************************************
+//	 * This method creates the event triggers, and initializes them.
+//	 * @throws Exception
+//	 *******************************************************/
+	public List<SkinEventTrigger> getTriggers() throws Exception
+	{
+		ArrayList<SkinEventTrigger> triggers = new ArrayList<SkinEventTrigger>();
+		
+		String triggerPath = NODE_SKIN + "/" + NODE_TRIGGER;
+		
+		int triggerCount = extractInt("count(" + triggerPath + ")");
+		for (int index = 1; index <= triggerCount; index++)
+		{
+			
+			/* Get the triggers attributes */
+			String sensor = extractString(triggerPath + "[" + index + "]/@" + ATTRIB_SENSOR);
+			Double sensorMin = extractDouble(triggerPath + "[" + index + "]/@" + ATTRIB_SENSOR_MIN);
+			Double sensorMax = extractDouble(triggerPath + "[" + index + "]/@" + ATTRIB_SENSOR_MAX);
+			
+			String enterRangeAction = null;
+			String exitRangeAction = null;
+			
+			try
+			{
+				enterRangeAction = extractString(triggerPath + "[" + index + "]/@" + ATTRIB_ENTER_RANGE_ACTION);
+			}
+			catch(Exception e) {}
+			
+			try
+			{
+				exitRangeAction = extractString(triggerPath + "[" + index + "]/@" + ATTRIB_EXIT_RANGE_ACTION);
+			}
+			catch(Exception e) {}
+			
+			if ((enterRangeAction == null) && (exitRangeAction == null))
+			{
+				throw new Exception("Unable to create " + NODE_TRIGGER + " You must provide atleast one " + ATTRIB_ENTER_RANGE_ACTION + " or " + ATTRIB_EXIT_RANGE_ACTION);
+			}
+			
+			/* Create the trigger. */
+			List<SkinEvent> enterActions = SkinEvent.extractActions(enterRangeAction);
+			List<SkinEvent> exitActions = SkinEvent.extractActions(exitRangeAction);
+			SkinEventTrigger tgr = new SkinEventTrigger(this, sensor, sensorMin, sensorMax, enterActions, exitActions);
+			triggers.add(tgr);
+			
+		}
+		
+		return triggers;
 	}
 	
 	/*******************************************************
@@ -642,6 +708,25 @@ public class XMLSkin extends Skin
 		return f;
 	}
 	
+	
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.Skin#getSound(java.lang.String)
+	 *******************************************************/
+	public InputStream getSound(String name) throws Exception
+	{
+		
+		/* Get the sound source */
+		String soundPath = NODE_SKIN + "/" + NODE_SOUND + "[@" + ATTRIB_NAME + "='" + name + "']/@" + ATTRIB_SRC;
+		String soundSrc = extractString(soundPath);
+		
+		/* Load the sound into a stream */
+		InputStream is = new FileInputStream(new File(this.resourceUrl_ + File.separatorChar + soundSrc));
+		
+		return is;
+		
+	}
+	
 	/*******************************************************
 	 * 
 	 *******************************************************/
@@ -708,10 +793,6 @@ public class XMLSkin extends Skin
 		else if (GAUGE_TYPE_LED.equalsIgnoreCase(type))
 		{
 			gauge = createLedGauge(index);
-		}
-		else if (GAUGE_TYPE_BUTTON.equalsIgnoreCase(type))
-		{
-			gauge = createButtonGauge(index);
 		}
 		else if (GAUGE_TYPE_LINE_GRAPH.equalsIgnoreCase(type))
 		{
@@ -816,7 +897,7 @@ public class XMLSkin extends Skin
 		for (int shapeIndex = 1; shapeIndex <= buttonShapeCount; shapeIndex++)
 		{
 			AbstractShape shape = createShape(gaugePath + "/" + NODE_BUTTON + "[" + shapeIndex + "]");
-			GaugeButton gaugeButton = new GaugeButton(this, new Point(pivotX, pivotY), (ButtonShape)shape);
+			GaugeButton gaugeButton = new GaugeButton(this, (ButtonShape)shape);
 			analogGauge.addButton(gaugeButton);
 		}
 				
@@ -1011,58 +1092,6 @@ public class XMLSkin extends Skin
 		return ledGauge;
 
 	}
-
-	
-	/********************************************************
-	 * Create an analog gague from the given gauge index
-	 * @return
-	 ******************************************************/
-	private AbstractGauge createButtonGauge(int index) throws Exception
-	{
-
-		/* Get the gauge node */
-		String gaugePath = NODE_GAUGE + "[" + index + "]";
-		
-		
-		/* Get the parameter for this sensor.  It could be null, indicating that this is not a sensor triggered button. */
-		Parameter param = null;
-		try
-		{
-			/* Get the sensor type */
-			String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
-			param = getOwnerFactory().getParameterRegistry().getParamForName(sensor);
-		}
-		catch(Exception e) {}
-				
-		/* Add the button */
-		AbstractShape shape = createShape(gaugePath + "/" + NODE_BUTTON + "[1]");
-		
-		/* Get the relative point values */
-		int pointX = extractInt(gaugePath + "/@" + ATTRIB_X);
-		int pointY = extractInt(gaugePath + "/@" + ATTRIB_Y);
-
-		
-	// TODO
-		GaugeButton gaugeButton = new GaugeButton(this, new Point(pointX, pointY), (ButtonShape)shape);
-		ButtonGauge buttonGauge = new ButtonGauge(param, new Point(pointX, pointY), gaugeButton);
-		//ButtonGauge buttonGauge = new ButtonGauge(param, (ButtonShape)shape);
-		
-
-		/* Get the range values.  This is only needed if the parameter has been defined. */
-		if (param != null)
-		{
-			double sensorMin = extractDouble(gaugePath + "/" + NODE_RANGE + "/@" + ATTRIB_SENSOR_MIN);
-			double sensorMax = extractDouble(gaugePath + "/" + NODE_RANGE + "/@" + ATTRIB_SENSOR_MAX);
-			buttonGauge.setSensorMin(sensorMin);
-			buttonGauge.setSensorMax(sensorMax);
-		}
-		
-		
-		/* Return our new gauge */
-		return buttonGauge;
-		
-	}
-	
 
 	
 	/********************************************************

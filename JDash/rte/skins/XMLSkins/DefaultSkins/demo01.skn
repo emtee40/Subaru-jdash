@@ -9,13 +9,45 @@
   
     <!-- Main Window -->
     <window width="800" height="600" type="window:50"  fill-color="black">
+      <!-- Info Text -->
       <text color="yellow" size="14" x="580" y="30"  format="A collection of different" font="Arial"/>
       <text color="yellow" size="14" x="580" y="50"  format="types of Gauges layed out" font="Arial"/>
       <text color="yellow" size="14" x="580" y="70"  format="in a few different ways" font="Arial"/>
       <text color="yellow" size="14" x="580" y="90"  format="to show the flexibility" font="Arial"/>
       <text color="yellow" size="14" x="580" y="110" format="of JDash XML Skins." font="Arial"/>
+      <text color="yellow" size="14" x="580" y="130" format="+ Plays an alarm at 6000RPM." font="Arial"/>
+      
+      <!-- Logger Button -->
+      <rectangle color="white" fill-color="none" line-width="2" x="10" y="165" width="80" height="50" />
+      <text color="white" size="14" x="10"  y="163" format="Logging Btn" font="Arial"/>
+      <button 
+        type="toggle" 
+        x="20" 
+        y="170" 
+        width="35" 
+        height="35" 
+        down-action="logger/enable"
+        up-action="logger/disable"
+        up-image="red-indicator-light-off" 
+        down-image="red-indicator-light-on" />
+        
+      <!-- Global low-reset button -->
+      <rectangle color="white" fill-color="none" line-width="2" x="10" y="95" width="80" height="50" />
+      <text color="white" size="14" x="10"  y="93" format="Low Reset Btn" font="Arial"/>
+      <button 
+    	type="push-button" 
+    	x="20" 
+    	y="100" 
+    	width="36" 
+    	height="36" 
+    	down-action="all/low-reset"
+    	up-image="red-push-off" 
+    	down-image="red-push-on"/>
+    	
     </window>
-  
+
+  <!-- Sounds -->
+  <sound name="alarm-01"						src="alarm-01.mp3"/>  
 
   <!-- Images -->
   <image name="rpm-01"                      src="rpm-01.jpg"/> 
@@ -45,6 +77,11 @@
   <font name="digital" src="digital.ttf" />
   <font name="Arial" src="system:Arial"/>
   
+  
+  <!-- Event Triggers -->
+  <trigger sensor="RPM" sensor-min="6000" sensor-max="99999" enter-range-action="sound/alarm-01:stdout/Sound RPM Alarm"/>
+
+  
   <!-- Digital RPM -->
   <gauge sensor="RPM" type="digital" x="5"  y="20">
     <static>
@@ -54,42 +91,6 @@
     <text color="green" size="20" x="5" y="35" format="%5.0f"  font="digital"/>
   </gauge>
 
-  <!-- A simple button to reset all low needles -->
-  <gauge type="button" x="10" y="95">
-    <static>
-      <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="50" />
-      <text color="white" size="14" x="0"  y="-2" format="Low Reset Btn" font="Arial"/>
-    </static>  
-     <button 
-    	type="push-button" 
-    	x="10" 
-    	y="5" 
-    	width="36" 
-    	height="36" 
-    	down-action="all/low-reset"
-    	up-image="red-push-off" 
-    	down-image="red-push-on"/>
-  </gauge>
-  
-  <!-- Logging -->
-  <gauge type="button" x="10" y="170">
-    <static>
-      <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="50" />
-      <text color="white" size="14" x="0"  y="-2" format="Logging Btn" font="Arial"/>
-    </static>  
-    <button 
-      type="toggle" 
-      x="10" 
-      y="5" 
-      width="35" 
-      height="35" 
-      down-action="logger/enable"
-      up-action="logger/disable"
-      up-image="red-indicator-light-off" 
-      down-image="red-indicator-light-on" />
-  </gauge>
- 
-  
 
   <!-- Analog RPM -->
   <gauge sensor="RPM" type="analog" x="400" y="300">
@@ -100,7 +101,7 @@
 	      <text color="white" size="14" x="-100" y="-118" format="Analog with High/Low indicators" font="Arial"/>
 	      <text color="white" size="14" x="-100" y="-105" format="and High Reset Button" font="Arial"/>
       </static>
-  
+
     <button 
     	type="push-button" 
     	x="-22" 
@@ -110,7 +111,7 @@
     	down-action="high-reset"
     	up-image="red-push-off" 
     	down-image="red-push-on"/>
-    
+
     <needle type="high" delay="-1">
       <polygon color="blue" fill-color="dark-blue" line-width="1">
         <point x="-5"  y="10"/>

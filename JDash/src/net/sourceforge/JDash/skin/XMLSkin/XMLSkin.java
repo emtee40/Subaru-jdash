@@ -101,73 +101,74 @@ public class XMLSkin extends Skin
 	/** This is the full resource path to the digital ttf file.  */
 //	private static final String PATH_TO_DIGITAL_FONT = "/net/sourceforge/JDash/skin/XMLSkin/DefaultSkin/digital.ttf";
 	
-	private static final String GAUGE_TYPE_ANALOG 		= "analog";
-	private static final String GAUGE_TYPE_DIGITAL 		= "digital";
-	private static final String GAUGE_TYPE_DIGITAL_LOW	= "digital-low";
-	private static final String GAUGE_TYPE_DIGITAL_HIGH	= "digital-high";
-	private static final String GAUGE_TYPE_LED	 		= "led";
-	private static final String GAUGE_TYPE_LINE_GRAPH	= "line-graph";
+	public static final String GAUGE_TYPE_ANALOG 		= "analog";
+	public static final String GAUGE_TYPE_DIGITAL 		= "digital";
+	public static final String GAUGE_TYPE_LED	 		= "led";
+	public static final String GAUGE_TYPE_LINE_GRAPH	= "line-graph";
 	
-	private static final String NODE_SKIN 		= "/skin";
-	private static final String NODE_DESC		= "description";
-	private static final String NODE_IMAGE 		= "image";
-	private static final String NODE_COLOR		= "color";
-	private static final String NODE_GAUGE 		= NODE_SKIN + "/gauge";
-	private static final String NODE_WINDOW		= "window";
-	private static final String NODE_NEEDLE		= "needle";
-	private static final String NODE_LED		= "led";
-	private static final String NODE_POINT		= "point";
-	private static final String NODE_FONT		= "font";
-	private static final String NODE_STATIC		= "static";
-	private static final String NODE_TRIGGER	= "trigger";
-	private static final String NODE_SOUND		= "sound";
-	private static final String NODE_EVENT		= "event";
 	
-	private static final String NODE_BUTTON				= "button";
-	private static final String NODE_POLYGON			= "polygon";
-	private static final String NODE_ELLIPSE			= "ellipse";
-	private static final String NODE_LINE				= "line";
-	private static final String NODE_RECTANGLE			= "rectangle";
-	private static final String NODE_ROUND_RECTANGLE 	= "round-rectangle";
-	private static final String NODE_TEXT				= "text";
-	private static final String NODE_RANGE				= "range";
+	public static final String NODE_SKIN 		= "skin";
+	public static final String NODE_DESC		= "description";
+	public static final String NODE_IMAGE 		= "image";
+	public static final String NODE_COLOR		= "color";
+	public static final String NODE_GAUGE 		= "gauge";
+	public static final String NODE_WINDOW		= "window";
+	public static final String NODE_NEEDLE		= "needle";
+	public static final String NODE_LED			= "led";
+	public static final String NODE_POINT		= "point";
+	public static final String NODE_FONT		= "font";
+	public static final String NODE_STATIC		= "static";
+	public static final String NODE_TRIGGER		= "trigger";
+	public static final String NODE_SOUND		= "sound";
+	public static final String NODE_EVENT		= "event";
+	public static final String NODE_BUTTON				= "button";
+	public static final String NODE_POLYGON				= "polygon";
+	public static final String NODE_ELLIPSE				= "ellipse";
+	public static final String NODE_LINE				= "line";
+	public static final String NODE_RECTANGLE			= "rectangle";
+	public static final String NODE_ROUND_RECTANGLE 	= "round-rectangle";
+	public static final String NODE_TEXT				= "text";
+	public static final String NODE_RANGE				= "range";
 	
-	private static final String ATTRIB_NAME 		= "name";
-	private static final String ATTRIB_EXTENDS		= "extends";
-	private static final String ATTRIB_DELAY		= "delay";
-	private static final String ATTRIB_SRC 			= "src";
-	private static final String ATTRIB_SENSOR 		= "sensor";
-	private static final String ATTRIB_TYPE			= "type";
-	private static final String ATTRIB_X			= "x";
-	private static final String ATTRIB_Y			= "y";
-	private static final String ATTRIB_WIDTH		= "width";
-	private static final String ATTRIB_HEIGHT		= "height";
-	private static final String ATTRIB_ARC_WIDTH	= "arcw";
-	private static final String ATTRIB_ARC_HEIGHT	= "arch";
-	private static final String ATTRIB_COLOR		= NODE_COLOR;
-	private static final String ATTRIB_FILL_COLOR	= "fill-color";
-	private static final String ATTRIB_LINE_WIDTH	= "line-width";
-	private static final String ATTRIB_FORMAT		= "format";
-	private static final String ATTRIB_FONT			= "font";
-	private static final String ATTRIB_SIZE			= "size";
-	private static final String ATTRIB_SENSOR_MIN	= "sensor-min";
-	private static final String ATTRIB_SENSOR_MAX	= "sensor-max";
-	private static final String ATTRIB_GAUGE_MIN	= "gauge-min";
-	private static final String ATTRIB_GAUGE_MAX	= "gauge-max";
-	private static final String ATTRIB_VALUE		= "value";
-	private static final String ATTRIB_UP_IMAGE		= "up-image";
-	private static final String ATTRIB_DOWN_IMAGE	= "down-image";
-	private static final String ATTRIB_SECONDS      = "seconds";
-	private static final String ATTRIB_LABEL		= "label";
-	private static final String ATTRIB_REVERSE		= "reverse";
-	private static final String ATTRIB_POSITION		= "position";
-	private static final String ATTRIB_ACTION		= "action";
-	private static final String ATTRIB_DESTINATION	= "destination";
+	private static final String PATH_SKIN 		= "/" + NODE_SKIN;
+	private static final String PATH_GAUGE 		= PATH_SKIN + "/" + NODE_GAUGE;
 	
-	private static final String VALUE_MAIN			= "main";
-	private static final String VALUE_LOW			= "low";
-	private static final String VALUE_HIGH			= "high";
-	private static final String VALUE_SYSTEM		= "system";
+	public static final String ATTRIB_NAME 			= "name";
+	public static final String ATTRIB_EXTENDS		= "extends";
+	public static final String ATTRIB_DELAY			= "delay";
+	public static final String ATTRIB_SRC 			= "src";
+	public static final String ATTRIB_SENSOR 		= "sensor";
+	public static final String ATTRIB_TYPE			= "type";
+	public static final String ATTRIB_X				= "x";
+	public static final String ATTRIB_Y				= "y";
+	public static final String ATTRIB_WIDTH			= "width";
+	public static final String ATTRIB_HEIGHT		= "height";
+	public static final String ATTRIB_ARC_WIDTH		= "arcw";
+	public static final String ATTRIB_ARC_HEIGHT	= "arch";
+	public static final String ATTRIB_COLOR			= NODE_COLOR;
+	public static final String ATTRIB_FILL_COLOR	= "fill-color";
+	public static final String ATTRIB_LINE_WIDTH	= "line-width";
+	public static final String ATTRIB_FORMAT		= "format";
+	public static final String ATTRIB_FONT			= "font";
+	public static final String ATTRIB_SIZE			= "size";
+	public static final String ATTRIB_SENSOR_MIN	= "sensor-min";
+	public static final String ATTRIB_SENSOR_MAX	= "sensor-max";
+	public static final String ATTRIB_GAUGE_MIN		= "gauge-min";
+	public static final String ATTRIB_GAUGE_MAX		= "gauge-max";
+	public static final String ATTRIB_VALUE			= "value";
+	public static final String ATTRIB_UP_IMAGE		= "up-image";
+	public static final String ATTRIB_DOWN_IMAGE	= "down-image";
+	public static final String ATTRIB_SECONDS      	= "seconds";
+	public static final String ATTRIB_LABEL			= "label";
+	public static final String ATTRIB_REVERSE		= "reverse";
+	public static final String ATTRIB_POSITION		= "position";
+	public static final String ATTRIB_ACTION		= "action";
+	public static final String ATTRIB_DESTINATION	= "destination";
+	
+	public static final String VALUE_MAIN			= "main";
+	public static final String VALUE_LOW			= "low";
+	public static final String VALUE_HIGH			= "high";
+	public static final String VALUE_SYSTEM			= "system";
 	
 	
 	
@@ -256,7 +257,7 @@ public class XMLSkin extends Skin
 			
 			/* Get a list of all child nodes */
 			XPath xp =   XPathFactory.newInstance().newXPath();
-			NodeList childNodes = (NodeList)xp.evaluate(NODE_SKIN + "/*", this.xmlSkinDoc_, XPathConstants.NODESET);
+			NodeList childNodes = (NodeList)xp.evaluate(PATH_SKIN + "/*", this.xmlSkinDoc_, XPathConstants.NODESET);
 			
 			try
 			{
@@ -337,20 +338,20 @@ public class XMLSkin extends Skin
 		this.xmlSkinDoc_ = builder.parse(skinUrl.openStream());
 		
 		/* Set the name of this skin */
-		this.name_ = extractString(NODE_SKIN + "/@" + ATTRIB_NAME);
+		this.name_ = extractString(PATH_SKIN + "/@" + ATTRIB_NAME);
 		
 		/* Setup the unique id */
 		File skinFile = new File(skinUrl.getFile());
 
 		/* Set the description */
-		this.description_ = extractString(NODE_SKIN + "/" + NODE_DESC);
+		this.description_ = extractString(PATH_SKIN + "/" + NODE_DESC);
 
 		
 		/* Get the extension, if any */
 		String extendedSkinName = null;
 		try
 		{
-			extendedSkinName = extractString(NODE_SKIN + "/@" + ATTRIB_EXTENDS);
+			extendedSkinName = extractString(PATH_SKIN + "/@" + ATTRIB_EXTENDS);
 		}
 		catch(Exception e) {}
 		if (extendedSkinName != null)
@@ -444,7 +445,7 @@ public class XMLSkin extends Skin
 	@Override
 	public String getWindowStartupState() throws Exception
 	{
-		return extractString(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_TYPE);
+		return extractString(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_TYPE);
 	}
 	
 	/*******************************************************
@@ -455,8 +456,8 @@ public class XMLSkin extends Skin
 	{
 		if (this.windowSize_ == null)
 		{
-			int w = extractInt(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_WIDTH);
-			int h = extractInt(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_HEIGHT);
+			int w = extractInt(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_WIDTH);
+			int h = extractInt(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_HEIGHT);
 			this.windowSize_ = new Dimension(w,h);
 		}
 		
@@ -522,11 +523,11 @@ public class XMLSkin extends Skin
 	{
 		ArrayList<AbstractShape> backgroundShapes = new ArrayList<AbstractShape>();
 		
-		int shapeCount = extractInt("count(" + NODE_SKIN + "/" + NODE_WINDOW + "/*" + ")");
+		int shapeCount = extractInt("count(" + PATH_SKIN + "/" + NODE_WINDOW + "/*" + ")");
 
 		for (int shapeIndex = 1; shapeIndex <= shapeCount; shapeIndex++)
 		{
-			AbstractShape shape = createShape(NODE_SKIN + "/" + NODE_WINDOW + "/*[" + shapeIndex + "]");
+			AbstractShape shape = createShape(PATH_SKIN + "/" + NODE_WINDOW + "/*[" + shapeIndex + "]");
 			backgroundShapes.add(shape);
 		}
 		
@@ -550,7 +551,7 @@ public class XMLSkin extends Skin
 	 *******************************************************/
 	public java.awt.Color getBackgroundColor() throws Exception
 	{
-		return Color.decode(getColor(extractString(NODE_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR)));
+		return Color.decode(getColor(extractString(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR)));
 	}
 	
 
@@ -563,7 +564,7 @@ public class XMLSkin extends Skin
 	{
 		ArrayList<SkinEventTrigger> triggers = new ArrayList<SkinEventTrigger>();
 		
-		String triggerPath = NODE_SKIN + "/" + NODE_TRIGGER;
+		String triggerPath = PATH_SKIN + "/" + NODE_TRIGGER;
 		
 		int triggerCount = extractInt("count(" + triggerPath + ")");
 		for (int index = 1; index <= triggerCount; index++)
@@ -597,7 +598,7 @@ public class XMLSkin extends Skin
 	 *******************************************************/
 	public URL getImageUrl(String imageName) throws Exception
 	{
-		String imageSource = extractString(NODE_SKIN + "/" + NODE_IMAGE + "[@" + ATTRIB_NAME + "='" + imageName + "']/@" + ATTRIB_SRC);
+		String imageSource = extractString(PATH_SKIN + "/" + NODE_IMAGE + "[@" + ATTRIB_NAME + "='" + imageName + "']/@" + ATTRIB_SRC);
 		imageSource = this.resourceUrl_ + "/" + imageSource;
 		
 		/* This image source could be a link to a file, or a link to an image inside a jar
@@ -643,7 +644,7 @@ public class XMLSkin extends Skin
 			return colorName;
 		}
 		
-		String value = extractString(NODE_SKIN + "/" + NODE_COLOR + "[@" + ATTRIB_NAME + "='" + colorName + "']/@" + ATTRIB_VALUE );
+		String value = extractString(PATH_SKIN + "/" + NODE_COLOR + "[@" + ATTRIB_NAME + "='" + colorName + "']/@" + ATTRIB_VALUE );
 		return value;
 	}
 	
@@ -668,7 +669,7 @@ public class XMLSkin extends Skin
 		else
 		{
 			
-			String fontSource = extractString(NODE_SKIN + "/" + NODE_FONT + "[@" + ATTRIB_NAME + "='" + fontName + "']/@" + ATTRIB_SRC );
+			String fontSource = extractString(PATH_SKIN + "/" + NODE_FONT + "[@" + ATTRIB_NAME + "='" + fontName + "']/@" + ATTRIB_SRC );
 			
 			if (fontSource.startsWith(VALUE_SYSTEM + VALUE_DELIM))
 			{
@@ -697,7 +698,7 @@ public class XMLSkin extends Skin
 	{
 		
 		/* Get the sound source */
-		String soundPath = NODE_SKIN + "/" + NODE_SOUND + "[@" + ATTRIB_NAME + "='" + name + "']/@" + ATTRIB_SRC;
+		String soundPath = PATH_SKIN + "/" + NODE_SOUND + "[@" + ATTRIB_NAME + "='" + name + "']/@" + ATTRIB_SRC;
 		String soundSrc = extractString(soundPath);
 		
 		/* Load the sound into a stream */
@@ -714,7 +715,7 @@ public class XMLSkin extends Skin
 	{
 		if (this.gaugeCount_ == null)
 		{
-			this.gaugeCount_ = new Integer(extractInt("count(" + NODE_GAUGE + ")"));
+			this.gaugeCount_ = new Integer(extractInt("count(" + PATH_GAUGE + ")"));
 		}
 		
 		return this.gaugeCount_.intValue();
@@ -748,7 +749,7 @@ public class XMLSkin extends Skin
 		index++;
 		
 		/* Get the gauge node */
-		String gaugePath = NODE_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_GAUGE + "[" + index + "]";
 		
 		AbstractGauge gauge = null;
 		
@@ -762,14 +763,14 @@ public class XMLSkin extends Skin
 		{
 			gauge = createDigitalGauge(index);
 		}
-		else if (GAUGE_TYPE_DIGITAL_HIGH.equalsIgnoreCase(type))
-		{
-			gauge = createDigitalHighGauge(index);
-		}
-		else if (GAUGE_TYPE_DIGITAL_LOW.equalsIgnoreCase(type))
-		{
-			gauge = createDigitalLowGauge(index);
-		}
+//		else if (GAUGE_TYPE_DIGITAL_HIGH.equalsIgnoreCase(type))
+//		{
+//			gauge = createDigitalHighGauge(index);
+//		}
+//		else if (GAUGE_TYPE_DIGITAL_LOW.equalsIgnoreCase(type))
+//		{
+//			gauge = createDigitalLowGauge(index);
+//		}
 		else if (GAUGE_TYPE_LED.equalsIgnoreCase(type))
 		{
 			gauge = createLedGauge(index);
@@ -806,7 +807,7 @@ public class XMLSkin extends Skin
 	{
 
 		/* Get the gauge node */
-		String gaugePath = NODE_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
@@ -911,32 +912,32 @@ public class XMLSkin extends Skin
 	}
 	
 	
-	/********************************************************
-	 * @param index
-	 * @param parentPanel
-	 * @return
-	 * @throws Exception
-	 *******************************************************/
-	private AbstractGauge createDigitalLowGauge(int index) throws Exception
-	{
-		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
-		gauge.enableLowHighHold(false);
-		return gauge;
-	}
-	
-	
-	/********************************************************
-	 * @param index
-	 * @param parentPanel
-	 * @return
-	 * @throws Exception
-	 *******************************************************/
-	private AbstractGauge createDigitalHighGauge(int index) throws Exception
-	{
-		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
-		gauge.enableLowHighHold(true);
-		return gauge;
-	}
+//	/********************************************************
+//	 * @param index
+//	 * @param parentPanel
+//	 * @return
+//	 * @throws Exception
+//	 *******************************************************/
+//	private AbstractGauge createDigitalLowGauge(int index) throws Exception
+//	{
+//		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
+//		gauge.enableLowHighHold(false);
+//		return gauge;
+//	}
+//	
+//	
+//	/********************************************************
+//	 * @param index
+//	 * @param parentPanel
+//	 * @return
+//	 * @throws Exception
+//	 *******************************************************/
+//	private AbstractGauge createDigitalHighGauge(int index) throws Exception
+//	{
+//		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
+//		gauge.enableLowHighHold(true);
+//		return gauge;
+//	}
 	
 	
 	/********************************************************
@@ -947,7 +948,7 @@ public class XMLSkin extends Skin
 	private AbstractGauge createDigitalGauge(int index) throws Exception
 	{
 		/* Get the gauge node */
-		String gaugePath = NODE_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
@@ -987,7 +988,7 @@ public class XMLSkin extends Skin
 	{
 		
 		/* Get the gauge node */
-		String gaugePath = NODE_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
@@ -1082,7 +1083,7 @@ public class XMLSkin extends Skin
 	{
 
 		/* Get the gauge node */
-		String gaugePath = NODE_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
@@ -1152,7 +1153,7 @@ public class XMLSkin extends Skin
 	{
 
 		/* Get the gauge node */
-		String gaugePath = NODE_GAUGE + "[" + gaugeIndex + "]";
+		String gaugePath = PATH_GAUGE + "[" + gaugeIndex + "]";
 	
 		int shapeCount = extractInt("count(" + gaugePath + "/" + NODE_STATIC + "/*)");
 		for (int shapeIndex = 1; shapeIndex <= shapeCount; shapeIndex++)

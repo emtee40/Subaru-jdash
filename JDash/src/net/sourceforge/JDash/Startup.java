@@ -154,9 +154,7 @@ public class Startup
 				if (new Boolean(Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_TEST)) == true)
 				{
 					Startup.splashFrame_.setStatus(60, "Initializing Test Monitor");
-					
-// TODO: Reenable this
-//					disableLoggingOverride = true;
+					disableLoggingOverride = true;
 					Startup.monitor_ = new TestMonitor();
 				}
 				else

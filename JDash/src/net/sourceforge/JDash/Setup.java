@@ -51,14 +51,14 @@ import java.util.Properties;
 public class Setup
 {	
 	/** The application version string */
-	public static final String VERSION = "v0.7.1 11-08-2007";
+	public static final String VERSION = "v0.9.0b 12-05-2007";
 	
 	/** The applicaiton name */
 	public static final String APPLICATION = "JDash / " + VERSION;
 
 	
 	/** the license string */
-	public static final String LICENSE = "Protected under LGPL.  Copyright (C) 2006  Shane Powell";
+	public static final String LICENSE = "Protected under LGPL.  Copyright (C) 2007  Shane Powell";
 	
 	/** the ecu parameter file extension */
 	public static final String PARAMETER_FILE_EXT = ".pml";

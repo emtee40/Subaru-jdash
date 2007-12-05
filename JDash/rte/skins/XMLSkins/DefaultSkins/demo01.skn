@@ -20,29 +20,17 @@
       <!-- Logger Button -->
       <rectangle color="white" fill-color="none" line-width="2" x="10" y="165" width="80" height="50" />
       <text color="white" size="14" x="10"  y="163" format="Logging Btn" font="Arial"/>
-      <button 
-        type="toggle" 
-        x="20" 
-        y="170" 
-        width="35" 
-        height="35" 
-        down-action="logger/enable"
-        up-action="logger/disable"
-        up-image="red-indicator-light-off" 
-        down-image="red-indicator-light-on" />
+      <button type="toggle" x="20" y="170" width="35" height="35" up-image="red-indicator-light-off" down-image="red-indicator-light-on">
+        <event type="up" destination="logger" action="disable"/>
+        <event type="down" destination="logger" action="enable"/>
+      </button>
         
       <!-- Global low-reset button -->
       <rectangle color="white" fill-color="none" line-width="2" x="10" y="95" width="80" height="50" />
       <text color="white" size="14" x="10"  y="93" format="Low Reset Btn" font="Arial"/>
-      <button 
-    	type="push-button" 
-    	x="20" 
-    	y="100" 
-    	width="36" 
-    	height="36" 
-    	down-action="all/low-reset"
-    	up-image="red-push-off" 
-    	down-image="red-push-on"/>
+      <button type="push-button" x="20" y="100" width="36" height="36" down-image="red-push-on" up-image="red-push-off">
+    	<event type="down" destination="all" action="low-reset"/>
+      </button>
     	
     </window>
 
@@ -79,7 +67,10 @@
   
   
   <!-- Event Triggers -->
-  <trigger sensor="RPM" sensor-min="6000" sensor-max="99999" enter-range-action="sound/alarm-01:stdout/Sound RPM Alarm"/>
+  <trigger sensor="RPM" sensor-min="6000" sensor-max="99999">
+    <event type="enter-range" destination="sound" action="alarm-01"/>
+    <event type="exit-range" destination="stdout" action="Sound RPM Alarm"/>
+  </trigger>
 
   
   <!-- Digital RPM -->
@@ -102,15 +93,9 @@
 	      <text color="white" size="14" x="-100" y="-105" format="and High Reset Button" font="Arial"/>
       </static>
 
-    <button 
-    	type="push-button" 
-    	x="-22" 
-    	y="20" 
-    	width="36" 
-    	height="36" 
-    	down-action="high-reset"
-    	up-image="red-push-off" 
-    	down-image="red-push-on"/>
+    <button type="push-button" x="-22" y="20" width="36" height="36" up-image="red-push-off" down-image="red-push-on">
+    	<event type="down" action="high-reset"/>
+    </button>
 
     <needle type="high" delay="-1">
       <polygon color="blue" fill-color="dark-blue" line-width="1">

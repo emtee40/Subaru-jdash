@@ -205,7 +205,7 @@ public class Startup
 				Startup.splashFrame_.setStatus(80, "Initializing Logger");
 				DataLogger logger = new DatabaseLogger(loader.getName());
 				logger.addParameter(paramRegistry.getParamForName(ParameterRegistry.TIME_PARAM));
-//				logger.setEnableable(loggerEnableable);
+				logger.setEnableable(loggerEnableable);
 
 				
 				/* Add the logger to the skin as a SkinEventListener */

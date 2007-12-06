@@ -111,16 +111,13 @@ public class XMLSkin extends Skin
 	public static final String NODE_SKIN 		= "skin";
 	public static final String NODE_DESC		= "description";
 	public static final String NODE_IMAGE 		= "image";
-	public static final String NODE_COLOR		= "color";
 	public static final String NODE_GAUGE 		= "gauge";
 	public static final String NODE_WINDOW		= "window";
 	public static final String NODE_NEEDLE		= "needle";
 	public static final String NODE_LED			= "led";
 	public static final String NODE_POINT		= "point";
-	public static final String NODE_FONT		= "font";
 	public static final String NODE_STATIC		= "static";
 	public static final String NODE_TRIGGER		= "trigger";
-	public static final String NODE_SOUND		= "sound";
 	public static final String NODE_EVENT		= "event";
 	public static final String NODE_BUTTON				= "button";
 	public static final String NODE_POLYGON				= "polygon";
@@ -130,6 +127,8 @@ public class XMLSkin extends Skin
 	public static final String NODE_ROUND_RECTANGLE 	= "round-rectangle";
 	public static final String NODE_TEXT				= "text";
 	public static final String NODE_RANGE				= "range";
+	public static final String NODE_RESOURCE			= "resource";
+
 	
 	private static final String PATH_SKIN 		= "/" + NODE_SKIN;
 	private static final String PATH_GAUGE 		= PATH_SKIN + "/" + NODE_GAUGE;
@@ -137,7 +136,7 @@ public class XMLSkin extends Skin
 	public static final String ATTRIB_NAME 			= "name";
 	public static final String ATTRIB_EXTENDS		= "extends";
 	public static final String ATTRIB_DELAY			= "delay";
-	public static final String ATTRIB_SRC 			= "src";
+///	public static final String ATTRIB_SRC 			= "src";
 	public static final String ATTRIB_SENSOR 		= "sensor";
 	public static final String ATTRIB_TYPE			= "type";
 	public static final String ATTRIB_SCALE			= "scale";
@@ -147,7 +146,7 @@ public class XMLSkin extends Skin
 	public static final String ATTRIB_HEIGHT		= "height";
 	public static final String ATTRIB_ARC_WIDTH		= "arcw";
 	public static final String ATTRIB_ARC_HEIGHT	= "arch";
-	public static final String ATTRIB_COLOR			= NODE_COLOR;
+	public static final String ATTRIB_COLOR			= "color";
 	public static final String ATTRIB_FILL_COLOR	= "fill-color";
 	public static final String ATTRIB_LINE_WIDTH	= "line-width";
 	public static final String ATTRIB_FORMAT		= "format";
@@ -171,6 +170,10 @@ public class XMLSkin extends Skin
 	public static final String VALUE_LOW			= "low";
 	public static final String VALUE_HIGH			= "high";
 	public static final String VALUE_SYSTEM			= "system";
+	public static final String VALUE_SOUND			= "sound";
+	public static final String VALUE_IMAGE			= NODE_IMAGE;
+	public static final String VALUE_FONT			= ATTRIB_FONT;
+	public static final String VALUE_COLOR			= ATTRIB_COLOR;
 	
 	
 	
@@ -251,7 +254,14 @@ public class XMLSkin extends Skin
 					(docToAddTo==null?"":"This occured during an attempt to extend a skin"));
 		}
 		
-		loadSkin(skinXmlFile);
+		try
+		{
+			loadSkin(skinXmlFile);
+		}
+		catch(Exception e)
+		{
+			throw new Exception("Skin: " + skinXmlFile.toString(), e);
+		}
 		
 		/* if the add to is not null, then add the child nodes */
 		if (docToAddTo != null)
@@ -642,7 +652,10 @@ public class XMLSkin extends Skin
 	 *******************************************************/
 	public URL getImageUrl(String imageName) throws Exception
 	{
-		String imageSource = extractString(PATH_SKIN + "/" + NODE_IMAGE + "[@" + ATTRIB_NAME + "='" + imageName + "']/@" + ATTRIB_SRC);
+		String imageSource = extractString(PATH_SKIN + "/" + 
+											NODE_RESOURCE + "[@" + ATTRIB_TYPE + "='" + VALUE_IMAGE + "' and " + 
+															"@" + ATTRIB_NAME + "='" + imageName + "']/@" + 
+															ATTRIB_VALUE);
 		imageSource = this.resourceUrl_ + "/" + imageSource;
 		
 		/* This image source could be a link to a file, or a link to an image inside a jar
@@ -688,7 +701,9 @@ public class XMLSkin extends Skin
 			return colorName;
 		}
 		
-		String value = extractString(PATH_SKIN + "/" + NODE_COLOR + "[@" + ATTRIB_NAME + "='" + colorName + "']/@" + ATTRIB_VALUE );
+		String value = extractString(PATH_SKIN + "/" +  
+									NODE_RESOURCE + "[@" + ATTRIB_TYPE + "='" + VALUE_COLOR + "' and " +
+									"@" + ATTRIB_NAME + "='" + colorName + "']/@" + ATTRIB_VALUE );
 		return value;
 	}
 	
@@ -713,7 +728,9 @@ public class XMLSkin extends Skin
 		else
 		{
 			
-			String fontSource = extractString(PATH_SKIN + "/" + NODE_FONT + "[@" + ATTRIB_NAME + "='" + fontName + "']/@" + ATTRIB_SRC );
+			String fontSource = extractString(PATH_SKIN + "/" + 
+												NODE_RESOURCE + "[@" + ATTRIB_TYPE + "='" + VALUE_FONT + "' and " +
+														"@" + ATTRIB_NAME + "='" + fontName + "']/@" + ATTRIB_VALUE );
 			
 			if (fontSource.startsWith(VALUE_SYSTEM + VALUE_DELIM))
 			{
@@ -742,7 +759,9 @@ public class XMLSkin extends Skin
 	{
 		
 		/* Get the sound source */
-		String soundPath = PATH_SKIN + "/" + NODE_SOUND + "[@" + ATTRIB_NAME + "='" + name + "']/@" + ATTRIB_SRC;
+		String soundPath = PATH_SKIN + "/" +  
+						NODE_RESOURCE + "[@" + ATTRIB_TYPE + "='" + VALUE_SOUND + "' and " +
+								"@" + ATTRIB_NAME + "='" + name + "']/@" + ATTRIB_VALUE;
 		String soundSrc = extractString(soundPath);
 		
 		/* Load the sound into a stream */

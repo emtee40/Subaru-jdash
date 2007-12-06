@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.skin;
 
+import net.sourceforge.JDash.ecu.comm.BaseMonitor;
+
 
 /*******************************************************
  * Skin events are messages passed to the engine from the skin usually
@@ -53,6 +55,15 @@ public class SkinEvent
 	 * When an event triggers one of these, the action will be printed to the stdout console.
 	 * This is really just usefull for debugging */
 	public static final String DESTINATION_STDOUT = "stdout";
+	
+	
+	/** This stirng represents the reserved destination code for the current ECU Monitor.
+	 * When an event is triggered and sends a destination with this code, then the
+	 * current ECU Monitor will respond to it.  It is the job of the individual monitor
+	 * to define all valid actions.  One of the common actions is defined in the BaseMonitor
+	 * class "dtc-reset"
+	 * @see BaseMonitor */
+	public static final String DESTINATION_MONITOR = "monitor";
 	
 	
 

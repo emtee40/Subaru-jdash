@@ -136,31 +136,31 @@ public abstract class AbstractGaugePanel extends JPanel
 	
 
 	
-	/*******************************************************
-	 * Override
-	 * @see java.awt.Component#setBounds(java.awt.Rectangle)
-	 *******************************************************/
-	@Override
-	public void setBounds(Rectangle rect)
-	{
-		this.setBounds(rect.x, rect.y, rect.width, rect.height);
-	}
-	
-	/*******************************************************
-	 * Override
-	 * @see java.awt.Component#setBounds(int, int, int, int)
-	 *******************************************************/
-	@Override
-	public void setBounds(int x, int y, int w, int h)
-	{
-		super.setBounds(x, y, w, h);
-		
-
-		/* Tell the layout manager to relayout this container */
-		getLayout().layoutContainer(this);
-		
-	}
-	
+//	/*******************************************************
+//	 * Override
+//	 * @see java.awt.Component#setBounds(java.awt.Rectangle)
+//	 *******************************************************/
+//	@Override
+//	public void setBounds(Rectangle rect)
+//	{
+//		this.setBounds(rect.x, rect.y, rect.width, rect.height);
+//	}
+//	
+//	/*******************************************************
+//	 * Override
+//	 * @see java.awt.Component#setBounds(int, int, int, int)
+//	 *******************************************************/
+//	@Override
+//	public void setBounds(int x, int y, int w, int h)
+//	{
+//		
+//		super.setBounds(x, y, w, h);
+//		
+//
+//		/* Tell the layout manager to relayout this container */
+//		getLayout().layoutContainer(this);
+//		
+//	}
 	
 	/*******************************************************
 	 * Always return the size of the original background image.
@@ -170,6 +170,7 @@ public abstract class AbstractGaugePanel extends JPanel
 	@Override
 	public Dimension getPreferredSize()
 	{
+		
 		try
 		{
 			return this.getSkin().getWindowSize();

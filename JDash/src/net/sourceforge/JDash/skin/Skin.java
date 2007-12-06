@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.skin;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,6 +46,12 @@ import net.sourceforge.JDash.logger.DataLogger;
  ******************************************************/
 public abstract class Skin implements SkinEventListener
 {
+	
+	/** The minimum allowable window sacale value */
+	public static final int SCALE_MIN = 0;
+	
+	/** The maximum allowable window scale value */
+	public static final int SCALE_MAX = 100;
 	
 	/** A value used by the skins to identify a windows mode */
 	public static final String STATE_WINDOW 		= "window";
@@ -77,6 +84,7 @@ public abstract class Skin implements SkinEventListener
 	public Skin(SkinFactory ownerFactory)
 	{
 		this.ownerFactory_ = ownerFactory;
+		
 		
 		/* Add this skin to the event listeners, because there are a few
 		 * events that we watch for */
@@ -179,25 +187,41 @@ public abstract class Skin implements SkinEventListener
 	 * Inform each listener of the skin event.
 	 * @param e
 	 *******************************************************/
-	public void fireSkinEvent(SkinEvent e)
+	public void fireSkinEvent(SkinEvent se)
 	{
-		for (SkinEventListener l : this.skinEventListeners_)
+		try
 		{
-			l.actionPerformed(e);
+			for (SkinEventListener l : this.skinEventListeners_)
+			{
+				l.actionPerformed(se);
+			}
+		}
+		catch(Exception e)
+		{
+			Startup.showException(e, false);
 		}
 	}
 	
 	/********************************************************
 	 * Get the initial window startup state.  This will be one 
-	 * of 2 words. "fullscreen" or "window". But, the "window"
-	 * value can be suffixed with a scale value.  eg. "window:26"
-	 * will start in window mode and scale the initial size to 26% 
-	 * of the screen size.
+	 * of 2 words. "fullscreen" or "window".
 	 * 
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	public abstract String getWindowStartupState() throws Exception;
+	public abstract String getWindowStartupState();
+	
+	
+	/********************************************************
+	 * The window can be setup to start scaled by a percentage of
+	 * the screen size.  If this value returns a 50, then the
+	 * initial window will be scaled to 50% of the screen size.
+	 * If a value of 100 is returned, then it will be a full
+	 * screen window. 
+	 * @return
+	 * @throws Exception
+	 *******************************************************/
+	public abstract int getWindowStartupScale();
 	
 	/*******************************************************
 	 * return the original dimensions of the desired window. 
@@ -210,7 +234,7 @@ public abstract class Skin implements SkinEventListener
 	 * @return
 	 * @throws Exception
 	 *******************************************************/
-	public abstract Dimension getWindowSize() throws Exception;
+	public abstract Dimension getWindowSize();
 	
 	
 	/********************************************************
@@ -230,6 +254,14 @@ public abstract class Skin implements SkinEventListener
 	 *******************************************************/
 	public abstract AbstractGaugePanel createGaugePanel(DashboardFrame dashFrame, BaseMonitor monitor, DataLogger logger) throws Exception;
 
+	
+	
+	/*******************************************************
+	 * Get the default window background color
+	 * @return
+	 *******************************************************/
+	public abstract Color getBackgroundColor();
+	
 	
 	/*******************************************************
 	 * Plays the given sound name.  The concrete skin is
@@ -255,6 +287,9 @@ public abstract class Skin implements SkinEventListener
 	public abstract InputStream getSound(String name) throws Exception;
 	
 	
+	/*******************************************************
+	 * A simple internal class to play sounds in a thread.
+	 ******************************************************/
 	private static class SoundRunnable implements Runnable
 	{
 		private InputStream is_ = null;

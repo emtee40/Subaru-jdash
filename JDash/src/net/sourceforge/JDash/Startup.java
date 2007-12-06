@@ -89,7 +89,7 @@ public class Startup
 	 ******************************************************/
 	private void startup(String args[])
 	{
-		boolean disableLoggingOverride = false;
+		boolean loggerEnableable = true;
 		Startup.splashFrame_ = new Splash(Setup.APPLICATION);
 		JFrame displayFrame = null;
 			
@@ -154,7 +154,7 @@ public class Startup
 				if (new Boolean(Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_TEST)) == true)
 				{
 					Startup.splashFrame_.setStatus(60, "Initializing Test Monitor");
-					disableLoggingOverride = true;
+					loggerEnableable = false;
 					Startup.monitor_ = new TestMonitor();
 				}
 				else
@@ -163,7 +163,7 @@ public class Startup
 					if (new Boolean(Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK)) == true)
 					{
 						Startup.splashFrame_.setStatus(60, "Initializing Log Playback Monitor");
-						disableLoggingOverride = true;
+						loggerEnableable = false;
 						Startup.monitor_ = new LoggerPlaybackMonitor();
 					}
 					else
@@ -205,12 +205,14 @@ public class Startup
 				Startup.splashFrame_.setStatus(80, "Initializing Logger");
 				DataLogger logger = new DatabaseLogger(loader.getName());
 				logger.addParameter(paramRegistry.getParamForName(ParameterRegistry.TIME_PARAM));
-				logger.disableOverride(disableLoggingOverride);
+//				logger.setEnableable(loggerEnableable);
 
 				
 				/* Add the logger to the skin as a SkinEventListener */
 				skinFactory.getDefaultSkin().addSkinEventListener(logger);
 			
+				/* Add the monitor to the skin as a SkinEventListener */
+				skinFactory.getDefaultSkin().addSkinEventListener(monitor_);
 				
 				/* create the main dashboard frame */
 				displayFrame = new DashboardFrame(skinFactory.getDefaultSkin(), Startup.monitor_, logger);

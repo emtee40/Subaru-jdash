@@ -682,22 +682,29 @@ public class ELMScanMonitor extends RS232Monitor
 	 * @see net.sourceforge.JDash.ecu.comm.BaseMonitor#resetDTCs()
 	 *******************************************************/
 	@Override
-	public void resetDTCs() throws Exception
+	public void resetDTCs() throws RuntimeException
 	{
-		String buffer = sendELMString("0" + MODE_4);
-		
-		if ("44".equals(buffer) == false)
+		try
 		{
-			throw new Exception("There was an error resetting the ECU\nELM Module Response was:\n[" + buffer + "]");
+			String buffer = sendELMString("0" + MODE_4);
+			
+			if ("44".equals(buffer) == false)
+			{
+				throw new Exception("There was an error resetting the ECU\nELM Module Response was:\n[" + buffer + "]");
+			}
+			
+			/* Get the low level MIL status parameter, and set it's last fetch time to 0, this will cause it
+			 * to be re-fetched */
+			Parameter p = getParameterRegistry().getParamForName(ParameterRegistry.PARAM_NAME_E_MIL_STATUS);
+			if (p instanceof ECUParameter)
+			{
+				((ECUParameter)p).setResult(0);
+				((ECUParameter)p).setLastFetchTime(0);
+			}
 		}
-		
-		/* Get the low level MIL status parameter, and set it's last fetch time to 0, this will cause it
-		 * to be re-fetched */
-		Parameter p = getParameterRegistry().getParamForName(ParameterRegistry.PARAM_NAME_E_MIL_STATUS);
-		if (p instanceof ECUParameter)
+		catch(Exception e)
 		{
-			((ECUParameter)p).setResult(0);
-			((ECUParameter)p).setLastFetchTime(0);
+			throw new RuntimeException(e);
 		}
 	}
 	

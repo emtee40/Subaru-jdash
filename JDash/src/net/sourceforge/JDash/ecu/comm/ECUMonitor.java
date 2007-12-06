@@ -28,6 +28,7 @@ package net.sourceforge.JDash.ecu.comm;
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
+import net.sourceforge.JDash.skin.SkinEventListener;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ import java.util.List;
  *  2. addAllParam()
  *  3. start the monitor in it's own thread.
  ******************************************************/
-public interface ECUMonitor extends Runnable
+public interface ECUMonitor extends Runnable, SkinEventListener
 {
 	
 	

@@ -25,17 +25,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.gui;
 
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.net.URL;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import net.sourceforge.JDash.Setup;
@@ -79,6 +83,7 @@ public class DashboardFrame extends JFrame
 		
 		try
 		{
+		
 			
 			/* Set the frame title */
 			setTitle(this.skin_.getName());
@@ -86,31 +91,26 @@ public class DashboardFrame extends JFrame
 			
 			/* Setup the screenlayout */
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			//Dimension frameSize = new Dimension(screenSize);
 			Dimension frameSize = skin.getWindowSize();
 			String windowState = this.skin_.getWindowStartupState();
+			double windowScale = this.skin_.getWindowStartupScale();
 			
 			/* Windowed */
 			if (windowState.startsWith(Skin.STATE_WINDOW) == true)
 			{
 				
-				/* Set the size? */
-				if (windowState.indexOf(":") != -1)
-				{
-					double ratio = Double.parseDouble(windowState.substring(windowState.indexOf(":") + 1, windowState.length()));
-					frameSize = new Dimension((int)((double)screenSize.width * (ratio / 100f)), (int)((double)screenSize.height * (ratio / 100f)));
-				}
-				else
-				{
-					/* Default to the full size of the window, unless it's bigger than the screen */
-					frameSize.width = Math.min(frameSize.width, screenSize.width);
-					frameSize.height = Math.min(frameSize.height, screenSize.height);
-					
-				}
+				/* Setup the window size */
+				frameSize = new Dimension((int)((double)screenSize.width * (windowScale / 100f)), (int)((double)screenSize.height * (windowScale / 100f)));
+				
+				/* Make sure the size is within the screen dimensions */
+				frameSize.width = Math.min(frameSize.width, screenSize.width);
+				frameSize.height = Math.min(frameSize.height, screenSize.height);
+				
 			}
 			else if (windowState.startsWith(Skin.STATE_FULLSCREEN) == true)
 			{
 				/* Turn off some of the window controls */
+				// TODO
 				throw new RuntimeException("Window state " + Skin.STATE_FULLSCREEN + " not Yet Supported");
 				
 			}
@@ -120,15 +120,23 @@ public class DashboardFrame extends JFrame
 			}
 			
 
-			/* Set the screen size */
-			setSize(frameSize);
 			
-			/* And the location in the center of the screen */
-			setLocation(((screenSize.width - frameSize.width) / 2), ((screenSize.height - frameSize.height) / 2));
 			
 			/* Setup the main panel */
 			this.gaugePanel_ = this.skin_.createGaugePanel(this, monitor, logger);
-			setContentPane(this.gaugePanel_);
+			JPanel contentPanel = new JPanel();
+			contentPanel.setBackground(this.skin_.getBackgroundColor());
+			contentPanel.setLayout(new BorderLayout());
+			contentPanel.setBorder(BorderFactory.createEmptyBorder());
+			contentPanel.add(this.gaugePanel_);
+			setContentPane(contentPanel);
+			
+			
+			/* Set the initial screen size */
+			pack();
+			
+			/* And the location in the center of the screen */
+			setLocationRelativeTo(null);
 						
 			
 			/* Respond to the f1 key for the about box */
@@ -154,8 +162,6 @@ public class DashboardFrame extends JFrame
 		
 	}
 	
-	
-
 	
 	/*******************************************************
 	 * call this method to suspend gauge updates.  This is 

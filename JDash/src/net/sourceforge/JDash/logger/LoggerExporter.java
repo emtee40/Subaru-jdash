@@ -210,6 +210,7 @@ public class LoggerExporter extends JDialog implements ParameterEventListener
 		}
 		else
 		{
+			this.monitor_.getTime().removeEventListener(this);
 			this.monitor_ = null;
 		}
 		

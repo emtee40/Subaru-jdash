@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -139,6 +140,7 @@ public class XMLSkin extends Skin
 	public static final String ATTRIB_SRC 			= "src";
 	public static final String ATTRIB_SENSOR 		= "sensor";
 	public static final String ATTRIB_TYPE			= "type";
+	public static final String ATTRIB_SCALE			= "scale";
 	public static final String ATTRIB_X				= "x";
 	public static final String ATTRIB_Y				= "y";
 	public static final String ATTRIB_WIDTH			= "width";
@@ -389,7 +391,7 @@ public class XMLSkin extends Skin
 		}
 		catch(Exception e)
 		{
-			throw new Exception("Unable to extract String at path [" + path + "] " + this.id_, e);
+			throw new Exception(this.id_ + "\nUnable to extract String at path [" + path + "] " + this.id_, e);
 		}
 
 	}
@@ -411,7 +413,7 @@ public class XMLSkin extends Skin
 		}
 		catch(Exception e)
 		{
-			throw new Exception("Unable to extract int at path [" + path + "] " + this.id_, e);
+			throw new Exception(this.id_ + "\nUnable to extract int at path [" + path + "] " + this.id_, e);
 		}
 
 
@@ -433,7 +435,7 @@ public class XMLSkin extends Skin
 		}
 		catch(Exception e)
 		{
-			throw new Exception("Unable to extract double at path [" + path + "] " + this.id_, e);
+			throw new Exception(this.id_ + "\nUnable to extract double at path [" + path + "] " + this.id_, e);
 		}
 	}
 	
@@ -443,26 +445,59 @@ public class XMLSkin extends Skin
 	 * @see net.sourceforge.JDash.skin.Skin#getWindowStartupState()
 	 *******************************************************/
 	@Override
-	public String getWindowStartupState() throws Exception
+	public String getWindowStartupState()
 	{
-		return extractString(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_TYPE);
+		try
+		{
+			return extractString(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_TYPE);
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
+	
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.Skin#getWindowStartupScale()
+	 *******************************************************/
+	public int getWindowStartupScale()
+	{
+		try
+		{
+			return extractInt(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_SCALE);
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/*******************************************************
 	 * Override
 	 * @see net.sourceforge.JDash.skin.Skin#getWindowSize()
 	 *******************************************************/
-	public Dimension getWindowSize() throws Exception
+	public Dimension getWindowSize()
 	{
-		if (this.windowSize_ == null)
+		try
 		{
-			int w = extractInt(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_WIDTH);
-			int h = extractInt(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_HEIGHT);
-			this.windowSize_ = new Dimension(w,h);
+			if (this.windowSize_ == null)
+			{
+				int w = extractInt(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_WIDTH);
+				int h = extractInt(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_HEIGHT);
+				this.windowSize_ = new Dimension(w,h);
+			}
+			
+			return this.windowSize_;
 		}
-		
-		return this.windowSize_;
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
+	
 	
 	/********************************************************
 	 * the getImage() method is final to enforce caching of images.
@@ -544,14 +579,23 @@ public class XMLSkin extends Skin
 	}
 	
 	
+
 	/*******************************************************
 	 * get the defined fill color for this skin.
 	 * 
 	 * @return
 	 *******************************************************/
-	public java.awt.Color getBackgroundColor() throws Exception
+	@Override
+	public Color getBackgroundColor()
 	{
-		return Color.decode(getColor(extractString(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR)));
+		try
+		{
+			return Color.decode(getColor(extractString(PATH_SKIN + "/" + NODE_WINDOW + "/@" + ATTRIB_FILL_COLOR)));
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 	
 

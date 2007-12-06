@@ -241,8 +241,29 @@ public class XMLGaugePanel extends AbstractGaugePanel
 	@Override
 	public void setBounds(int x, int y, int w, int h)
 	{
-		super.setBounds(x, y, w, h);
+		/* We're told the bounds to make ourselves.. But what we'll do
+		 * is adjust the values to keep our scale correct, and center also */
+
+
+		/* Calculate the scaled width and height */
+		Dimension scaledSize = UTIL.aspectScale(new Dimension(w,h), getPreferredSize());
 		
+		
+		/* Adjust the y if the scaled height smaller */
+		if (scaledSize.height < h)
+		{
+			y = (h - scaledSize.height) / 2;
+		}
+
+		/* Adjust the x if the scaled width is smaller  */
+		if (scaledSize.width < w)
+		{
+			x = (w - scaledSize.width) / 2;
+		}
+		
+		
+		/* Set the scaled bounds */
+		super.setBounds(x, y, scaledSize.width, scaledSize.height);
 
 		/* Tell the layout manager to relayout this container */
 		getLayout().layoutContainer(this);

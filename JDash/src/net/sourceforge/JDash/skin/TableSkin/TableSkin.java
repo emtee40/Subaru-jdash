@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.skin.TableSkin;
 
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.InputStream;
 
@@ -60,7 +61,7 @@ public class TableSkin extends Skin
 	private static int PANEL_HEIGHT = 800;
 
 	
-	private String name_ = "Table of Parameters";
+	private static final String NAME = "JDash / Table of all Parameters";
 	private String description_ = "This Skin will put ALL of the parameters on the screen in simple Table Format." +
 			" You will be able to enable and disable the parameters you want updated.";
 
@@ -102,7 +103,7 @@ public class TableSkin extends Skin
 	@Override
 	public String getName()
 	{
-		return this.name_;
+		return NAME;
 	}
 	
 	
@@ -121,9 +122,20 @@ public class TableSkin extends Skin
 	 * @see net.sourceforge.JDash.skin.Skin#getWindowStartupState()
 	 *******************************************************/
 	@Override
-	public String getWindowStartupState() throws Exception
+	public String getWindowStartupState()
 	{
 		return Skin.STATE_WINDOW;
+	}
+	
+	
+	/******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.Skin#getWindowStartupScale()
+	 *******************************************************/
+	@Override
+	public int getWindowStartupScale()
+	{
+		return 100;
 	}
 	
 	/*******************************************************
@@ -131,12 +143,19 @@ public class TableSkin extends Skin
 	 * @see net.sourceforge.JDash.skin.Skin#getWindowSize()
 	 *******************************************************/
 	@Override
-	public Dimension getWindowSize() throws Exception
+	public Dimension getWindowSize()
 	{
 		return new Dimension(PANEL_WIDTH, PANEL_HEIGHT);
 	}
 	
-	
+	/*******************************************************
+	 * Override
+	 * @see net.sourceforge.JDash.skin.Skin#getBackgroundColor()
+	 *******************************************************/
+	@Override
+	public Color getBackgroundColor() {
+		return Color.WHITE;
+	}
 	
 	/******************************************************
 	 * Override

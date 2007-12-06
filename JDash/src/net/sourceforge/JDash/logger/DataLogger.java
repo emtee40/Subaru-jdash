@@ -57,6 +57,7 @@ public abstract class DataLogger implements SkinEventListener
 			
 				if (SkinEvent.DESTINATION_LOGGER.equals(se.getDestination()))
 				{
+
 					if (ACTION_DISABLE.equals(se.getAction()))
 					{
 						this.enable(false);
@@ -85,7 +86,7 @@ public abstract class DataLogger implements SkinEventListener
 		 * @param enableOverride
 		 * @throws Exception
 		 *******************************************************/
-		public abstract void disableOverride(boolean enableOverride) throws Exception;
+		public abstract void setEnableable(boolean enableOverride) throws Exception;
 	
 		
 		/********************************************************

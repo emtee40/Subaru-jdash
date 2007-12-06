@@ -37,6 +37,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -190,9 +193,26 @@ public class ConfigureFrame extends JFrame
 		
 		
 		/* Add the known SKINS */
-		for (SkinFactory skinFactory : SkinFactory.getAllFactories())
 		{
-			for (Skin skin : skinFactory.getAllSkins())
+			ArrayList<Skin> skins = new ArrayList<Skin>();
+			
+			for (SkinFactory skinFactory : SkinFactory.getAllFactories())
+			{
+				skins.addAll(skinFactory.getAllSkins());
+			}
+			
+			/* Sort the skins */
+			Collections.sort(skins, new Comparator<Skin>()
+			{
+				public int compare(Skin s1, Skin s2)
+				{
+					return s1.getName().compareTo(s2.getName());
+				}
+			});
+			
+			
+			/* Add them to the combo box */
+			for (Skin skin : skins)
 			{
 				this.skinClass_.addItem(skin);
 				if (skin.getId().equals(Setup.getSetup().get(Setup.SETUP_CONFIG_SKIN_ID)) == true)
@@ -200,8 +220,9 @@ public class ConfigureFrame extends JFrame
 					this.skinClass_.setSelectedItem(skin);
 				}
 			}
+			
 		}
-		
+			
 		
 
 		

@@ -31,6 +31,7 @@ import net.sourceforge.JDash.ecu.param.MetaParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.special.TimeParameter;
+import net.sourceforge.JDash.skin.SkinEvent;
 
 
 import java.util.List;
@@ -46,6 +47,9 @@ import java.util.Collections;
  *****************************************************/
 public abstract class BaseMonitor implements ECUMonitor
 {
+	
+	
+	public static final String ACTION_DTC_RESET = "dtc-reset";
 	
 	/** This list will hold the entire list of ECU Bound parameters */
     protected List<ECUParameter> params_;
@@ -92,6 +96,28 @@ public abstract class BaseMonitor implements ECUMonitor
     	this.paramRegistry_ =  reg;
     	
     	return new ArrayList<Parameter>();
+    }
+    
+    
+    /*******************************************************
+     * watch for known skin events.
+     * Override
+     * @see net.sourceforge.JDash.skin.SkinEventListener#actionPerformed(net.sourceforge.JDash.skin.SkinEvent)
+     *******************************************************/
+    public void actionPerformed(SkinEvent e)
+    {
+    	if (SkinEvent.DESTINATION_MONITOR.equals(e.getDestination()))
+    	{
+    		if (ACTION_DTC_RESET.equals(e.getAction()))
+    		{
+    			resetDTCs();
+    		}
+    		else
+    		{
+    			
+    		}
+    	}
+    	
     }
     
     /********************************************************
@@ -273,9 +299,9 @@ public abstract class BaseMonitor implements ECUMonitor
      * Override
      * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#resetDTCs()
      *******************************************************/
-    public void resetDTCs() throws Exception
+    public void resetDTCs() throws RuntimeException
     {
-    	throw new Exception("DTC reset not supported by this monitor");
+    	throw new RuntimeException("DTC reset not supported by this ECU monitor");
     	
     }
     

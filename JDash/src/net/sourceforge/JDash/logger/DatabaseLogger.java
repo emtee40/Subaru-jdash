@@ -55,7 +55,7 @@ public class DatabaseLogger extends DataLogger  implements ParameterEventListene
 {
 
 	/* By default allow ologging, But, it can be overridden */
-	private boolean disableLoggingOverride_ = true;
+	private boolean enableable_ = true;
 	
 	
 	private static final String DB_NAME = "eculogdb";
@@ -130,13 +130,14 @@ public class DatabaseLogger extends DataLogger  implements ParameterEventListene
 	
 
 	
-	/*******************************************************
+	/******************************************************
 	 * Override
-	 * @see net.sourceforge.JDash.logger.DataLogger#enableOverride(boolean)
-	 *******************************************************/
-	public void disableOverride(boolean disableLoggingOverride) throws Exception
+	 * @see net.sourceforge.JDash.logger.DataLogger#setEnableable(boolean)
+	 ******************************************************/
+	@Override
+	public void setEnableable(boolean enableable) throws Exception
 	{
-		this.disableLoggingOverride_ = disableLoggingOverride;
+		this.enableable_ = enableable;
 		
 	}
 	
@@ -314,7 +315,7 @@ public class DatabaseLogger extends DataLogger  implements ParameterEventListene
 		}
 		
 		/* The override is disabled */
-		if (this.disableLoggingOverride_ == true)
+		if (this.enableable_ == false)
 		{
 			return;
 		}
@@ -344,11 +345,12 @@ public class DatabaseLogger extends DataLogger  implements ParameterEventListene
 				this.currentLogId_ = null;
 				
 			}
+			
 		}
 		catch(Throwable e)
 		{
 			e.printStackTrace();
-			throw new Exception("There was an unexpected error connecting to logger database.");
+			throw new Exception("There was an unexpected error connecting to logger database.", e);
 		}
 
 	}

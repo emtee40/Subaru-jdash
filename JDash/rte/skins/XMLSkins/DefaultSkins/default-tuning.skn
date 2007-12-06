@@ -3,7 +3,7 @@
  http://jdash.sourceforge.net
   $Id: default-tuning.skn,v 1.1 2006/12/31 16:59:09 shaneapowell Exp $
      ====================================================================== -->
-<skin name="JDash / Line Graphs for Tuning" fill-color="#000000">
+<skin name="JDash / Line Graphs for Tuning" extends="resources.inc">
 
 <description>This simple skin will layout a series line graph gauges you might use for simple tuning.  It will show values like RPM, LOAD and STFT.  This skin will also display the Check Engine Light status, and as many as 8 Trouble Codes.  Assuming the selected monitor supportes DTC processing.</description>
   
@@ -27,31 +27,6 @@
    
   </window>
 
-  <!-- Font Definitions -->
-  <font name="digital" src="digital.ttf" />
-  <font name="Arial" src="system:Arial"/>
-  
-  <image name="background"                  src="blank_black.jpg"/> 
-
-  <!-- Color definitions -->
-  <color name="black"        value="#000000" />
-  <color name="white"        value="#ffffff" />
-  <color name="lite-gray"    value="#0c0c0c" />
-  <color name="red"          value="#ff0000" />
-  <color name="dark-red"     value="#990000" />
-  <color name="orange"       value="#F87431" />
-  <color name="dark-orange"  value="#C35617" />
-  <color name="green"        value="#00ff00" />
-  <color name="dark-green"   value="#306754" />
-  <color name="dark-blue"    value="#0000ff" />
-  <color name="blue"         value="#2554C7"/>
-  <color name="yellow"       value="#fffb0b" />
-  
-
- <image name="red-indicator-light-on"		src="red-indicator-light-on.jpg"/>
- <image name="red-indicator-light-off"		src="red-indicator-light-off.jpg"/>
- <image name="red-push-button-down"			src="red-push-switch-on.jpg"/>
- <image name="red-push-button-up"			src="red-push-switch-off.jpg"/>
 
 
   <!-- Event Triggers.  Respond to the DEFOG switch.  If it's turned on, then enable logging. -->

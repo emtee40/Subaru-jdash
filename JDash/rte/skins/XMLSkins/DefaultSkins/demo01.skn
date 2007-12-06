@@ -3,7 +3,7 @@
  http://jdash.sourceforge.net
   $Id: default.skn,v 1.6 2006/12/31 16:59:09 shaneapowell Exp $
      ====================================================================== -->
-<skin name="JDash / Demo Gauges">
+<skin name="JDash / Demo Gauges" extends="resources.inc">
 
   <description>This skin creates a whole bunch of different types and styles of gauges for the purpose of seeing what is possible to create with JDash. You'll see RPM and Air Fuel values</description>
   
@@ -40,37 +40,6 @@
     	
     </window>
 
-  <!-- Sound resources -->
-  <sound name="alarm-01"						src="alarm-01.mp3"/>  
-
-  <!-- Image resources -->
-  <image name="rpm-01"                      src="rpm-01.jpg"/> 
-  <image name="af-01"                       src="af-01.jpg"/>
-  <image name="red-toggle-off"              src="red-toggle-switch-off.gif"/> 
-  <image name="red-toggle-on"               src="red-toggle-switch-on.gif"/> 
-  <image name="red-push-off"                src="red-push-switch-off.jpg"/> 
-  <image name="red-push-on"                 src="red-push-switch-on.jpg"/> 
-  <image name="red-indicator-light-on"		src="red-indicator-light-on.jpg"/>
-  <image name="red-indicator-light-off"		src="red-indicator-light-off.jpg"/>
-  
-  
-  <!-- Color definitions -->
-  <color name="black"        value="#000000" />
-  <color name="white"        value="#ffffff" />
-  <color name="lite-gray"    value="#0c0c0c" />
-  <color name="red"          value="#ff0000" />
-  <color name="dark-red"     value="#990000" />
-  <color name="orange"       value="#F87431" />
-  <color name="dark-orange"  value="#C35617" />
-  <color name="green"        value="#00ff00" />
-  <color name="dark-green"   value="#306754" />
-  <color name="dark-blue"    value="#0000ff" />
-  <color name="blue"         value="#2554C7"/>
-  <color name="yellow"       value="#fffb0b" />
-  
-  <!-- Font resources -->
-  <font name="digital" src="digital.ttf" />
-  <font name="Arial" src="system:Arial"/>
   
   
   <!-- Event Triggers.  This trigger simply sounds an alarm sound when the RPM reaches into 

@@ -8,7 +8,7 @@
   <description>This skin will layout a set of common gauges that almost all cars support. It includes a Tach with a Shift Light, Speedo, A/F, Coolant Temp and Boost/Vac.</description>
   
     <!-- Main Window -->
-  <window width="751" height="411" type="window" scale="60"  fill-color="#000000">
+  <window width="751" height="411" type="window" scale="60"  fill-color="black">
     <image name="background" x="0" y="0" width="-1" height="-1" /> 
   </window>
   
@@ -23,6 +23,7 @@
   <image name="red-indicator-light-off"		src="red-indicator-light-off.jpg"/>
   
   <!-- Color definitions -->
+  <color name="black"      value="#000000" />
   <color name="red"        value="#ff0000" />
   <color name="dark-red"   value="#990000" />
   <color name="green"      value="#00ff00" />
@@ -32,138 +33,152 @@
   <!-- Font Definitions -->
   <font name="digital" src="digital.ttf" />
   <font name="Arial" src="system:Arial"/>
+  
+  <!-- Defog Switch logger event -->
+  
+  
+  <!-- Defot Switch Indicator Light -->
+  <gauge sensor="DEFOG_SW" type="led" x="310" y="355">
+    <led sensor-min="0" sensor-max="0">
+      <image name="red-indicator-light-off" x="0" y="0" width="-1" height="-1"/>
+    </led>
+    <led sensor-min="1" sensor-max="1">
+      <image name="red-indicator-light-on" x="0" y="0" width="-1" height="-1"/>
+    </led>
+  </gauge>
+  
  
   <!-- Digital VAC/BOOST -->
-  <gauge sensor="VAC_BOOST_PSI" type="digital">
-     <text color="#0000ff" size="25" x="620" y="85" format="%02.2f" font="digital"/>
+  <gauge sensor="VAC_BOOST_PSI" type="digital" x="620" y="85">
+     <text color="#0000ff" size="25" x="0" y="0" format="%02.2f" font="digital"/>
   </gauge>
 
 
 	<!-- LED VAC/BOOST -->
-   <gauge sensor="VAC_BOOST_PSI" type="led">
+   <gauge sensor="VAC_BOOST_PSI" type="led" x="361" y="50"> 
      <led sensor-min="-13" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="361" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="0" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-12" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="368" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="7" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-11" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="375" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="14" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-10" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="382" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="21" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-9" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="389" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="28" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-8" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="396" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="35" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-7" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="403" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="42" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-6" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="410" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="49" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-5" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="417" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="56" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-4" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="424" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="63" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-3" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="431" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="70" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-2" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="438" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="77" y="0" width="5" height="32" />
      </led>
      <led sensor-min="-1" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="445" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="84" y="0" width="5" height="32" />
      </led>
      <led sensor-min="0" sensor-max="-15">
-     	<rectangle color="blue" fill-color="blue" line-width="1" x="452" y="50" width="5" height="32" />
+     	<rectangle color="blue" fill-color="blue" line-width="1" x="91" y="0" width="5" height="32" />
      </led>
      <led sensor-min="0" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="459" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="98" y="0" width="5" height="32" />
      </led>
      <led sensor-min="1" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="466" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="91" y="0" width="5" height="32" />
      </led>
      <led sensor-min="2" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="473" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="98" y="0" width="5" height="32" />
      </led>
      <led sensor-min="3" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="480" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="105" y="0" width="5" height="32" />
      </led>
      <led sensor-min="4" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="487" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="112" y="0" width="5" height="32" />
      </led>
      <led sensor-min="5" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="494" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="119" y="0" width="5" height="32" />
      </led>
      <led sensor-min="6" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="501" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="126" y="0" width="5" height="32" />
      </led>
      <led sensor-min="7" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="508" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="133" y="0" width="5" height="32" />
      </led>
      <led sensor-min="8" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="515" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="140" y="0" width="5" height="32" />
      </led>
      <led sensor-min="9" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="522" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="147" y="0" width="5" height="32" />
      </led>
      <led sensor-min="10" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="529" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="154" y="0" width="5" height="32" />
      </led>
      <led sensor-min="11" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="536" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="161" y="0" width="5" height="32" />
      </led>
      <led sensor-min="12" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="543" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="168" y="0" width="5" height="32" />
      </led>
      <led sensor-min="13" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="550" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="175" y="0" width="5" height="32" />
      </led>
      <led sensor-min="14" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="557" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="182" y="0" width="5" height="32" />
      </led>
      <led sensor-min="15" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="564" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="189" y="0" width="5" height="32" />
      </led>
      <led sensor-min="16" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="571" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="196" y="0" width="5" height="32" />
      </led>
      <led sensor-min="17" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="578" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="203" y="0" width="5" height="32" />
      </led>
      <led sensor-min="18" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="585" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="210" y="0" width="5" height="32" />
      </led>
      <led sensor-min="19" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="592" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="217" y="0" width="5" height="32" />
      </led>
      <led sensor-min="20" sensor-max="99">
-     	<rectangle color="red" fill-color="red" line-width="1" x="599" y="50" width="5" height="32" />
+     	<rectangle color="red" fill-color="red" line-width="1" x="224" y="0" width="5" height="32" />
      </led>
    </gauge>
 
 
   <!-- Digital RPM -->
-  <gauge sensor="RPM" type="digital">
-	  <text color="#ff0000" size="50" x="100" y="275" format="%5.0f"  font="digital"/>
+  <gauge sensor="RPM" type="digital" x="100" y="275">
+	  <text color="#ff0000" size="50" x="0" y="0" format="%5.0f"  font="digital"/>
   </gauge>
 
   <!-- Digital MPH -->
-  <gauge sensor="MPH" type="digital">
-	  <text color="#00ffff" size="20" x="465" y="300" format="%3.0f" font="digital"/>
+  <gauge sensor="MPH" type="digital" x="465" y="300">
+	  <text color="#00ffff" size="20" x="0" y="0" format="%3.0f" font="digital"/>
   </gauge>
   
 
   <!-- Shift Light -->
-  <gauge sensor="RPM" type="led">
+  <gauge sensor="RPM" type="led" x="140" y="320">
     <led sensor-min="5000" sensor-max="99999">
-      <round-rectangle color="dark-red" fill-color="red" line-width="2"  x="140" y="320" width="80" height="23" arcw="4" arch="4"/>
+      <round-rectangle color="dark-red" fill-color="red" line-width="2"  x="0" y="0" width="80" height="23" arcw="4" arch="4"/>
     </led>
   </gauge>
   
@@ -173,13 +188,15 @@
   
     <button 
     	type="push-button" 
-    	x="20" 
-    	y="358" 
-    	width="60" 
-    	height="60" 
-    	down-action="high-reset:low-reset"
+    	x="-150" 
+    	y="175" 
+    	width="45" 
+    	height="45" 
     	up-image="red-push-off" 
-    	down-image="red-push-on"/>
+    	down-image="red-push-on">
+    	<event type="down" action="high-reset"/>
+    	<event type="down" action="low-reset"/>
+    </button>
     
     <needle type="high" delay="-1">
       <polygon color="#0000ff" fill-color="blue" line-width="2">
@@ -245,8 +262,8 @@
   
   
     <!-- Digital Air/Fuel #1 -->
-  <gauge sensor="LAMBDA_1" type="digital">
-     <text color="blue" size="8" x="670" y="190" format="%01.2f" font="digital"/>
+  <gauge sensor="LAMBDA_1" type="digital" x="670" y="190">
+     <text color="blue" size="8" x="0" y="0" format="%01.2f" font="digital"/>
   </gauge>
   
    <!-- Analog Air/Fuel #1 -->
@@ -284,8 +301,8 @@
    </gauge>
   
   <!-- Digital Coolant Temp -->
-  <gauge sensor="COOLANT_TEMP_F" type="digital">
-     <text color="blue" size="12" x="670" y="360" format="%03.0f" font="digital"/>
+  <gauge sensor="COOLANT_TEMP_F" type="digital" x="670" y="360" >
+     <text color="blue" size="12" x="0" y="0" format="%03.0f" font="digital"/>
   </gauge>
   
   <!-- Analog Water Temp -->
@@ -305,17 +322,10 @@
 
   <!-- Digital Rate -->
   <!--
-  <gauge sensor="RATE" type="digital">
-     <text color="blue" size="12" x="550" y="400" format="Refresh Rate:%2.2f/s" font="Arial"/>
+  <gauge sensor="RATE" type="digital" x="550" y="400">
+     <text color="blue" size="12" x="0" y="0" format="Refresh Rate:%2.2f/s" font="Arial"/>
   </gauge>
   -->
   
-  <!-- Knock Correction -->
-  
-  <!-- Injector Duty Cycle -->
-  
-  <!-- EGT -->
-  
-  <!-- TPS -->
   
 </skin>

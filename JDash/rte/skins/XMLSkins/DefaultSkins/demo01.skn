@@ -3,13 +3,17 @@
  http://jdash.sourceforge.net
   $Id: default.skn,v 1.6 2006/12/31 16:59:09 shaneapowell Exp $
      ====================================================================== -->
-<skin name="Demo - Gauge Types">
+<skin name="JDash / Demo Gauges">
 
   <description>This skin creates a whole bunch of different types and styles of gauges for the purpose of seeing what is possible to create with JDash. You'll see RPM and Air Fuel values</description>
   
-    <!-- Main Window -->
-    <window width="800" height="600" type="window:50"  fill-color="black">
-      <!-- Info Text -->
+    <!-- Main Window.  Here we setup the width and height of the main window.  These 2 values
+    	are referenced when placing each gauge by it's x and y value.  The window
+    	type code identifies this skin as a "window" or a "fullscreen" skin.  the ":50"
+    	tells JDash to scale the window by 50 %.  The fill-color defines the default background color -->
+    <window width="800" height="600" type="window" scale="50"  fill-color="black">
+    
+      <!-- Info Text describing what this skin tries to do -->
       <text color="yellow" size="14" x="580" y="30"  format="A collection of different" font="Arial"/>
       <text color="yellow" size="14" x="580" y="50"  format="types of Gauges layed out" font="Arial"/>
       <text color="yellow" size="14" x="580" y="70"  format="in a few different ways" font="Arial"/>
@@ -17,15 +21,17 @@
       <text color="yellow" size="14" x="580" y="110" format="of JDash XML Skins." font="Arial"/>
       <text color="yellow" size="14" x="580" y="130" format="+ Plays an alarm at 6000RPM." font="Arial"/>
       
-      <!-- Logger Button -->
+      <!-- Logger enable/disable Button -->
       <rectangle color="white" fill-color="none" line-width="2" x="10" y="165" width="80" height="50" />
       <text color="white" size="14" x="10"  y="163" format="Logging Btn" font="Arial"/>
       <button type="toggle" x="20" y="170" width="35" height="35" up-image="red-indicator-light-off" down-image="red-indicator-light-on">
         <event type="up" destination="logger" action="disable"/>
         <event type="down" destination="logger" action="enable"/>
+        <event type="up" destination="stdout" action="Disable Logger"/>
+        <event type="down" destination="stdout" action="Enable Logger"/>
       </button>
         
-      <!-- Global low-reset button -->
+      <!-- Global low-reset button.  Sends a "low-reset" message to all listeners -->
       <rectangle color="white" fill-color="none" line-width="2" x="10" y="95" width="80" height="50" />
       <text color="white" size="14" x="10"  y="93" format="Low Reset Btn" font="Arial"/>
       <button type="push-button" x="20" y="100" width="36" height="36" down-image="red-push-on" up-image="red-push-off">
@@ -34,10 +40,10 @@
     	
     </window>
 
-  <!-- Sounds -->
+  <!-- Sound resources -->
   <sound name="alarm-01"						src="alarm-01.mp3"/>  
 
-  <!-- Images -->
+  <!-- Image resources -->
   <image name="rpm-01"                      src="rpm-01.jpg"/> 
   <image name="af-01"                       src="af-01.jpg"/>
   <image name="red-toggle-off"              src="red-toggle-switch-off.gif"/> 
@@ -46,6 +52,7 @@
   <image name="red-push-on"                 src="red-push-switch-on.jpg"/> 
   <image name="red-indicator-light-on"		src="red-indicator-light-on.jpg"/>
   <image name="red-indicator-light-off"		src="red-indicator-light-off.jpg"/>
+  
   
   <!-- Color definitions -->
   <color name="black"        value="#000000" />
@@ -61,19 +68,20 @@
   <color name="blue"         value="#2554C7"/>
   <color name="yellow"       value="#fffb0b" />
   
-  <!-- Font Definitions -->
+  <!-- Font resources -->
   <font name="digital" src="digital.ttf" />
   <font name="Arial" src="system:Arial"/>
   
   
-  <!-- Event Triggers -->
+  <!-- Event Triggers.  This trigger simply sounds an alarm sound when the RPM reaches into 
+  	a redline of 6000. -->
   <trigger sensor="RPM" sensor-min="6000" sensor-max="99999">
     <event type="enter-range" destination="sound" action="alarm-01"/>
     <event type="exit-range" destination="stdout" action="Sound RPM Alarm"/>
   </trigger>
 
   
-  <!-- Digital RPM -->
+  <!-- Digital RPM.  Displays the RPM as digital text in the  upper left corner -->
   <gauge sensor="RPM" type="digital" x="5"  y="20">
     <static>
       <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="40" />
@@ -83,7 +91,10 @@
   </gauge>
 
 
-  <!-- Analog RPM -->
+  <!-- Analog RPM.  Puts an analog sweep style gauge of the RPM in the middle of the screen.
+   		Also, this gauge will show a high and low indicator needle.  These show the most recent
+   		"high" and "low" RPM.  The "high" needle can be reset by pressing the red button in the
+   		middle of the gauge.  The "low" needle will automatically reset itself every 3 seconds. -->
   <gauge sensor="RPM" type="analog" x="400" y="300">
   
       <static>
@@ -126,12 +137,15 @@
       </polygon>
     </needle>
     
+    <!-- This analog gauge allows RPM values from 0 to 7k.  the corrisponding angles
+    	in degrees are -130 and +125 -->
     <range sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125" />
     
   </gauge>
   
   
-   <!-- Analog Air Fuel Ratio -->
+   <!-- Analog Air Fuel Ratio.  this analog gauge is designed to resemeble a sweeping set of
+   		LED Lights for the AF ratio.   -->
   <gauge sensor="LAMBDA_1" type="analog" x="664" y="293">
   
     <static>
@@ -152,27 +166,33 @@
       <rectangle color="green" fill-color="dark-green" line-width="1" x="-2" y="-40" width="4" height="10"/> 
     </needle>
     
+    <!-- Since Lambda values of < 1 represent a rich condition, and > 1 a lean condition, the
+    	range settings have a reverse='true' setup. This causes the sweep hand to rotate
+    	from right to left as the value increases -->
     <range sensor-min="0" sensor-max="2" gauge-min="-140" gauge-max="132"  reverse="true"/>
     
   </gauge>
   
-  <!-- Digital AF -->
+  <!-- Digital AF.  This gauge places the digital AF readout in the middle of the analog gauge. -->
   <gauge type="digital" x="662" y="293" sensor="LAMBDA_1">
     <text color="yellow" size="13" x="-10" y="5" format="%1.2f" font="digital"/>
   </gauge>
 
-   <!-- Shift Light -->
+   <!-- Shift Light.  When the RPMs reach a value greater than 6000, then a shift light will come on
+   near the bottom of the analog RPM gauge.  This is just a simple LED Gauge. -->
   <gauge sensor="RPM" type="led" x="375" y="375">
     <static>
       <text color="dark-red" size="14" x="5" y="12" format="Shift" font="Arial"/> 
     </static>
-    <led sensor-min="6200" sensor-max="99999">
+    <led sensor-min="6000" sensor-max="99999">
       <round-rectangle color="dark-red" fill-color="red" line-width="1"  x="0" y="0" width="46" height="14" arcw="4" arch="4"/>
     </led>
   </gauge>
    
   
-  <!-- Horizontal LED String -->
+  <!-- Horizontal LED String.  This massive LED Gauge is designed to show a series of horizontal LEDs
+  		representing the RPMs as they increase and decrease.  You can see that each LED defined within this
+  		gauge lights up at a progressivly higher RPM.  This gauge also has a HIGH and LOW needle defined.  -->
    <gauge sensor="RPM" type="led" x="120" y="20">
    
       <static>
@@ -444,7 +464,8 @@
    </gauge>
   
   
-   <!-- Verticle LED String -->
+   <!-- Verticle LED String .  Similar to the previous LED Gauge, this one simply shows a verticle 
+  		verson of the RPM values. -->
    <gauge sensor="RPM" type="led" x="530" y="130">
      <led sensor-min="0" sensor-max="99999">
      	<rectangle color="dark-blue" fill-color="blue" line-width="1" x="0" y="0" width="35" height="10" />
@@ -478,13 +499,16 @@
      </led>
    </gauge>
   
-  <!-- Line Graph for RPM -->
+  <!-- Line Graph for RPM  with a short time scale of 10 seconds.  This line graph also shows the 
+  		most recent high and low values. -->
 	<gauge sensor="RPM" label="RPM" type="line-graph" x="400"  y="410"  width="300" height="200" seconds="10" sensor-min="-100"   sensor-max="17000" format="%f">
       <text type="high" color="red"   size="20" x="310" y="70"  format="H%02.0f" font="digital"/>
       <text type="main" color="blue"  size="20" x="310" y="110"  format=" %02.0f" font="digital"/>
       <text type="low"  color="green" size="20" x="310" y="150"  format="L%02.0f" font="digital"/>
     </gauge>
     
+    
+    <!-- Line graph for RPM with a much longer time scale of 2.5 minutes. -->
     <gauge sensor="RPM" label="RPM" type="line-graph" x="95"  y="410"  width="300" height="200" seconds="150" sensor-min="-100"   sensor-max="17000" format="%f">
       <text type="main" color="blue"  size="20" x="-60" y="110"  format="%02.0f ->" font="digital"/>
     </gauge>

@@ -36,7 +36,7 @@
 		<pack name="Main Application" required="yes">
 			<description>The Main Application files</description>
 			<singlefile src="JDash.jar" target="$INSTALL_PATH/JDash.jar"/>
-			<fileset dir="." targetdir="$INSTALL_PATH" excludes="CVS .cvsignore .svn" />
+			<fileset dir="." targetdir="$INSTALL_PATH" excludes="CVS .cvsignore .svn logdb/*" />
 		</pack>
 	</packs>
 </installation>

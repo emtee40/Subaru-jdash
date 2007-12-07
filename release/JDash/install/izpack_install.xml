@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<installation version="1.0">
+	<info>
+		<appname>JDash</appname>
+		<appversion>0</appversion>
+		<authors>
+			<author name="Shane Powell" email="sgspowell-jdash@yahoo.com"/>
+		</authors>
+		<url>http://jdash.sourceforge.net</url>
+	</info>
+	<guiprefs width="640" height="480" resizable="no"/>
+	<native type="izpack" name="ShellLink.dll"/>
+	<locale>
+		<langpack iso3="eng"/>
+	</locale>
+	<!--         The resources section.        The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.    -->
+	<resources>
+		<res id="LicencePanel.licence" src="license.txt"/>
+		<res id="InfoPanel.info" src="../install/info.txt"/>
+		<res id="TargetPanel.dir" src="../install/install_path.txt" />
+		<res id="shortcutSpec.xml" src="../install/win_shortcut.xml" />
+		<res id="Unix_shortcutSpec.xml" src="../install/unix_shortcut.xml" />
+	</resources>
+	<panels>
+		<panel classname="HelloPanel"/>
+		<panel classname="InfoPanel"/>
+		<panel classname="LicencePanel"/>
+		<panel classname="TargetPanel" />
+		<panel classname="PacksPanel"/>
+		<panel classname="InstallPanel"/>
+		<panel classname="ShortcutPanel"/>
+		<panel classname="FinishPanel"/>
+	</panels>
+	<!--         The packs section.        We specify here our packs.    -->
+	<packs>
+		<pack name="Main Application" required="yes">
+			<description>The Main Application files</description>
+			<singlefile src="JDash.jar" target="$INSTALL_PATH/JDash.jar"/>
+			<fileset dir="." targetdir="$INSTALL_PATH" excludes="CVS .cvsignore .svn logdb/*" />
+		</pack>
+	</packs>
+</installation>

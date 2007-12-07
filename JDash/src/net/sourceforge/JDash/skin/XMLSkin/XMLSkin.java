@@ -981,6 +981,8 @@ public class XMLSkin extends Skin
 		
 		addStaticShapes(gaugePath, analogGauge);
 		
+		addSkinEventListener(analogGauge);
+		
 		/* Return our new gauge */
 		return analogGauge;
 		
@@ -1125,6 +1127,7 @@ public class XMLSkin extends Skin
 		ledGauge.setHighNeedlePosition(highPosition);
 		ledGauge.setLowNeedlePosition(lowPosition);
 		addStaticShapes(gaugePath, ledGauge);
+		addSkinEventListener(ledGauge);
 		
 		/* Return our new gauge */
 		return ledGauge;

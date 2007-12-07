@@ -171,6 +171,7 @@ public class XMLGaugePanel extends AbstractGaugePanel
 			}
 		}
 		
+		
 		/* And the background color */
 		setOpaque(false);
 

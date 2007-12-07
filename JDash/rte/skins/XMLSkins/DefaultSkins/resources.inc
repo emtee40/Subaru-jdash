@@ -5,6 +5,7 @@
 <skin name="JDash / Common Resources">
 
   <description>Common Default Skin Resources</description>
+  <window width="0" height="0" type="window" scale="0"  fill-color="none"/>
 
 
   <!-- Sound resources -->

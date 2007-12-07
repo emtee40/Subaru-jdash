@@ -34,8 +34,12 @@
 		<property name="jar06" value="jl1.0.jar"/>
 		<property name="jar07" value="SuperWaba.jar"/>
 		<property name="jar08" value="h2.jar"/>
+		<property name="jar09" value="msv.jar"/>
+		<property name="jar10" value="isorelax.jar"/>
+		<property name="jar11" value="relaxngDatatype.jar"/>
+		<property name="jar12" value="xsdlib.jar"/>
 		<property name="classpath"
-			  value="${rteDir}/${jar01}:${rteDir}/${jar02}:${rteDir}/${jar03}:${rteDir}/${jar04}:${rteDir}/${jar05}:${rteDir}/${jar06}:${rteDir}/${jar07}:${rteDir}/${jar08}:" />
+			  value="${rteDir}/${jar01}:${rteDir}/${jar02}:${rteDir}/${jar03}:${rteDir}/${jar04}:${rteDir}/${jar05}:${rteDir}/${jar06}:${rteDir}/${jar07}:${rteDir}/${jar08}:${rteDir}/${jar09}:${rteDir}/${jar10}:${rteDir}/${jar11}:${rteDir}/${jar12}:" />
 		<mkdir dir="${outputDir}" />
 		<echo message="CLASSPATH=${classpath}"/>
 	</target>
@@ -56,6 +60,12 @@
 			debug="true" 
 			debuglevel="source,lines,vars"
 		/>
+		<copy todir="${outputDir}">
+			<fileset dir="${sourceDir}">
+				<exclude name="**/*.java"/>
+				<exclude name="**/.svn"/>
+			</fileset>
+	    </copy>
 	</target>
 	
 	<!-- Jar -->
@@ -67,7 +77,7 @@
 		<manifest file="${manifest}">
 			<attribute name="Built-By" value="${user.name} (Copyright 2007)"/>
 			<attribute name="Main-Class" value="net.sourceforge.JDash.Startup"/>
-			<attribute name="Class-Path" value="${jar01} ${jar02} ${jar03} ${jar04} ${jar05} ${jar06} ${jar07} ${jar08}"/>
+			<attribute name="Class-Path" value="${jar01} ${jar02} ${jar03} ${jar04} ${jar05} ${jar06} ${jar07} ${jar08} ${jar09} ${jar10} ${jar11} ${jar12}"/>
 		</manifest>
 		
 		<jar destfile="${rteDir}/${JDashJar}"

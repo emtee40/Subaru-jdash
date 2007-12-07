@@ -1,0 +1,978 @@
+<!-- ======================================================
+     EVERY known to us  SSM parameter
+     ====================================================== -->
+<parameters name="Known Subaru SSM/OBD-II addresses" monitor-class="net.sourceforge.JDash.ecu.comm.SSMOBD2Monitor">
+
+    <description>This parameter include file contains the known set of SSM parameter addresses on an OBD-II vehicle. There are NOT meta-parameter definitions contained here.</description>
+	
+	<parameter name="E_LOAD">
+		<description>Engine Load - Multiply value by 100.0 and divide by 255 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x07</byte>
+		</address>
+	</parameter>
+	 <parameter name="E_COOLANT_TEMP" rate="5000">
+		<description>Coolant Temp Subtract 40 to get C - Multiply by (9/5) and add 32to get Fahrenheit</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x08</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_COR_1">
+		<description>Air/Fuel Correction #1 - Subtract 128 from value and divide by 1.28 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x09</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_LEARN_1">
+		<description>Air/Fuel Learning #1 - Subtract 128 from value and divide by 1.28 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0a</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_COR_2">
+		<description>Air/Fuel Correction #2 - Subtract 128 from value and divide by 1.28 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0b</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_LEARN_2">
+		<description>Air/Fuel Learning #2  - Subtract 128 from value and divide by 1.28 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0c</byte>
+		</address>
+	</parameter>
+	<parameter name="E_MAP">
+		<description>Manifold Absolute Pressure - Multiply value by 37.0 and divide by 255 to get psig</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0d</byte>
+		</address>
+	</parameter>
+	<parameter name="E_RPM_H">
+		<description>Engine Speed High Byte - Divide value by 4 to get RPM</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0e</byte>
+		</address>
+	</parameter>
+	<parameter name="E_RPM_L">
+		<description>Engine Speed Low Byte - Divide value by 4 to get RPM</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0f</byte>
+		</address>
+	</parameter>
+	<parameter name="KPH">
+		<description>Vehicle Speed in KPH</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x10</byte>
+		</address>
+	</parameter>
+	<parameter name="E_IG_TIMING">
+		<description>Ignition Timing - Subtract 128 from value and divide by 2 to get degrees</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x11</byte>
+		</address>
+	</parameter>
+	<parameter name="E_INTAKE_AIR_TEMP">
+		<description>Intake Air Temperature in C</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x12</byte>
+		</address>
+	</parameter>
+	<parameter name="E_MAF_H">
+		<description>Mass Air Flow High Byte - Divide value by 100.0 to get grams/s</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x13</byte>
+		</address>
+	</parameter>
+	<parameter name="E_MAF_L">
+		<description>Mass Air Flow Low Byte - Divide value by 100.0 to get grams/s</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x14</byte>
+		</address>
+	</parameter>
+	<parameter name="E_TPS">
+		<description>Throttle Opening Angle - Multiply value by 100.0 and divide by 255 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x15</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FRONT_O2V_1_H">
+		<description>Front O2 Sensor #1 High Byte - Multiply value by 0.005 to get voltage</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x16</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FRONT_O2V_1_L">
+		<description>Front O2 Sensor #1 Low Byte - Multiply value by 0.005 to get voltage</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x17</byte>
+		</address>
+	</parameter>
+	<parameter name="E_REAR_O2V_H">
+		<description>Rear O2 Sensor High Byte - Multiply value by 0.005 to get voltage</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x18</byte>
+		</address>
+	</parameter>
+	<parameter name="E_REAR_O2V_L">
+		<description>Rear O2 Sensor Low Byte - Multiply value by 0.005 to get voltage</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x19</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FRONT_02V_2_H">
+		<description>Front O2 Sensor #2 High Byte - Multiply value by 0.005 to get voltage</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x1a</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FRONT_02V_2_L">
+		<description>Front O2 Sensor #2 Low Byte - Multiply value by 0.005 to get voltage</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x1b</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BATTERY_VOLTS">
+		<description>Battery Voltage - Multiply value by 0.08 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0c</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_VOLTS">
+		<description>Air Flow Sensor Voltage - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0d</byte>
+		</address>
+	</parameter>
+	<parameter name="E_TPS_VOLTS">
+		<description>Throttle Sensor Voltage - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0e</byte>
+		</address>
+	</parameter>
+	<parameter name="E_DPS_VOLTS">
+		<description>Differential Pressure Sensor Voltage - Multiply value by 0.02 to get Volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x0f</byte>
+		</address>
+	</parameter>
+	<parameter name="E_INJ_1_PULSE">
+		<description>Fuel Injection #1 Pulse Width - Multiply value by 0.256 to get ms</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x20</byte>
+		</address>
+	</parameter>
+	<parameter name="E_INJ_2_PULSE">
+		<description>Fuel Injection #2 Pulse Width - Multiply value by 0.256 to get ms</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x21</byte>
+		</address>
+	</parameter>
+	<parameter name="E_KNOCK_COR">
+		<description>Knock Correction - Subtract 128 from value and divide by 2 to get degrees</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x22</byte>
+		</address>
+	</parameter>
+	<parameter name="E_ATMO">
+		<description>Atmospheric Pressure - Multiply value by 37.0 and divide by 255 to get psig</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x23</byte>
+		</address>
+	</parameter>
+	<parameter name="E_VAC_BOOST">
+		<description>Manifold Relative Pressure - Subtract 128 from value, multiply by 37.0 and divide by 255 to get psig</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x24</byte>
+		</address>
+	</parameter>
+	<parameter name="E_DPS">
+		<description>Pressure Differential Sensor - Subtract 128 from value, multiply by 37.0 and divide by 255 to get psig</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x25</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FUEL_PRESSURE">
+		<description>Fuel Tank Pressure - Subtract 128 from value and multiply by 0.0035 to get psig</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x26</byte>
+		</address>
+	</parameter>
+	<parameter name="E_CO_VOLTS">
+		<description>CO Adjustment - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x27</byte>
+		</address>
+	</parameter>
+	<parameter name="E_LEARNED_IG_TIMING">
+		<description>Learned Ignition Timing - Subtract 128 from value and divide by 2 to get degrees</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x28</byte>
+		</address>
+	</parameter>
+	<parameter name="E_ACCEL">
+		<description>Accelerator Opening Angle - Divide value by 2.56 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x29</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FUEL_TEMP">
+		<description>Fuel Temperature - Subtract 40 from value to get Degrees C</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x2a</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FRONT_02A_1_HEATER">
+		<description>Front O2 Heater #1 - Multiply value by 10.04 and divide by 256 to get Amps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x2b</byte>
+		</address>
+	</parameter>
+	<parameter name="E_REAR_O2A_HEATER">
+		<description>Rear O2 Heater Current -Multiply value by 10.04 and divide by 256 to get Amps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x2c</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FRONT_O2A_2_HEATER">
+		<description>Front O2 Heater #2 - Multiply value by 10.04 and divide by 256 to get Amps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x2d</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FUEL_LEVEL">
+		<description>Fuel Level - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x2e</byte>
+		</address>
+	</parameter>
+	<parameter name="E_PRIM_WG_DUTY">
+		<description>Primary Wastegate Duty Cycle - Multiply value by 100.0 and divide by 255 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x30</byte>
+		</address>
+	</parameter>
+	<parameter name="E_SEC_WG_DUTY">
+		<description>Secondary Wastegate Duty Cycle - Multiply value by 100.0 and divide by 255 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x31</byte>
+		</address>
+	</parameter>
+	<parameter name="E_CPC_DUTY">
+		<description>CPC Valve Duty Ratio - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x32</byte>
+		</address>
+	</parameter>
+	<parameter name="E_TUMB_VALVE_POS_R">
+		<description>Tumble Valve Position Sensor Right - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x33</byte>
+		</address>
+	</parameter>
+	<parameter name="E_TUMB_VALVE_POS_L">
+		<description>Tumble Valve Position Sensor Left - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x34</byte>
+		</address>
+	</parameter>
+	<parameter name="E_IDLE_SPEED_DUTY">
+		<description>Idle Speed Control Valve Duty Ratio - Divide value by 2 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x35</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_LEAN_COR">
+		<description>Air/Fuel Lean Correction - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x36</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_HEATER_DUTY">
+		<description>Air/Fuel Heater Duty - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x37</byte>
+		</address>
+	</parameter>
+	<parameter name="IDLE_STEP">
+		<description>Idle Speed Control Valve Step - Value is in steps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x38</byte>
+		</address>
+	</parameter>
+	<parameter name="EX_GAS_REC_STEP">
+		<description>Number of Ex. Gas Recirc Steps - Value is in steps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x39</byte>
+		</address>
+	</parameter>
+	<parameter name="ALT_DUTY">
+		<description>Alternator Duty - Value is in percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x3a</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FUEL_PUMP_DUTY">
+		<description>Fuel Pump Duty - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x3b</byte>
+		</address>
+	</parameter>
+	<parameter name="E_VVT_ADVANCE_R">
+		<description>VVT Advance Angle Right - Subtract 50 from value to get degrees</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x3c</byte>
+		</address>
+	</parameter>
+	<parameter name="E_VVT_ADVANCE_L">
+		<description>VVT Advance Angle Left- Subtract 50 from value to get degrees</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x3d</byte>
+		</address>
+	</parameter>
+	<parameter name="E_OVC_DUTY_R">
+		<description>OCV Duty Right - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x3e</byte>
+		</address>
+	</parameter>
+	<parameter name="E_OVC_DUCY_L">
+		<description>OCV Duty Left - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x3f</byte>
+		</address>
+	</parameter>
+	<parameter name="E_OVC_CUR_R">
+		<description>OCV Current Right - Multiply value by 32 to get mA</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x40</byte>
+		</address>
+	</parameter>
+	<parameter name="E_OVC_CUR_L">
+		<description>OCV Current Left - Multiply value by 32 to get mA</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x41</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_1A">
+		<description>Air/Fuel Sensor #1 Current -Subtract 128 from value and multiply by .125 to get mA</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x42</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_2A">
+		<description>Air/Fuel Sensor #2 Current -Subtract 128 from value and multiply by .125 to get mA</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x43</byte>
+		</address>
+	</parameter>
+	<parameter name="AF_1R">
+		<description>Air/Fuel Sensor #1 Resistance - Value is in ohms</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x44</byte>
+		</address>
+	</parameter>
+	<parameter name="AF_2R">
+		<description>Air/Fuel Sensor #2 Resistance - Value is in ohms</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x45</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_1">
+		<description>Air/Fuel Sensor #1 - Divide value by 128.0 to get Lambda</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x46</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_2">
+		<description>Air/Fuel Sensor #2 - Divide value by 128.0 to get Lambda</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x47</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_COR_3">
+		<description>Air/Fuel Correction #3 - Subtract 128 from value and divide by 1.28 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0xd0</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_LEARN_3">
+		<description>Air/Fuel Learning #3 - Subtract 128 from value and divide by 1.28 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0xd1</byte>
+		</address>
+	</parameter>
+	<parameter name="E_REAR_AF_V_HEATER">
+		<description>Rear O2 Heater Voltage - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0xd2</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_ADJ_V">
+		<description>Air/Fuel Adjustment Voltage - Multiply value by 0.02 to get voltage</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0xd3</byte>
+		</address>
+	</parameter>
+	<parameter name="E_GEAR_POS">
+		<description>Gear Position - Add 1 to value to get gear</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x4a</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_1C_HEATER">
+		<description>Air/Fuel Sensor #1 Heater Current - Divide value by 10 to get Amps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x53</byte>
+		</address>
+	</parameter>
+	<parameter name="E_AF_2C_HEATER">
+		<description>Air/Fuel Sensor #2 Heater Current - Divide value by 10 to get Amps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x54</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_1">
+		<description>
+			AT Vehicle ID - bit 6 (01000000)
+			Test Mode Connector - bit 5 (00100000)
+			Read Memory Connector - bit 4 (00010000)
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x61</byte>
+		</address>
+	</parameter>		
+	<parameter name="E_BIT_BLOCK_2">
+		<description>
+			Neutral Position Switch  - bit 7
+			Idle Switch - bit 6
+			Intercooler AutoWash Switch - bit 4
+			Ignition Switch - bit 3
+			Power Steering Switch - bit 2
+			Air Conditioning Switch - bit 1
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x62</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_3">
+		<description>
+			Handle Switch - bit 7
+			Starter Switch - bit 6
+			Front O2 Rich Signal - bit 5
+			Rear O2 Rich Signal - bit 4
+			Front O2 #2 Rich Signal - bit 3
+			Knock Signal 1 - bit 2
+			Knock Signal 2 - bit 1
+			Electrical Load Signal - bit 0
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x63</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_4">
+		<description>
+			Crank Position Sensor - bit 7
+			Cam Position Sensor - bit 6
+			Defogger Switch - bit 5
+			Blower Switch - bit 4
+			Interior Light Switch - bit 3
+			Wiper Switch - bit 2
+			Air-Con Lock Signal - bit 1
+			Air-Con Mid Pressure Switch - bit 0
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x64</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_5">
+		<description>
+			Air-Con Compressor Signal - bit 7
+			Radiator Fan Relay #3 - bit 6
+			Radiator Fan Relay #1 - bit 5
+			Radiator Fan Relay #2 - bit 4
+			Fuel Pump Relay - bit 3
+			Intercooler Auto-Wash Relay - bit 2
+			CPC Solenoid Valve - bit 1
+			Blow-By Leak Connector - bit 0
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x65</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_6">
+		<description>
+			PCV Solenoid Valve - bif 7
+			TGV Output - bif 6
+			TGV Drive - bif 5
+			Variable Intake Air Solenoid - bif 4
+			Pressure Sources Change - bif 3
+			Vent Solenoid Valve - bif 2
+			P/S Solenoid Valve - bif 1
+			Assist Air Solenoid Valve - bif 0
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x66</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_7">
+		<description>
+			Tank Sensor Control Valve - bif 7
+			Relief Valve Solenoid 1 - bif 6
+			Relief Valve Solenoid 2 - bif 5
+			TCS Relief Valve Solenoid - bif 4
+			Ex. Gas Positive Pressure - bif 3
+			Ex. Gas Negative Pressure - bif 2
+			Intake Air Solenoid - bif 1
+			Muffler Control - bif 0
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x67</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_8">
+		<description>
+			Retard Signal from AT - bit 3
+			Fuel Cut Signal from AT - bit 2
+			Ban of Torque Down - bit 1
+			Request Torque Down VDC - bit 0
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x68</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_9">
+		<description>
+			Torque Control Signal #1 - bit 7
+			Torque Control Signal #2 - bit 6
+			Torque Permission Signal - bit 5
+			EAM signal - bit 4
+			AT coop. lock up signal - bit 3
+			AT coop. lean burn signal - bit 2
+			AT coop. rich spike signal - bit 1
+			AET Signal - bit 0
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x00</byte>
+			<byte>0x69</byte>
+		</address>
+	</parameter>
+	<parameter name="E_SUB_THROT">
+		<description>Sub Throttle Sensor - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x00</byte>
+		</address>
+	</parameter>
+	<parameter name="E_MAIN_THROT">
+		<description>Main Throttle Sensor - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x01</byte>
+		</address>
+	</parameter>
+	<parameter name="E_SUB_ACCEL">
+		<description>Sub Accelerator Sensor - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x02</byte>
+		</address>
+	</parameter>
+	<parameter name="E_MAIN_ACCEL">
+		<description>Main Accelerator Sensor - Multiply value by 0.02 to get volts</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x03</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BRAKE_BOOST">
+		<description>Brake Booster Pressure  - Multiply value by 37.0 and divide by 255 to get psig</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x04</byte>
+		</address>
+	</parameter>
+	<parameter name="E_FUEL_PRESSUSRE_HIGHT">
+		<description>Fuel Pressure (High) - Multiply value by 0.04 to get MPa</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x05</byte>
+		</address>
+	</parameter>
+	<parameter name="E_EGT">
+		<description>Exhaust Gas Temperature - Add 40 to value and multiply by 5 to get Degrees C</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x06</byte>
+		</address>
+	</parameter>
+	<parameter name="E_COLD_START_INJ">
+		<description>Cold Start Injector - Multiply value by .256 to get ms</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x08</byte>
+		</address>
+	</parameter>
+	<parameter name="SVC_STEP">
+		<description>SCV Step - Value is in Steps</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x09</byte>
+		</address>
+	</parameter>
+	<parameter name="CRUISE_KPH">
+		<description>Memorized Cruise Speed - Value is in km/h</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x0a</byte>
+		</address>
+	</parameter>
+	<parameter name="E_EX_VVT_ADV_R">
+		<description>Exhaust VVT Advance Angle Right - Subtract 50 from value to get degrees</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x18</byte>
+		</address>
+	</parameter>
+	<parameter name="E_EX_VVT_ADV_L">
+		<description>Exhaust VVT Advance Angle Left - Subtract 50 from value to get degrees</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x19</byte>
+		</address>
+	</parameter>
+	<parameter name="E_EX_OCV_DUTY_R">
+		<description>Exhaust OCV Duty Right - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x1a</byte>
+		</address>
+	</parameter>
+	<parameter name="E_EX_OCV_DUTY_L">
+		<description>Exhaust OCV Duty Left - Divide value by 2.55 to get percent</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x1b</byte>
+		</address>
+	</parameter>
+	<parameter name="E_EX_OCV_CUR_R">
+		<description>Exhaust OCV Current Right - Multiply value by 32 to get mA</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x1c</byte>
+		</address>
+	</parameter>
+	<parameter name="E_EX_OCV_CUR_L">
+		<description>Exhaust OCV Current Left - Multiply value by 32 to get mA</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x1d</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_10">
+		<description>ETC Motor Relay - bit 6</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x20</byte>
+		</address>
+	</parameter>
+	<parameter name="E_BIT_BLOCK_11">
+		<description>
+			Clutch Switch - bit 7
+			Stop Light Switch - bit 6
+			Set/Coast Switch - bit 5
+			Resume/Accelerate Switch - bit 4
+			Brake Switch - bit 3
+			Accelerator Switch - bit 1
+		</description>
+		<address>
+			<byte>0x00</byte>
+			<byte>0x01</byte>
+			<byte>0x21</byte>
+		</address>
+	</parameter>
+
+
+	
+	/* Take one or more ecu values, and run them thourgh a convesion */
+    <meta-parameter name="RPM">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" Math.round((BSH.makeint(~E_RPM_H~, ~E_RPM_L~) / 4.0) / 10) * 10 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="MAP_PSI">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~E_MAP~ * 37.0) / 255.0" />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="ATMO_PSI">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~E_ATMO~ * 37.0) / 255.0" /> 
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="VAC_BOOST_PSI">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~E_VAC_BOOST~ - 128.0)  * 37 / 255 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="LAMBDA_1">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" ~E_AF_1~ / 128.0 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="LAMBDA_2">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" ~E_AF_2~ / 128.0 " />
+        </args>
+    </meta-parameter>
+
+    <meta-parameter name="COOLANT_TEMP_C">
+      <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+      <args>
+          <arg name="script" value=" ~E_COOLANT_TEMP~ - 40 " />
+      </args>
+    </meta-parameter>
+    
+    <meta-parameter name="COOLANT_TEMP_F">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~COOLANT_TEMP_C~ * (9.0/5.0)) + 32.0 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="MPH">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="(float)~KPH~ * 0.6215"/>
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="EGT_C">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="(~E_EGT~ + 40) * 5"/>
+        </args>
+    </meta-parameter>
+    
+	<meta-parameter name="EGT_F">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="~EGT_C~ * 1.8 + 32.0"/>
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="GEAR_MANUAL">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="~E_GEAR_POS~ + 1.0"/>
+        </args>
+    </meta-parameter>
+    
+     <meta-parameter name="CRUISE_MPH">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="(float)~CRUISE_KPH~ * 0.6215"/>
+        </args>
+    </meta-parameter>
+    
+     <meta-parameter name="REAR_O2_VOLTS">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~E_REAR_O2V_H~, ~E_REAR_O2V_L~) * 0.005" />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="DEFOG_SW">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.bitcheck(~E_BIT_BLOCK_4~, 5) " />
+        </args>
+    </meta-parameter>	
+    
+</parameters>

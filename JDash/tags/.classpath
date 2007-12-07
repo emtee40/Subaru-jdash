@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="rte/bsh-core-2.0b4.jar"/>
+	<classpathentry exported="true" kind="lib" path="rte/jdom.jar"/>
+	<classpathentry exported="true" kind="lib" path="rte/RXTXcomm.jar"/>
+	<classpathentry exported="true" kind="lib" path="rte/h2.jar"/>
+	<classpathentry exported="true" kind="lib" path="rte/jcckit.jar"/>
+	<classpathentry exported="true" kind="lib" path="rte/junit.jar"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>

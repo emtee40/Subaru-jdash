@@ -1,0 +1,177 @@
+<!-- ======================================================
+     The defined meta parametres for a subaru.  Depends on the subaru_ssm.xml file being loaded
+     ====================================================== -->
+<parameters name="Subaru SSM meta parameters">
+
+
+    <description>This parameter include file contains a set of common subaru meta-parameter definitions.</description>
+	
+	
+	/* Take one or more ecu values, and run them thourgh a convesion */
+    <meta-parameter name="RPM">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" Math.round((BSH.makeint(~RPM_H~, ~RPM_L~) / 4.0) / 10) * 10 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="MAP_PSI">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~MAP~ * 37.0) / 255.0" />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="ATMO_PSI">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~ATMO~ * 37.0) / 255.0" /> 
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="VAC_BOOST_PSI">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~VAC_BOOST~ - 128.0)  * 37 / 255 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="LAMBDA_1">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" ~AF_1~ / 128.0 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="LAMBDA_2">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" ~AF_2~ / 128.0 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="COOLANT_TEMP_F">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" (~COOLANT_TEMP_C~ * (9.0/5.0)) + 32.0 " />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="MPH">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="(float)~KPH~ * 0.6215"/>
+        </args>
+    </meta-parameter>
+    
+	<meta-parameter name="EGT_F">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="~EGT_C~ * 1.8 + 32.0"/>
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="GEAR_MANUAL">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="~GEAR_POS~ + 1.0"/>
+        </args>
+    </meta-parameter>
+    
+     <meta-parameter name="CRUISE_MPH">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value="(float)~CRUISE_KPH~ * 0.6215"/>
+        </args>
+    </meta-parameter>
+    
+     <meta-parameter name="REAR_O2_VOLTS">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~REAR_O2V_H~, ~REAR_O2V_L~) * 0.005" />
+        </args>
+    </meta-parameter>
+    
+    <meta-parameter name="DEFOG_SW">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.bitcheck(~BIT_BLOCK_4~, 5) " />
+        </args>
+    </meta-parameter>
+	
+	<!-- NOTE: The DTC_* ecu parameters are NOT defined within this file.  This is because different
+	subaru ecus hold the DTC codes in different memory locations.  If you use this parameter
+	file directly, you won't be able to use these DTC codes.  Instead, define a model specific
+	parameter file, and define within it the DTC_CUR_xH and L parametres. Then include this
+	file in that parameter file with the include directive -->
+    <meta-parameter name="DTC_CUR_0">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_CUR_0H~,~DTC_CUR_0L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_1">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_CUR_1H~,~DTC_CUR_1L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_2">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_CUR_2H~,~DTC_CUR_2L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_3">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_CUR_3H~,~DTC_CUR_3L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_4">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_CUR_4H~,~DTC_CUR_4L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_0">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_HIST_0H~,~DTC_HIST_0L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_1">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_HIST_1H~,~DTC_HIST_1L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_2">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_HIST_2H~,~DTC_HIST_2L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_3">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_HIST_3H~,~DTC_HIST_3L~) " />
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_4">
+        <handler>net.sourceforge.JDash.ecu.BeanShellMetaParam</handler>
+        <args>
+            <arg name="script" value=" BSH.makeint(~DTC_HIST_4H~,~DTC_HIST_4L~) " />
+        </args>
+    </meta-parameter>	
+    
+</parameters>

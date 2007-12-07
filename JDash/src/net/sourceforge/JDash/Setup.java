@@ -51,7 +51,7 @@ import java.util.Properties;
 public class Setup
 {	
 	/** The application version string */
-	public static final String VERSION = "v0.9.0b 12-05-2007";
+	public static final String VERSION = "v0.9.0b 12-07-2007";
 	
 	/** The applicaiton name */
 	public static final String APPLICATION = "JDash / " + VERSION;

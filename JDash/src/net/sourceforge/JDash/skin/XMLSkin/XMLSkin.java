@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -69,13 +68,22 @@ import net.sourceforge.JDash.gui.shapes.TextShape;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.skin.Skin;
 import net.sourceforge.JDash.skin.SkinEvent;
-import net.sourceforge.JDash.skin.SkinEventListener;
 import net.sourceforge.JDash.skin.SkinEventTrigger;
 import net.sourceforge.JDash.skin.SkinFactory;
 
+import org.iso_relax.verifier.Verifier;
+import org.iso_relax.verifier.VerifierFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import com.sun.msv.verifier.jarv.TheFactoryImpl;
+import com.sun.msv.verifier.jaxp.DocumentBuilderFactoryImpl;
+
+
 
 
 /*******************************************************
@@ -99,6 +107,8 @@ import org.w3c.dom.NodeList;
 public class XMLSkin extends Skin
 {
 	
+	private static final String RELAX_NG_SCHEMA_RESOURCE_NAME = "schema.rng";
+		
 	/** This is the full resource path to the digital ttf file.  */
 //	private static final String PATH_TO_DIGITAL_FONT = "/net/sourceforge/JDash/skin/XMLSkin/DefaultSkin/digital.ttf";
 	
@@ -108,17 +118,20 @@ public class XMLSkin extends Skin
 	public static final String GAUGE_TYPE_LINE_GRAPH	= "line-graph";
 	
 	
-	public static final String NODE_SKIN 		= "skin";
-	public static final String NODE_DESC		= "description";
-	public static final String NODE_IMAGE 		= "image";
-	public static final String NODE_GAUGE 		= "gauge";
-	public static final String NODE_WINDOW		= "window";
-	public static final String NODE_NEEDLE		= "needle";
-	public static final String NODE_LED			= "led";
-	public static final String NODE_POINT		= "point";
-	public static final String NODE_STATIC		= "static";
-	public static final String NODE_TRIGGER		= "trigger";
-	public static final String NODE_EVENT		= "event";
+	public static final String NODE_SKIN 				= "skin";
+	public static final String NODE_DESC				= "description";
+	public static final String NODE_IMAGE 				= "image";
+	public static final String NODE_ANALOG_GAUGE 		= "analog-gauge";
+	public static final String NODE_DIGITAL_GAUGE 		= "digital-gauge";
+	public static final String NODE_LED_GAUGE 			= "led-gauge";
+	public static final String NODE_LINEGRAPH_GAUGE 	= "linegraph-gauge";
+	public static final String NODE_WINDOW				= "window";
+	public static final String NODE_NEEDLE				= "needle";
+	public static final String NODE_LED					= "led";
+	public static final String NODE_POINT				= "point";
+	public static final String NODE_STATIC				= "static";
+	public static final String NODE_TRIGGER				= "trigger";
+	public static final String NODE_EVENT				= "event";
 	public static final String NODE_BUTTON				= "button";
 	public static final String NODE_POLYGON				= "polygon";
 	public static final String NODE_ELLIPSE				= "ellipse";
@@ -126,17 +139,19 @@ public class XMLSkin extends Skin
 	public static final String NODE_RECTANGLE			= "rectangle";
 	public static final String NODE_ROUND_RECTANGLE 	= "round-rectangle";
 	public static final String NODE_TEXT				= "text";
-	public static final String NODE_RANGE				= "range";
 	public static final String NODE_RESOURCE			= "resource";
 
 	
-	private static final String PATH_SKIN 		= "/" + NODE_SKIN;
-	private static final String PATH_GAUGE 		= PATH_SKIN + "/" + NODE_GAUGE;
+	private static final String PATH_SKIN 				= "/" + NODE_SKIN;
+	private static final String PATH_ANALOG_GAUGE 		= PATH_SKIN + "/" + NODE_ANALOG_GAUGE;
+	private static final String PATH_DIGITAL_GAUGE 		= PATH_SKIN + "/" + NODE_DIGITAL_GAUGE;
+	private static final String PATH_LED_GAUGE 			= PATH_SKIN + "/" + NODE_LED_GAUGE;
+	private static final String PATH_LINEGRAPH_GAUGE 	= PATH_SKIN + "/" + NODE_LINEGRAPH_GAUGE;
+
 	
 	public static final String ATTRIB_NAME 			= "name";
 	public static final String ATTRIB_EXTENDS		= "extends";
 	public static final String ATTRIB_DELAY			= "delay";
-///	public static final String ATTRIB_SRC 			= "src";
 	public static final String ATTRIB_SENSOR 		= "sensor";
 	public static final String ATTRIB_TYPE			= "type";
 	public static final String ATTRIB_SCALE			= "scale";
@@ -189,14 +204,13 @@ public class XMLSkin extends Skin
 	/* The cache of images */
 	private HashMap<String, ImageIcon> imageCache_ = new HashMap<String, ImageIcon>();
 	
-	/* the cache of all created gauges */
-	private HashMap<Integer, AbstractGauge> gaugeCache_= new HashMap<Integer, AbstractGauge>();
 
+	/* for performance reasons, we cache gauge counts */
+	private HashMap<String, Integer> gaugeCountCache_ = new HashMap<String, Integer>();
 	
 	private String id_ = null;
 	private String name_ = null;
 	private String description_ = null;
-	private Integer gaugeCount_ = null;
 	private Dimension windowSize_ = null;
 	
 	/******************************************************
@@ -260,7 +274,7 @@ public class XMLSkin extends Skin
 		}
 		catch(Exception e)
 		{
-			throw new Exception("Skin: " + skinXmlFile.toString(), e);
+			throw new Exception("Skin: " + skinXmlFile.toString() + "\n" + e.getMessage(), e);
 		}
 		
 		/* if the add to is not null, then add the child nodes */
@@ -345,9 +359,42 @@ public class XMLSkin extends Skin
 	private void loadSkin(URL skinUrl) throws Exception
 	{
 		
-		/* Load the xml skin file */
-		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		File schemaFile = new File(getClass().getResource(RELAX_NG_SCHEMA_RESOURCE_NAME).getFile());
+		
+		/* Setup the XML builder */
+		XMLErrorHandler errorHandler = new XMLErrorHandler();
+		DocumentBuilderFactory builderFactory = DocumentBuilderFactoryImpl.newInstance();
+		builderFactory.setNamespaceAware(true);
+		builderFactory.setIgnoringComments(true);
+		builderFactory.setIgnoringElementContentWhitespace(true);
+		builderFactory.setValidating(false);
+		DocumentBuilder builder = builderFactory.newDocumentBuilder();
+
+// TODO
+//		/* Verify the document */
+//		VerifierFactory verifierFactory = new TheFactoryImpl();
+//		Verifier verifier = verifierFactory.compileSchema(schemaFile).newVerifier();
+//		verifier.setErrorHandler(errorHandler);
+//		verifier.verify(skinUrl.getFile());
+//		
+//		if (errorHandler.getErrorMessages().size() > 0)
+//		{
+//			System.out.println("Errors in XML Skin " + skinUrl + "\nSTART:---------------\n");
+//			
+//			for (String s : errorHandler.getErrorMessages())
+//			{
+//				System.out.println(s);
+//			}
+//
+//			System.out.println("\nEND:---------------\n");
+//			throw new Exception("XML Skin File contains invalid data.");
+//		}
+		
+		
+		/* Parse the skin xml file */
 		this.xmlSkinDoc_ = builder.parse(skinUrl.openStream());
+
+
 		
 		/* Set the name of this skin */
 		this.name_ = extractString(PATH_SKIN + "/@" + ATTRIB_NAME);
@@ -401,7 +448,7 @@ public class XMLSkin extends Skin
 		}
 		catch(Exception e)
 		{
-			throw new Exception(this.id_ + "\nUnable to extract String at path [" + path + "] " + this.id_, e);
+			throw new Exception(this.id_ + "\nUnable to extract String at path \"" + path + "\" from " + this.id_, e);
 		}
 
 	}
@@ -423,7 +470,7 @@ public class XMLSkin extends Skin
 		}
 		catch(Exception e)
 		{
-			throw new Exception(this.id_ + "\nUnable to extract int at path [" + path + "] " + this.id_, e);
+			throw new Exception(this.id_ + "\nUnable to extract int at path \"" + path + "\" " + this.id_, e);
 		}
 
 
@@ -445,7 +492,7 @@ public class XMLSkin extends Skin
 		}
 		catch(Exception e)
 		{
-			throw new Exception(this.id_ + "\nUnable to extract double at path [" + path + "] " + this.id_, e);
+			throw new Exception(this.id_ + "\nUnable to extract double at path \"" + path + "\" " + this.id_, e);
 		}
 	}
 	
@@ -771,113 +818,76 @@ public class XMLSkin extends Skin
 		
 	}
 	
-	/*******************************************************
-	 * 
-	 *******************************************************/
-	public int getGaugeCount() throws Exception
-	{
-		if (this.gaugeCount_ == null)
-		{
-			this.gaugeCount_ = new Integer(extractInt("count(" + PATH_GAUGE + ")"));
-		}
-		
-		return this.gaugeCount_.intValue();
-	}
 	
-	/********************************************************
-	 * get the guage at the given index. Throw an exception if
-	 * a problem occurs.  do NOT return null.
-	 * @param index IN - the index of which gauge to create.
-	 * @param parentPanel IN - the parent panel this guage will belong to
+	/*******************************************************
+	 * A simple utility method to count gauges at the
+	 * given path, and cache the result for performance.
+	 * @param path
 	 * @return
+	 * @throws Exception
 	 *******************************************************/
-	public AbstractGauge getGauge(int index) throws Exception
+	private int getGaugeCount(String path) throws Exception
 	{
-		/* If the gauge has not yet been created, then create and cache it first */
-		if (this.gaugeCache_.containsKey(new Integer(index)) == false)
-		{
-			this.gaugeCache_.put(new Integer(index), this.createGauge(index));
-		}
-			
-		return this.gaugeCache_.get(new Integer(index));
+		Integer count = gaugeCountCache_.get(path);
 		
+		if (count == null)
+		{
+			count = new Integer(extractInt("count(" + path + ")"));
+			gaugeCountCache_.put(path, count);
+		}
+		
+		return count.intValue();
 	}
 	
 	/*******************************************************
 	 * 
 	 *******************************************************/
-	private AbstractGauge createGauge(int index) throws Exception
+	public int getAnalogGaugeCount() throws Exception
 	{
-		/* XPath is 1 relative, so increment index */
-		index++;
-		
-		/* Get the gauge node */
-		String gaugePath = PATH_GAUGE + "[" + index + "]";
-		
-		AbstractGauge gauge = null;
-		
-		/* Get the gauge type */
-		String type = extractString(gaugePath + "/@" + ATTRIB_TYPE);
-		if (GAUGE_TYPE_ANALOG.equalsIgnoreCase(type))
-		{
-			gauge = createAnalogGauge(index);
-		}
-		else if (GAUGE_TYPE_DIGITAL.equalsIgnoreCase(type))
-		{
-			gauge = createDigitalGauge(index);
-		}
-//		else if (GAUGE_TYPE_DIGITAL_HIGH.equalsIgnoreCase(type))
-//		{
-//			gauge = createDigitalHighGauge(index);
-//		}
-//		else if (GAUGE_TYPE_DIGITAL_LOW.equalsIgnoreCase(type))
-//		{
-//			gauge = createDigitalLowGauge(index);
-//		}
-		else if (GAUGE_TYPE_LED.equalsIgnoreCase(type))
-		{
-			gauge = createLedGauge(index);
-		}
-		else if (GAUGE_TYPE_LINE_GRAPH.equalsIgnoreCase(type))
-		{
-			gauge = createLineGraphGauge(index);
-		}
-		else
-		{
-			throw new Exception("Invalud Gauge Type of [" + type + "] at index: " + index);
-		}
-		
-		
-		/* Add any static background shapes to this gauge */
-		addStaticShapes(index, gauge);
-		
-		/* If this gauge is a skin event listener, then we can go ahead and automatically
-		 * add it to our listener list */
-		if (gauge instanceof SkinEventListener)
-		{
-			addSkinEventListener((SkinEventListener)gauge);
-		}
-			
-		
-		return gauge;
+		return getGaugeCount(PATH_ANALOG_GAUGE);
 	}
+	
+	/*******************************************************
+	 * 
+	 *******************************************************/
+	public int getDigitalGaugeCount() throws Exception
+	{
+		return getGaugeCount(PATH_DIGITAL_GAUGE);
+	}
+	
+	/*******************************************************
+	 * 
+	 *******************************************************/
+	public int getLedGaugeCount() throws Exception
+	{
+		return getGaugeCount(PATH_LED_GAUGE);
+	}
+	
+	/*******************************************************
+	 * 
+	 *******************************************************/
+	public int getLineGraphGaugeCount() throws Exception
+	{
+		return getGaugeCount(PATH_LINEGRAPH_GAUGE);
+	}
+	
+
+	
 	
 	/********************************************************
 	 * Create an analog gague from the given gauge index
 	 * @return
 	 ******************************************************/
-	private AbstractGauge createAnalogGauge(int index) throws Exception
+	public AnalogGauge createAnalogGauge(int index) throws Exception
 	{
+		/* XPath is 1 relative, so increment index */
+		index++;
 
 		/* Get the gauge node */
-		String gaugePath = PATH_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_ANALOG_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
-		if ((sensor == null) || (sensor.length() == 0))
-		{
-			throw new Exception("Invalid Sensor of [" + sensor + "] at gauge index: " + index);
-		}
 		
 		
 		/* Get the parameter for this sensor */
@@ -946,72 +956,51 @@ public class XMLSkin extends Skin
 		}
 				
 		/* Get the min degree */
-		int needleDegreeMin = extractInt(gaugePath + "/" + NODE_RANGE + "/@" + ATTRIB_GAUGE_MIN);
+		int needleDegreeMin = extractInt(gaugePath + "/@" + ATTRIB_GAUGE_MIN);
 		analogGauge.setDegreeMin(needleDegreeMin);
 		
 		/* Get the max degree */
-		int needleDegreeMax = extractInt(gaugePath + "/" + NODE_RANGE + "/@" + ATTRIB_GAUGE_MAX);
+		int needleDegreeMax = extractInt(gaugePath + "/@" + ATTRIB_GAUGE_MAX);
 		analogGauge.setDegreeMax(needleDegreeMax);
 		
 		/* Get the min value */
-		int needleValueMin = extractInt(gaugePath + "/" + NODE_RANGE + "/@" + ATTRIB_SENSOR_MIN);
+		int needleValueMin = extractInt(gaugePath + "/@" + ATTRIB_SENSOR_MIN);
 		analogGauge.setValueMin(needleValueMin);
 		
 		/* Get the max value */
-		int needleValueMax = extractInt(gaugePath + "/" + NODE_RANGE + "/@" + ATTRIB_SENSOR_MAX);
+		int needleValueMax = extractInt(gaugePath + "/@" + ATTRIB_SENSOR_MAX);
 		analogGauge.setValueMax(needleValueMax);
 		
 		/* Clockwise? It's optional */
 		try
 		{
-			Boolean clockwise = new Boolean(extractString(gaugePath + "/" + NODE_RANGE + "/@" + ATTRIB_REVERSE));
+			Boolean clockwise = new Boolean(extractString(gaugePath + "/@" + ATTRIB_REVERSE));
 			analogGauge.setClockwise(!clockwise);
 		}
 		catch(Exception e) {}
+		
+		addStaticShapes(gaugePath, analogGauge);
 		
 		/* Return our new gauge */
 		return analogGauge;
 		
 	}
 	
-	
-//	/********************************************************
-//	 * @param index
-//	 * @param parentPanel
-//	 * @return
-//	 * @throws Exception
-//	 *******************************************************/
-//	private AbstractGauge createDigitalLowGauge(int index) throws Exception
-//	{
-//		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
-//		gauge.enableLowHighHold(false);
-//		return gauge;
-//	}
-//	
-//	
-//	/********************************************************
-//	 * @param index
-//	 * @param parentPanel
-//	 * @return
-//	 * @throws Exception
-//	 *******************************************************/
-//	private AbstractGauge createDigitalHighGauge(int index) throws Exception
-//	{
-//		DigitalGauge gauge = (DigitalGauge)createDigitalGauge(index);
-//		gauge.enableLowHighHold(true);
-//		return gauge;
-//	}
-	
+
 	
 	/********************************************************
 	 * Create a digital gauge.
 	 * @param index
 	 * @return
 	 *******************************************************/
-	private AbstractGauge createDigitalGauge(int index) throws Exception
+	public DigitalGauge createDigitalGauge(int index) throws Exception
 	{
+		/* XPath is 1 relative, so increment index */
+		index++;
+
+		
 		/* Get the gauge node */
-		String gaugePath = PATH_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_DIGITAL_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
@@ -1037,6 +1026,7 @@ public class XMLSkin extends Skin
 
 		/* Create the gague */
 		DigitalGauge digitalGauge = new DigitalGauge(param, new Point(pointX, pointY), textShape);
+		addStaticShapes(gaugePath, digitalGauge);
 		
 		/* Return it */
 		return digitalGauge;
@@ -1047,11 +1037,14 @@ public class XMLSkin extends Skin
 	 * @param index
 	 * @return
 	 *******************************************************/
-	private AbstractGauge createLedGauge(int index) throws Exception
+	public LEDGauge createLedGauge(int index) throws Exception
 	{
+		/* XPath is 1 relative, so increment index */
+		index++;
+
 		
 		/* Get the gauge node */
-		String gaugePath = PATH_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_LED_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
@@ -1131,6 +1124,7 @@ public class XMLSkin extends Skin
 		ledGauge.setNeedleResetDelays(lowNeedleDelay, highNeedleDelay);
 		ledGauge.setHighNeedlePosition(highPosition);
 		ledGauge.setLowNeedlePosition(lowPosition);
+		addStaticShapes(gaugePath, ledGauge);
 		
 		/* Return our new gauge */
 		return ledGauge;
@@ -1142,11 +1136,14 @@ public class XMLSkin extends Skin
 	 * Create a new line graph gauge
 	 * @return
 	 ******************************************************/
-	private AbstractGauge createLineGraphGauge(int index) throws Exception
+	public LineGraphGauge createLineGraphGauge(int index) throws Exception
 	{
+		/* XPath is 1 relative, so increment index */
+		index++;
+
 
 		/* Get the gauge node */
-		String gaugePath = PATH_GAUGE + "[" + index + "]";
+		String gaugePath = PATH_LINEGRAPH_GAUGE + "[" + index + "]";
 		
 		/* Get the sensor type */
 		String sensor = extractString(gaugePath + "/@" + ATTRIB_SENSOR);
@@ -1200,6 +1197,7 @@ public class XMLSkin extends Skin
 		
 		/* Create and return the line graph */
 		LineGraphGauge lineGraphGauge = new LineGraphGauge(param, x, y, width, height, seconds, min, max, format, label, mainText, lowText, highText);
+		addStaticShapes(gaugePath, lineGraphGauge);
 		return lineGraphGauge;
 		
 	}
@@ -1212,11 +1210,9 @@ public class XMLSkin extends Skin
 	 * @param staticPath
 	 * @param gauge
 	 *******************************************************/
-	private void addStaticShapes(int gaugeIndex, AbstractGauge gauge) throws Exception
+	private void addStaticShapes(String gaugePath, AbstractGauge gauge) throws Exception
 	{
 
-		/* Get the gauge node */
-		String gaugePath = PATH_GAUGE + "[" + gaugeIndex + "]";
 	
 		int shapeCount = extractInt("count(" + gaugePath + "/" + NODE_STATIC + "/*)");
 		for (int shapeIndex = 1; shapeIndex <= shapeCount; shapeIndex++)
@@ -1654,6 +1650,39 @@ public class XMLSkin extends Skin
 		{}
 		
 		return new SkinEvent(type, destination, action);
+		
+	}
+	
+	
+	private static class XMLErrorHandler implements ErrorHandler
+	{
+		private ArrayList<String> errorMessages_ = new ArrayList<String>();
+		
+		public XMLErrorHandler()
+		{
+			
+		}
+		
+		public ArrayList<String> getErrorMessages()
+		{
+			return this.errorMessages_;
+		}
+		
+		public void error(SAXParseException exception) throws SAXException
+		{
+			errorMessages_.add("ERROR: " + exception.getMessage() + " @line:[" + exception.getLineNumber() + "]");
+		}
+		
+		public void fatalError(SAXParseException exception) throws SAXException
+		{
+			errorMessages_.add("FATAL:" + exception.getMessage() + " @line:[" + exception.getLineNumber() + "]");
+		}
+		
+		public void warning(SAXParseException exception) throws SAXException
+		{
+			errorMessages_.add("WARN: " + exception.getMessage() + " @line:[" + exception.getLineNumber() + "]");
+		}
+		
 		
 	}
 	

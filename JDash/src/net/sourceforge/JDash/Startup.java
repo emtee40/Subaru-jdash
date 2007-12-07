@@ -360,6 +360,22 @@ public class Startup
 	}
 	
 	
+	/********************************************************
+	 * @param message
+	 *******************************************************/
+	public synchronized static void showWarning(String message)
+	{
+		if ((Startup.splashFrame_ != null) && (Startup.splashFrame_.isVisible()))
+		{
+			JOptionPane.showMessageDialog(Startup.splashFrame_, message, "Warning", JOptionPane.WARNING_MESSAGE);
+		}
+		else
+		{
+			JOptionPane.showMessageDialog(Startup.mainFrame_, message, "warning", JOptionPane.WARNING_MESSAGE);
+		}
+	}
+	
+	
 	/*******************************************************
 	 *  A static show exception method.  If a frame exists, then
 	 *  it will be set as the owner of the message box, if not,
@@ -369,7 +385,7 @@ public class Startup
 	 *  @param fatal IN - if true, then the system will exit after
 	 *  the message is displayed.
 	 *******************************************************/
-	public static void showException(Exception e, boolean fatal)
+	public synchronized static void showException(Exception e, boolean fatal)
 	{
 		
 		e.printStackTrace();

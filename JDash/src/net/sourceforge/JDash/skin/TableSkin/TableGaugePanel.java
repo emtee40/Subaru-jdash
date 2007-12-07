@@ -26,6 +26,8 @@ package net.sourceforge.JDash.skin.TableSkin;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -175,10 +177,35 @@ public class TableGaugePanel extends AbstractGaugePanel
 				buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 				buttonPanel.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 				
-				JToggleButton loggerButton = new JToggleButton("Logging");
+				JToggleButton loggerButton = new JToggleButton("Start Logging");
 				buttonPanel.add(loggerButton);
-				
 				this.add(buttonPanel, BorderLayout.NORTH);
+				loggerButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent ae)
+					{
+						JToggleButton btn = ((JToggleButton)ae.getSource());
+						
+						if (btn.isSelected())
+						{
+							btn.setText("Stop Logging");
+						}
+						else
+						{
+							btn.setText("Start Logging");
+						}
+						
+						try
+						{
+							getLogger().enable(btn.isSelected());
+						}
+						catch(Exception e)
+						{
+							throw new RuntimeException(e);
+						}
+						
+					}	
+				});
 			}
 
 			

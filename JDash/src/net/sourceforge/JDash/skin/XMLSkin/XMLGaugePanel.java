@@ -32,6 +32,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -87,6 +88,10 @@ public class XMLGaugePanel extends AbstractGaugePanel
 	private BufferedImage doubleBufferedImage_ = null;
 	
 	
+	/** We'll collect all gauges from the skin, and place them in here */
+	private List<AbstractGauge> allGauges_ = new ArrayList<AbstractGauge>();
+	
+	
 	/*******************************************************
 	 * Create a new gauge panel. 
 	 * @param backgroundShapes IN - the shapes to be drawn to make up
@@ -128,10 +133,38 @@ public class XMLGaugePanel extends AbstractGaugePanel
 			
 		}
 
-		/* Add all static shapes to the background */
-		for (int index = 0; index < skin.getGaugeCount(); index++)
+		
+		/* Compile the list of gauges */
 		{
-			AbstractGauge gauge = skin.getGauge(index);
+			/* Analog Gauges */
+			for (int index = 0; index < skin.getAnalogGaugeCount(); index++)
+			{
+				this.allGauges_.add(skin.createAnalogGauge(index));
+			}
+			
+			/* Digital Gauges */
+			for (int index = 0; index < skin.getDigitalGaugeCount(); index++)
+			{
+				this.allGauges_.add(skin.createDigitalGauge(index));
+			}
+			
+			/* LED Gauges */
+			for (int index = 0; index < skin.getLedGaugeCount(); index++)
+			{
+				this.allGauges_.add(skin.createLedGauge(index));
+			}
+			
+			/* LineGraph Gauges */
+			for (int index = 0; index < skin.getLineGraphGaugeCount(); index++)
+			{
+				this.allGauges_.add(skin.createLineGraphGauge(index));
+			}
+		}
+		
+		
+		/* Add all static shapes to the background */
+		for (AbstractGauge gauge : this.allGauges_)
+		{
 			if (gauge.getStaticShapes() != null)
 			{
 				this.backgroundShapes_.addAll(gauge.getStaticShapes());
@@ -146,10 +179,8 @@ public class XMLGaugePanel extends AbstractGaugePanel
 		
 		
 		/* Add each gauges parameter to both the monitor and the logger */
-		for (int index = 0; index < skin.getGaugeCount(); index++)
+		for (AbstractGauge gauge : this.allGauges_)
 		{
-			AbstractGauge gauge = skin.getGauge(index);
-			
 			/* Only add parameters, that have been defined */
 			if (gauge.getParameter() != null)
 			{
@@ -161,9 +192,8 @@ public class XMLGaugePanel extends AbstractGaugePanel
 		
 		
 		/* Add each SwingComponentGauge object */
-		for (int index = 0; index < skin.getGaugeCount(); index++)
+		for (AbstractGauge gauge : this.allGauges_)
 		{
-			AbstractGauge gauge = skin.getGauge(index);
 			if (gauge instanceof SwingComponentGauge)
 			{
 				for (Component c : ((SwingComponentGauge)gauge).getGaugeComponents())
@@ -207,9 +237,8 @@ public class XMLGaugePanel extends AbstractGaugePanel
 		/* Send each swing component gauge an updateDisplay message */
 		try
 		{
-			for (int index = 0; index < ((XMLSkin)getSkin()).getGaugeCount(); index++)
+			for (AbstractGauge gauge : this.allGauges_)
 			{
-				AbstractGauge gauge = ((XMLSkin)getSkin()).getGauge(index);
 				if (gauge instanceof SwingComponentGauge)
 				{
 					((SwingComponentGauge)gauge).updateDisplay();
@@ -408,9 +437,8 @@ public class XMLGaugePanel extends AbstractGaugePanel
 	
 		
 			/* Paint each PaintableGauge */
-			for (int index = 0; index < ((XMLSkin)getSkin()).getGaugeCount(); index++)
+			for (AbstractGauge gauge : this.allGauges_)
 			{
-				AbstractGauge gauge = ((XMLSkin)getSkin()).getGauge(index);
 				if (gauge instanceof PaintableGauge)
 				{
 					((PaintableGauge)gauge).paint(this, (Graphics2D)g2.create(), getScalingTransform());

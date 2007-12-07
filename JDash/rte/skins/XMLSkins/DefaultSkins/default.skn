@@ -25,7 +25,7 @@
 
   
   
-  <!-- Defot Switch Indicator Light -->
+  <!-- Defog Switch Indicator Light -->
   <led-gauge sensor="DEFOG_SW" x="310" y="355">
     <led sensor-min="0" sensor-max="0">
       <image name="red-indicator-light-off" x="0" y="0" width="-1" height="-1"/>
@@ -174,14 +174,7 @@
   <!-- Analog RPM -->
   <analog-gauge sensor="RPM" x="179" y="185" sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125">
   
-    <button 
-    	type="push-button" 
-    	x="-150" 
-    	y="175" 
-    	width="45" 
-    	height="45" 
-    	up-image="red-push-off" 
-    	down-image="red-push-on">
+    <button type="push-button" x="-150" y="175" width="45" height="45" up-image="red-push-off" down-image="red-push-on">
     	<event type="down" action="high-reset"/>
     	<event type="down" action="low-reset"/>
     </button>

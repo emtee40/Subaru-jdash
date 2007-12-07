@@ -51,32 +51,29 @@
 
   
   <!-- Digital RPM.  Displays the RPM as digital text in the  upper left corner -->
-  <gauge sensor="RPM" type="digital" x="5"  y="20">
+  <digital-gauge sensor="RPM" x="5"  y="20">
     <static>
       <rectangle color="white" fill-color="none" line-width="2" x="0" y="0" width="80" height="40" />
       <text color="white" size="14" x="0" y="-2" format="Digital Text" font="Arial"/>
     </static>
     <text color="green" size="20" x="5" y="35" format="%5.0f"  font="digital"/>
-  </gauge>
+  </digital-gauge>
 
 
   <!-- Analog RPM.  Puts an analog sweep style gauge of the RPM in the middle of the screen.
    		Also, this gauge will show a high and low indicator needle.  These show the most recent
    		"high" and "low" RPM.  The "high" needle can be reset by pressing the red button in the
    		middle of the gauge.  The "low" needle will automatically reset itself every 3 seconds. -->
-  <gauge sensor="RPM" type="analog" x="400" y="300">
-  
-      <static>
-	      <image name="rpm-01" x="-100" y="-100" width="200" height="200" /> -->
-	      <rectangle color="white" fill-color="none" line-width="2" x="-100" y="-100" width="200" height="200" />
-	      <text color="white" size="14" x="-100" y="-118" format="Analog with High/Low indicators" font="Arial"/>
-	      <text color="white" size="14" x="-100" y="-105" format="and High Reset Button" font="Arial"/>
-      </static>
-
+  <analog-gauge sensor="RPM" x="400" y="300" sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125">
+    <static>
+      <image name="rpm-01" x="-100" y="-100" width="200" height="200" /> -->
+      <rectangle color="white" fill-color="none" line-width="2" x="-100" y="-100" width="200" height="200" />
+	  <text color="white" size="14" x="-100" y="-118" format="Analog with High/Low indicators" font="Arial"/>
+	  <text color="white" size="14" x="-100" y="-105" format="and High Reset Button" font="Arial"/>
+    </static>
     <button type="push-button" x="-22" y="20" width="36" height="36" up-image="red-push-off" down-image="red-push-on">
     	<event type="down" action="high-reset"/>
     </button>
-
     <needle type="high" delay="-1">
       <polygon color="blue" fill-color="dark-blue" line-width="1">
         <point x="-5"  y="10"/>
@@ -86,17 +83,6 @@
       </polygon>
       <ellipse color="blue" fill-color="dark-blue" line-width="1" x="-5" y="-70" width="10" height="10" />
     </needle>
-    
-    <needle type="low" delay="3000">
-      <polygon color="green" fill-color="dark-green" line-width="1">
-        <point x="-5"  y="10"/>
-        <point x="-1" y="-60"/>
-        <point x="1"  y="-60"/>
-        <point x="5"  y="10"/>
-      </polygon>
-      <ellipse color="green" fill-color="dark-green" line-width="1" x="-5" y="-60" width="10" height="10" />
-    </needle>
-    
     <needle type="main">
       <polygon color="red" fill-color="dark-red" line-width="1">
         <point x="-5"  y="10"/>
@@ -105,64 +91,53 @@
         <point x="5"  y="10"/>
       </polygon>
     </needle>
-    
-    <!-- This analog gauge allows RPM values from 0 to 7k.  the corrisponding angles
-    	in degrees are -130 and +125 -->
-    <range sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125" />
-    
-  </gauge>
+
+  </analog-gauge>
   
   
    <!-- Analog Air Fuel Ratio.  this analog gauge is designed to resemeble a sweeping set of
-   		LED Lights for the AF ratio.   -->
-  <gauge sensor="LAMBDA_1" type="analog" x="664" y="293">
-  
+   		LED Lights for the AF ratio.   
+   		Since Lambda values of < 1 represent a rich condition, and > 1 a lean condition, the
+    	range settings have a reverse='true' setup. This causes the sweep hand to rotate
+    	from right to left as the value increases -->
+  <analog-gauge sensor="LAMBDA_1" x="664" y="293" sensor-min="0" sensor-max="2" gauge-min="-140" gauge-max="132" reverse="true">
     <static>
       <image name="af-01" x="-62" y="-62" width="124" height="124" /> 
       <rectangle color="white" fill-color="none" line-width="2" x="-67" y="-67" width="134" height="134" />
       <text color="white" size="14" x="-67" y="-70" format="Analog Air Fuel" font="Arial"/>
     </static>
-  
     <needle type="main">
       <rectangle color="yellow" fill-color="orange" line-width="1" x="-2" y="-40" width="4" height="10"/> 
     </needle>
-    
     <needle type="high" delay="4000">
       <rectangle color="red" fill-color="dark-red" line-width="1" x="-2" y="-40" width="4" height="10"/> 
     </needle>
-    
     <needle type="low" delay="4000">
       <rectangle color="green" fill-color="dark-green" line-width="1" x="-2" y="-40" width="4" height="10"/> 
     </needle>
-    
-    <!-- Since Lambda values of < 1 represent a rich condition, and > 1 a lean condition, the
-    	range settings have a reverse='true' setup. This causes the sweep hand to rotate
-    	from right to left as the value increases -->
-    <range sensor-min="0" sensor-max="2" gauge-min="-140" gauge-max="132"  reverse="true"/>
-    
-  </gauge>
+  </analog-gauge>
   
   <!-- Digital AF.  This gauge places the digital AF readout in the middle of the analog gauge. -->
-  <gauge type="digital" x="662" y="293" sensor="LAMBDA_1">
+  <digital-gauge x="662" y="293" sensor="LAMBDA_1">
     <text color="yellow" size="13" x="-10" y="5" format="%1.2f" font="digital"/>
-  </gauge>
+  </digital-gauge>
 
    <!-- Shift Light.  When the RPMs reach a value greater than 6000, then a shift light will come on
    near the bottom of the analog RPM gauge.  This is just a simple LED Gauge. -->
-  <gauge sensor="RPM" type="led" x="375" y="375">
+  <led-gauge sensor="RPM" x="375" y="375">
     <static>
       <text color="dark-red" size="14" x="5" y="12" format="Shift" font="Arial"/> 
     </static>
     <led sensor-min="6000" sensor-max="99999">
       <round-rectangle color="dark-red" fill-color="red" line-width="1"  x="0" y="0" width="46" height="14" arcw="4" arch="4"/>
     </led>
-  </gauge>
+  </led-gauge>
    
   
   <!-- Horizontal LED String.  This massive LED Gauge is designed to show a series of horizontal LEDs
   		representing the RPMs as they increase and decrease.  You can see that each LED defined within this
   		gauge lights up at a progressivly higher RPM.  This gauge also has a HIGH and LOW needle defined.  -->
-   <gauge sensor="RPM" type="led" x="120" y="20">
+   <led-gauge sensor="RPM" x="120" y="20">
    
       <static>
         <rectangle color="white" fill-color="none" line-width="2" x="-5" y="-5" width="455" height="150" />
@@ -430,12 +405,12 @@
      <led sensor-min="8000" sensor-max="99999">
      	<rectangle color="dark-red" fill-color="red" line-width="1" x="400" y="20" width="5" height="100" />
      </led>
-   </gauge>
+   </led-gauge>
   
   
    <!-- Verticle LED String .  Similar to the previous LED Gauge, this one simply shows a verticle 
   		verson of the RPM values. -->
-   <gauge sensor="RPM" type="led" x="530" y="130">
+   <led-gauge sensor="RPM" x="530" y="130">
      <led sensor-min="0" sensor-max="99999">
      	<rectangle color="dark-blue" fill-color="blue" line-width="1" x="0" y="0" width="35" height="10" />
      </led>
@@ -466,21 +441,21 @@
      <led sensor-min="9000" sensor-max="99999">
      	<rectangle color="dark-red" fill-color="red" line-width="1" x="0" y="-90" width="35" height="10" />
      </led>
-   </gauge>
+   </led-gauge>
   
   <!-- Line Graph for RPM  with a short time scale of 10 seconds.  This line graph also shows the 
   		most recent high and low values. -->
-	<gauge sensor="RPM" label="RPM" type="line-graph" x="400"  y="410"  width="300" height="200" seconds="10" sensor-min="-100"   sensor-max="17000" format="%f">
+	<linegraph-gauge sensor="RPM" label="RPM" x="400"  y="410"  width="300" height="200" seconds="10" sensor-min="-100"   sensor-max="17000" format="%f">
       <text type="high" color="red"   size="20" x="310" y="70"  format="H%02.0f" font="digital"/>
       <text type="main" color="blue"  size="20" x="310" y="110"  format=" %02.0f" font="digital"/>
       <text type="low"  color="green" size="20" x="310" y="150"  format="L%02.0f" font="digital"/>
-    </gauge>
+    </linegraph-gauge>
     
     
     <!-- Line graph for RPM with a much longer time scale of 2.5 minutes. -->
-    <gauge sensor="RPM" label="RPM" type="line-graph" x="95"  y="410"  width="300" height="200" seconds="150" sensor-min="-100"   sensor-max="17000" format="%f">
+    <linegraph-gauge sensor="RPM" label="RPM" x="95"  y="410"  width="300" height="200" seconds="150" sensor-min="-100"   sensor-max="17000" format="%f">
       <text type="main" color="blue"  size="20" x="-60" y="110"  format="%02.0f ->" font="digital"/>
-    </gauge>
+    </linegraph-gauge>
     
 
 </skin>

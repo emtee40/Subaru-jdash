@@ -26,24 +26,24 @@
   
   
   <!-- Defot Switch Indicator Light -->
-  <gauge sensor="DEFOG_SW" type="led" x="310" y="355">
+  <led-gauge sensor="DEFOG_SW" x="310" y="355">
     <led sensor-min="0" sensor-max="0">
       <image name="red-indicator-light-off" x="0" y="0" width="-1" height="-1"/>
     </led>
     <led sensor-min="1" sensor-max="1">
       <image name="red-indicator-light-on" x="0" y="0" width="-1" height="-1"/>
     </led>
-  </gauge>
+  </led-gauge>
   
  
   <!-- Digital VAC/BOOST -->
-  <gauge sensor="VAC_BOOST_PSI" type="digital" x="620" y="85">
+  <digital-gauge sensor="VAC_BOOST_PSI" x="620" y="85">
      <text color="#0000ff" size="25" x="0" y="0" format="%02.2f" font="digital"/>
-  </gauge>
+  </digital-gauge>
 
 
 	<!-- LED VAC/BOOST -->
-   <gauge sensor="VAC_BOOST_PSI" type="led" x="361" y="50"> 
+   <led-gauge sensor="VAC_BOOST_PSI" x="361" y="50"> 
      <led sensor-min="-13" sensor-max="-15">
      	<rectangle color="blue" fill-color="blue" line-width="1" x="0" y="0" width="5" height="32" />
      </led>
@@ -149,30 +149,30 @@
      <led sensor-min="20" sensor-max="99">
      	<rectangle color="red" fill-color="red" line-width="1" x="224" y="0" width="5" height="32" />
      </led>
-   </gauge>
+   </led-gauge>
 
 
   <!-- Digital RPM -->
-  <gauge sensor="RPM" type="digital" x="100" y="275">
+  <digital-gauge sensor="RPM" x="100" y="275">
 	  <text color="#ff0000" size="50" x="0" y="0" format="%5.0f"  font="digital"/>
-  </gauge>
+  </digital-gauge>
 
   <!-- Digital MPH -->
-  <gauge sensor="MPH" type="digital" x="465" y="300">
+  <digital-gauge sensor="MPH" x="465" y="300">
 	  <text color="#00ffff" size="20" x="0" y="0" format="%3.0f" font="digital"/>
-  </gauge>
+  </digital-gauge>
   
 
   <!-- Shift Light -->
-  <gauge sensor="RPM" type="led" x="140" y="320">
+  <led-gauge sensor="RPM" x="140" y="320">
     <led sensor-min="5000" sensor-max="99999">
       <round-rectangle color="dark-red" fill-color="red" line-width="2"  x="0" y="0" width="80" height="23" arcw="4" arch="4"/>
     </led>
-  </gauge>
+  </led-gauge>
   
   
   <!-- Analog RPM -->
-  <gauge sensor="RPM" type="analog" x="179" y="185">
+  <analog-gauge sensor="RPM" x="179" y="185" sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125">
   
     <button 
     	type="push-button" 
@@ -216,13 +216,11 @@
       <ellipse color="#000000" fill-color="#cccccc" line-width="2" x="-8" y="-8" width="16" height="16" />      
     </needle>
     
-    <range sensor-min="0" sensor-max="7000" gauge-min="-130" gauge-max="125" />
-    
-  </gauge>
+  </analog-gauge>
   
   
   <!-- Analog MPH -->
-  <gauge sensor="MPH" type="analog" x="487" y="252">
+  <analog-gauge sensor="MPH" x="487" y="252" sensor-min="0" sensor-max="140" gauge-min="-143" gauge-max="132">
   
     <needle type="high" delay="20000">
       <polygon color="#0000ff" fill-color="blue" line-width="2">
@@ -244,18 +242,16 @@
       <ellipse color="#000000" fill-color="#cccccc" line-width="2" x="-8" y="-8" width="16" height="16" />      
     </needle>
     
-    <range sensor-min="0" sensor-max="140" gauge-min="-143" gauge-max="132" />
-    
-  </gauge>
+  </analog-gauge>
   
   
     <!-- Digital Air/Fuel #1 -->
-  <gauge sensor="LAMBDA_1" type="digital" x="670" y="190">
+  <digital-gauge sensor="LAMBDA_1" x="670" y="190">
      <text color="blue" size="8" x="0" y="0" format="%01.2f" font="digital"/>
-  </gauge>
+  </digital-gauge>
   
    <!-- Analog Air/Fuel #1 -->
-   <gauge sensor="LAMBDA_1"  type="analog" x="677" y="185">
+   <analog-gauge sensor="LAMBDA_1" x="677" y="185" sensor-min="0" sensor-max="2" gauge-min="-140" gauge-max="132"  reverse="true">
    
     <needle type="high" delay="20000">
       <polygon color="blue" fill-color="blue" line-width="1">
@@ -284,17 +280,15 @@
       </polygon>
     </needle>
     
-    <range sensor-min="0" sensor-max="2" gauge-min="-140" gauge-max="132"  reverse="true"/>
-   
-   </gauge>
+   </analog-gauge>
   
   <!-- Digital Coolant Temp -->
-  <gauge sensor="COOLANT_TEMP_F" type="digital" x="670" y="360" >
+  <digital-gauge sensor="COOLANT_TEMP_F" x="670" y="360" >
      <text color="blue" size="12" x="0" y="0" format="%03.0f" font="digital"/>
-  </gauge>
+  </digital-gauge>
   
   <!-- Analog Water Temp -->
-  <gauge sensor="COOLANT_TEMP_F" type="analog" x="682" y="329">
+  <analog-gauge sensor="COOLANT_TEMP_F" x="682" y="329" sensor-min="100" sensor-max="250" gauge-min="-45" gauge-max="45" >
     <needle type="main" delay="10000">
       <polygon color="red" fill-color="red" line-width="2">
         <point x="-2"  y="10"/>
@@ -303,16 +297,15 @@
         <point x="2"  y="10"/>
       </polygon>
     </needle>
-    <range sensor-min="100" sensor-max="250" gauge-min="-45" gauge-max="45" />    
-  </gauge>
+  </analog-gauge>
   
   
 
   <!-- Digital Rate -->
   <!--
-  <gauge sensor="RATE" type="digital" x="550" y="400">
+  <digital-gauge sensor="RATE" x="550" y="400">
      <text color="blue" size="12" x="0" y="0" format="Refresh Rate:%2.2f/s" font="Arial"/>
-  </gauge>
+  </digital-gauge>
   -->
   
   

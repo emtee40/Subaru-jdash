@@ -1,0 +1,125 @@
+<!-- ======================================================
+     The defined meta parametres for a subaru.  Depends on the subaru_ssm.xml file being loaded
+     ====================================================== -->
+<parameters name="Subaru DTC/OBD-II Meta Parameters">
+
+
+    <description>This parameter file sets up the common 0-4 DTC meta parameters from an OBD-II subaru.  This file should be included after you have defined the raw DTC parameters</description>
+	
+	
+	<!-- NOTE: The DTC_* ecu parameters are NOT defined within this file.  This is because different
+	subaru ecus hold the DTC codes in different memory locations.  If you use this parameter
+	file directly, you won't be able to use these DTC codes.  Instead, define a model specific
+	parameter file, and define within it the DTC_CUR_xH and L parametres. Then include this
+	file in that parameter file with the include directive -->
+    <meta-parameter name="DTC_CUR_0">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_CUR_0H"),meta.getParamValue("E_DTC_CUR_0L")) 
+            </arg>
+            <arg name="dependant" value="E_DTC_CUR_0H"/>
+            <arg name="dependant" value="E_DTC_CUR_0L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_1">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_CUR_1H"),meta.getParamValue("E_DTC_CUR_1L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_CUR_1H"/>
+            <arg name="dependant" value="E_DTC_CUR_1L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_2">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_CUR_2H"),meta.getParamValue("E_DTC_CUR_2L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_CUR_2H"/>
+            <arg name="dependant" value="E_DTC_CUR_2L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_3">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_CUR_3H"),meta.getParamValue("E_DTC_CUR_3L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_CUR_3H"/>
+            <arg name="dependant" value="E_DTC_CUR_3L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_CUR_4">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_CUR_4H"),meta.getParamValue("E_DTC_CUR_4L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_CUR_4H"/>
+            <arg name="dependant" value="E_DTC_CUR_4L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_0">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_HIST_0H"),meta.getParamValue("E_DTC_HIST_0L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_HIST_0H"/>
+            <arg name="dependant" value="E_DTC_HIST_0L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_1">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_HIST_1H"),meta.getParamValue("E_DTC_HIST_1L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_HIST_1H"/>
+            <arg name="dependant" value="E_DTC_HIST_1L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_2">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_HIST_2H"),meta.getParamValue("E_DTC_HIST_2L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_HIST_2H"/>
+            <arg name="dependant" value="E_DTC_HIST_2L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_3">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_HIST_3H"),meta.getParamValue("E_DTC_HIST_3L"))  
+            </arg>
+            <arg name="dependant" value="E_DTC_HIST_3H"/>
+            <arg name="dependant" value="E_DTC_HIST_3L"/>
+        </args>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_4">
+        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <args>
+            <arg name="script">
+            	return meta.makeint(meta.getParamValue("E_DTC_HIST_4H"),meta.getParamValue("E_DTC_HIST_4L"))s
+            </arg>
+            <arg name="dependant" value="E_DTC_HIST_4H"/>
+            <arg name="dependant" value="E_DTC_HIST_4L"/>
+        </args>
+    </meta-parameter>	
+    
+</parameters>

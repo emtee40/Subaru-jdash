@@ -1,0 +1,94 @@
+<!-- ======================================================
+     This definition file defines the OBD-II byte codes that will be used to communicate with an ELM module
+     such as the ELM323 or ELM327.  The order of the 3 bytes is important.
+     byte-1 = PID
+     
+     For more info see
+     http://en.wikipedia.org/wiki/OBD-II_PIDs
+     ====================================================== -->
+<parameters name="Common DTCs">
+
+    <description>This defines the common DTC parameters.  This should be usable in all PML files.</description>
+
+	<meta-parameter name="DTC_0">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_1">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_2">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_3">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_4">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_5">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_6">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_7">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_8">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_9">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+
+
+	<meta-parameter name="DTC_HIST_0">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_1">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_2">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_3">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_4">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_5">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_6">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_7">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_8">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+    
+    <meta-parameter name="DTC_HIST_9">
+		<handler>net.sourceforge.JDash.ecu.param.DTCMetaParam</handler>
+    </meta-parameter>	
+
+</parameters>

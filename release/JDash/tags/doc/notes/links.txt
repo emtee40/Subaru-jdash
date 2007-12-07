@@ -1,0 +1,2 @@
+OBD-I / SSM protocol
+http://www.apps44.dsl.pipex.com/scoobymonitor/protocol.html

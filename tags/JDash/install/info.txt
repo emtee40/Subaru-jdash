@@ -1,0 +1,4 @@
+JDash is a pure Java Dashboard for your car.  It can interface with your
+cars computer and display sensor info in real time.
+
+JDash is protected under the LGPL License.

@@ -1,0 +1,16 @@
+net.sourceforge.JDash
+net.sourceforge.JDash.ecu.comm
+net.sourceforge.JDash.ecu.param
+net.sourceforge.JDash.ecu.param.special
+net.sourceforge.JDash.gui
+net.sourceforge.JDash.gui.renderer
+net.sourceforge.JDash.gui.shapes
+net.sourceforge.JDash.gui.shapes.txt
+net.sourceforge.JDash.gui.waba
+net.sourceforge.JDash.logger
+net.sourceforge.JDash.skin
+net.sourceforge.JDash.skin.TableSkin
+net.sourceforge.JDash.skin.XMLSkin
+net.sourceforge.JDash.util
+net.sourceforge.JDash.waba
+net.sourceforge.JDash.waba.error

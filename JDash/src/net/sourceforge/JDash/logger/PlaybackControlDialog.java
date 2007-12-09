@@ -177,7 +177,7 @@ public class PlaybackControlDialog extends JDialog
 		
 		/* Fwd Button */
 		buttonPanel.add(Box.createHorizontalStrut(10));
-		button = new JButton("Fworward");
+		button = new JButton("Forward");
 		buttonPanel.add(button);
 		button.addMouseListener(new MouseAdapter()
 		{

@@ -1,1 +1,1 @@
-java -jar JDash.jar -config
+java -jar JDashConfig.jar

@@ -27,7 +27,7 @@
 	 startup="no"
 	 target="java"
 	 workingDirectory="$INSTALL_PATH"
-	 commandLine="-jar &quot;$INSTALL_PATH/JDash.jar&quot; -config"
+	 commandLine="-jar &quot;$INSTALL_PATH/JDashConfig.jar&quot;"
 	 initialState="noShow"
 	 iconFile="$INSTALL_PATH/config.png"
 	 type="Application"

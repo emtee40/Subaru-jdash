@@ -41,65 +41,65 @@
    <!-- column 1 -->
     <!-- RPM -->
 	<linegraph-gauge sensor="RPM" label="RPM" x="10"  y="10"   width="280" height="90" seconds="60" sensor-min="0"   sensor-max="8000" format="%f">
+	  <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
       <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
-      <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
     </linegraph-gauge>
 
 	<!-- MPH -->
 	<linegraph-gauge sensor="MPH"           label="MPH"    x="10"  y="110"  width="280" height="90" seconds="60" sensor-min="0"   sensor-max="150"  format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
     </linegraph-gauge>
 	
 	<!-- LOAD -->
 	<linegraph-gauge sensor="LOAD"          label="Load %"   x="10"  y="210"  width="280" height="90" seconds="60" sensor-min="0"   sensor-max="100"  format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
     </linegraph-gauge>
 	
 	<!-- KNOCK CORRECTION -->
 	<linegraph-gauge sensor="KNOCK_COR_DEG" label="Knock Corr. deg" x="10"  y="310"  width="280" height="90" seconds="60" sensor-min="-30" sensor-max="30"   format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
 	 </linegraph-gauge>
 	
  <!-- Column 2 -->
 	<!-- STFT -->
 	<linegraph-gauge sensor="STFT_1"      label="STFT %"     x="400" y="10"   width="280" height="90" seconds="60" sensor-min="-30" sensor-max="30"  format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
 	</linegraph-gauge>
 	
 	<!-- LTFT -->
 	<linegraph-gauge sensor="LTFT_1"    label="LTFT %"     x="400" y="110"  width="280" height="90" seconds="60" sensor-min="-30" sensor-max="30"  format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
 	</linegraph-gauge>
 	
 	<!-- TIMING -->
 	<linegraph-gauge sensor="IG_TIMING_DEG" label="Timing deg"  x="400" y="210"  width="280" height="90" seconds="60" sensor-min="-30" sensor-max="60"  format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
     </linegraph-gauge>
 
     <!-- LAMBDA -->
 	<linegraph-gauge sensor="LAMBDA_1" label="Lambda"  x="400" y="310"  width="280" height="90" seconds="60" sensor-min="0"   sensor-max="2"  format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
     </linegraph-gauge>
     
     <!-- INJECTOR PULSE -->
 	<linegraph-gauge sensor="INJ_1_PULSE_MS" label="Inj Pulse (ms)" x="400" y="410"  width="280" height="90" seconds="60" sensor-min="0"   sensor-max="20"  format="%f">
-      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="main" color="blue"  size="18" x="285" y="55"  format="%02.0f" font="digital"/>
+      <text type="high" color="red"   size="18" x="285" y="25"  format="%02.0f" font="digital"/>
       <text type="low"  color="green" size="18" x="285" y="85"  format="%02.0f" font="digital"/>
 	</linegraph-gauge>
     

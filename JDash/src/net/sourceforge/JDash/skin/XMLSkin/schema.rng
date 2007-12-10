@@ -1,3 +1,9 @@
+<!--
+ *
+ * The official RelaxNG schema for an XML Skin file (.skn)
+ *
+ * $Id:$
+ -->
 <grammar xmlns="http://relaxng.org/ns/structure/1.0" 
          xmlns:a="http://www.example.com/annotation" 
          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
@@ -371,6 +377,17 @@
     </element>
   </define>  
   
+  <!-- Line Shape definition -->
+  <define name="line-shape">
+    <element name="line">
+      <ref name="color"/>
+      <ref name="fill-color"/>
+      <ref name="line-width"/>
+      <ref name="point-shape"/>
+      <ref name="point-shape"/>
+    </element>
+  </define>
+  
   <!-- The 3 common needle shapes. main/high/low -->
   <define name="all-needle-shapes">
       <element name="needle">
@@ -468,6 +485,9 @@
     </zeroOrMore>
     <zeroOrMore>
       <ref name="roundrectangle-shape"/>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="line-shape"/>
     </zeroOrMore>
   </interleave>
   </define>

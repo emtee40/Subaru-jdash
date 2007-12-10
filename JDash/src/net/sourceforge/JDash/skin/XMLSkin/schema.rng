@@ -90,32 +90,37 @@
   <!-- trigger definition -->
   <define name="trigger">
     <element name="trigger">
-      <attribute name="sensor"><text/></attribute>
+      <ref name="sensor"/>
       <attribute name="sensor-min"><text/></attribute>
       <attribute name="sensor-max"><text/></attribute>
       <oneOrMore>
-        <ref name="trigger-event"/>
+        <ref name="event"/>
       </oneOrMore>
     </element>
   </define>
   
-  <!-- trigger-event definition -->
-  <define name="trigger-event">
+  <!-- event definition -->
+  <define name="event">
     <element name="event">
       <attribute name="type">
         <choice>
           <value>enter-range</value>
           <value>exit-range</value>
+          <value>down</value>
+          <value>up</value>
         </choice>
       </attribute>
-      <attribute name="destination">
-        <choice>
-          <value>sound</value>
-          <value>stdout</value>
-          <value>logger</value>
-          <value>monitor</value>
-        </choice>
-      </attribute>
+      <optional>
+        <attribute name="destination">
+          <choice>
+            <value>sound</value>
+            <value>stdout</value>
+            <value>logger</value>
+            <value>monitor</value>
+            <value>all</value>
+          </choice>
+        </attribute>
+      </optional>
       <attribute name="action"><text/></attribute>
     </element>
   </define>
@@ -123,33 +128,37 @@
   <!-- analog-gauge definition -->
   <define name="analog-gauge">
     <element name="analog-gauge">
-      <attribute name="sensor">
-        <data type="string"/>
-      </attribute>
+      <ref name="sensor"/>
       <ref name="x-coord"/>
       <ref name="y-coord"/>
       <ref name="sensor-min"/>
       <ref name="sensor-max"/>
       <ref name="gauge-min"/>
       <ref name="gauge-max"/>
+      <optional>
+        <attribute name="reverse">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+      </optional>
       <interleave>
         <optional>
           <ref name="static-shapes"/>
         </optional>
-        <ref name="needle-shape"/>
-        <ref name="needle-shape"/>
-        <ref name="needle-shape"/>
+        <ref name="all-needle-shapes"/>
+        <optional>
+          <ref name="button-shape"/>
+        </optional>
       </interleave>
-
     </element>
   </define>
   
   <!-- digital-gauge definition -->
   <define name="digital-gauge">
     <element name="digital-gauge">
-      <attribute name="sensor">
-        <data type="string"/>
-      </attribute>
+      <ref name="sensor"/>
       <ref name="x-coord"/>
       <ref name="y-coord"/>
       <optional>
@@ -162,14 +171,81 @@
   <!-- led-gauge definition -->
   <define name="led-gauge">
     <element name="led-gauge">
-      <text/>
+      <ref name="sensor"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <optional>
+        <ref name="static-shapes"/>
+      </optional>
+      <ref name="high-low-needle-shapes"/>
+      <oneOrMore>
+        <element name="led">
+          <attribute name="sensor-min">
+            <data type="string"/>
+          </attribute>
+          <attribute name="sensor-max">
+            <data type="string"/>
+          </attribute>
+          <ref name="simple-shapes"/>
+        </element>
+      </oneOrMore>
     </element>
   </define>
   
   <!-- linegraph-gauge definition -->
   <define name="linegraph-gauge">
     <element name="linegraph-gauge">
-      <text/>
+      <ref name="sensor"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+      <attribute name="label"><text/></attribute>
+      <attribute name="seconds">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="sensor-min"><text/></attribute>
+      <attribute name="sensor-max"><text/></attribute>
+      <attribute name="format"><text/></attribute>
+      <optional>
+        <element name="text">
+          <attribute name="type">
+            <value>main</value>
+          </attribute>
+          <ref name="color"/>
+          <ref name="x-coord"/>
+          <ref name="y-coord"/>
+          <ref name="size"/>
+          <attribute name="format"><text/></attribute>
+          <attribute name="font"><text/></attribute>
+        </element>
+      </optional>
+      <optional>
+        <element name="text">
+          <attribute name="type">
+            <value>high</value>
+          </attribute>
+          <ref name="color"/>
+          <ref name="x-coord"/>
+          <ref name="y-coord"/>
+          <ref name="size"/>
+          <attribute name="format"><text/></attribute>
+          <attribute name="font"><text/></attribute>
+        </element>
+      </optional>
+      <optional>
+        <element name="text">
+          <attribute name="type">
+            <value>low</value>
+          </attribute>
+          <ref name="color"/>
+          <ref name="x-coord"/>
+          <ref name="y-coord"/>
+          <ref name="size"/>
+          <attribute name="format"><text/></attribute>
+          <attribute name="font"><text/></attribute>
+        </element>
+      </optional>
     </element>
   </define>
 
@@ -261,6 +337,31 @@
       </oneOrMore>    
     </element>
   </define>
+  
+  <!-- button shape definition -->
+  <define name="button-shape">
+    <element name="button">
+      <attribute name="type">
+        <choice>
+          <value>push-button</value>
+          <value>toggle-switch</value>
+        </choice>
+      </attribute>
+      <attribute name="up-image">
+        <data type="string"/>
+      </attribute>
+      <attribute name="down-image">
+        <data type="string"/>
+      </attribute>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+      <oneOrMore>
+        <ref name="event"/>
+      </oneOrMore>
+    </element>
+  </define>
 
   <!-- Point Shape definition -->
   <define name="point-shape">
@@ -269,6 +370,69 @@
       <ref name="y-coord"/>
     </element>
   </define>  
+  
+  <!-- The 3 common needle shapes. main/high/low -->
+  <define name="all-needle-shapes">
+      <element name="needle">
+        <attribute name="type">
+          <value>main</value>
+        </attribute>
+        <ref name="simple-shapes"/>
+      </element>
+      <ref name="high-low-needle-shapes"/>
+  </define>
+  
+  <!-- name="high-low-needle-shapes" -->
+  <define name="high-low-needle-shapes">
+  <optional>
+      <element name="needle">
+          <attribute name="type">
+            <value>high</value>
+          </attribute>
+          <optional>
+            <attribute name="delay">
+              <data type="integer"/>
+            </attribute>
+          </optional>
+          <optional>
+            <attribute name="position">
+              <choice>
+                <value>top</value>
+                <value>bottom</value>
+                <value>left</value>
+                <value>right</value>
+                <value>center</value>
+              </choice>
+            </attribute>
+          </optional>
+          <ref name="simple-shapes"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="needle">
+          <attribute name="type">
+            <value>low</value>
+          </attribute>
+          <optional>
+            <attribute name="delay">
+              <data type="integer"/>
+            </attribute>
+          </optional>
+          <optional>
+            <attribute name="position">
+              <choice>
+                <value>top</value>
+                <value>bottom</value>
+                <value>left</value>
+                <value>right</value>
+                <value>center</value>
+              </choice>
+            </attribute>
+          </optional>
+          <ref name="simple-shapes"/>
+        </element>
+      </optional>
+  </define>
   
   <!-- needle shape definition -->
   <define name="needle-shape">
@@ -313,6 +477,9 @@
   <define name="all-shapes">
     <interleave>
       <zeroOrMore>
+        <ref name="button-shape"/>
+      </zeroOrMore>
+      <zeroOrMore>
         <ref name="text-shape"/>
       </zeroOrMore>
       <ref name="simple-shapes"/>
@@ -325,7 +492,12 @@
       <data type="string"/>
     </attribute>
   </define>
-  
+
+  <define name="sensor">
+    <attribute name="sensor">
+      <data type="string"/>
+    </attribute>
+  </define>
   
   <define name="x-coord">
     <attribute name="x">

@@ -370,25 +370,25 @@ public class XMLSkin extends Skin
 		builderFactory.setValidating(false);
 		DocumentBuilder builder = builderFactory.newDocumentBuilder();
 
-// TODO
-//		/* Verify the document */
-//		VerifierFactory verifierFactory = new TheFactoryImpl();
-//		Verifier verifier = verifierFactory.compileSchema(schemaFile).newVerifier();
-//		verifier.setErrorHandler(errorHandler);
-//		verifier.verify(skinUrl.getFile());
-//		
-//		if (errorHandler.getErrorMessages().size() > 0)
-//		{
-//			System.out.println("Errors in XML Skin " + skinUrl + "\nSTART:---------------\n");
-//			
-//			for (String s : errorHandler.getErrorMessages())
-//			{
-//				System.out.println(s);
-//			}
-//
-//			System.out.println("\nEND:---------------\n");
-//			throw new Exception("XML Skin File contains invalid data.");
-//		}
+ //TODO
+		/* Verify the document */
+		VerifierFactory verifierFactory = new TheFactoryImpl();
+		Verifier verifier = verifierFactory.compileSchema(schemaFile).newVerifier();
+		verifier.setErrorHandler(errorHandler);
+		verifier.verify(skinUrl.getFile());
+		
+		if (errorHandler.getErrorMessages().size() > 0)
+		{
+			System.out.println("Errors in XML Skin " + skinUrl + "\nSTART:---------------\n");
+			
+			for (String s : errorHandler.getErrorMessages())
+			{
+				System.out.println(s);
+			}
+
+			System.out.println("\nEND:---------------\n");
+			throw new Exception("XML Skin File contains invalid data.");
+		}
 		
 		
 		/* Parse the skin xml file */

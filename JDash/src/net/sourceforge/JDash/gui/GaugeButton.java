@@ -56,7 +56,7 @@ public class GaugeButton implements SwingComponent
 	public static final String BUTTON_TYPE_PUSHBUTTON = "push-button";
 	
 	/** A button type code string to represent a toggle/checkbox button */
-	public static final String BUTTON_TYPE_TOGGLE = "toggle";
+	public static final String BUTTON_TYPE_TOGGLE = "toggle-switch";
 	
 	
 	/** Buttons can have events with only specific types.  This is for "up" events */

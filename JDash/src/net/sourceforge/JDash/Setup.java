@@ -48,13 +48,14 @@ import java.util.Properties;
  * are all fetched via this class. Call the getSetup() method
  * to get the setup instance.
  ******************************************************/ 
-public class Setup
+public class Setup implements Version
 {	
-	/** The application version string */
-	public static final String VERSION = "v0.9.0b 12-07-2007";
 	
-	/** The applicaiton name */
-	public static final String APPLICATION = "JDash / " + VERSION;
+	/** The applicaiton version */
+	public static final String VERSION = "v" + MAJOR + "." + MINOR + "." + BUILD;
+
+	/** The application string */
+	public static final String APPLICATION = "JDash / " + VERSION + " " + BUILD_DATE;
 
 	
 	/** the license string */

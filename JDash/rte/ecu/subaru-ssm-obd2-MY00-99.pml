@@ -187,6 +187,11 @@ Thanks to ecuexplorer for these addresses
             </arg>
             <arg name="dependant" value="E_DTC_CUR_0H"/>
             <arg name="dependant" value="E_DTC_CUR_0L"/>
+<!--
+In the future, once we learn how to get the MIL status for a Subaru, we can make the DTCs dependant
+on this code.  Then, they will only be fetched when the MIL status actually changes
+            <arg name="dependant" value="MIL_STATUS"/> 
+-->
         </args>
     </meta-parameter>	
     

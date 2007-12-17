@@ -178,6 +178,7 @@ public abstract class RS232Monitor extends BaseMonitor
 			this.port_.notifyOnCTS(false);
 			this.port_.enableReceiveTimeout(getTxRxTimeout());
 			this.port_.notifyOnOutputEmpty(true);
+			this.port_.setEndOfInputChar((byte)0x0);
 		}
 		catch(Exception e)
 		{

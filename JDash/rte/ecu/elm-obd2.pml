@@ -10,7 +10,7 @@
 
     <description>Standard ELMScan module. Tested with 323, but should work with any ELM module such as the new ELM327.</description>
 
-	<include file="dtc.iml"/>
+<!--	<include file="dtc.iml"/> -->
 
 	<parameter name="E_MIL_STATUS" rate="60000">
 		<description>

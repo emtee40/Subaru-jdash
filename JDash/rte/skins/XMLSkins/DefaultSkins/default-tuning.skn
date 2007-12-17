@@ -148,19 +148,19 @@
 	  <text color="red" size="12" x="0" y="0" format="DTC-%s"  font="Arial"/>
   </digital-gauge>
   
-  <digital-gauge sensor="DTC_4"  x="150" y="435">
+  <digital-gauge sensor="DTC_HIST_0"  x="150" y="435">
 	  <text color="red" size="12" x="0" y="0" format="DTC-%s"  font="Arial"/>
   </digital-gauge>
   
-  <digital-gauge sensor="DTC_5" x="150" y="450">
+  <digital-gauge sensor="DTC_HIST_1" x="150" y="450">
 	  <text color="red" size="12" x="0" y="0" format="DTC-%s"  font="Arial"/>
   </digital-gauge>
   
-  <digital-gauge sensor="DTC_6"  x="150" y="465">
+  <digital-gauge sensor="DTC_HIST_2"  x="150" y="465">
 	  <text color="red" size="12" x="0" y="0" format="DTC-%s"  font="Arial"/>
   </digital-gauge>
   
-  <digital-gauge sensor="DTC_7" x="150" y="480">
+  <digital-gauge sensor="DTC_HIST_3" x="150" y="480">
 	  <text color="red" size="12" x="0" y="0" format="DTC-%s"  font="Arial"/>
   </digital-gauge>
 

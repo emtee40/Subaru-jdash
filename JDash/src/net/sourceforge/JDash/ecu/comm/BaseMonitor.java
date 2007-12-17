@@ -48,6 +48,11 @@ import java.util.Collections;
 public abstract class BaseMonitor implements ECUMonitor
 {
 	
+	/** This is the expected name of all DTC codes.  They start with this + an index number.  eg DTC_0 or DTC_4 */
+	public static final String DTC_PARAM_NAME_PREFIX = "DTC_";
+	
+	/** Just like the DTC_PARAM_NAME_PREFIX, this is for DTC History codes */
+	public static final String DTC_HISTORY_PARAM_NAME_PREFIX = "DTC_HIST_";
 	
 	public static final String ACTION_DTC_RESET = "dtc-reset";
 	
@@ -272,18 +277,17 @@ public abstract class BaseMonitor implements ECUMonitor
         	}
         	this.addAllParams(((MetaParameter) params.get(0)).getDependants());
         }
-        else if (params.get(0) instanceof TimeParameter)
-        {
-            /*do nothing.  The TimeParameter is a special parameter that must be
-             * manually delt with in each monitor */
-        }
-        else
+        else if(params.get(0) instanceof ECUParameter)
         {
         	/* If this param has already been added, then no need to add it again */
             if(!this.params_.contains(params.get(0)))
             {
             	this.params_.add((ECUParameter)params.get(0));
             }
+        }
+        else
+        {
+        	/* Do nothing, we only care about monitoring MetaParams and actual ECU Parameters */
         }
         
         /* Remove this now added parameter from the list, and recurse to the next one */

@@ -26,7 +26,11 @@ package net.sourceforge.JDash.ecu.comm;
 
 
 import net.sourceforge.JDash.ecu.param.ECUParameter;
+import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.ParameterRegistry;
+import net.sourceforge.JDash.ecu.param.special.InternalParam;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +57,23 @@ public class TestMonitor extends BaseMonitor
     }
     
     
+    /*******************************************************
+     * Override
+     * @see net.sourceforge.JDash.ecu.comm.BaseMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry, net.sourceforge.JDash.ecu.comm.InitListener)
+     *******************************************************/
+    public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception
+    {
+		/* Add the DTC meta parameters to the registry */
+		for (int index = 0; index < 9; index++)
+		{
+			InternalParam dtcCode = new InternalParam(DTC_PARAM_NAME_PREFIX + index);
+			InternalParam dtcHistCode = new InternalParam(DTC_HISTORY_PARAM_NAME_PREFIX + index);
+			reg.add(dtcCode);
+			reg.add(dtcHistCode);
+		}
+		
+    	return super.init(reg, initListener);
+    }
     
     /*******************************************************
      * Override

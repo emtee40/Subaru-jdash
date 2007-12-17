@@ -177,6 +177,7 @@ public class Startup
 				
 				System.out.println("Monitor: " + Startup.monitor_.getClass().getName());
 
+				/* Initialize the monitor */
 				List<Parameter> supportedParams = Startup.monitor_.init(paramRegistry, new InitListener(loader.getName())
 				{
 					public void update(String message, int step, int max)
@@ -215,6 +216,7 @@ public class Startup
 				skinFactory.getDefaultSkin().addSkinEventListener(monitor_);
 				
 				/* create the main dashboard frame */
+				Startup.splashFrame_.setStatus(85, "Initializing Dashboard");
 				displayFrame = new DashboardFrame(skinFactory.getDefaultSkin(), Startup.monitor_, logger);
 				if (Startup.monitor_ instanceof LoggerPlaybackMonitor)
 				{

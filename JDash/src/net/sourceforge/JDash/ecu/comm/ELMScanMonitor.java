@@ -26,12 +26,12 @@ package net.sourceforge.JDash.ecu.comm;
 
 import gnu.io.RXTXPort;
 
-import net.sourceforge.JDash.ecu.param.DTCMetaParam;
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterEventListener;
 import net.sourceforge.JDash.ecu.param.ParameterException;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
+import net.sourceforge.JDash.ecu.param.special.InternalParam;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -87,6 +87,8 @@ public class ELMScanMonitor extends RS232Monitor
 	
 	private Integer semaphore_ = new Integer(0);
 
+	private ArrayList<InternalParam> dtcCodes_ = new ArrayList<InternalParam>();
+	private ArrayList<InternalParam> dtcHistCodes_ = new ArrayList<InternalParam>();
 	
 	/*******************************************************
 	 * Create a new SSP Monitor
@@ -127,6 +129,18 @@ public class ELMScanMonitor extends RS232Monitor
 					doMilCheck();
 				}
 			});
+		}
+		
+		
+		/* Add the DTC meta parameters to the registry */
+		for (int index = 0; index < 9; index++)
+		{
+			InternalParam dtcCode = new InternalParam(DTC_PARAM_NAME_PREFIX + index);
+			InternalParam dtcHistCode = new InternalParam(DTC_HISTORY_PARAM_NAME_PREFIX + index);
+			this.dtcCodes_.add(dtcCode);
+			this.dtcHistCodes_.add(dtcHistCode);
+			reg.add(dtcCode);
+			reg.add(dtcHistCode);
 		}
 		
 		getPort().setRTS(false);
@@ -470,19 +484,19 @@ public class ELMScanMonitor extends RS232Monitor
 				
 			/* Apply the list of DTCs to the DTC Parameters, null out the remaining parameters */
 			int dtcIndex = 0;
-			for(DTCMetaParam dtcParam : getParameterRegistry().getDTCParameters()) 
+			for(InternalParam dtcParam : this.dtcCodes_) 
 			{
 				
 				/* Set the DTC value within the DTC Parameter to our calculated DTC value.  If the list
 				 * is null, then the MIL lamp must be off.. so.. reset all DTC parameters */
 				if ((dtcCodes != null) && (dtcIndex < dtcCodes.size()))
 				{
-					dtcParam.setDTCCode(dtcCodes.get(dtcIndex));
+					dtcParam.setValue(dtcCodes.get(dtcIndex));
 				}
 				else
 				{
 					/* Null out the rest of the DTC parametres */
-					dtcParam.setDTCCode(null);
+					dtcParam.setValue(null);
 				}
 				
 				/* Next code */

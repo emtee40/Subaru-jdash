@@ -139,25 +139,53 @@ public class XMLGaugePanel extends AbstractGaugePanel
 			/* Analog Gauges */
 			for (int index = 0; index < skin.getAnalogGaugeCount(); index++)
 			{
-				this.allGauges_.add(skin.createAnalogGauge(index));
+				try
+				{
+					this.allGauges_.add(skin.createAnalogGauge(index));
+				}
+				catch(Exception e)
+				{
+					Startup.showWarning(e.getMessage() + "\nThis analog gauge will not be displayed.");
+				}
 			}
 			
 			/* Digital Gauges */
 			for (int index = 0; index < skin.getDigitalGaugeCount(); index++)
 			{
-				this.allGauges_.add(skin.createDigitalGauge(index));
+				try
+				{
+					this.allGauges_.add(skin.createDigitalGauge(index));
+				}
+				catch(Exception e)
+				{
+					Startup.showWarning(e.getMessage() + "\nThis digital gauge will not be displayed.");
+				}
 			}
 			
 			/* LED Gauges */
 			for (int index = 0; index < skin.getLedGaugeCount(); index++)
 			{
-				this.allGauges_.add(skin.createLedGauge(index));
+				try
+				{
+					this.allGauges_.add(skin.createLedGauge(index));
+				}
+				catch(Exception e)
+				{
+					Startup.showWarning(e.getMessage() + "\nThis LED gauge will not be displayed.");
+				}
 			}
 			
 			/* LineGraph Gauges */
 			for (int index = 0; index < skin.getLineGraphGaugeCount(); index++)
 			{
-				this.allGauges_.add(skin.createLineGraphGauge(index));
+				try
+				{
+					this.allGauges_.add(skin.createLineGraphGauge(index));
+				}
+				catch(Exception e)
+				{
+					Startup.showWarning(e.getMessage() + "\nThis line grap gauge will not be displayed.");
+				}
 			}
 		}
 		
@@ -212,9 +240,19 @@ public class XMLGaugePanel extends AbstractGaugePanel
 			Parameter p = monitor.getParameterRegistry().getParamForName(t.getParameterName());
 			if (p == null)
 			{
-				throw new Exception("Unable to setup trigger, it references a sensor that does not exist [" + t.getParameterName() + "]");
+				try
+				{
+					throw new Exception("Unable to setup trigger, it references a sensor that does not exist [" + t.getParameterName() + "]");
+				}
+				catch(Exception e)
+				{
+					Startup.showWarning(e.getMessage() + "\nThis trigger will not be enabled.");
+				}
 			}
-			t.attachToParameter(p);
+			else
+			{
+				t.attachToParameter(p);
+			}
 		}
 		
 	}

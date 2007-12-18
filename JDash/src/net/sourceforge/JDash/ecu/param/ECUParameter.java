@@ -47,7 +47,6 @@ public class ECUParameter extends Parameter
     private String _description;
     private int rate_ = 0;
     private long lastFetchTime_ = 0;
-    private boolean isEnabled_ = true;
     
     
     /******************************************************
@@ -167,23 +166,4 @@ public class ECUParameter extends Parameter
     	return lastFetchTime_;
     }
     
-	/******************************************************
-	 * Has this parameter been enabled?  This is true by default.
-	 * @return
-	 *******************************************************/
-	public boolean isEnabled()
-	{
-		return this.isEnabled_;
-	}
-	
-	
-	/*******************************************************
-	 * Set this parameters to enabled or disabled.  Disabled,
-	 * the parameter will NOT be fetched by the monitor.
-	 * @return
-	 *******************************************************/
-	public void setEnabled(boolean enable)
-	{
-		this.isEnabled_ = enable;
-	}
 }

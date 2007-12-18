@@ -43,6 +43,9 @@ public abstract class Parameter implements DoubleParameter
 	private ArrayList<ParameterEventListener> eventListeners_ = new ArrayList<ParameterEventListener>();
 	
 	
+    private boolean isEnabled_ = true;
+
+	
 	/*******************************************************
 	 * This method will return the owner registry value that
 	 * was set with the setOnwerRegistry metod.
@@ -142,4 +145,25 @@ public abstract class Parameter implements DoubleParameter
     	
     	return getName().equals(((Parameter)obj).getName());
     }
+    
+
+	/******************************************************
+	 * Has this parameter been enabled?  This is true by default.
+	 * @return
+	 *******************************************************/
+	public boolean isEnabled()
+	{
+		return this.isEnabled_;
+	}
+	
+	
+	/*******************************************************
+	 * Set this parameters to enabled or disabled.  Disabled,
+	 * the parameter will NOT be fetched by the monitor.
+	 * @return
+	 *******************************************************/
+	public void setEnabled(boolean enable)
+	{
+		this.isEnabled_ = enable;
+	}
 }

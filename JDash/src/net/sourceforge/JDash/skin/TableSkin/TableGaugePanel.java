@@ -70,7 +70,7 @@ public class TableGaugePanel extends AbstractGaugePanel
 	private EnableableGaugeTableModel ecuTableModel_ = null;
 	
 	private JTable staticTableGauge_ = null;
-	private GaugeTableModel staticTableModel_ = null;
+	private EnableableGaugeTableModel staticTableModel_ = null;
 	
 	/*******************************************************
 	 * @param ownerFrame
@@ -160,7 +160,7 @@ public class TableGaugePanel extends AbstractGaugePanel
 			
 			/* Add the calculated parameter table */
 			{
-				this.staticTableModel_ = new GaugeTableModel(staticParams);
+				this.staticTableModel_ = new EnableableGaugeTableModel(staticParams);
 				this.staticTableGauge_ = new JTable(this.staticTableModel_);
 				JScrollPane staticScrollPane = new JScrollPane(this.staticTableGauge_);
 				splitPane.setRightComponent(staticScrollPane);

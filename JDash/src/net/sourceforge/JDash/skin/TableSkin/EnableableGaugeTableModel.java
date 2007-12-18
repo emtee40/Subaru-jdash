@@ -29,6 +29,8 @@ import java.util.List;
 
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
+import net.sourceforge.JDash.ecu.param.special.RateParameter;
+import net.sourceforge.JDash.ecu.param.special.TimeParameter;
 
 /*******************************************************
  * A simple table model that presents a list of parameters
@@ -48,10 +50,7 @@ public class EnableableGaugeTableModel extends GaugeTableModel
 		/* Start each ECU Parameter in a disabled mode */
 		for (Parameter p : params)
 		{
-			if (p instanceof ECUParameter)
-			{
-				((ECUParameter)p).setEnabled(false);
-			}
+			p.setEnabled(false);
 		}
 	}
 	
@@ -104,7 +103,7 @@ public class EnableableGaugeTableModel extends GaugeTableModel
 		
 		if (col == 0)
 		{
-			return ((ECUParameter)p).isEnabled();
+			return p.isEnabled();
 		}
 		
 		return super.getValueAt(row, col - 1);
@@ -116,9 +115,18 @@ public class EnableableGaugeTableModel extends GaugeTableModel
 	 ******************************************************/
 	public boolean isCellEditable(int row, int col)
 	{
+		Parameter p = this.params_.get(row);
+		
 		if (col == 0)
 		{
-			return true;
+			if ((p instanceof TimeParameter) || (p instanceof RateParameter))
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
 		}
 		
 		return super.isCellEditable(row, col - 1);
@@ -138,10 +146,7 @@ public class EnableableGaugeTableModel extends GaugeTableModel
 
 		Parameter p = this.params_.get(row);
 		
-		if (p instanceof ECUParameter)
-		{
-			((ECUParameter)p).setEnabled(new Boolean(v.toString()));
-		}
+		p.setEnabled(new Boolean(v.toString()));
 		
 	}
 

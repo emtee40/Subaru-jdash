@@ -91,4 +91,11 @@ public class TimeParameter extends Parameter
     	return _mark;
     }
     
+
+	/*******************************************************
+	 * Overridden to prevent being disabled.
+	 *******************************************************/
+	public void setEnabled(boolean enable)
+	{
+	}
 }

@@ -63,4 +63,20 @@ public abstract class MetaParameter extends Parameter // implements Observer
 	 *******************************************************/
 	public abstract void addArg(String name, String value) throws ParameterException;
 	
+	
+	/******************************************************
+	 * When a MetaParameter is enabled/disabled, all it's dependants
+	 * are also enabled/disabled.
+	 * Override
+	 * @see net.sourceforge.JDash.ecu.param.Parameter#setEnabled(boolean)
+	 *******************************************************/
+	public void setEnabled(boolean enable)
+	{
+		for (Parameter dep : getDependants())
+		{
+			dep.setEnabled(enable);
+		}
+		super.setEnabled(enable);
+	}
+	
 }

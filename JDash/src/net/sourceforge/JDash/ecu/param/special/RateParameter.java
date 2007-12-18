@@ -92,6 +92,15 @@ public class RateParameter extends MetaParameter {
       return this.rate_;
     	
     }
+    
+    /*******************************************************
+     * Overridden to prevent this parameter from ever being disabled.
+     * Override
+     * @see net.sourceforge.JDash.ecu.param.Parameter#setEnabled(boolean)
+     *******************************************************/
+    public void setEnabled(boolean enable)
+    {
+    }
 
 //    /******************************************************
 //     * When an update on this parameter gets called, it's because this

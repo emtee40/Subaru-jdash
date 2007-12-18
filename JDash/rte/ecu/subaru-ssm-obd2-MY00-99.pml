@@ -180,7 +180,7 @@ Thanks to ecuexplorer for these addresses
 	
 	
 	    <meta-parameter name="DTC_0">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_CUR_0H"),meta.getParamValue("E_DTC_CUR_0L")) 
@@ -196,7 +196,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_1">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_CUR_1H"),meta.getParamValue("E_DTC_CUR_1L"))  
@@ -207,7 +207,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_2">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_CUR_2H"),meta.getParamValue("E_DTC_CUR_2L"))  
@@ -218,7 +218,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_3">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_CUR_3H"),meta.getParamValue("E_DTC_CUR_3L"))  
@@ -229,7 +229,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_4">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_CUR_4H"),meta.getParamValue("E_DTC_CUR_4L"))  
@@ -240,7 +240,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_HIST_0">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_HIST_0H"),meta.getParamValue("E_DTC_HIST_0L"))  
@@ -251,7 +251,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_HIST_1">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_HIST_1H"),meta.getParamValue("E_DTC_HIST_1L"))  
@@ -262,7 +262,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_HIST_2">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_HIST_2H"),meta.getParamValue("E_DTC_HIST_2L"))  
@@ -273,7 +273,7 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_HIST_3">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
             	return meta.makeint(meta.getParamValue("E_DTC_HIST_3H"),meta.getParamValue("E_DTC_HIST_3L"))  
@@ -284,10 +284,10 @@ on this code.  Then, they will only be fetched when the MIL status actually chan
     </meta-parameter>	
     
     <meta-parameter name="DTC_HIST_4">
-        <handler>net.sourceforge.JDash.ecu.param.JSMetaParam</handler>
+        <handler>net.sourceforge.JDash.ecu.param.JSStringMetaParam</handler>
         <args>
             <arg name="script">
-            	return meta.makeint(meta.getParamValue("E_DTC_HIST_4H"),meta.getParamValue("E_DTC_HIST_4L"))s
+            	return meta.makeint(meta.getParamValue("E_DTC_HIST_4H"),meta.getParamValue("E_DTC_HIST_4L"))
             </arg>
             <arg name="dependant" value="E_DTC_HIST_4H"/>
             <arg name="dependant" value="E_DTC_HIST_4L"/>

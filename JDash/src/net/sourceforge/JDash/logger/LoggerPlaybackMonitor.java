@@ -330,8 +330,11 @@ public class LoggerPlaybackMonitor extends BaseMonitor
 	    	/* Normal ecu parameters, set their values */
 	    	if (param instanceof ECUParameter)
 	    	{
-	    		((ECUParameter)param).setResult(value);
-	    		fireProcessingParameterEvent(param);
+	    		if (((ECUParameter)param).isEnabled())
+	    		{
+	    			((ECUParameter)param).setResult(value);
+	    			fireProcessingParameterEvent(param);
+	    		}
 	    	}
 	    	else
 	    	{

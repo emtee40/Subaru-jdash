@@ -334,6 +334,19 @@ public class JSMetaParam extends MetaParameter
 		return ((highByte << 8) + lowByte);
 	}
 	
+	
+	/*******************************************************
+	 * An overloaded call to bitcheck(int, int). to accomodate
+	 * double values.s
+	 * @param paramValue
+	 * @param bit
+	 * @return
+	 *******************************************************/
+	public double bitcheck(double paramValue, int bit)
+	{
+		return bitcheck(((int)paramValue), bit);
+	}
+	
 	/*******************************************************
 	 * This utility funciton is available to the bean shell for
 	 * generating a 1 or 0 from a bitmask.

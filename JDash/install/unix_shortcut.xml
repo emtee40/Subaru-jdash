@@ -10,7 +10,7 @@
 	 startup="no"
 	 target="java"
 	 workingDirectory="$INSTALL_PATH"
-	 commandLine="-jar &quot;$INSTALL_PATH/JDash.jar&quot;"
+	 commandLine="-Dsun.java2d.opengl=True -jar &quot;$INSTALL_PATH/JDash.jar&quot;"
 	 initialState="noShow"
 	 iconFile="$INSTALL_PATH/icon.png"
 	 type="Application"

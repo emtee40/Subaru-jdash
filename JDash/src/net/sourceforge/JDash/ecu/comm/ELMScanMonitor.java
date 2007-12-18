@@ -293,7 +293,10 @@ public class ELMScanMonitor extends RS232Monitor
 					//for (int index = 0; index < thisFetchList.size(); index++)
 					for (ECUParameter param : thisFetchList)
                     {
-						retreiveMode1ParamValue(param);
+						if (param.isEnabled())
+						{
+							retreiveMode1ParamValue(param);
+						}
                     }
 					
                     /* Once all packets in this run are sent and received, mark the time */

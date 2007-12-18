@@ -199,10 +199,13 @@ public class SSMOBD2Monitor extends RS232Monitor
                 List<ECUParameter> thisFetchList = new ArrayList<ECUParameter>();
                 for (ECUParameter param : this.params_)
                 {
-                	if (param.getLastFetchTime() + param.getPreferedRate() < System.currentTimeMillis())
+                	if (param.isEnabled())
                 	{
-                		param.setLastFetchTime(System.currentTimeMillis());
-                		thisFetchList.add(param);
+	                	if (param.getLastFetchTime() + param.getPreferedRate() < System.currentTimeMillis())
+	                	{
+	                		param.setLastFetchTime(System.currentTimeMillis());
+	                		thisFetchList.add(param);
+	                	}
                 	}
                 }
                 

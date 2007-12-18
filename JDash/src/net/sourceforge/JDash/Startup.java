@@ -208,15 +208,18 @@ public class Startup
 				logger.addParameter(paramRegistry.getParamForName(ParameterRegistry.TIME_PARAM));
 				logger.setEnableable(loggerEnableable);
 
+	
 				
 				/* Add the logger to the skin as a SkinEventListener */
+				Startup.splashFrame_.setStatus(82, "Building Skin...");
 				skinFactory.getDefaultSkin().addSkinEventListener(logger);
 			
 				/* Add the monitor to the skin as a SkinEventListener */
+				Startup.splashFrame_.setStatus(84, "Connecting Monitor...");
 				skinFactory.getDefaultSkin().addSkinEventListener(monitor_);
 				
 				/* create the main dashboard frame */
-				Startup.splashFrame_.setStatus(85, "Initializing Dashboard");
+				Startup.splashFrame_.setStatus(86, "Initializing Dashboard");
 				displayFrame = new DashboardFrame(skinFactory.getDefaultSkin(), Startup.monitor_, logger);
 				if (Startup.monitor_ instanceof LoggerPlaybackMonitor)
 				{

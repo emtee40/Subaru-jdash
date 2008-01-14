@@ -359,8 +359,6 @@ public class XMLSkin extends Skin
 	private void loadSkin(URL skinUrl) throws Exception
 	{
 		
-		File schemaFile = new File(getClass().getResource(RELAX_NG_SCHEMA_RESOURCE_NAME).getFile());
-		
 		/* Setup the XML builder */
 		XMLErrorHandler errorHandler = new XMLErrorHandler();
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactoryImpl.newInstance();
@@ -373,7 +371,7 @@ public class XMLSkin extends Skin
  //TODO
 		/* Verify the document */
 		VerifierFactory verifierFactory = new TheFactoryImpl();
-		Verifier verifier = verifierFactory.compileSchema(schemaFile).newVerifier();
+		Verifier verifier = verifierFactory.compileSchema(getClass().getResource(RELAX_NG_SCHEMA_RESOURCE_NAME).openStream()).newVerifier();
 		verifier.setErrorHandler(errorHandler);
 		verifier.verify(skinUrl.getFile());
 		

@@ -126,6 +126,12 @@
 		    basedir="./install"
 		    includes="setup.jar install.txt"/>
 		<delete file="install/setup.jar"/>
+		<move file="rte" tofile="JDash"/>
+		<zip
+			destFile="JDash-${major.number}.${minor.number}.${build.number}-noinstaller.zip"
+			basedir="."
+			includes="JDash/**"/>
+		<move file="jdash" tofile="rte"/>
 	</target>
 		
 	

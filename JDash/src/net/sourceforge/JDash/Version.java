@@ -5,7 +5,7 @@
 	{
 		public static final int MAJOR = 0;
 		public static final int MINOR = 9;
-		public static final int BUILD = 13;
-		public static final String BUILD_DATE = "12-10-2007";
+		public static final int BUILD = 19;
+		public static final String BUILD_DATE = "01-14-2008";
 	}
 		

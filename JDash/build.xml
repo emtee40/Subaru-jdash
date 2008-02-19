@@ -189,5 +189,12 @@
 		</java>
 	</target>
 
+	<!-- Launch the SuperWaba version -->
+	<target name="launch-waba" depends="rte">
+		<java classpath="${classpath}:${rteDir}/comm.jar:${rteDir}/JDash.jar" fork="true" dir="${rteDir}/" failonerror="true" classname="waba.applet.Applet">
+			<sysproperty key="java.library.path" value="${rteDir}"/>
+			<arg id="" value="net.sourceforge.JDash.waba.DashboardMainWindow"/>
+		</java>
+	</target>
 	
 </project>

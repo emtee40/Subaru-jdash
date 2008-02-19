@@ -52,6 +52,10 @@ import java.util.StringTokenizer;
  *****************************************************/
 public class ELMScanMonitor extends RS232Monitor
 {
+	/* If your debugging and writing code usin the ELM Ecu Emulator, the you'll want to
+	 * set this flag to true.  This will prevent any of the OBD Calls we normaly make to an
+	 * ELM module, that the emulator doesn't support*/
+	private static final boolean USING_ECUEMULATOR_INTERFACE = true;
 	
 	public static final String AT_OK = "OK";
 	public static final String ERROR_BUS_BUSY = "BUS BUSY";
@@ -170,13 +174,24 @@ public class ELMScanMonitor extends RS232Monitor
 		
 		/* Ask for the VID, this will also result in an INIT response. Then we'll just add it to the ecuID output string */
 		initListener.update("Fetch VID", 4, 5);
-		buffer = sendELMString("09 01");
+		if (false == USING_ECUEMULATOR_INTERFACE)
+		{
+			buffer = sendELMString("0901");
+		}
+		else
+		{
+			buffer = sendELMString("010D");
+		}
+		buffer = sendELMString("010D");
 		this.ecuId_ += "\nVID: " + buffer;
 
 		
 		/* attempt to set the fastes ELM timeout value */
-		initListener.update("Setting best speed", 5, 5);
-		setBestTimeout();
+		if (false == USING_ECUEMULATOR_INTERFACE)
+		{
+			initListener.update("Setting best speed", 5, 5);
+			setBestTimeout();
+		}
 		
 		
 		/* Return the init results */
@@ -228,9 +243,9 @@ public class ELMScanMonitor extends RS232Monitor
 				
 				/* Attempt to send 3 commands, if any of them return an error, then we'll assume the speed
 				 * is too fast. We'll use the first PID block, since it's a 4 byte response. */
-				buffer = sendELMString("01 00");
-				buffer = sendELMString("01 00");
-				buffer = sendELMString("01 00");
+				buffer = sendELMString("0100");
+				buffer = sendELMString("0100");
+				buffer = sendELMString("0100");
 				
 				
 				/* If we got past all 3 without an error, then lets assume the speed is good */
@@ -247,7 +262,7 @@ public class ELMScanMonitor extends RS232Monitor
 			}
 			
 		}
-		
+			
 		
 		/* If we got here, then NONE of the speeds worked??!! */
 		throw new Exception("Unable to set the timeout speed to any reliable value.");
@@ -271,7 +286,6 @@ public class ELMScanMonitor extends RS232Monitor
 			while(doRun_.booleanValue())
 			{
 				
-				
                 /* define the list of parameters that will be fetched.  This is based on if the
                  * packets rate has it ready for an update or not. */
                 List<ECUParameter> thisFetchList = new ArrayList<ECUParameter>();
@@ -284,6 +298,7 @@ public class ELMScanMonitor extends RS232Monitor
                 	}
                 }
 
+
                 
                 try
                 {
@@ -293,6 +308,7 @@ public class ELMScanMonitor extends RS232Monitor
 					//for (int index = 0; index < thisFetchList.size(); index++)
 					for (ECUParameter param : thisFetchList)
                     {
+
 						if (param.isEnabled())
 						{
 							retreiveMode1ParamValue(param);
@@ -301,9 +317,16 @@ public class ELMScanMonitor extends RS232Monitor
 					
                     /* Once all packets in this run are sent and received, mark the time */
                     fireProcessingFinishedEvent();
-                    
+
                     /* Reset the packet failure count */
                     packetFailureCount = 0;
+                    
+                    /* Release the cpu for a moment.  With the speed of the ELM interfaces
+                     * being the main bottle neck, this should not be an issue. */
+                    if (thisFetchList.size() <= 0)
+                    {
+                    	Thread.sleep(100);
+                    }
 
                 }
                 catch(Exception e)
@@ -527,7 +550,7 @@ public class ELMScanMonitor extends RS232Monitor
 	private void retreiveMode1ParamValue(ECUParameter param) throws Exception
 	{
 		/* Put together the command request.  byte 0 is the mode, byte 1 is the PID */
-		String command = String.format("%02d %02x", MODE_1, param.getAddress()[REQUEST_PID_BYTE]);
+		String command = String.format("%02d%02x", MODE_1, param.getAddress()[REQUEST_PID_BYTE]);
 		command = command.toUpperCase();
 		
 		/* Send the command, and retreive the response */

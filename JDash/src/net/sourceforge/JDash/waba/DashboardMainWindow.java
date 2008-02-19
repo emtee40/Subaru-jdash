@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.waba;
 
 
+import net.sourceforge.JDash.waba.error.ErrorDialog;
 import net.sourceforge.JDash.waba.error.ErrorLog;
+import waba.io.SerialPort;
 import waba.sys.Settings;
 import waba.ui.MainWindow;
 
@@ -69,6 +71,23 @@ public class DashboardMainWindow extends MainWindow
 				//}
 				
 				//SerialPort sp = new SerialPort(0, 2400);
+				
+				
+				SerialPort port = new SerialPort(5, 9600, 8, false, 1);
+				if (!port.isOpen())
+				{
+					return;
+				}
+				String tx = "010D\r";
+				port.writeBytes(tx.getBytes(), 0, tx.length());
+				Thread.sleep(10);
+				byte[] buf = new byte[20];
+				int count = port.readBytes(buf, 0, 10);
+				//ErrorDialog.showError(new String(buf));
+				System.out.println("\n\n\n" + count + "[" + new String(buf) + "]");
+				
+				
+				port.close();
 			}
 			catch(Throwable t)
 			{

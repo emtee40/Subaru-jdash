@@ -53,8 +53,8 @@
 	
 	<!-- Jar -->
 	<target name="jar" depends="init,compile">
-		<echo message="Creating JDash jar file"/>
 
+		<!-- App Jar -->
 		<echo message="Creating Application jar file..."/>
 		<delete file="${manifest}" />
 		<manifest file="${manifest}">
@@ -69,6 +69,7 @@
          	/>
 		<delete file="${manifest}" />
 
+		<!-- Config Jar -->
 		<echo message="Creating Config jar file..."/>
 		<delete file="${manifest}" />
 		<manifest file="${manifest}">
@@ -79,6 +80,20 @@
 		<jar destfile="${rteDir}/${JDashConfigJar}"
 			basedir="${outputDir}"
 			includes="**/StartupConfigWrapper.*"
+			manifest="${manifest}"/>
+		<delete file="${manifest}" />
+
+		<!-- Waba Jar -->
+		<echo message="Creating SuperWaba jar file..."/>
+		<delete file="${manifest}" />
+		<manifest file="${manifest}">
+			<attribute name="Built-By" value="${user.name} (Copyright 2007)"/>
+			<attribute name="Main-Class" value="waba.applet.Applet"/>
+			<attribute name="Class-Path" value="${JDashJar} comm.jar SuperWaba.jar"/>
+		</manifest>
+		<jar destfile="${rteDir}/${JDashWabaJar}"
+			basedir="${outputDir}"
+			includes="/net/sourceforge/JDash/waba/**"
 			manifest="${manifest}"/>
 		<delete file="${manifest}" />
 		
@@ -191,7 +206,7 @@
 
 	<!-- Launch the SuperWaba version -->
 	<target name="launch-waba" depends="rte">
-		<java classpath="${classpath}:${rteDir}/comm.jar:${rteDir}/JDash.jar" fork="true" dir="${rteDir}/" failonerror="true" classname="waba.applet.Applet">
+		<java jar="${rteDir}/${JDashWabaJar}" fork="true" dir="${rteDir}/" failonerror="true">
 			<sysproperty key="java.library.path" value="${rteDir}"/>
 			<arg id="" value="net.sourceforge.JDash.waba.DashboardMainWindow"/>
 		</java>

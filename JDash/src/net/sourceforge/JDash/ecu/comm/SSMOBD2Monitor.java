@@ -60,12 +60,22 @@ public class SSMOBD2Monitor extends RS232Monitor
 
 	private String			ecuId_					= null;
 	
+	private static final byte SSM_READ_COMMAND 		= (byte) 0xA8;
+	private static final byte SSM_WRITE_COMMAND 	= (byte) 0xB8;
+	private static final byte SSM_DEVICE_ECU		= (byte) 0x10;
+	private static final byte SSM_DEVICE_APP		= (byte) 0xF0;
 	
-	private static final byte[] ADDRESS_RESET_ECU				= {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x60}; //0x00000060;
-	private static final byte[] ADDRESS_IGNITION_RETARD			= {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x6f}; //0x0000006F;
-	private static final byte[] ADDRESS_IDLE_ADJUST_NORMAL		= {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x70}; //0x00000070;
-	private static final byte[] ADDRESS_IDLE_ADJUST_AIRCON		= {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x71}; //0x00000071; 
 	
+	
+	private static final byte[] ADDRESS_RESET_ECU				= {(byte)0x00, (byte)0x00, (byte)0x60}; //0x00000060;
+	private static final byte[] ADDRESS_IGNITION_RETARD			= {(byte)0x00, (byte)0x00, (byte)0x6f}; //0x0000006F;
+	private static final byte[] ADDRESS_IDLE_SPEED_NORMAL		= {(byte)0x00, (byte)0x00, (byte)0x70}; //0x00000070;
+	private static final byte[] ADDRESS_IDLE_SPEED_AIRCON		= {(byte)0x00, (byte)0x00, (byte)0x71}; //0x00000071; 
+
+	private static final ECUParameter PARAM_GET_IDLE_SPEED_NORMAL = new ECUParameter(ADDRESS_IDLE_SPEED_NORMAL, "E_IDLE_SPEED_NORMAL", "Get Normal Idle Speed", -1);
+	private static final ECUParameter PARAM_GET_IDLE_SPEED_AIRCON = new ECUParameter(ADDRESS_IDLE_SPEED_AIRCON, "E_IDLE_SPEED_AIRCON", "Get With AirCon Idle Speed", -1);
+	
+
 
 	/***********************************************************************************************
 	 * Create a new SSM OBD-II capable monitor.
@@ -228,7 +238,7 @@ public class SSMOBD2Monitor extends RS232Monitor
 						{
 
 							/* Create the new TX Packet */
-							RS232Packet txPacket = createTxPacket(packetList);
+							RS232Packet txPacket = createTxPacket(packetList, true);
 
 							/* Send and distribute it's results */
 							RS232Packet rxPacket = sendPacket(txPacket, SSM_HEADER_LEN);
@@ -388,29 +398,40 @@ public class SSMOBD2Monitor extends RS232Monitor
 
 			/* The result data is preceeded by a padding byte, thats why the +1 */
 			p.setResult(rxPacket.getData()[index + 1]);
+			
+//			System.out.println("\n" + p.getName() + rxPacket.toString());
 
 			fireProcessingParameterEvent(p);
 		}
 	}
 
 	/***********************************************************************************************
+	 * @param params IN - the list of parameters to create the packet from.
+	 * @param read IN - Is this a READ or WRITE packet.
 	 * @return
 	 **********************************************************************************************/
-	private RS232Packet createTxPacket(List<ECUParameter> params)
+	private RS232Packet createTxPacket(List<ECUParameter> params, boolean read)
 	{
 		RS232Packet packet = new RS232Packet();
 
 		/* Set the header */
 		packet.setHeader(new byte[] { (byte) 0x80, /* padding */
-		(byte) 0x10, /* destination ecu */
-		(byte) 0xF0 /* source diag app */
-		});
+										SSM_DEVICE_ECU, /* destination ecu */
+										SSM_DEVICE_APP /* source diag app */
+									});
 
 		/* This array list will hold our list of address bytes */
 		ArrayList<Byte> data = new ArrayList<Byte>();
 
 		/* Add the command byte and required padding */
-		data.add((byte) 0xA8); /* Read Address Command */
+		if (true == read)
+		{
+			data.add(SSM_READ_COMMAND); /* Read Address Command */
+		}
+		else
+		{
+			data.add(SSM_WRITE_COMMAND); /* Write Address Command */
+		}
 		data.add((byte) 0x00); /* Data Padding */
 
 		/* For each parameter */
@@ -452,29 +473,29 @@ public class SSMOBD2Monitor extends RS232Monitor
 	private long getIdleSpeed(boolean withAirCon) throws Exception
 	{
 		long idleSpeed = -1;
+		ArrayList<ECUParameter> pList = new ArrayList<ECUParameter>();
 		
-		/* Create an empty packet */
-		RS232Packet txPacket = createTxPacket(new ArrayList<ECUParameter>());
-
-		/* Set the address data */
 		if (false == withAirCon)
 		{
-			txPacket.setData(ADDRESS_IDLE_ADJUST_NORMAL);
+			pList.add(PARAM_GET_IDLE_SPEED_NORMAL);
 		}
 		else
 		{
-			txPacket.setData(ADDRESS_IDLE_ADJUST_AIRCON);
+			pList.add(PARAM_GET_IDLE_SPEED_AIRCON);
 		}
 		
-		/* Calculate the checksum */
-		txPacket.setCheckSum();
+		/* Create an empty packet */
+		RS232Packet txPacket = createTxPacket(pList, true);
+
 		
 		/* Send the packet */
-		System.out.println(txPacket.toString());
+		System.out.println("\nTX:" + txPacket.toString());
 		RS232Packet rxPacket = sendPacket(txPacket, SSM_HEADER_LEN);
-		System.out.println("B");
+		System.out.println("\nRX:" + rxPacket.toString());
 		
-		rxPacket.toString();
+		/* Get the idle speed */
+		idleSpeed = UTIL.unsignedByteToInt(rxPacket.getData()[1]);
+		idleSpeed = (idleSpeed - 128) * 25L;
 		
 		return idleSpeed;
 	}
@@ -512,9 +533,10 @@ public class SSMOBD2Monitor extends RS232Monitor
 				}
 			});
 			
-			mon.getIdleSpeed(false);
-			mon.getIdleSpeed(true);
+			System.out.println("Normal Idle Speed: " + mon.getIdleSpeed(false));
+			System.out.println("AirCon Idle Speed: " + mon.getIdleSpeed(true));
 			
+			mon.closePort();
 		}
 		catch(Exception e)
 		{

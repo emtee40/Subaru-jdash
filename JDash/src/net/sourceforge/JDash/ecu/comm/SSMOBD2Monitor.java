@@ -35,7 +35,7 @@ import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
-import net.sourceforge.JDash.util.UTIL;
+import net.sourceforge.JDash.util.ByteUtil;
 
 /***************************************************************************************************
  * This extension to the SSMMonitor is setup to use the OBD-II version of SSM
@@ -115,10 +115,10 @@ public class SSMOBD2Monitor extends RS232Monitor
 		if (rxPacket.getHeader().length != SSM_HEADER_LEN)
 		{
 			throw new Exception("Init RX packet did not return the expected header\n"
-					+ "Expected: " + UTIL.bytesToString(txPacket.getHeader())
-					+ txPacket.getDataLength() + " " + UTIL.bytesToString(txPacket.getData()) + " "
+					+ "Expected: " + ByteUtil.bytesToString(txPacket.getHeader())
+					+ txPacket.getDataLength() + " " + ByteUtil.bytesToString(txPacket.getData()) + " "
 					+ txPacket.getCheckSum() + " 0x80 0xf0 0x10\n" + "Received: "
-					+ UTIL.bytesToString(rxPacket.getHeader()));
+					+ ByteUtil.bytesToString(rxPacket.getHeader()));
 		}
 
 		/* Ecu ID */
@@ -494,7 +494,7 @@ public class SSMOBD2Monitor extends RS232Monitor
 		System.out.println("\nRX:" + rxPacket.toString());
 		
 		/* Get the idle speed */
-		idleSpeed = UTIL.unsignedByteToInt(rxPacket.getData()[1]);
+		idleSpeed = ByteUtil.unsignedByteToInt(rxPacket.getData()[1]);
 		idleSpeed = (idleSpeed - 128) * 25L;
 		
 		return idleSpeed;

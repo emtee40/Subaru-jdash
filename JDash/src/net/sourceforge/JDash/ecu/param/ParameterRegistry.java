@@ -27,11 +27,8 @@ package net.sourceforge.JDash.ecu.param;
 import net.sourceforge.JDash.ecu.param.special.RateParameter;
 import net.sourceforge.JDash.ecu.param.special.TimeParameter;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ParameterRegistry
@@ -62,7 +59,6 @@ public class ParameterRegistry
 	
 	private Map<String, Parameter> _paramMap;
 	
-//	private List<DTCMetaParam> dtcParameters_ = null;
 	
 	/******************************************************
 	 * create a new, bare registry.  Call init() to setup 
@@ -122,50 +118,6 @@ public class ParameterRegistry
 	}
 	
 
-//	/*******************************************************
-//	 * Return an orderd list of DTCParameters. The list is ordered
-//	 * by the parameter name.
-//	 * @return
-//	 *******************************************************/
-//	public List<DTCMetaParam> getDTCParameters()
-//	{
-//		
-//		/* Initialize the list */
-//		if (this.dtcParameters_ == null)
-//		{
-//			/* Create a new list */
-//			this.dtcParameters_ = new ArrayList<DTCMetaParam>();
-//			
-//			for (String key : this._paramMap.keySet())
-//			{
-//				if (this._paramMap.get(key) instanceof DTCMetaParam)
-//				{
-//					this.dtcParameters_.add((DTCMetaParam)this._paramMap.get(key));
-//				}
-//			}
-//		
-//			
-//			/* Sort the list by the DTC name */
-//			Collections.sort(this.dtcParameters_, new Comparator<DTCMetaParam>()
-//			{
-//				public int compare(DTCMetaParam p1, DTCMetaParam p2)
-//				{
-//					return p1.getName().compareTo(p2.getName());
-//				}
-//			});
-//			
-//			
-//			/* make the list unmodifaiable */
-//			this.dtcParameters_ = Collections.unmodifiableList(this.dtcParameters_);
-//		}
-//		
-//		
-//		
-//		return this.dtcParameters_;
-//		
-//	}
-//	
-	
 	
 	/*******************************************************
 	 * Returns an Unmodifiable Map of these parameters.

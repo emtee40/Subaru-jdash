@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import net.sourceforge.JDash.util.UTIL;
+import net.sourceforge.JDash.util.ByteUtil;
 
 
 /******************************************************
@@ -90,7 +90,7 @@ public class RS232Packet
 	 ******************************************************/
 	public void setDataLength(byte b)
 	{
-		setDataLength(UTIL.unsignedByteToInt(b));
+		setDataLength(ByteUtil.unsignedByteToInt(b));
 	}
 	
 	/*******************************************************
@@ -223,10 +223,10 @@ public class RS232Packet
 		String ret = "";
 		
 		ret = "\nRS232Packet";
-		ret += "\nH: " + UTIL.bytesToString(getHeader());
+		ret += "\nH: " + ByteUtil.bytesToString(getHeader());
 		ret += "\nL: " + getDataLength();
-		ret += "\nD: " + UTIL.bytesToString(getData());
-		ret += "\nC: " + UTIL.unsignedByteToInt(getCheckSum());
+		ret += "\nD: " + ByteUtil.bytesToString(getData());
+		ret += "\nC: " + ByteUtil.unsignedByteToInt(getCheckSum());
 		
 		return ret;
 	}

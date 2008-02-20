@@ -24,12 +24,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.ecu.param;
 
-import java.util.ArrayList;
+import waba.util.Vector;
+
+
+//import java.util.ArrayList;
 
 
 /******************************************************
  * This basic parameter class is simple class whos
  * sole purpose is to provide data to the renderers/Observers.
+ * 
+ * Do NOT use any 1.5 specific stuff in here.  These parameter classes
+ * need to be compatible with SuperWaba.
  *****************************************************/
 public abstract class Parameter implements DoubleParameter
 {
@@ -40,7 +46,7 @@ public abstract class Parameter implements DoubleParameter
 	
 	
 	/* The linked listeners */
-	private ArrayList<ParameterEventListener> eventListeners_ = new ArrayList<ParameterEventListener>();
+	private Vector eventListeners_ = new Vector();
 	
 	
     private boolean isEnabled_ = true;
@@ -66,7 +72,7 @@ public abstract class Parameter implements DoubleParameter
 	 *******************************************************/
 	public void addEventListener(ParameterEventListener l)
 	{
-		if (this.eventListeners_.contains(l) == false)
+		if (this.eventListeners_.indexOf(l) == -1)
 		{
 			this.eventListeners_.add(l);
 		}
@@ -77,7 +83,7 @@ public abstract class Parameter implements DoubleParameter
 	 *******************************************************/
 	public void removeEventListener(ParameterEventListener l)
 	{
-		this.eventListeners_.remove(l);
+		this.eventListeners_.removeElement(l);
 	}
 	
 	/*******************************************************
@@ -86,8 +92,9 @@ public abstract class Parameter implements DoubleParameter
 	 *******************************************************/
 	public void fireValueChangedEvent()
 	{
-		for (ParameterEventListener l : this.eventListeners_)
+		for (int index = 0; index < this.eventListeners_.size(); index++)
 		{
+			ParameterEventListener l = (ParameterEventListener)this.eventListeners_.items[index];
 			l.valueChanged(this);
 		}
 	}

@@ -24,7 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.ecu.param;
 
-import net.sourceforge.JDash.util.UTIL;
+import net.sourceforge.JDash.util.ByteUtil;
+
 
 /*****************************************************
  * An ECU Parameter is an extension to the minimum parameter.
@@ -64,7 +65,7 @@ public class ECUParameter extends Parameter
         if (this._name == null)
         {
         	String error = "Cannot create an ECU parameter with a null name.\nName: " + this._name + "\nDesc: " + this._description + "\nAddr: ";
-        	error += UTIL.bytesToString(this._address);
+        	error += ByteUtil.bytesToString(this._address);
         	throw new RuntimeException(error);  
         }
     }
@@ -105,7 +106,7 @@ public class ECUParameter extends Parameter
      *******************************************************/
     public void setResult(byte b)
     {
-    	setResult((double)UTIL.unsignedByteToInt(b));
+    	setResult((double)ByteUtil.unsignedByteToInt(b));
     }
 
     /******************************************************

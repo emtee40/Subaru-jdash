@@ -31,7 +31,7 @@ import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterException;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
-import net.sourceforge.JDash.util.UTIL;
+import net.sourceforge.JDash.util.ByteUtil;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -198,7 +198,7 @@ public class KWP2000Monitor extends RS232Monitor
 				Thread.sleep(100); /* Wait for just a bit longer. giveing the stale bytes time to complete */
 				System.out.println("Warning, there were stale bytes on the input stream");
 				byte[] staleBytes = readBytes(is, is.available());
-				System.out.println(UTIL.bytesToString(staleBytes));
+				System.out.println(ByteUtil.bytesToString(staleBytes));
 			}
 			
 			
@@ -214,7 +214,7 @@ public class KWP2000Monitor extends RS232Monitor
 			rxPacket.setHeader(readBytes(is, OBD_HEADER_LENGTH));
 			
 			/* From byte 1 of the header, extract the number of data bytes present */
-			int dataByteCount = UTIL.unsignedByteToInt(rxPacket.getHeader()[0]) & LENGTH_BYTE_MASK;
+			int dataByteCount = ByteUtil.unsignedByteToInt(rxPacket.getHeader()[0]) & LENGTH_BYTE_MASK;
 System.out.println("RX packet indicates: " + dataByteCount + " data bytes on their way");			
 
 			/* read the data bytes */

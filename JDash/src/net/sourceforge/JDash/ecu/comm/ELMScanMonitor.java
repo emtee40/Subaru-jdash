@@ -26,6 +26,7 @@ package net.sourceforge.JDash.ecu.comm;
 
 import gnu.io.RXTXPort;
 
+import net.sourceforge.JDash.ecu.comm.util.ELMUtil;
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterEventListener;
@@ -57,31 +58,6 @@ public class ELMScanMonitor extends RS232Monitor
 	 * ELM module, that the emulator doesn't support*/
 	private static final boolean USING_ECUEMULATOR_INTERFACE = true;
 	
-	public static final String AT_OK = "OK";
-	public static final String ERROR_BUS_BUSY = "BUS BUSY";
-	public static final String ERROR_FB_ERROR = "FB ERROR";
-	public static final String ERROR_DATA_ERROR = "DATA ERROR";
-	public static final String ERROR_NO_DATA = "NO DATA";
-	public static final String ERROR_UNKNOWN = "?";
-	
-	public static final int MODE_1 = 1;
-	public static final int MODE_2 = 2;
-	public static final int MODE_3 = 3;
-	public static final int MODE_4 = 4;
-	public static final int MODE_5 = 5;
-	public static final int MODE_6 = 6;
-	public static final int MODE_7 = 7;
-	public static final int MODE_8 = 8;
-	public static final int MODE_9 = 9;
-	
-	public static final int REQUEST_PID_BYTE = 0;
-	public static final int RESPONSE_MODE_BYTE = 0;
-	public static final int RESPONSE_PID_BYTE = 1;
-	
-	public static final int MODE_RESPONSE = 40;
-		
-	public static final int DEFAULT_ELM_BAUD = 9600;
-	private static final int MAX_READ_BUFFER = 512;
 	
 	private String ecuId_ = "";
     
@@ -100,7 +76,7 @@ public class ELMScanMonitor extends RS232Monitor
 	 ******************************************************/
 	public ELMScanMonitor() throws Exception
 	{
-		super(DEFAULT_ELM_BAUD, RXTXPort.DATABITS_8, RXTXPort.PARITY_NONE, RXTXPort.STOPBITS_1);
+		super(ELMUtil.DEFAULT_ELM_BAUD, RXTXPort.DATABITS_8, RXTXPort.PARITY_NONE, RXTXPort.STOPBITS_1);
 		
 		this.writer_ = new BufferedWriter(new OutputStreamWriter(getPort().getOutputStream()));
 		this.reader_ = new BufferedReader(new InputStreamReader(getPort().getInputStream()));
@@ -158,7 +134,7 @@ public class ELMScanMonitor extends RS232Monitor
 		/* Disable Echo */
 		initListener.update("Disable Echo", 2, 5);
 		buffer = sendELMString("ATE0");
-		if (buffer.indexOf(AT_OK) == -1)
+		if (buffer.indexOf(ELMUtil.AT_OK) == -1)
 		{
 			throw new Exception("Unable to set the ELM modules echo to off [ATE0].  Response was [" + buffer + "]");
 		}
@@ -167,7 +143,7 @@ public class ELMScanMonitor extends RS232Monitor
 		/* Turn of the LineFeed */
 		initListener.update("Set Command", 3, 5);
 		buffer = sendELMString("ATL0");
-		if (buffer.indexOf(AT_OK) == -1)
+		if (buffer.indexOf(ELMUtil.AT_OK) == -1)
 		{
 			throw new Exception("Unable to set the ELM modules LF to off [ATL0].  Response was [" + buffer + "]");
 		}
@@ -235,7 +211,7 @@ public class ELMScanMonitor extends RS232Monitor
 			{
 				/* Set the timeout value */
 				buffer = sendELMString("ATST" + timeoutSpeed);
-				if (buffer.indexOf(AT_OK) == -1)
+				if (buffer.indexOf(ELMUtil.AT_OK) == -1)
 				{
 					throw new Exception("Unable to set the ELM Timeout (ATST) value to " + timeoutSpeed + " Response was [" + buffer + "]");
 				}
@@ -389,7 +365,7 @@ public class ELMScanMonitor extends RS232Monitor
 			{
 				
 				/* Request the CEL codes */
-				String celResponse = sendELMString("0" + MODE_3);
+				String celResponse = sendELMString("0" + ELMUtil.MODE_3);
 //				System.out.println("Response to CEL code request is [" + celResponse + "]");
 				
 				/* Convert to an array of Strings */
@@ -404,7 +380,7 @@ public class ELMScanMonitor extends RS232Monitor
 				/* We should get a 43 back */
 				if (responseValues[0].equalsIgnoreCase("43") == false)
 				{
-					throw new Exception("Response from ELM did not start with the expected value of " + (MODE_RESPONSE + MODE_3) + " it was " + responseValues[0]);
+					throw new Exception("Response from ELM did not start with the expected value of " + (ELMUtil.MODE_RESPONSE + ELMUtil.MODE_3) + " it was " + responseValues[0]);
 				}
 				
 				
@@ -550,7 +526,7 @@ public class ELMScanMonitor extends RS232Monitor
 	private void retreiveMode1ParamValue(ECUParameter param) throws Exception
 	{
 		/* Put together the command request.  byte 0 is the mode, byte 1 is the PID */
-		String command = String.format("%02d%02x", MODE_1, param.getAddress()[REQUEST_PID_BYTE]);
+		String command = String.format("%02d%02x", ELMUtil.MODE_1, param.getAddress()[ELMUtil.REQUEST_PID_BYTE]);
 		command = command.toUpperCase();
 		
 		/* Send the command, and retreive the response */
@@ -560,12 +536,12 @@ public class ELMScanMonitor extends RS232Monitor
 		
 		
 		/* Bytes 0 and 1 should be the 40 + the mode and the PID. eg.  Mode 01 PID 06 will return [41 06] */
-		if ((responseValues[RESPONSE_MODE_BYTE] != MODE_RESPONSE + MODE_1) &&
-			(responseValues[RESPONSE_PID_BYTE] != param.getAddress()[REQUEST_PID_BYTE]))
+		if ((responseValues[ELMUtil.RESPONSE_MODE_BYTE] != ELMUtil.MODE_RESPONSE + ELMUtil.MODE_1) &&
+			(responseValues[ELMUtil.RESPONSE_PID_BYTE] != param.getAddress()[ELMUtil.REQUEST_PID_BYTE]))
 		{
 			throw new Exception("Response from ELM did not start with the expected byte pair [" + 
-						MODE_RESPONSE + MODE_1 + " " + param.getAddress()[REQUEST_PID_BYTE] + "]" + 
-						" it responded with [" + responseValues[RESPONSE_MODE_BYTE] + " " + responseValues[RESPONSE_PID_BYTE] + "]");
+					ELMUtil.MODE_RESPONSE + ELMUtil.MODE_1 + " " + param.getAddress()[ELMUtil.REQUEST_PID_BYTE] + "]" + 
+						" it responded with [" + responseValues[ELMUtil.RESPONSE_MODE_BYTE] + " " + responseValues[ELMUtil.RESPONSE_PID_BYTE] + "]");
 		}
 			
 		
@@ -627,7 +603,7 @@ public class ELMScanMonitor extends RS232Monitor
 		{
 			
 			int responseCount = 0;
-			char[] buffer = new char[MAX_READ_BUFFER];
+			char[] buffer = new char[ELMUtil.MAX_READ_BUFFER];
 			String bufferLine = null;
 			String response = "";
 			
@@ -644,7 +620,22 @@ public class ELMScanMonitor extends RS232Monitor
 			
 			/* Write the command */
 			this.writer_.write(cmd);
-			this.writer_.flush();
+			
+			/* If using the emulator,then catch and ignore the resulting excepiton about the drain. 
+			 * it has NO impact on how things operate */
+			if(USING_ECUEMULATOR_INTERFACE)
+			{
+				try
+				{
+					this.writer_.flush();
+				}
+				catch(Exception e)
+				{ /* do nothing */ }
+			}
+			else
+			{
+				this.writer_.flush();
+			}
 			
 			/* Read the lines until we get to a character that breaks the readline loop */
 			while (true)
@@ -680,29 +671,29 @@ public class ELMScanMonitor extends RS232Monitor
 	
 			
 			/* ELM Didn't understand command, or was not ready */
-			if (response.indexOf(ERROR_UNKNOWN) != -1)
+			if (response.indexOf(ELMUtil.ERROR_UNKNOWN) != -1)
 			{
 				throw new Exception("\n" + response + "\nELM module did not understand our command.  cmd[" + cmd + "]");
 			}
 		
 			
-			if (response.indexOf(ERROR_BUS_BUSY) != -1)
+			if (response.indexOf(ELMUtil.ERROR_BUS_BUSY) != -1)
 			{
 				throw new Exception("\n" + response + "\nELM module responded with bus busy error.  cmd[" + cmd + "]");
 			}
 			
-			if (response.indexOf(ERROR_FB_ERROR) != -1)
+			if (response.indexOf(ELMUtil.ERROR_FB_ERROR) != -1)
 			{
 				throw new Exception("\n" + response + "\nELM Feedback Error.  cmd[" + cmd + "]");
 			}
 					
 					
-			if (response.indexOf(ERROR_DATA_ERROR) != -1)
+			if (response.indexOf(ELMUtil.ERROR_DATA_ERROR) != -1)
 			{
 				throw new Exception("\n" + response + "\nELM Module data error.  cmd[" + cmd + "]");
 			}
 						
-			if (response.indexOf(ERROR_NO_DATA) != -1)
+			if (response.indexOf(ELMUtil.ERROR_NO_DATA) != -1)
 			{
 				throw new Exception("\n" + response + "\nELM did not recieve any data.  cmd[" + cmd + "]");
 			}
@@ -726,7 +717,7 @@ public class ELMScanMonitor extends RS232Monitor
 	{
 		try
 		{
-			String buffer = sendELMString("0" + MODE_4);
+			String buffer = sendELMString("0" + ELMUtil.MODE_4);
 			
 			if ("44".equals(buffer) == false)
 			{

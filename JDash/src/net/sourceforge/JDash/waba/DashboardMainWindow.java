@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.waba;
 
 
+import net.sourceforge.JDash.ecu.comm.util.ELMUtil;
 import net.sourceforge.JDash.waba.error.ErrorDialog;
 import net.sourceforge.JDash.waba.error.ErrorLog;
 import waba.io.SerialPort;
@@ -39,6 +40,8 @@ import waba.ui.MainWindow;
 public class DashboardMainWindow extends MainWindow
 {
 
+	
+	private SerialPort serialPort_ = null;
 
 	/*******************************************************
 	 * Override
@@ -51,9 +54,6 @@ public class DashboardMainWindow extends MainWindow
 			/* Setup the look and feel */
 			Settings.setUIStyle(Settings.Vista);
 			
-			/* Initialize the Setup instance */
-			Setup.init();
-			Setup.getInstance();
 			
 			/* Initialize the Logger instance */
 			ErrorLog.init();
@@ -73,21 +73,32 @@ public class DashboardMainWindow extends MainWindow
 				//SerialPort sp = new SerialPort(0, 2400);
 				
 				
-				SerialPort port = new SerialPort(5, 9600, 8, false, 1);
-				if (!port.isOpen())
+				/* Connect to the serial port */
+				this.serialPort_ = new SerialPort(5, 9600, 8, false, 1);
+				if (!this.serialPort_.isOpen())
 				{
-					return;
+					ErrorDialog.showError("Unable to open serial port");
 				}
+
+				ELMUtil elmUtil = new ELMUtil();
+				
 				String tx = "010D\r";
-				port.writeBytes(tx.getBytes(), 0, tx.length());
+				this.serialPort_.writeBytes(tx.getBytes(), 0, tx.length());
 				Thread.sleep(10);
 				byte[] buf = new byte[20];
-				int count = port.readBytes(buf, 0, 10);
-				//ErrorDialog.showError(new String(buf));
-				System.out.println("\n\n\n" + count + "[" + new String(buf) + "]");
+				int count = this.serialPort_.readBytes(buf, 0, 10);
+				String result = new String(buf, 0, count).trim();
+				
+				int[] intValues = elmUtil.convertELMResonseToIntArray(result);
+				for (int index = 0; index < intValues.length; index++)
+				{
+					System.out.print("(" + String.format("%02x", intValues[index]) + ") ");
+				}
+				
+				System.out.println("NO Mas");
 				
 				
-				port.close();
+
 			}
 			catch(Throwable t)
 			{
@@ -113,7 +124,7 @@ public class DashboardMainWindow extends MainWindow
 	 *******************************************************/
 	public void onExit()
 	{
-		// TODO Auto-generated method stub
+		this.serialPort_.close();
 		super.onExit();
 	}
 	

@@ -28,7 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import net.sourceforge.JDash.ecu.param.ECUParameter;
-import net.sourceforge.JDash.util.UTIL;
+import net.sourceforge.JDash.util.ByteUtil;
 import gnu.io.RXTXPort;
 
 
@@ -119,7 +119,7 @@ public class SSMOBD1Monitor extends RS232Monitor
 	                		txPacket[1] = param.getAddress()[0];
 	                		txPacket[2] = param.getAddress()[1];
 	                		txPacket[3] = 0;
-	                System.out.println("TX: " + UTIL.bytesToString(txPacket));
+	                System.out.println("TX: " + ByteUtil.bytesToString(txPacket));
 	                		
 	                		/* Send the read packet */
 	                		os.write(txPacket, 0, txPacket.length);
@@ -127,7 +127,7 @@ public class SSMOBD1Monitor extends RS232Monitor
 	                		/* Read the result */
 	                		byte[] rxPacket = readBytes(is, SSM_OBD1_ADDRESS_SIZE + 1);
 	                		
-	                System.out.println("RX: " + UTIL.bytesToString(rxPacket));
+	                System.out.println("RX: " + ByteUtil.bytesToString(rxPacket));
 	                		
 	                		/* Send the stop command */
 	                		os.write(new byte[] {SSM_STOP_CODE});
@@ -136,8 +136,8 @@ public class SSMOBD1Monitor extends RS232Monitor
 	                		if ((rxPacket[0] != param.getAddress()[0]) && (rxPacket[1] != param.getAddress()[1]))
 	                		{
 	                			throw new Exception("The packet received from the ECU did not start with the memory address as expected\n" +
-	                								"TX:" + UTIL.bytesToString(txPacket) + "\n" + 
-	                								"RX:" + UTIL.bytesToString(rxPacket));
+	                								"TX:" + ByteUtil.bytesToString(txPacket) + "\n" + 
+	                								"RX:" + ByteUtil.bytesToString(rxPacket));
 	                		}
 	                		
 	                		/* Set the result to the parameter */

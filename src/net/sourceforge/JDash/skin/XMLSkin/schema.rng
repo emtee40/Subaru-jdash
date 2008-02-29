@@ -1,0 +1,601 @@
+<!--
+ *
+ * The official RelaxNG schema for an XML Skin file (.skn)
+ *
+ * $Id:$
+ -->
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" 
+         xmlns:a="http://www.example.com/annotation" 
+         datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+  <!-- The ROOT -->
+  <start>
+    <ref name="skin"/>
+  </start>
+
+
+  <!-- skin definition -->
+  <define name="skin">
+    <element name="skin">
+      <!-- Attributes -->
+      <a:documentation>The root node of the XML Document.</a:documentation>
+      <attribute name="name">
+        <a:documentation>The unique name for this skin</a:documentation>
+        <text/>
+      </attribute>
+      <optional>
+        <attribute name="extends"><text/></attribute>
+      </optional>
+      <!-- Elements -->
+      <interleave>
+          <element name="description">
+            <text/>
+          </element>
+          <ref name="window"/>
+          <zeroOrMore>
+            <ref name="resource"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="trigger"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="analog-gauge"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="digital-gauge"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="led-gauge"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="linegraph-gauge"/>
+          </zeroOrMore>
+      </interleave>
+    </element>
+  </define>
+  
+  <!-- window definition -->
+  <define name="window">
+    <element name="window">
+      <attribute name="width">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="height">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="type">
+        <choice>
+          <value>window</value>
+          <value>fullscreen</value>
+        </choice>
+      </attribute>
+      <attribute name="scale">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="fill-color"><text/></attribute>
+      <ref name="all-shapes"/>
+    </element>
+  </define>
+  
+  <!-- resource definition -->
+  <define name="resource">
+    <element name="resource">
+      <attribute name="name"><text/></attribute>
+      <attribute name="type">
+        <choice>
+          <value>image</value>
+          <value>color</value>
+          <value>sound</value>
+          <value>font</value>
+        </choice>
+      </attribute>
+      <attribute name="value"><text/></attribute>
+    </element>
+  </define>
+
+  <!-- trigger definition -->
+  <define name="trigger">
+    <element name="trigger">
+      <ref name="sensor"/>
+      <attribute name="sensor-min"><text/></attribute>
+      <attribute name="sensor-max"><text/></attribute>
+      <oneOrMore>
+        <ref name="event"/>
+      </oneOrMore>
+    </element>
+  </define>
+  
+  <!-- event definition -->
+  <define name="event">
+    <element name="event">
+      <attribute name="type">
+        <choice>
+          <value>enter-range</value>
+          <value>exit-range</value>
+          <value>down</value>
+          <value>up</value>
+        </choice>
+      </attribute>
+      <optional>
+        <attribute name="destination">
+          <choice>
+            <value>sound</value>
+            <value>stdout</value>
+            <value>logger</value>
+            <value>monitor</value>
+            <value>all</value>
+          </choice>
+        </attribute>
+      </optional>
+      <attribute name="action"><text/></attribute>
+    </element>
+  </define>
+  
+  <!-- analog-gauge definition -->
+  <define name="analog-gauge">
+    <element name="analog-gauge">
+      <ref name="sensor"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="sensor-min"/>
+      <ref name="sensor-max"/>
+      <ref name="gauge-min"/>
+      <ref name="gauge-max"/>
+      <optional>
+        <attribute name="reverse">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+      </optional>
+      <interleave>
+        <optional>
+          <ref name="static-shapes"/>
+        </optional>
+        <ref name="all-needle-shapes"/>
+        <optional>
+          <ref name="button-shape"/>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+  
+  <!-- digital-gauge definition -->
+  <define name="digital-gauge">
+    <element name="digital-gauge">
+      <ref name="sensor"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <optional>
+        <ref name="static-shapes"/>
+      </optional>
+      <ref name="text-shape"/>
+    </element>
+  </define>
+  
+  <!-- led-gauge definition -->
+  <define name="led-gauge">
+    <element name="led-gauge">
+      <ref name="sensor"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <optional>
+        <ref name="static-shapes"/>
+      </optional>
+      <ref name="high-low-needle-shapes"/>
+      <oneOrMore>
+        <element name="led">
+          <attribute name="sensor-min">
+            <data type="string"/>
+          </attribute>
+          <attribute name="sensor-max">
+            <data type="string"/>
+          </attribute>
+          <ref name="simple-shapes"/>
+        </element>
+      </oneOrMore>
+    </element>
+  </define>
+  
+  <!-- linegraph-gauge definition -->
+  <define name="linegraph-gauge">
+    <element name="linegraph-gauge">
+      <ref name="sensor"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+      <attribute name="label"><text/></attribute>
+      <attribute name="seconds">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="sensor-min"><text/></attribute>
+      <attribute name="sensor-max"><text/></attribute>
+      <attribute name="format"><text/></attribute>
+      <optional>
+        <element name="text">
+          <attribute name="type">
+            <value>main</value>
+          </attribute>
+          <ref name="color"/>
+          <ref name="x-coord"/>
+          <ref name="y-coord"/>
+          <ref name="size"/>
+          <attribute name="format"><text/></attribute>
+          <attribute name="font"><text/></attribute>
+        </element>
+      </optional>
+      <optional>
+        <element name="text">
+          <attribute name="type">
+            <value>high</value>
+          </attribute>
+          <ref name="color"/>
+          <ref name="x-coord"/>
+          <ref name="y-coord"/>
+          <ref name="size"/>
+          <attribute name="format"><text/></attribute>
+          <attribute name="font"><text/></attribute>
+        </element>
+      </optional>
+      <optional>
+        <element name="text">
+          <attribute name="type">
+            <value>low</value>
+          </attribute>
+          <ref name="color"/>
+          <ref name="x-coord"/>
+          <ref name="y-coord"/>
+          <ref name="size"/>
+          <attribute name="format"><text/></attribute>
+          <attribute name="font"><text/></attribute>
+        </element>
+      </optional>
+    </element>
+  </define>
+
+
+  <!-- static definition -->
+  <define name="static-shapes">
+    <element name="static">
+      <ref name="all-shapes"/>
+    </element>
+  </define>
+  
+  <!-- text shape definition -->
+  <define name="text-shape">
+    <element name="text">
+      <ref name="color"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="size"/>
+      <attribute name="format"><text/></attribute>
+      <attribute name="font"><text/></attribute>
+    </element>
+  </define>
+  
+  <!-- rectangle shape definition -->
+  <define name="rectangle-shape">
+    <element name="rectangle">
+      <ref name="color"/>
+      <ref name="fill-color"/>
+      <ref name="line-width"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+    </element>
+  </define>
+  
+  <!-- roundrectangle shape definition -->
+  <define name="roundrectangle-shape">
+    <element name="round-rectangle">
+      <ref name="color"/>
+      <ref name="fill-color"/>
+      <ref name="line-width"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+      <attribute name="arcw">
+        <data type="integer"/>
+      </attribute>
+      <attribute name="arch">
+        <data type="integer"/>
+      </attribute>
+    </element>
+  </define>
+  
+  
+  <!-- image shape definition -->
+  <define name="image-shape">
+    <element name="image">
+      <ref name="name"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+    </element>
+  </define>
+
+  <!-- ellipse shape definition -->  
+  <define name="ellipse-shape">
+    <element name="ellipse">
+      <ref name="color"/>
+      <ref name="fill-color"/>
+      <ref name="line-width"/>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+    </element>
+  </define>
+
+  <!-- polygon shape definition -->
+  <define name="polygon-shape">
+    <element name="polygon">
+      <ref name="color"/>
+      <ref name="fill-color"/>
+      <ref name="line-width"/>
+      <oneOrMore>
+        <ref name="point-shape"/>
+      </oneOrMore>    
+    </element>
+  </define>
+  
+  <!-- button shape definition -->
+  <define name="button-shape">
+    <element name="button">
+      <attribute name="type">
+        <choice>
+          <value>push-button</value>
+          <value>toggle-switch</value>
+        </choice>
+      </attribute>
+      <attribute name="up-image">
+        <data type="string"/>
+      </attribute>
+      <attribute name="down-image">
+        <data type="string"/>
+      </attribute>
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+      <ref name="width"/>
+      <ref name="height"/>
+      <oneOrMore>
+        <ref name="event"/>
+      </oneOrMore>
+    </element>
+  </define>
+
+  <!-- Point Shape definition -->
+  <define name="point-shape">
+    <element name="point">
+      <ref name="x-coord"/>
+      <ref name="y-coord"/>
+    </element>
+  </define>  
+  
+  <!-- Line Shape definition -->
+  <define name="line-shape">
+    <element name="line">
+      <ref name="color"/>
+      <ref name="fill-color"/>
+      <ref name="line-width"/>
+      <ref name="point-shape"/>
+      <ref name="point-shape"/>
+    </element>
+  </define>
+  
+  <!-- The 3 common needle shapes. main/high/low -->
+  <define name="all-needle-shapes">
+      <element name="needle">
+        <attribute name="type">
+          <value>main</value>
+        </attribute>
+        <ref name="simple-shapes"/>
+      </element>
+      <ref name="high-low-needle-shapes"/>
+  </define>
+  
+  <!-- name="high-low-needle-shapes" -->
+  <define name="high-low-needle-shapes">
+  <optional>
+      <element name="needle">
+          <attribute name="type">
+            <value>high</value>
+          </attribute>
+          <optional>
+            <attribute name="delay">
+              <data type="integer"/>
+            </attribute>
+          </optional>
+          <optional>
+            <attribute name="position">
+              <choice>
+                <value>top</value>
+                <value>bottom</value>
+                <value>left</value>
+                <value>right</value>
+                <value>center</value>
+              </choice>
+            </attribute>
+          </optional>
+          <ref name="simple-shapes"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="needle">
+          <attribute name="type">
+            <value>low</value>
+          </attribute>
+          <optional>
+            <attribute name="delay">
+              <data type="integer"/>
+            </attribute>
+          </optional>
+          <optional>
+            <attribute name="position">
+              <choice>
+                <value>top</value>
+                <value>bottom</value>
+                <value>left</value>
+                <value>right</value>
+                <value>center</value>
+              </choice>
+            </attribute>
+          </optional>
+          <ref name="simple-shapes"/>
+        </element>
+      </optional>
+  </define>
+  
+  <!-- needle shape definition -->
+  <define name="needle-shape">
+    <element name="needle">
+      <attribute name="type">
+        <choice>
+          <value>low</value>
+          <value>main</value>
+          <value>high</value>
+        </choice>
+      </attribute>
+      <optional>
+        <ref name="delay"/>
+      </optional>
+      <ref name="simple-shapes"/>
+    </element>
+  </define>
+
+  <!-- Defines a combination of all possible simple shapes, not including the text shape -->
+  <define name="simple-shapes">
+    <interleave>
+    <zeroOrMore>
+      <ref name="rectangle-shape"/>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="image-shape"/>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="ellipse-shape"/>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="polygon-shape"/>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="roundrectangle-shape"/>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="line-shape"/>
+    </zeroOrMore>
+  </interleave>
+  </define>
+    
+    
+  <!-- Defines a combination of all standard shapes, including text shapes -->
+  <define name="all-shapes">
+    <interleave>
+      <zeroOrMore>
+        <ref name="button-shape"/>
+      </zeroOrMore>
+      <zeroOrMore>
+        <ref name="text-shape"/>
+      </zeroOrMore>
+      <ref name="simple-shapes"/>
+    </interleave>
+  </define>
+  
+  <!-- Some of the standad and common element attributes -->
+  <define name="name">
+    <attribute name="name">
+      <data type="string"/>
+    </attribute>
+  </define>
+
+  <define name="sensor">
+    <attribute name="sensor">
+      <data type="string"/>
+    </attribute>
+  </define>
+  
+  <define name="x-coord">
+    <attribute name="x">
+      <data type="integer"/>
+    </attribute>
+  </define>
+  
+  <define name="y-coord">
+    <attribute name="y">
+      <data type="integer"/>
+    </attribute>
+  </define>
+  
+  <define name="size">
+    <attribute name="size">
+      <data type="integer"/>
+    </attribute>
+  </define>
+  
+  <define name="line-width">
+    <attribute name="line-width">
+      <data type="integer"/>
+    </attribute>
+  </define>
+  
+  <define name="height">
+    <attribute name="height">
+      <data type="integer"/>
+    </attribute>
+  </define>
+  
+  <define name="width">
+    <attribute name="width">
+      <data type="integer"/>
+    </attribute>
+  </define>
+  
+  <define name="color">
+    <attribute name="color">
+      <data type="string"/>
+    </attribute>
+  </define>
+  
+  <define name="fill-color">
+    <attribute name="fill-color">
+      <data type="string"/>
+    </attribute>
+  </define>
+
+  <define name="sensor-min">
+    <attribute name="sensor-min">
+      <data type="integer"/>
+    </attribute>
+  </define>
+
+  <define name="sensor-max">
+    <attribute name="sensor-max">
+      <data type="integer"/>
+    </attribute>
+  </define>
+
+  <define name="gauge-min">
+    <attribute name="gauge-min">
+      <data type="integer"/>
+    </attribute>
+  </define>
+
+  <define name="gauge-max">
+    <attribute name="gauge-max">
+      <data type="integer"/>
+    </attribute>
+  </define>
+
+  <define name="delay">
+    <attribute name="delay">
+      <data type="integer"/>
+    </attribute>
+  </define>
+
+
+</grammar>

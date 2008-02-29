@@ -1,0 +1,215 @@
+<!-- =======================================
+ This is the JDash ANT build file.  
+ The following list defines the set of common build targets.
+ 
+ all = Build everything up to the JAR file, and put it into the RTE dir.
+ compile = Compile sources ONLY
+ jar = Build the JAR file
+ rte = Build the RTE. This is the same as "all"
+ javadoc = Build the javadoc files
+ launch = Launch the application
+ launch-config = Launch the config application
+ clean = clean up all build files
+ release = create a release zip file named JDash-x.x.x.zip
+
+ $Id:$
+============================================ -->
+
+<project default="all" name="JDash">
+	
+	<!-- Init -->
+	<target name="init">
+		<property file="build.properties"/>
+		<property file="build.number"/>
+		<tstamp>
+		    <format property="build.date" pattern="MM-dd-yyyy" />
+		  </tstamp>
+		<mkdir dir="${outputDir}" />
+	</target>
+	
+	<!-- ALL -->
+	<target name="all" depends="init,rte" description="Build all of JDash, but not the install or zip.">
+		<echo message="JDash build complete"/>
+	</target>
+	
+	<!-- Compile -->
+	<target name="compile" depends="init">
+		<echo message="Compiling JDash"/>
+		<javac 
+			srcdir="${sourceDir}" 
+			destdir="${outputDir}" 
+			classpath="${classpath}" 
+			deprecation="true" 
+			debug="true" 
+			debuglevel="source,lines,vars"
+		/>
+		<copy todir="${outputDir}">
+			<fileset dir="${sourceDir}">
+				<exclude name="**/*.java"/>
+				<exclude name="**/.svn"/>
+			</fileset>
+	    </copy>
+	</target>
+	
+	<!-- Jar -->
+	<target name="jar" depends="init,compile">
+
+		<!-- App Jar -->
+		<echo message="Creating Application jar file..."/>
+		<delete file="${manifest}" />
+		<manifest file="${manifest}">
+			<attribute name="Built-By" value="${user.name} (Copyright 2007)"/>
+			<attribute name="Main-Class" value="net.sourceforge.JDash.Startup"/>
+			<attribute name="Class-Path" value="${jar01} ${jar02} ${jar03} ${jar04} ${jar05} ${jar06} ${jar07} ${jar08} ${jar09} ${jar10} ${jar11} ${jar12}"/>
+		</manifest>
+		<jar destfile="${rteDir}/${JDashJar}"
+		     basedir="${outputDir}"
+		     includes="**/*"
+		     manifest="${manifest}"
+         	/>
+		<delete file="${manifest}" />
+
+		<!-- Config Jar -->
+		<echo message="Creating Config jar file..."/>
+		<delete file="${manifest}" />
+		<manifest file="${manifest}">
+			<attribute name="Built-By" value="${user.name} (Copyright 2007)"/>
+			<attribute name="Main-Class" value="net.sourceforge.JDash.StartupConfigWrapper"/>
+			<attribute name="Class-Path" value="${JDashJar} ${jar01} ${jar02} ${jar03} ${jar04} ${jar05} ${jar06} ${jar07} ${jar08} ${jar09} ${jar10} ${jar11} ${jar12}"/>
+		</manifest>
+		<jar destfile="${rteDir}/${JDashConfigJar}"
+			basedir="${outputDir}"
+			includes="**/StartupConfigWrapper.*"
+			manifest="${manifest}"/>
+		<delete file="${manifest}" />
+
+		<!-- Waba Jar -->
+		<echo message="Creating SuperWaba jar file..."/>
+		<delete file="${manifest}" />
+		<manifest file="${manifest}">
+			<attribute name="Built-By" value="${user.name} (Copyright 2007)"/>
+			<attribute name="Main-Class" value="waba.applet.Applet"/>
+			<attribute name="Class-Path" value="${JDashJar} comm.jar SuperWaba.jar"/>
+		</manifest>
+		<jar destfile="${rteDir}/${JDashWabaJar}"
+			basedir="${outputDir}"
+			includes="/net/sourceforge/JDash/waba/**"
+			manifest="${manifest}"/>
+		<delete file="${manifest}" />
+		
+	</target>
+	
+	<!-- RTE -->
+	<target name="rte" depends="init,jar">
+		<echo message="Creating JDash Runtime Environment"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/icon.ico" tofile="${rteDir}/icon.ico"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/icon.png" tofile="${rteDir}/icon.png"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/config.png" tofile="${rteDir}/config.png"/>
+		<copy file="${sourceDir}/net/sourceforge/JDash/config.ico" tofile="${rteDir}/config.ico"/>
+	</target>
+	
+	<!-- java doc -->
+	<target name="javadoc" depends="init">
+		<javadoc packagenames="*"
+			sourcepath="${sourceDir}"
+			destdir="${docDir}/javadoc"
+			classpath="${classpath}"
+			author="true"
+			version="true"
+			windowtitle="${projectName} API"
+			doctitle="${projectName}"
+			header="${projectName} JavaDoc"
+			overview="Overview"
+			bottom="Copyright (c) 2006 Shane Powell under the LGPL License. All Rights Reserved."
+    	/>
+	</target>
+	
+	<!-- Build zip file -->
+	<target name="release" depends="init,clean,increment-build-number,generate-version-source,rte">
+		<fail unless="major.number"/>
+		<fail unless="minor.number"/>
+		<fail unless="build.number"/>
+		<exec executable="java" dir="install">
+			<arg line=" -cp standalone-compiler.jar" />
+			<arg line=" -Dtools.jar=$JAVA_HOME/lib/tools.jar" />
+			<arg line=" com.izforge.izpack.compiler.Compiler" />
+			<arg line=" izpack_install.xml" />
+			<arg line=" -b ../${rteDir} -o setup"/>
+		</exec>
+		<zip
+		    destFile="JDash-${major.number}.${minor.number}.${build.number}.zip"
+		    basedir="./install"
+		    includes="setup.jar install.txt"/>
+		<delete file="install/setup.jar"/>
+		<move file="rte" tofile="JDash"/>
+		<zip
+			destFile="JDash-${major.number}.${minor.number}.${build.number}-noinstaller.zip"
+			basedir="."
+			includes="JDash/**"/>
+		<move file="jdash" tofile="rte"/>
+	</target>
+		
+	
+	<!-- Increment the build number -->
+	<target name="increment-build-number">
+		<echo message="Incrementing Build Number..."/>
+		<buildnumber/>
+		<antcall target="init"/>
+	</target>
+	
+	<!-- Generate the version.java file -->
+	<target name="generate-version-source" depends="init">
+		<fail unless="major.number"/>
+		<fail unless="minor.number"/>
+		<fail unless="build.number"/>
+		<fail unless="build.date"/>
+		<echo message="Generating Version.java source file" />
+		<echo file="${sourceDir}/net/sourceforge/JDash/Version.java">
+	/**Do NOT Modify. Generated by ant build task */
+	package net.sourceforge.JDash;
+	public interface Version
+	{
+		public static final int MAJOR = ${major.number};
+		public static final int MINOR = ${minor.number};
+		public static final int BUILD = ${build.number};
+		public static final String BUILD_DATE = "${build.date}";
+	}
+		</echo>
+	</target>
+	
+	<!-- clean -->
+	<target name="clean" depends="init">
+		<echo message="Cleaning..." />
+		<delete failonerror="no" dir="${outputDir}" />
+		<delete failonerror="no" file="${rteDir}/${JDashJar}" />
+	</target>
+	
+	
+	<!-- Launch -->
+	<target name="launch" depends="rte">
+		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true"/>
+	</target>
+
+	<!-- Launch Config -->
+	<target name="launch-config" depends="rte">
+		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true">
+			<arg line="-config"/>
+		</java>
+	</target>
+
+	<!-- Launch JDash and enable the JMP Java memory profiler plugin -->
+	<target name="launch-jmp" depends="rte">
+		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true">
+			<jvmarg line="-Xrunjmp"/>
+		</java>
+	</target>
+
+	<!-- Launch the SuperWaba version -->
+	<target name="launch-waba" depends="rte">
+		<java jar="${rteDir}/${JDashWabaJar}" fork="true" dir="${rteDir}/" failonerror="true">
+			<sysproperty key="java.library.path" value="${rteDir}"/>
+			<arg id="" value="net.sourceforge.JDash.waba.DashboardMainWindow"/>
+		</java>
+	</target>
+	
+</project>

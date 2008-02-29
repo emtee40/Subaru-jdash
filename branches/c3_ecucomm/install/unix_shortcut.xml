@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<shortcuts>
+	<programGroup defaultName="JDash" location="applications"/>
+	
+<shortcut
+	 name="JDash"
+	 programGroup="yes"
+	 desktop="yes"
+	 startMenu="yes"
+	 startup="no"
+	 target="java"
+	 workingDirectory="$INSTALL_PATH"
+	 commandLine="-Dsun.java2d.opengl=True -jar &quot;$INSTALL_PATH/JDash.jar&quot;"
+	 initialState="noShow"
+	 iconFile="$INSTALL_PATH/icon.png"
+	 type="Application"
+	 encoding="UTF-8"
+	 description="Java OBD-II Sensor Display">
+	<createForPack name="Main Application"/>
+</shortcut>
+
+<shortcut
+	 name="Configure"
+	 programGroup="yes"
+	 desktop="yes"
+	 startMenu="yes"
+	 startup="no"
+	 target="java"
+	 workingDirectory="$INSTALL_PATH"
+	 commandLine="-jar &quot;$INSTALL_PATH/JDashConfig.jar&quot;"
+	 initialState="noShow"
+	 iconFile="$INSTALL_PATH/config.png"
+	 type="Application"
+	 encoding="UTF-8"
+	 description="Java OBD-II Sensor Display">
+	<createForPack name="Main Application"/>
+</shortcut>
+
+
+<shortcut
+	 name="Uninstall"
+	 programGroup="yes"
+	 desktop="no"
+	 startMenu="yes"
+	 startup="no"
+	 target="java"
+	 commandLine="-jar &quot;$INSTALL_PATH/Uninstaller/uninstaller.jar&quot;"
+	 initialState="noShow"
+	 iconFile="$INSTALL_PATH/uninstall.png"
+	 iconIndex="0"
+	 workingDirectory=""
+	 type="Application"
+	 encoding="UTF-8"
+	 description="Uninstaller">
+	<createForPack name="Main Application" />
+</shortcut>
+
+</shortcuts>

@@ -35,6 +35,7 @@ import net.sourceforge.JDash.skin.SkinEvent;
 
 
 import java.util.List;
+import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -44,10 +45,19 @@ import java.util.Collections;
  * the ECUMonitor is the primary interface, this method provides
  * a few necessary initialization and setup functions.  And
  * the markTime() method.
+ * 
+ * Monitor objects encapsulate the functionality of mediating
+ * (possibly recurring) requests to the ECU.  The details
+ * of how this is done are contained in the ProtocolHandler
+ * class.
  *****************************************************/
 public abstract class BaseMonitor implements ECUMonitor
 {
-	
+
+
+	/*************************************************
+	 * Constants	
+     *************************************************/		
 	/** This is the expected name of all DTC codes.  They start with this + an index number.  eg DTC_0 or DTC_4 */
 	public static final String DTC_PARAM_NAME_PREFIX = "DTC_";
 	
@@ -55,6 +65,10 @@ public abstract class BaseMonitor implements ECUMonitor
 	public static final String DTC_HISTORY_PARAM_NAME_PREFIX = "DTC_HIST_";
 	
 	public static final String ACTION_DTC_RESET = "dtc-reset";
+
+	/*************************************************
+	 * 
+     *************************************************/		
 	
 	/** This list will hold the entire list of ECU Bound parameters */
     protected List<ECUParameter> params_;
@@ -62,15 +76,18 @@ public abstract class BaseMonitor implements ECUMonitor
     /* This is the special time parameter that the markTime() method will call upon */
     private TimeParameter time_;
     
+    /** the list of all parameters */
+    private ParameterRegistry paramRegistry_ = null;
+    
     /** You'll need this. This flag indicates that the thread is to be run or not. As long as this
      * flag is true, then keep looping in your run() method.  As soon as it's set to false, you can drop
      * out of the loop, and exit the run() method */
     protected Boolean doRun_;
 
-    /** the list of all parameters */
-    private ParameterRegistry paramRegistry_ = null;
     
-    
+	/*************************************************
+	 * Event Listener members
+     *************************************************/		
     /** This is a list of objects that wish to be informed of monitor events */
     List<MonitorEventListener> monitorListeners_ = new ArrayList<MonitorEventListener>();
     
@@ -233,15 +250,14 @@ public abstract class BaseMonitor implements ECUMonitor
     		{
     			throw new RuntimeException("Cannot add a null parameter to this monitor.  Index [" + index + "]");
     		}
-
     	}
 
-    	/* Recursivly add the parameters.  We do this with a copy of
+    	/* Recursively add the parameters.  We do this with a copy of
     	 * the original list, because the recursion method modifies the
-    	 * list as it processes it's entries */
+    	 * list as it processes its entries */
         ArrayList<Parameter> l = new ArrayList<Parameter>(params.size());
         l.addAll(params);
-        recursivlyAddParams(l);
+        recursivelyAddParams(l);
     }
 
     /******************************************************
@@ -253,12 +269,48 @@ public abstract class BaseMonitor implements ECUMonitor
     	return this.params_;
     }
     
+	/**
+	 * Get a list of parameters that need to be updated, based on their preferred
+	 * update rate, and when it was last updated.
+	 * @return 
+	 * List of ECUParameters that need to be updated.  If you update an
+	 * ECUParameter, call that parameter's setLastFetchTime method.
+	 * 
+	 */
+	public List<ECUParameter> getParamsForUpdate() {
+		List<ECUParameter> list = new LinkedList<ECUParameter>();
+		getParamsForUpdate(list);
+		return list;
+	}
+	
+	/**
+	 * Get a list of parameters that need to be updated, based on their
+	 * preferred update rate, and when it was last updated.
+	 * @param list 
+	 * A reference to a list where values will be returned.  If you update an
+	 * ECUParameter in this list, call that parameter's setLastFetchTime method.
+	 */
+	public void getParamsForUpdate(List<ECUParameter> list) {
+		list.clear();
+		long now = System.currentTimeMillis();
+		for (ECUParameter p : params_) {
+			if (!p.isEnabled()) continue;
+			
+			if (p.getLastFetchTime() + p.getPreferredRate() < now)
+			{
+				list.add(p);
+				// Don't set the fetch time because it might not
+				// actually get fetched.
+            	// p.setLastFetchTime(System.currentTimeMillis());
+			}
+		}
+	}
 
     
     /*******************************************************
      * @param params
      *******************************************************/
-    private void recursivlyAddParams(ArrayList<Parameter> params)
+    private void recursivelyAddParams(ArrayList<Parameter> params)
     {
     	/* If this list is not empty, then stop here */
         if(params.size() == 0)
@@ -292,7 +344,7 @@ public abstract class BaseMonitor implements ECUMonitor
         
         /* Remove this now added parameter from the list, and recurse to the next one */
         params.remove(0);
-        recursivlyAddParams(params);
+        recursivelyAddParams(params);
     }
     
     
@@ -306,8 +358,5 @@ public abstract class BaseMonitor implements ECUMonitor
     public void resetDTCs() throws RuntimeException
     {
     	throw new RuntimeException("DTC reset not supported by this ECU monitor");
-    	
-    }
-    
- 
+    } 
 }

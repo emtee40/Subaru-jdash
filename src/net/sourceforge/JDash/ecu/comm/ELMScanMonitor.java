@@ -51,13 +51,15 @@ import java.util.StringTokenizer;
  *  http://en.wikipedia.org/wiki/OBD-II_PIDs
  * </pre>
  *****************************************************/
-public class ELMScanMonitor extends RS232Monitor
+public class ELMScanMonitor extends BaseMonitor
+		//extends RS232Monitor
 {
 	/* If your debugging and writing code usin the ELM Ecu Emulator, the you'll want to
 	 * set this flag to true.  This will prevent any of the OBD Calls we normaly make to an
 	 * ELM module, that the emulator doesn't support*/
 	private static final boolean USING_ECUEMULATOR_INTERFACE = true;
 	
+	public static final int MAX_PACKET_FAILURES = 5;
 	
 	private String ecuId_ = "";
     
@@ -70,16 +72,18 @@ public class ELMScanMonitor extends RS232Monitor
 	private ArrayList<InternalParam> dtcCodes_ = new ArrayList<InternalParam>();
 	private ArrayList<InternalParam> dtcHistCodes_ = new ArrayList<InternalParam>();
 	
+	RS232Monitor serial_stream;
+	
 	/*******************************************************
 	 * Create a new SSP Monitor
 	 * @throws ParameterException
 	 ******************************************************/
 	public ELMScanMonitor() throws Exception
 	{
-		super(ELMUtil.DEFAULT_ELM_BAUD, RXTXPort.DATABITS_8, RXTXPort.PARITY_NONE, RXTXPort.STOPBITS_1);
+		serial_stream = new RS232Monitor(ELMUtil.DEFAULT_ELM_BAUD, RXTXPort.DATABITS_8, RXTXPort.PARITY_NONE, RXTXPort.STOPBITS_1);
 		
-		this.writer_ = new BufferedWriter(new OutputStreamWriter(getPort().getOutputStream()));
-		this.reader_ = new BufferedReader(new InputStreamReader(getPort().getInputStream()));
+		this.writer_ = new BufferedWriter(new OutputStreamWriter(serial_stream.getPort().getOutputStream()));
+		this.reader_ = new BufferedReader(new InputStreamReader(serial_stream.getPort().getInputStream()));
 	}
 
 	
@@ -123,7 +127,7 @@ public class ELMScanMonitor extends RS232Monitor
 			reg.add(dtcHistCode);
 		}
 		
-		getPort().setRTS(false);
+		serial_stream.getPort().setRTS(false);
 		
 		/* Perform a complete ELM reset */
 		initListener.update("Reset ELM", 1, 5);
@@ -162,7 +166,7 @@ public class ELMScanMonitor extends RS232Monitor
 		this.ecuId_ += "\nVID: " + buffer;
 
 		
-		/* attempt to set the fastes ELM timeout value */
+		/* attempt to set the fastest ELM timeout value */
 		if (false == USING_ECUEMULATOR_INTERFACE)
 		{
 			initListener.update("Setting best speed", 5, 5);
@@ -186,9 +190,10 @@ public class ELMScanMonitor extends RS232Monitor
 
 
 	/*********************************************************
-	 * The default timeout for an ELM module is 200ms. This is not ideal.  Infact, it
-	 * limits the ELM to about 2.5 values per second. We want to make this as fast as possible, so
-	 * this method will try to set the timeout to the fastest of a set of timeout values.  The
+	 * The default timeout for an ELM module is 200ms. This is not ideal.  
+	 * In fact, it limits the ELM to about 2.5 values per second. We want 
+	 * to make this as fast as possible, so this method will try to set 
+	 * the timeout to the fastest of a set of timeout values.  The
 	 * fastest one that doesn't return errors will be used.
 	 * 
 	 * @throws Exception
@@ -200,7 +205,7 @@ public class ELMScanMonitor extends RS232Monitor
 									"14",  /* 14 = 20 = 80ms */
 									"1E",  /* 1E = 30 = 120ms */
 									"28",  /* 28 = 40 = 160ms */
-									"32"}; /* 32 = 50 = 200ms (elm default_ */
+									"32"}; /* 32 = 50 = 200ms (elm default) */
 		
 		
 		/* Try each speed, starting from the fastest */
@@ -225,7 +230,7 @@ public class ELMScanMonitor extends RS232Monitor
 				
 				
 				/* If we got past all 3 without an error, then lets assume the speed is good */
-				System.out.println("Timing SEt to: " + timeoutSpeed);
+				System.out.println("Timing Set to: " + timeoutSpeed);
 				return;
 				
 				
@@ -267,7 +272,7 @@ public class ELMScanMonitor extends RS232Monitor
                 List<ECUParameter> thisFetchList = new ArrayList<ECUParameter>();
                 for (ECUParameter param : this.params_)
                 {
-                	if (param.getLastFetchTime() + param.getPreferedRate() < System.currentTimeMillis())
+                	if (param.getLastFetchTime() + param.getPreferredRate() < System.currentTimeMillis())
                 	{
                 		param.setLastFetchTime(System.currentTimeMillis());
                 		thisFetchList.add(param);
@@ -333,7 +338,7 @@ public class ELMScanMonitor extends RS232Monitor
 		{
 			try
         	{
-        		closePort();
+        		serial_stream.closePort();
         	}
         	catch(Exception e)
         	{
@@ -621,7 +626,7 @@ public class ELMScanMonitor extends RS232Monitor
 			/* Write the command */
 			this.writer_.write(cmd);
 			
-			/* If using the emulator,then catch and ignore the resulting excepiton about the drain. 
+			/* If using the emulator,then catch and ignore the resulting exception about the drain. 
 			 * it has NO impact on how things operate */
 			if(USING_ECUEMULATOR_INTERFACE)
 			{

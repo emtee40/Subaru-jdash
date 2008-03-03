@@ -14,7 +14,7 @@
 		</address>
 	</parameter>
 	 <parameter name="E_COOLANT_TEMP" rate="5000">
-		<description>Coolant Temp Subtract 40 to get C - Multiply by (9/5) and add 32to get Fahrenheit</description>
+		<description>Coolant Temp Subtract 40 to get C - Multiply by (9/5) and add 32 to get Fahrenheit</description>
 		<address>
 			<byte>0x00</byte>
 			<byte>0x00</byte>

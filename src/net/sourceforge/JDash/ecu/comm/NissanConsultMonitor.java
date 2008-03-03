@@ -42,7 +42,7 @@ import java.util.List;
  * module is pretty much stubbed out.  I'm hoping someone with
  * a Nissan can step up and write the gutts of this one.
  *****************************************************/
-public class NissanConsultMonitor extends RS232Monitor
+public class NissanConsultMonitor extends BaseMonitor
 {
 		
 	private static final int CONSULT_BAUD = 9600;
@@ -50,14 +50,19 @@ public class NissanConsultMonitor extends RS232Monitor
 	private static final byte READ_BYTE_COMMAND_START = (byte)0xc9;
 	private static final byte READ_BYTE_COMMAND_END = (byte)0xf0;
 	
-    
+        RS232Monitor serial_stream;
 	/*******************************************************
 	 * Create a new Consult Monitor
 	 * @throws ParameterException
 	 ******************************************************/
 	public NissanConsultMonitor() throws Exception
 	{
-	    super(CONSULT_BAUD, RXTXPort.DATABITS_8, RXTXPort.PARITY_NONE, RXTXPort.STOPBITS_1);
+	    serial_stream = new RS232Monitor(
+                    CONSULT_BAUD, 
+                    RXTXPort.DATABITS_8, 
+                    RXTXPort.PARITY_NONE, 
+                    RXTXPort.STOPBITS_1
+                    );
 	}
 
 
@@ -102,8 +107,8 @@ public class NissanConsultMonitor extends RS232Monitor
 		
 		try
 		{
-			OutputStream os = getPort().getOutputStream();
-			InputStream is = getPort().getInputStream();
+			OutputStream os = serial_stream.getPort().getOutputStream();
+			InputStream is = serial_stream.getPort().getInputStream();
 			
 			
 			while(doRun_.booleanValue())
@@ -124,7 +129,7 @@ public class NissanConsultMonitor extends RS232Monitor
 		{
 			try
         	{
-        		closePort();
+        		serial_stream.closePort();
         	}
         	catch(Exception e)
         	{
@@ -158,14 +163,14 @@ public class NissanConsultMonitor extends RS232Monitor
 		{
 			
 			/* Get the ports streams */
-			OutputStream os = getPort().getOutputStream();
-			InputStream is = getPort().getInputStream();
+			OutputStream os = serial_stream.getPort().getOutputStream();
+			InputStream is = serial_stream.getPort().getInputStream();
 			
 			/* Read any stale bytes on the input stream */
 			if (is.available() != 0)
 			{
 				Thread.sleep(100); /* Wait for just a bit longer. giveing the stale bytes time to complete */
-				byte[] staleBytes = readBytes(is, is.available());
+				byte[] staleBytes = serial_stream.readBytes(is, is.available());
 			}
 			
 			

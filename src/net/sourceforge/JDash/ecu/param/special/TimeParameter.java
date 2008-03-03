@@ -29,9 +29,9 @@ import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 
 /******************************************************
  * This special parameter tracks the time in milliseconds
- * for update events.  The monitor class will call it's
+ * for update events.  The monitor class will call its
  * markTime() method, which in turn calls the this time 
- * parameters markTime() method.  Thus, updating the
+ * parameter's markTime() method,  thus updating the
  * the elapsed time.
  *****************************************************/
 public class TimeParameter extends Parameter

@@ -261,7 +261,7 @@ public class XMLParameterLoader
     }
 
     /********************************************************
-     * Return the list of files that are identified as incldes in this paramter file.
+     * Return the list of files that are identified as includes in this paramter file.
      * 
      * @return the list of include files.
      * @throws ParameterException

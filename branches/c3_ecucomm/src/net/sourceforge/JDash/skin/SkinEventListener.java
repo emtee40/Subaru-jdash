@@ -33,7 +33,7 @@ public interface SkinEventListener
 
 	
 	/********************************************************
-	 * When an aciton is performed, each listener will
+	 * When an action is performed, each listener will
 	 * get a chance to respond to the action.  It is the
 	 * responsibility of the listener to know what SkinEvent
 	 * messages to respond to, and what ones to ignore.

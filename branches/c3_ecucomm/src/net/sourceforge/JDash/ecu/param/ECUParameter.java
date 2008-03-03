@@ -134,13 +134,13 @@ public class ECUParameter extends Parameter
     }
 
     /*******************************************************
-     * Get the desired update speed of this ecu parameter.
-     * It is up to the monitor, but you can optionaly support
-     * the ONLY sending of parametre requests if within the speed
+     * Get the desired update speed of this ecu parameter in milliseconds.
+     * It is up to the monitor, but you can optionally support
+     * the ONLY sending of parameter requests if within the speed
      * setting define.
      * @return
      ******************************************************/
-    public int getPreferedRate()
+    public int getPreferredRate()
     {
     	return this.rate_;
     }

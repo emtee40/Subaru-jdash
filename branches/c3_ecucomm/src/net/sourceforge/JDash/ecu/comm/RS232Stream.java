@@ -27,6 +27,7 @@ package net.sourceforge.JDash.ecu.comm;
 import gnu.io.RXTXPort;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import net.sourceforge.JDash.Setup;
 
@@ -44,16 +45,18 @@ import net.sourceforge.JDash.Setup;
  * simple sending and receive to text strings.  Use the ELMScanMonitor
  * instead.
  * 
- * // GN: I want to rename RS232Monitor RXTXSerialPort
+ * 
+ * the getRXTXPort method was removed as I don't see a reason for
+ * any higher level routine to directly access the rxtx port. -GN
+ * 
  * 
  * Usefull Links
  * http://obddiagnostics.com/obdinfo/msg_struct.html
  *****************************************************/
-public class RS232Monitor 
+public class RS232Stream extends BaseStream
 {
 	/** This is the maximum number of failed packets in a row that can occur before this monitor will stop processing */
 	public static final int MAX_PACKET_FAILURES = 5;
-
 	
 	public static final int DEFAULT_TXRX_TIMEOUT = 4000;
 	
@@ -72,11 +75,10 @@ public class RS232Monitor
 	/** The stop bit */
 	private int stopBit_ = 0;
 	
-	/** The seial port */
+	/** The serial port */
 	private RXTXPort port_ = null;
-	
-	
-	
+
+		
 	/*******************************************************
 	 *  Create a new instance of an RS232Monitor.
 	 *  @param rxEchosTx IN - this indicates that the ecu at the
@@ -91,19 +93,49 @@ public class RS232Monitor
 	 *  @param parity IN - the parity state, use the constants from RXTXPort
 	 *  @param stop IN - the stop bit, use the constatns from RXTXPOrt
 	 ******************************************************/
-	public RS232Monitor(int serialBaud, int data, int parity, int stop) throws Exception
+	public RS232Stream(int serialBaud, int data, int parity, int stop) throws Exception
 	{
 		super();
 		
-		this.serialBaud_ = serialBaud;
-		this.dataBits_ = data;
-		this.parity_ = parity;
-		this.stopBit_ = stop;
-		
 		setTxRxTimeout(DEFAULT_TXRX_TIMEOUT);
+	}
+		
+	/**
+	 * Set the serial communications parameters.  Parameters may only be set
+	 * while a communications port is not open.
+	 * @param serialBaud
+	 * @param data
+	 * @param parity
+	 * @param stop
+	 * @return true if setting of parameters succeeds, false otherwise.
+	 */
+	public boolean setSerialParams(int baud, int data, int parity, int stop) {
+		if (port_ == null) {
+			this.serialBaud_ = baud;
+			this.dataBits_   = data;
+			this.parity_     = parity;
+			this.stopBit_    = stop;
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	
+	public InputStream getInputStream() {
+		if (port_ == null) return null;
+		return port_.getInputStream();
+	}
+	
+	public OutputStream getOutputStream() {
+		if (port_ == null) return null;
+		return port_.getOutputStream();
+	}
+	
+	public boolean isOpen() {
+		return (port_ == null);
+	}
+
 	/*******************************************************
 	 * Override
 	 * @see java.lang.Object#finalize()
@@ -147,26 +179,14 @@ public class RS232Monitor
 
 	}
 	
-	/*******************************************************
-	 * This function will create and return the RXTX Serial Port.
-	 * The first call to this method will create the port, all
-	 * following calls will return the originally created one. 
-	 * The BAUD rate of the port is set with the value passed into the
-	 * constructor. If you need to do anything out of the ordinary
-	 * for serial port generation, then override this method, and
-	 * go to town.  Note, other than the data/parity/stop bit settings,
-	 * the only thing done to this port is to set the flowcontrol to NONE>
-	 * 
-	 * @return the serial port.
-	 ******************************************************/
-	protected RXTXPort getPort() throws Exception
-	{
-		
-		if (this.port_ != null)
-		{
-			return this.port_;
-		}
-	  
+	
+	
+	/**
+	 * Open the communications port using the parameters set in the constructor
+	 * or setParams.
+	 * @return
+	 */
+	public boolean open() throws Exception {
 	  
 		try
 		{
@@ -184,49 +204,23 @@ public class RS232Monitor
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			throw new Exception("Unable to open monitor communications port [" + Setup.getSetup().get(Setup.SETUP_CONFIG_MONITOR_PORT) + "]\n" + e.getMessage());
+			throw new Exception("Unable to open RS232 communications port [" + Setup.getSetup().get(Setup.SETUP_CONFIG_MONITOR_PORT) + "]\n" + e.getMessage());
 		}
-		
-		return this.port_;
-  }
-  
-  
-	
-	/*******************************************************
-	 * Calculate the checksum value for the given byte array
-	 * @param b
-	 * @return
-	 *******************************************************/
-	protected static byte calcCheckSum(byte[] byteArray)
-	{
-		byte sum = 0;
-		
-		for (byte b : byteArray)
-		{
-			sum += b;
-		}
-		
-		return sum;
+		return true;
 	}
+  
 	
-	
-	
-	
-	/*******************************************************
-	 * The sendPacket method sets up a monitor timer to watch
-	 * for the IO port timeint out on the TX/RX sequence.  If the
-	 * timer fires, it will call this method.  Here, we'll
-	 * not only break the connection, but also close the port.
-	 *******************************************************/
-	protected void breakConnection()
+	public boolean close() 
 	{
 		try
 		{
 			closePort();
+			return true;
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
+			return false;
 		}
 	}
 	
@@ -234,37 +228,33 @@ public class RS232Monitor
 	/********************************************************
 	 * Read the EXACT number of bytes from the input stream as
 	 * identified in the numBytes value. This method will
-	 * wait on the InputSTream until atleast the numBytes
+	 * wait on the InputStream until atleast the numBytes
 	 * of byte are available. Then EXACTLY that number of bytes
-	 * will be aread. No more, no less.  The return byte[] will
+	 * will be read. No more, no less.  The return byte[] will
 	 * be the bytes you requested.
 	 * 
 	 * @param is IN - the input stream to read from.
 	 * @param bytes IN - the number of bytes to read.
 	 * @return the read bytes.
-	 * @throws Exception If there was a problem reading the byes. Like
+	 * @throws Exception If there was a problem reading the bytes. Like
 	 * the read timed out.
 	 ******************************************************/
-	protected byte[] readBytes(InputStream is, int numBytes) throws Exception
+	public byte[] readBytes(int numBytes) throws Exception
 	{
-		
 		/* Setup our read buffer */
-		byte[] rxPacket = new byte[numBytes];
-		
-		
-		/* Byte by byte, read the data */
-		for (int index = 0; index < rxPacket.length; index++)
-		{
-			is.read(rxPacket, index, 1);
-		}
-		
-		
-		/* Return the receive packet */
-		return rxPacket;
-		
+		byte[] rxData = new byte[numBytes];
+		readBytes(rxData);
+		return rxData;
 	}
-
 	
-	
+	public boolean readBytes(byte[] buffer) throws Exception
+	{
+		if (! isOpen()) {
+			throw new Exception("Stream is not open!");
+		}
+		InputStream is = port_.getInputStream();
+		is.read(buffer,0, buffer.length);
+		return true;
+	}
 }
 

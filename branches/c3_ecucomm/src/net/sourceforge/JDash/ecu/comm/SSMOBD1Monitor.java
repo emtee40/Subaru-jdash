@@ -36,8 +36,9 @@ import gnu.io.RXTXPort;
  * This extension to the SSMMonitor is setup to
  * use the OBD-II version of SSM
  ******************************************************/
-public class SSMOBD1Monitor extends RS232Monitor
+public class SSMOBD1Monitor extends BaseMonitor
 {
+        public static final int MAX_PACKET_FAILURES = 5;
 	private static final int SSM_OBD1_BAUD_RATE = 1953;
 	
 	private static final int TX_PACKET_SIZE = 4;
@@ -47,12 +48,18 @@ public class SSMOBD1Monitor extends RS232Monitor
 	private static final byte SSM_STOP_CODE = (byte)0x12;
 	private static final byte SSM_READ_CODE = (byte)0x78; 
 	
+        RS232Monitor serial_stream;
+        
 	/*******************************************************
 	 * Create a new SSM OBD-II capable monitor.
 	 ******************************************************/
 	public SSMOBD1Monitor() throws Exception
 	{
-		super(SSM_OBD1_BAUD_RATE, RXTXPort.DATABITS_8, RXTXPort.PARITY_EVEN, RXTXPort.STOPBITS_1);
+		serial_stream = new RS232Monitor(
+                        SSM_OBD1_BAUD_RATE, 
+                        RXTXPort.DATABITS_8, 
+                        RXTXPort.PARITY_EVEN, 
+                        RXTXPort.STOPBITS_1);
 	}
 
 
@@ -80,9 +87,9 @@ public class SSMOBD1Monitor extends RS232Monitor
         try
         {
         	/* Set the RTS to false */
-            getPort().setRTS(false);
-            InputStream is = getPort().getInputStream();
-            OutputStream os = getPort().getOutputStream();
+            serial_stream.getPort().setRTS(false);
+            InputStream is  = serial_stream.getPort().getInputStream();
+            OutputStream os = serial_stream.getPort().getOutputStream();
 
             
         	/* The main TX/RX loop */
@@ -99,7 +106,7 @@ public class SSMOBD1Monitor extends RS232Monitor
 	                for (ECUParameter param : this.params_)
 	                {
 	                	/* If it's due for an update, then run it */
-	                	if (param.getLastFetchTime() + param.getPreferedRate() < System.currentTimeMillis())
+	                	if (param.getLastFetchTime() + param.getPreferredRate() < System.currentTimeMillis())
 	                	{
 	                		/* reset the fetch time */
 	                		param.setLastFetchTime(System.currentTimeMillis());
@@ -119,15 +126,15 @@ public class SSMOBD1Monitor extends RS232Monitor
 	                		txPacket[1] = param.getAddress()[0];
 	                		txPacket[2] = param.getAddress()[1];
 	                		txPacket[3] = 0;
-	                System.out.println("TX: " + ByteUtil.bytesToString(txPacket));
+	                		System.out.println("TX: " + ByteUtil.bytesToString(txPacket));
 	                		
 	                		/* Send the read packet */
 	                		os.write(txPacket, 0, txPacket.length);
 	                		
 	                		/* Read the result */
-	                		byte[] rxPacket = readBytes(is, SSM_OBD1_ADDRESS_SIZE + 1);
+	                		byte[] rxPacket = serial_stream.readBytes(is, SSM_OBD1_ADDRESS_SIZE + 1);
 	                		
-	                System.out.println("RX: " + ByteUtil.bytesToString(rxPacket));
+	                		System.out.println("RX: " + ByteUtil.bytesToString(rxPacket));
 	                		
 	                		/* Send the stop command */
 	                		os.write(new byte[] {SSM_STOP_CODE});
@@ -186,7 +193,7 @@ public class SSMOBD1Monitor extends RS232Monitor
         {
         	try
         	{
-        		closePort();
+        		serial_stream.closePort();
         	}
         	catch(Exception e)
         	{

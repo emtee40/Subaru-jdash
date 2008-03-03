@@ -86,7 +86,7 @@ public class ELMUtil
 	 * @param dtcCodes IN - this array of InternalParams will
 	 * 	populated with the DTC Codes, in order from 0->length
 	 *******************************************************/
-	public void getDTCCodes(InternalParam[] dtcCodes) throws RuntimeException
+	public static void getDTCCodes(InternalParam[] dtcCodes) throws RuntimeException
 	{
 		try
 		{
@@ -226,7 +226,7 @@ public class ELMUtil
 	 * @param param
 	 * @throws Exception
 	 *******************************************************/
-	public void retreiveMode1ParamValue(ECUParameter param) throws Exception
+	public static void retrieveMode1ParamValue(ECUParameter param) throws Exception
 	{
 		/* Put together the command request.  byte 0 is the mode, byte 1 is the PID */
 		String command = String.format("%02d%02x", MODE_1, param.getAddress()[REQUEST_PID_BYTE]);
@@ -277,7 +277,7 @@ public class ELMUtil
 	 * @throws Exception When the response was NOT a byte[] of data.  It
 	 * could have been one of the error string.s
 	 *******************************************************/
-	public int[] convertELMResonseToIntArray(String response) throws Exception
+	public static int[] convertELMResonseToIntArray(String response) throws Exception
 	{
 		
 		response = response.trim().toUpperCase();
@@ -350,7 +350,7 @@ public class ELMUtil
 	 * @param cmd
 	 * @return
 	 *******************************************************/
-	public String sendELMString(String cmd) throws Exception
+	public static String sendELMString(String cmd) throws Exception
 	{
 			
 //			int responseCount = 0;
@@ -460,7 +460,7 @@ public class ELMUtil
 	 /*******************************************************
 	  * 
 	 *******************************************************/
-	public void resetDTCs() throws RuntimeException
+	public static void resetDTCs() throws RuntimeException
 	{
 		try
 		{

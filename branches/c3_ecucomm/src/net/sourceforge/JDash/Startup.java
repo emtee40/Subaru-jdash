@@ -42,7 +42,8 @@ import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.XMLParameterLoader;
 import net.sourceforge.JDash.gui.ConfigureFrame;
-import net.sourceforge.JDash.gui.DashboardFrame;import net.sourceforge.JDash.gui.Splash;
+import net.sourceforge.JDash.gui.DashboardFrame;
+import net.sourceforge.JDash.gui.Splash;
 import net.sourceforge.JDash.logger.DataLogger;
 import net.sourceforge.JDash.logger.DatabaseLogger;
 import net.sourceforge.JDash.logger.LoggerPlaybackMonitor;
@@ -59,6 +60,12 @@ public class Startup
 	
 	/** This is the command line argument to start the configuration window */
 	public static final String CONFIG_FLAG = "-config";
+	
+	// GN: I'm sort of confused as to everything is forced to be static.
+	// Is it so that you have global variables?  If you only want to allow one
+	// instance i would think that's not too hard to enforce.
+	
+	// I could see a reason why you might want to allow more than one monitor.
 	
 	
 	/**  The splash frame */
@@ -149,6 +156,8 @@ public class Startup
 				skinFactory.setParameterRegistry(paramRegistry);
 				
 				
+				// GN: I would think you'd want to make the test monitor on
+				// equal footing with all the others.
 				/* Create the desired ECU monitor */
 				/* If the test monitor has been checked, then override our default monitor */
 				if (new Boolean(Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_TEST)) == true)
@@ -279,6 +288,7 @@ public class Startup
 	private BaseMonitor createMonitor(XMLParameterLoader loader) throws Exception
 	{
 		String monitorClass = loader.getMonitorClass();
+		// TODO: assert that the monitor class is of type net.sourceforge. ...?
 		
 		if ((monitorClass == null) || (monitorClass.length() == 0))
 		{

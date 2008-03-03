@@ -39,13 +39,13 @@ import net.sourceforge.JDash.gui.DashboardFrame;
 
 /******************************************************
  * This monitor is a completely different animal.  It's
- * designed to read it's values from an HSQLDB Database,
+ * designed to read its values from an HSQLDB Database,
  * re-submit them to the display subsystem that is listening.
  * It's basically a facility to record, and playback
  * ecu events.  One more major difference between this
  * monitor, and others is that this monitor is capable of
  * both reading and writing to the database.  This is 
- * basically a complete DAO class.  Infact, this monitor
+ * basically a complete DAO class.  In fact, this monitor
  * is used for the data logging capabilities of this 
  * application.
  *****************************************************/

@@ -170,17 +170,27 @@ public class RS232Packet
 	
 	/*******************************************************
 	 * Given the current state of the header, datalength, and data values,
-	 * this method will calcuate the checksum and return it.
+	 * this method will calculate the checksum and return it.
 	 *******************************************************/
 	public byte calcCheckSum()
 	{
 		/* Check the checksum against the packet */
-		byte checkSum = RS232Monitor.calcCheckSum(this.header_);
-		checkSum += ((byte)this.dataLength_);
-		checkSum += RS232Monitor.calcCheckSum(this.data_);
-		return checkSum;
+		byte checksum = 0;
+		int i;
+		for (i=0; i < header_.length; i++)
+			checksum += header_[i];
+
+		checksum += ((byte)this.dataLength_);
+
+		for (i=0; i < data_.length; i++)
+			checksum += data_[i];
+
+		return checksum;
 	}
 	
+	public boolean verifyCheckSum() {
+		return (checkSum_ == calcCheckSum());
+	}
 	
 	/*******************************************************
 	 * Get the entire length of this packet. This

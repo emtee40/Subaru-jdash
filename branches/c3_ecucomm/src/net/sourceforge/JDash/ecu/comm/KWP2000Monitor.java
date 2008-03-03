@@ -49,7 +49,7 @@ import java.util.List;
  * http://www.etools.org/files/public/generic-protocols-02-17-03.htm
  * http://scoobypedia.co.uk/index.php/Knowledge/ReadingECUCodes
  *****************************************************/
-public class KWP2000Monitor extends RS232Monitor
+public class KWP2000Monitor extends BaseMonitor
 {
 		
 	private static final int OBD_FAST_INIT_BAUD = 360;
@@ -68,14 +68,14 @@ public class KWP2000Monitor extends RS232Monitor
 	
 //	private byte RX_TARGET = TX_SOURCE;
 	
-    
+        RS232Monitor serial_stream;
 	/*******************************************************
 	 * Create a new SSP Monitor
 	 * @throws ParameterException
 	 ******************************************************/
 	public KWP2000Monitor() throws Exception
 	{
-	    super(OBD_BAUD, RXTXPort.DATABITS_8, RXTXPort.STOPBITS_1, RXTXPort.PARITY_NONE);
+	    serial_stream = new RS232Monitor(OBD_BAUD, RXTXPort.DATABITS_8, RXTXPort.STOPBITS_1, RXTXPort.PARITY_NONE);
 	}
 
 
@@ -91,7 +91,7 @@ public class KWP2000Monitor extends RS232Monitor
 		RXTXPort initPort = new gnu.io.RXTXPort(Setup.getSetup().get(Setup.SETUP_CONFIG_MONITOR_PORT));
 		initPort.setFlowControlMode(RXTXPort.FLOWCONTROL_NONE);
 		initPort.setSerialPortParams(OBD_FAST_INIT_BAUD,RXTXPort.DATABITS_8, RXTXPort.STOPBITS_1, RXTXPort.PARITY_NONE);
-		initPort.enableReceiveTimeout(getTxRxTimeout());
+		initPort.enableReceiveTimeout(serial_stream.getTxRxTimeout());
 		initPort.getOutputStream().write(new byte[] {0x00});
 		initPort.getOutputStream().flush();
 		initPort.getOutputStream().close();
@@ -124,8 +124,8 @@ public class KWP2000Monitor extends RS232Monitor
 		
 		try
 		{
-			OutputStream os = getPort().getOutputStream();
-			InputStream is = getPort().getInputStream();
+			OutputStream os = serial_stream.getPort().getOutputStream();
+			InputStream is  = serial_stream.getPort().getInputStream();
 			
 			
 			while(doRun_.booleanValue())
@@ -155,7 +155,7 @@ public class KWP2000Monitor extends RS232Monitor
 		{
 			try
         	{
-        		closePort();
+        		serial_stream.closePort();
         	}
         	catch(Exception e)
         	{
@@ -188,40 +188,41 @@ public class KWP2000Monitor extends RS232Monitor
 		try
 		{
 			
-			/* Get the ports streams */
-			OutputStream os = getPort().getOutputStream();
-			InputStream is = getPort().getInputStream();
+			// Get the ports streams 
+			OutputStream os = serial_stream.getPort().getOutputStream();
+			InputStream is = serial_stream.getPort().getInputStream();
 			
-			/* Read any stale bytes on the input stream */
+			// Read any stale bytes on the input stream 
 			if (is.available() != 0)
 			{
-				Thread.sleep(100); /* Wait for just a bit longer. giveing the stale bytes time to complete */
+                                // Wait for just a bit longer. giveing the stale bytes time to complete 
+				Thread.sleep(100); 
 				System.out.println("Warning, there were stale bytes on the input stream");
-				byte[] staleBytes = readBytes(is, is.available());
+				byte[] staleBytes = serial_stream.readBytes(is, is.available());
 				System.out.println(ByteUtil.bytesToString(staleBytes));
 			}
 			
 			
-			/* Send the TX packet */
+			// Send the TX packet 
 			txPacket.write(os);
 			os.flush();
 			
 			
-			/* Create the RX packet */
+			// Create the RX packet 
 			RS232Packet rxPacket = new RS232Packet();
 			
-			/* Read the RX Header. */
-			rxPacket.setHeader(readBytes(is, OBD_HEADER_LENGTH));
+			// Read the RX Header. 
+			rxPacket.setHeader(serial_stream.readBytes(is, OBD_HEADER_LENGTH));
 			
-			/* From byte 1 of the header, extract the number of data bytes present */
+			// From byte 1 of the header, extract the number of data bytes present 
 			int dataByteCount = ByteUtil.unsignedByteToInt(rxPacket.getHeader()[0]) & LENGTH_BYTE_MASK;
 System.out.println("RX packet indicates: " + dataByteCount + " data bytes on their way");			
 
-			/* read the data bytes */
-			rxPacket.setData(readBytes(is, dataByteCount));
+			// read the data bytes 
+			rxPacket.setData(serial_stream.readBytes(is, dataByteCount));
 			
-			/* Read the checksum byte */
-			rxPacket.setCheckSum(readBytes(is, 1)[0]);
+			// Read the checksum byte 
+			rxPacket.setCheckSum(serial_stream.readBytes(is, 1)[0]);
 			
 			
 			/* Check the checksum against the packet */

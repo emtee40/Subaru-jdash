@@ -31,21 +31,22 @@ import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.special.InternalParam;
 
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 
 /******************************************************
  * This monitor will get each ECUParameter from the
- * registry, and increment it's value every DELAY ms.  The default
+ * registry, and increment its value every DELAY ms.  The default
  * DELAY value is 50. So, every 50 ms, each raw parameter will
- * get an increment.  This is usefull if you just want your
+ * get an increment.  This is useful if you just want your
  * screen to go crazy spewing out data.
  ******************************************************/
 public class TestMonitor extends BaseMonitor
 {
 	
-	private static final int DELAY = 50;
+	private static final int DELAY = 50; // milliseconds
 	
 	/*****************************************************
 	 * @param params IN - the list of parameters to monitor.
@@ -91,53 +92,46 @@ public class TestMonitor extends BaseMonitor
      *******************************************************/
     public void run()
     {
-    	long lastDirectionChange = 0L;
+    	long timeLastDirectionChange = 0L;
+		int signRateChange = 1; // sign (positive or neg) of rate change
+		int valueRateChange;
     	Random rnd = new Random(System.currentTimeMillis());
-    	boolean increase = true;
-    	int increaseRate = 1;
+		
+		List<ECUParameter> listParamsForUpdate = 
+				new LinkedList<ECUParameter>();
 
         while(doRun_)
         {
         	fireProcessingStartedEvent();
         	
         	/* Random the direction boolean, only every 1 seconds */
-        	if (lastDirectionChange <= (System.currentTimeMillis() - 1000))
+        	if (timeLastDirectionChange <= (System.currentTimeMillis() - 1000))
 			{
-        		increase = rnd.nextBoolean();
-        		lastDirectionChange = System.currentTimeMillis();
+        		signRateChange = rnd.nextBoolean() ? 1 : -1;
+        		timeLastDirectionChange = System.currentTimeMillis();
 			}
 
         	/* Randomly set the change rate */
-    		increaseRate = rnd.nextInt(4) + 1;
+    		valueRateChange = signRateChange * (rnd.nextInt(4) + 1);
         	
-        	/* Setup the test list */
-            for(ECUParameter p : getParams())
+
+			// Get list of parameteres that need updating
+			getParamsForUpdate(listParamsForUpdate);
+			
+			// Update each parameter
+            for(ECUParameter p : listParamsForUpdate)
             {
-            	if (p.isEnabled() == false)
-            	{
-            		continue;
-            	}
-            	
-            	if (p.getLastFetchTime() + p.getPreferedRate() < System.currentTimeMillis())
-            	{
-            		p.setLastFetchTime(System.currentTimeMillis());
-            		
-            		if (increase)
-            		{
-            			p.setResult(p.getResult() + increaseRate);
-            		}
-            		else
-            		{
-            			p.setResult(p.getResult() - increaseRate);
-            		}
-            		
-            		if ((p.getResult() > 0xff) || (p.getResult() < 0))
-            		{
-            			p.setResult(0);
-            			fireProcessingParameterEvent(p);
-            		}
-            	}
-            }
+				double result = p.getResult() + valueRateChange;
+				
+				// saturate results
+				if (result > 0xff) result = 0xff;
+				if (result < 0x00) result = 0x00;
+
+				p.setResult(result);
+				p.setLastFetchTime(System.currentTimeMillis());
+				
+				fireProcessingParameterEvent(p);
+			}
             
             fireProcessingFinishedEvent();
             

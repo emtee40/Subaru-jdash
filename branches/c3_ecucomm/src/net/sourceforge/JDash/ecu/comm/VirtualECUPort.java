@@ -59,7 +59,7 @@ import java.io.*;
  * 
  * @author greg
  */
-public class VirtualECUPort extends BaseStream {
+public class VirtualECUPort extends BasePort {
 
 	private PipedInputStream  pipeComm2ECUInput;
 	private PipedOutputStream pipeComm2ECUOutput;

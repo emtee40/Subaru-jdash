@@ -51,6 +51,17 @@ import java.util.Collections;
  * of how this is done are contained in the ProtocolHandler
  * class.
  *****************************************************/
+
+/***
+ * 
+ * The communication configurator will need to specify a couple different things:
+ * - ECU protocol (SSM)
+ * - Hardware driver (RXTXPort [serial], Cobb Serial, virtual)
+ * 
+ * 
+ * @author greg
+ */
+
 public abstract class BaseMonitor implements ECUMonitor
 {
 
@@ -84,7 +95,14 @@ public abstract class BaseMonitor implements ECUMonitor
      * out of the loop, and exit the run() method */
     protected Boolean doRun_;
 
-    
+
+	/*************************************************
+	 * Communications port
+     *************************************************/		
+	
+	protected BasePort commPort = null;
+
+	
 	/*************************************************
 	 * Event Listener members
      *************************************************/		
@@ -248,7 +266,8 @@ public abstract class BaseMonitor implements ECUMonitor
     	{
     		if (params.get(index) == null)
     		{
-    			throw new RuntimeException("Cannot add a null parameter to this monitor.  Index [" + index + "]");
+    			throw new RuntimeException(
+						"Cannot add a null parameter to this monitor.  Index [" + index + "]");
     		}
     	}
 
@@ -318,14 +337,14 @@ public abstract class BaseMonitor implements ECUMonitor
         	return;
         }
 
-        /* Meta parametes are not added themselves, rather their dependants are added.
+        /* Meta parameters are not added themselves, rather their dependants are added.
          * Note, that we use the addAll method so that we can correctly resurse through 
          * the dependants */
         if(params.get(0) instanceof MetaParameter)
         {
         	if(((MetaParameter) params.get(0)).getDependants().size() == 0)
         	{
-        		System.out.println("Warning: Metaparameter " + params.get(0).getName() + " does not have any dependants identified");
+        		System.out.println("Warning: Metaparameter " + params.get(0).getName() + " does not have any dependents identified");
         	}
         	this.addAllParams(((MetaParameter) params.get(0)).getDependants());
         }
@@ -347,7 +366,7 @@ public abstract class BaseMonitor implements ECUMonitor
         recursivelyAddParams(params);
     }
     
-    
+	
     /*******************************************************
      * The default is that the DTC Reset is NOT supported. If your
      * monitor class uspportes it, then you MUST override this method.

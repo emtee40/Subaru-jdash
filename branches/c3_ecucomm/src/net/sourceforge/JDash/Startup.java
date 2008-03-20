@@ -38,6 +38,8 @@ import net.sourceforge.JDash.ecu.comm.BaseMonitor;
 import net.sourceforge.JDash.ecu.comm.ECUMonitor;
 import net.sourceforge.JDash.ecu.comm.InitListener;
 import net.sourceforge.JDash.ecu.comm.TestMonitor;
+import net.sourceforge.JDash.ecu.comm.VirtualECU;
+import net.sourceforge.JDash.ecu.comm.VirtualECUPort;
 import net.sourceforge.JDash.ecu.param.Parameter;
 import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.ecu.param.XMLParameterLoader;
@@ -79,7 +81,10 @@ public class Startup
 	
 	/** This is THE monitor thread */
 	private static Thread monitorThread_ = null;
-	
+
+	/** These are only instantiated if you are in test mode **/
+	private static VirtualECU vecu = null;
+	private static VirtualECUPort vecuport;
 
 	/******************************************************
 	 * Create a new startup instance.  It's private because only

@@ -29,30 +29,36 @@ import net.sourceforge.JDash.ecu.comm.SSMOBD2ProtocolHandler.SSMPacket;
  * @author greg
  */
 public class SSMOBD2VirtualECU extends VirtualECU {
-	SSMOBD2ProtocolHandler ssmph;
+	SSMOBD2ProtocolHandler ssmprotohandler;
 	SSMOBD2VirtualECU() {
+		super();
 	}
 	public void run() {
 		SSMPacket rxPacket, txPacket;
 		System.out.println("SSMOBD2ECUEmulator started.");
 		InputStream  is = emuport.getECUInputStream();
 		OutputStream os = emuport.getECUOutputStream();
-		ssmph = new SSMOBD2ProtocolHandler(emuport);
+		ssmprotohandler = new SSMOBD2ProtocolHandler(emuport);
 		do {
-			try {
+			try 
+			{
 				int nAvail = is.available();
-				// TODO: instantiate a protocol handler.
-				if (nAvail > 0) {
-					rxPacket = ssmph.receivePacket(0);
+				if (nAvail > 0) 
+				{
+					rxPacket = ssmprotohandler.receivePacket(0);
+					System.out.println("SSMOBD2VirtualECU received a packet");
 				}
-			} catch (IOException e) {
+			} 
+			catch (IOException e) 
+			{
 				e.printStackTrace();
 			}
 			
-			try {
+			try 
+			{
 				Thread.sleep(50);
-			} catch (InterruptedException e) {}			
-		} while (getSignal() == 0) ;		
+			} catch (InterruptedException e) {}	
+		} while (getSignal() == 0) ;
 		
 	}
 }

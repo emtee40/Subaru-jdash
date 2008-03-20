@@ -51,7 +51,7 @@ import java.util.Properties;
 public class Setup implements Version
 {	
 	
-	/** The applicaiton version */
+	/** The application version */
 	public static final String VERSION = "v" + MAJOR + "." + MINOR + "." + BUILD;
 
 	/** The application string */

@@ -51,21 +51,20 @@ public class SSMOBD2Monitor extends BaseMonitor
 
 	private static final int MAX_PACKET_FAILURES = 5;
 	
-	SSMOBD2ProtocolHandler ssmph;
-	RS232Stream comm_serial;
+	private SSMOBD2ProtocolHandler ssmprotohandler;
 
 	/***************************************************************************
 	 * Create a new SSM OBD-II capable monitor.
 	 **************************************************************************/
 	public SSMOBD2Monitor() throws Exception
 	{
-		comm_serial = new RS232Stream(
+		commPort = new RS232Stream(
 				SSMOBD2ProtocolHandler.DEFAULT_SSM_BAUD, 
 				RXTXPort.DATABITS_8, 
 				RXTXPort.PARITY_NONE, 
 				RXTXPort.STOPBITS_1);
 
-		ssmph = new SSMOBD2ProtocolHandler(comm_serial);
+		ssmprotohandler = new SSMOBD2ProtocolHandler(commPort);
 	}
 
 	
@@ -79,10 +78,10 @@ public class SSMOBD2Monitor extends BaseMonitor
 	{
 		super.init(reg, initListener);
 		
-		ssmph.protocol_init();
+		ssmprotohandler.protocolInit();
 
 		/* Return the list of parameters this monitor claims to support */
-		return ssmph.paramList;
+		return ssmprotohandler.paramList;
 	}
 
 	/***********************************************************************************************
@@ -93,7 +92,7 @@ public class SSMOBD2Monitor extends BaseMonitor
 	public String getEcuInfo() throws Exception
 	{
 		// TODO Auto-generated method stub
-		return "SSP Monitor:\nECUID: " + ssmph.getECUID();
+		return "SSP Monitor:\nECUID: " + ssmprotohandler.getECUID();
 	}
 
 	/***********************************************************************************************
@@ -135,7 +134,7 @@ public class SSMOBD2Monitor extends BaseMonitor
 				 * update rate and the last time this parameter was updated.
 				 */
 				updateParamList.clear();
-				getParamsForUpdate(updateParamList);
+				super.getParamsForUpdate(updateParamList);
 
 				/* Send the TX packet, and wait for the RX packet */
 				try
@@ -169,7 +168,7 @@ public class SSMOBD2Monitor extends BaseMonitor
 								packetParamList, true);
 
 						// Send a packet and receive a response.
-						SSMPacket rxPacket = ssmph.sendAndReceivePacket(txPacket);
+						SSMPacket rxPacket = ssmprotohandler.sendAndReceivePacket(txPacket);
 						
 						// Update the parameter list with the data returned in
 						// rxPacket.
@@ -215,8 +214,8 @@ public class SSMOBD2Monitor extends BaseMonitor
 		{
 			try
 			{
-				ssmph.protocol_close();
-				comm_serial.close();
+				ssmprotohandler.protocolClose();
+				commPort.close();
 			}
 			catch (Exception e)
 			{

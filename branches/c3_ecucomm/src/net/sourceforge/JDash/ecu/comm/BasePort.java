@@ -24,12 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDash.ecu.comm;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 /**
  *
  * @author greg
  */
-public abstract class BaseStream {
+public abstract class BasePort {
 	/*******************************************************
 	 * Override
 	 * @see java.lang.Object#finalize()

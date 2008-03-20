@@ -101,8 +101,8 @@ public interface ECUMonitor extends Runnable, SkinEventListener
 	public void resetDTCs() throws Exception;
 	
     /********************************************************
-     * Tell this monitor to stop it's monitoring, and close
-     * it's connection. Note that this does NOT mean that the
+     * Tell this monitor to stop its monitoring, and close
+     * its connection. Note that this does NOT mean that the
      * thread is stopped right away.  This will flip a flag
      * indicating to the thread that it should finish what it's
      * currently doing, and then exit normally.  It is the

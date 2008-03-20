@@ -53,7 +53,7 @@ import net.sourceforge.JDash.Setup;
  * Usefull Links
  * http://obddiagnostics.com/obdinfo/msg_struct.html
  *****************************************************/
-public class RS232Stream extends BaseStream
+public class RS232Stream extends BasePort
 {
 	/** This is the maximum number of failed packets in a row that can occur before this monitor will stop processing */
 	public static final int MAX_PACKET_FAILURES = 5;

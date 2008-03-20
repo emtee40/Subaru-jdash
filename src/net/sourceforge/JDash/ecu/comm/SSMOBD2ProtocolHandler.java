@@ -101,7 +101,7 @@ public class SSMOBD2ProtocolHandler
 	
 	private static final int MAX_PACKET_FAILURES = 5;
 	
-	BaseStream comm_serial;
+	BasePort comm_serial;
 	public ArrayList<Parameter> paramList;
 	
 	public String getECUID() {
@@ -111,7 +111,7 @@ public class SSMOBD2ProtocolHandler
 	/***********************************************************************************************
 	 * Create a new SSM OBD-II capable monitor.
 	 **********************************************************************************************/
-	SSMOBD2ProtocolHandler(BaseStream bs)
+	SSMOBD2ProtocolHandler(BasePort bs)
 	{
 		comm_serial = bs;
 	}
@@ -123,7 +123,7 @@ public class SSMOBD2ProtocolHandler
 	 * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry)
 	 **********************************************************************************************/
 	 
-	void protocol_init() throws Exception { //public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception {
+	void protocolInit() throws Exception { //public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception {
 		
 						//super.init(reg, initListener);
 
@@ -200,7 +200,7 @@ public class SSMOBD2ProtocolHandler
 		// return paramList;
 	}
 
-	void protocol_close() {
+	void protocolClose() {
 	}
 
 

@@ -36,6 +36,17 @@ import waba.util.Vector;
  * 
  * Do NOT use any 1.5 specific stuff in here.  These parameter classes
  * need to be compatible with SuperWaba.
+ *
+ * TODO: I think that a Vector is not the most appropriate data structure
+ * here, given the operations that you are doing on it.
+ * the insert-if-not-present operations suggest that you should be
+ * using an implementation of java.util.Set (perhaps java.util.TreeSet)
+ * I'm assuming that you don't care what order in which the parameters are
+ * iterated over.  To use these, classes implementing parameterEventListener 
+ * might need meaningful equals() method.  
+ * 
+ * Incidentally, java.util.Set has been around since at least Java 1.3, I think.
+ *  -GN
  *****************************************************/
 public abstract class Parameter implements DoubleParameter
 {

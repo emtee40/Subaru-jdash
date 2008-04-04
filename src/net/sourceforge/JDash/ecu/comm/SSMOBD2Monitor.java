@@ -164,7 +164,7 @@ public class SSMOBD2Monitor extends BaseMonitor
 						
 						// Create the new TX Packet 
 						SSMPacket txPacket = 
-								SSMOBD2ProtocolHandler.createECUParameterQueryPacket(
+								SSMOBD2ProtocolHandler.encodeECUParameterQueryPacket(
 								packetParamList, true);
 
 						// Send a packet and receive a response.
@@ -172,7 +172,7 @@ public class SSMOBD2Monitor extends BaseMonitor
 						
 						// Update the parameter list with the data returned in
 						// rxPacket.
-						SSMOBD2ProtocolHandler.decodeECUParameterQueryPacket(
+						SSMOBD2ProtocolHandler.decodeECUParameterQueryResponsePacket(
 								packetParamList, rxPacket);
 						
 						// distribute update results to listeners

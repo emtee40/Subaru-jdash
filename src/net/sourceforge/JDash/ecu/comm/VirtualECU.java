@@ -45,8 +45,8 @@ import java.lang.RuntimeException;
 
 
 public class VirtualECU implements Runnable {
-	public VirtualECUPort emuport;
-	boolean bIsRunning;
+	protected VirtualECUPort emuport;
+	protected boolean        bIsRunning;
 	
 	Thread t;
 	int signal;
@@ -69,6 +69,11 @@ public class VirtualECU implements Runnable {
 			return false;
 		}
 	}
+	
+	public boolean isRunning() {
+		return bIsRunning;
+	}
+	
 	///////////////////////////////////////////////////
 	// Thread control routines
 	
@@ -86,7 +91,9 @@ public class VirtualECU implements Runnable {
 	/**
 	 * Override of Runnable.run().  This routine handles
 	 * processing of stream data.  Currently it is simply
-	 * a loopback device.
+	 * a in a loopback mode.
+	 * 
+	 * You should override this routine in a similar way.
 	 */
 	public void run() {
 		System.out.println("VirtualECU started.");
@@ -116,8 +123,12 @@ public class VirtualECU implements Runnable {
 	public Thread getThread() {
 		return t;
 	}
-	
-	void connect(VirtualECUPort emuport) throws RuntimeException{
+	/**
+	* Connect this ECU to a VirtualPort object.  You will need to call this method
+	* before calling the start() method.  This method cannot be called while the 
+	* VirtualECU is running.
+	*/
+	public void connect(VirtualECUPort emuport) throws RuntimeException{
 		if (bIsRunning) 
 			throw new RuntimeException("Cannot change VirtualECUPort while VirtualECU is running.");
 		this.emuport = emuport;
@@ -173,7 +184,7 @@ public class VirtualECU implements Runnable {
 			} while (1==1);
 			emu.setSignal(1); // kill the emulator
 		}  catch  ( IOException e )   {  
-			System.out.println ( "IO Exception on Buffered Read" ) ; 
+			System.out.println ( "IOException on Buffered Read" ) ; 
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 

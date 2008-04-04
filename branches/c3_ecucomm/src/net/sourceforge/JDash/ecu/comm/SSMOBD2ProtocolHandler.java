@@ -203,6 +203,22 @@ public class SSMOBD2ProtocolHandler
 	void protocolClose() {
 	}
 
+	
+	private int flushInputStream(InputStream is) throws IOException {
+		/* Read any stale bytes on the input stream */
+		if (is.available() != 0)
+		{
+			// Wait for just a little bit longer.  Giving the stale
+			// bytes time to complete.
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {}
+			int nAvailable = is.available();
+			is.skip(nAvailable);
+			return nAvailable;
+		}
+		return 0;		
+	}
 
 	/***********************************************************************
 	 * This method performs the heavylifting hard work required to send and 
@@ -222,6 +238,8 @@ public class SSMOBD2ProtocolHandler
 	 * timer fires, it will call this method.  Here, we'll
 	 * not only break the connection, but also close the port.
 	 ******************************************************* 
+	 * sendAndReceivePacket is intended to send and receive a packet 
+	 * to a port in one atomic operation.
 	 * 
 	 * 
 	 * @param txPacket
@@ -242,15 +260,8 @@ public class SSMOBD2ProtocolHandler
 				/* Get the ports streams */
 				OutputStream os = comm_serial.getOutputStream();
 				InputStream  is = comm_serial.getInputStream();
-
-				/* Read any stale bytes on the input stream */
-				if (is.available() != 0)
-				{
-					// Wait for just a little bit longer.  Giving the stale
-					// bytes time to complete.
-					Thread.sleep(100); 
-					is.skip(is.available());
-				}
+				
+				flushInputStream(is);
 
 				/* Send the TX packet */
 				txPacket.write(os);
@@ -272,6 +283,7 @@ public class SSMOBD2ProtocolHandler
 				if (! comm_serial.isOpen()) 
                                     return null;
 				
+                // GN: apparently the ECU is supposed to echo back the request packet?
 				//comm_serial.readBytes(is, txPacket.length());
 				is.skip(txPacket.length());
 
@@ -301,6 +313,26 @@ public class SSMOBD2ProtocolHandler
 		} /* end semaphore */
 	}
 
+	public void sendPacket(SSMPacket txPacket, 
+	                            boolean bFlushInputStreamFirst) 
+	                            throws IOException
+	{
+
+		synchronized (this.semaphore_)
+		{
+			/* Get the ports streams */
+			OutputStream os = comm_serial.getOutputStream();
+			InputStream  is = comm_serial.getInputStream();
+
+			if (bFlushInputStreamFirst) flushInputStream(is);
+
+			/* Send the TX packet */
+			txPacket.write(os);
+			os.flush();
+		} /* end semaphore */
+	}
+	
+	
 	
 	public SSMPacket receivePacket(int timeout) throws IOException
 	{
@@ -343,10 +375,10 @@ public class SSMOBD2ProtocolHandler
 	/***********************************************************************************************
 	 * @param params IN - the list of ECUParameters to be queried
 	 * @param typeRead IN - Is this a READ or WRITE packet?
-	 * @return
+	 * @return a formatted SSMPacket for this query request
 	 **********************************************************************************************/
 	//private SSMPacket createTxPacket(List<ECUParameter> params, boolean read)
-	public static SSMPacket createECUParameterQueryPacket(List<ECUParameter> params, boolean typeRead)
+	public static SSMPacket encodeECUParameterQueryPacket(List<ECUParameter> params, boolean typeRead)
 	{
 		SSMPacket packet = new SSMPacket();
 
@@ -394,14 +426,108 @@ public class SSMOBD2ProtocolHandler
 		return packet;
 
 	}
+
+	/***********************************************************************************************
+	 * @param packet   IN  - the packet to be decoded
+	 * @param params   OUT - the list of ECUParameters to be queried
+	 * @return typeRead - Is this a READ or WRITE packet?  true = read; false = write
+	 **********************************************************************************************/
+	public static boolean decodeECUParameterQueryPacket(SSMPacket packet, List<ECUParameter> params)
+	{
+		/* Check the header */
+		byte[] header = packet.getHeader();
+		int index;
+		if (!(header[0] == 0x80 &&
+		      header[1] == SSM_DEVICE_ECU &&
+		      header[2] == SSM_DEVICE_APP
+		      ))
+		{
+			// This isn't a properly formatted header
+			throw new RuntimeException("Not an ECUParameter Query packet!");
+		}
+		if (!packet.verifyChecksum()) {
+			// This isn't a properly formatted header
+			throw new RuntimeException("Invalid packet error: invalid data checksum");
+		}
+			
+		byte[] data = packet.getData();
+		// TODO: assert that the length of the data is ok
+				
+		/* Read the command byte */
+		boolean typeRead;
+		switch (data[0]) {
+			case SSM_READ_COMMAND:  typeRead = true; break;
+			case SSM_WRITE_COMMAND: typeRead = false; break;
+			default: throw new RuntimeException(
+					"Invalid packet error: Command specifier (read/write) is invalid");
+		}
+		
+		// TODO: assert data[1] == 00?
+		// data.add((byte) 0x00); /* Data Padding */
+		
+		// assert that the number of address bytes is a multiple of SSM_OBD2_ADDRESS_SIZE
+		int nAddressBytes = data.length - 2;
+		if (nAddressBytes % SSM_OBD2_ADDRESS_SIZE != 0) {
+			throw new RuntimeException("Invalid packet error: Unexpected number of address bytes.");
+		}
+
+ 		/* For each address parameter, add it to the list*/
+		params.clear();
+ 		for (index = 2; index < data.length; index += 3) 
+		{
+	 		
+	 		// read the 3-byte address
+	 		byte[] address = new byte[] {data[index],data[index+1],data[index+2]};
+
+	 		// GN: The ECUParameter class requires that you provide a name.
+	 		// the name, desc, and rate aren't really meaningful here.
+	 		ECUParameter p = new ECUParameter(address, "UNKNOWN_depq", "UNKNOWN_depq", -1);
+	 		params.add(p);	
+ 		}
+
+		return typeRead;		
+	}
 	
-	public static void decodeECUParameterQueryPacket(List<ECUParameter> params, SSMPacket rxPacket) {
+		
+
+	/** 
+	 * Encode the response sent to be sent by the ECU when the ECU is responding
+	 * to a parameter query event.  For use by the SSMOBD2VirtualECU.  Written by GN.
+	 * TODO: compare this implementation with a specification.
+	 */
+	public static SSMPacket encodeECUParameterQueryResponsePacket(List<ECUParameter> params) 
+	{
+		int index=0;
+		/* The result data is preceded by a padding byte, thats why the +1 */
+		byte[] data = new byte[ params.size() + 1];
+
+		data[index++] = 0;
+		
+		for (ECUParameter p : params ) 
+		{
+			// TODO: we need to figure out how to format the result
+			// as a byte?
+			data[index++] = (byte)p.getResult();
+		}
+
+		SSMPacket packet = new SSMPacket();
+		// TODO: what are we supposed to set the header to?
+		packet.setData(data);
+		return packet;
+	}
+	
+	/** 
+	 * Decodes the response sent by the ECU when the ECU is responding
+	 * to a parameter query event.
+	 */
+	
+	public static void decodeECUParameterQueryResponsePacket(List<ECUParameter> params, SSMPacket rxPacket) {
 		
 		for (int index = 0; index < params.size(); index++)
 		{
 			ECUParameter p = params.get(index);
 
-			/* The result data is preceeded by a padding byte, thats why the +1 */
+			/* The result data is preceded by a padding byte, thats why the +1 */
 			p.setResult(rxPacket.getData()[index + 1]);
 		}
 	}
@@ -420,7 +546,7 @@ public class SSMOBD2ProtocolHandler
 		pList.add( withAirCon ? PARAM_GET_IDLE_SPEED_AIRCON : PARAM_GET_IDLE_SPEED_NORMAL );
 		
 		/* Create an empty packet */
-		SSMPacket txPacket = createECUParameterQueryPacket(pList, true);
+		SSMPacket txPacket = encodeECUParameterQueryPacket(pList, true);
 
 		
 		/* Send the packet */
@@ -1178,7 +1304,7 @@ public class SSMOBD2ProtocolHandler
 			{
 				throw new RuntimeException(
 						"Maximum of [" + MAX_DATA_LENGTH + 
-						"] data bytes exceeded in RS232 Packet. [" 
+						"] data bytes exceeded in SSMPacket. [" 
 						+ len + "]"); 
 			}
 			

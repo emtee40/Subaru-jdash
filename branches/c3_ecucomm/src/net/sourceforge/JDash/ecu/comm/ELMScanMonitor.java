@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -72,7 +73,8 @@ public class ELMScanMonitor extends BaseMonitor
 	private ArrayList<InternalParam> dtcCodes_ = new ArrayList<InternalParam>();
 	private ArrayList<InternalParam> dtcHistCodes_ = new ArrayList<InternalParam>();
 	
-	RS232Monitor serial_stream;
+	//RS232Monitor serial_stream;
+    
 	
 	/*******************************************************
 	 * Create a new SSP Monitor
@@ -80,14 +82,57 @@ public class ELMScanMonitor extends BaseMonitor
 	 ******************************************************/
 	public ELMScanMonitor() throws Exception
 	{
-		serial_stream = new RS232Monitor(ELMUtil.DEFAULT_ELM_BAUD, RXTXPort.DATABITS_8, RXTXPort.PARITY_NONE, RXTXPort.STOPBITS_1);
+		//serial_stream = new RS232Monitor(ELMUtil.DEFAULT_ELM_BAUD, RXTXPort.DATABITS_8, RXTXPort.PARITY_NONE, RXTXPort.STOPBITS_1);
 		
-		this.writer_ = new BufferedWriter(new OutputStreamWriter(serial_stream.getPort().getOutputStream()));
-		this.reader_ = new BufferedReader(new InputStreamReader(serial_stream.getPort().getInputStream()));
+		//this.writer_ = new BufferedWriter(new OutputStreamWriter(serial_stream.getPort().getOutputStream()));
+		//this.reader_ = new BufferedReader(new InputStreamReader(serial_stream.getPort().getInputStream()));
+        
 	}
 
 	
-	
+	public BasePort initPort(BasePort port, String strPortName) throws IOException
+    {
+        
+        if (commPort != null) {
+            System.out.println("Warning: ELMScanMonitor.commPort object is already initialized!");
+            return commPort;
+        }
+
+        // Can't initialize a null port
+        if (port == null) return null;
+        
+        if (port instanceof RXTXSerialPort) 
+        {
+            ((RXTXSerialPort)port).setSerialParams(strPortName,
+                ELMUtil.DEFAULT_ELM_BAUD,
+				RXTXPort.DATABITS_8, 
+				RXTXPort.PARITY_NONE, 
+				RXTXPort.STOPBITS_1);
+            
+            
+            commPort = port;
+            throw new RuntimeException("TODO: commPort.setRTS(false);");
+        } 
+        else 
+        {
+            if (super.initPort(port, strPortName) == null) 
+                throw new RuntimeException(
+                        "This BasePort derived class is not supported.");
+        }
+
+        // Wrap the outputstream and inputstream objects in 
+        // reader/writer objects for easy stream communication.
+		this.writer_ = new BufferedWriter(
+                new OutputStreamWriter(
+                commPort.getOutputStream()));
+                
+		this.reader_ = new BufferedReader(new InputStreamReader(
+                commPort.getInputStream()));
+        
+        
+        return commPort;
+    }	
+
 
 	/*******************************************************
 	 * Override
@@ -127,7 +172,8 @@ public class ELMScanMonitor extends BaseMonitor
 			reg.add(dtcHistCode);
 		}
 		
-		serial_stream.getPort().setRTS(false);
+        // 11 May 2008 - moved into the initPort routine
+		//serial_stream.getPort().setRTS(false);
 		
 		/* Perform a complete ELM reset */
 		initListener.update("Reset ELM", 1, 5);
@@ -338,7 +384,8 @@ public class ELMScanMonitor extends BaseMonitor
 		{
 			try
         	{
-        		serial_stream.closePort();
+        		//serial_stream.closePort();
+                closePort();
         	}
         	catch(Exception e)
         	{

@@ -28,6 +28,7 @@ import gnu.io.RXTXPort;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 
 import net.sourceforge.JDash.Setup;
 
@@ -186,7 +187,7 @@ public class RS232Stream extends BasePort
 	 * or setParams.
 	 * @return
 	 */
-	public boolean open() throws Exception {
+	public boolean open() throws IOException {
 	  
 		try
 		{
@@ -204,11 +205,18 @@ public class RS232Stream extends BasePort
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			throw new Exception("Unable to open RS232 communications port [" + Setup.getSetup().get(Setup.SETUP_CONFIG_MONITOR_PORT) + "]\n" + e.getMessage());
+            String errMsg = "Unable to open RS232 communications port";
+            errMsg += " [" + Setup.getSetup().get(Setup.SETUP_CONFIG_MONITOR_PORT) + "]\n";
+            errMsg += e.getClass().getName() + ": " + e.getMessage();
+            
+			throw new IOException(errMsg);
 		}
 		return true;
 	}
-  
+    public boolean open(int timeout) throws IOException
+    {
+        return open(0);
+    }
 	
 	public boolean close() 
 	{

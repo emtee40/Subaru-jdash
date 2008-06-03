@@ -23,7 +23,7 @@ import java.io.IOException;
 public class CobbSerialPort extends BasePort {
 
     // interfaces to the native Cobb driver methods.
-    private native static int nativeStart();
+    private native static int  nativeStart();
 
     private native static void nativeStop(int nSessionID);
 
@@ -53,14 +53,18 @@ public class CobbSerialPort extends BasePort {
      * 
      * @return true on success, false on failure
      */
-    public boolean open() {
+    public boolean open(int timeout) throws IOException {
 		nSessionID = nativeStart();
 		istream = new CobbSerialInputStream(this);
 		ostream = new CobbSerialOutputStream(this);
 		
 		return (nSessionID < 0);
     }
-	
+
+    public boolean open() throws IOException
+    {
+        return open(0);
+    }
 	public boolean isOpen() {
 		return nSessionID >= 0;
 	}

@@ -42,7 +42,9 @@
 			deprecation="true" 
 			debug="true" 
 			debuglevel="source,lines,vars"
-		/>
+		>
+        <compilerarg value="-Xlint"/>
+        </javac>
 		<copy todir="${outputDir}">
 			<fileset dir="${sourceDir}">
 				<exclude name="**/*.java"/>

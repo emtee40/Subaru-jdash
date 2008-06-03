@@ -45,6 +45,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JRadioButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -55,6 +56,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.ButtonGroup;
 
 import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.ecu.param.XMLParameterLoader;
@@ -81,8 +83,11 @@ public class ConfigureFrame extends JFrame
 	private JTextField comPort_ = null;
 	private JComboBox monitorParamFile_ = null;
 	
-	private JCheckBox testMonitor_ = null;
-	private JCheckBox loggerMonitor_ = null;
+    private ButtonGroup  btngrpComm_     = null;
+    private JRadioButton btnCommNormal_ = null;
+	private JRadioButton btnCommTest_   = null;
+	private JRadioButton btnCommLogger_ = null;
+	private JRadioButton btnCommVECU_   = null;
 	
 	private JTextArea skinClassDesc_ = null;
 	private JTextArea comPortDesc_ = null;
@@ -109,19 +114,19 @@ public class ConfigureFrame extends JFrame
 			setTitle("Configure " + Setup.APPLICATION);
 			setIconImage(new ImageIcon(ICON).getImage());
 			
-			/* Setup the display */
+			/* Setup the configuration fields */
 			initComponents();
 			initLayout();
 
-			/* Setup the screenlayout */
+			/* Setup the screen layout */
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 			Dimension frameSize = getSize();
 	
 			/* And the location in the center of the screen */
+            // GN: TODO: validate this in a multimonitor setup
 			setLocation(((screenSize.width - frameSize.width) / 2), ((screenSize.height - frameSize.height) / 2));
-			
-
-			
+            
+            //dumpGUIValues();
 		}
 		catch(Exception e)
 		{
@@ -135,6 +140,7 @@ public class ConfigureFrame extends JFrame
 	
 
 	/*******************************************************
+     * Initialize GUI related to communication components.
 	 * @throws Exception
 	 *******************************************************/
 	private void initComponents() throws Exception
@@ -143,25 +149,55 @@ public class ConfigureFrame extends JFrame
 		this.comPort_ = new JTextField();
 		this.monitorParamFile_ = new JComboBox();
 		
-		this.testMonitor_ = new JCheckBox("Simulation Test Mode", new Boolean(Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_TEST)));
-		this.loggerMonitor_ = new JCheckBox("Logger Playback Mode", new Boolean(Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK)));
-		
-		this.testMonitor_.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent arg0)
-			{
-				loggerMonitor_.setSelected(false);
-			}
-		});
-		
-		this.loggerMonitor_.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent arg0)
-			{
-				testMonitor_.setSelected(false);
-			}
-		});
-		
+        // TODO: fix the config options so that this makes more sense.
+        // For now, we just interpret the results and make it into something
+        // usable by the current config file format.
+        
+        boolean bCommTest, bCommLogger, bCommNormal, bCommVECU = false;
+        
+        
+        this.btnCommNormal_ = new JRadioButton("Normal ECU Comm Mode");
+		this.btnCommTest_   = new JRadioButton("Simulation Test Mode");
+		this.btnCommLogger_ = new JRadioButton("Logger Playback Mode");
+		this.btnCommVECU_   = new JRadioButton("Virtual ECU Mode");
+        
+        this.btngrpComm_ = new ButtonGroup();
+        this.btngrpComm_.add(this.btnCommNormal_);
+        this.btngrpComm_.add(this.btnCommTest_);
+        this.btngrpComm_.add(this.btnCommLogger_);
+        this.btngrpComm_.add(this.btnCommVECU_);
+        
+        //Read mode config value
+        String strCommMode = Setup.getSetup().get(Setup.SETUP_CONFIG_COMM_MODE);
+        if (strCommMode != null) {
+            bCommNormal = strCommMode.equals(Setup.SETUP_VALUE_COMM_MODE_NORMAL);
+            bCommTest   = strCommMode.equals(Setup.SETUP_VALUE_COMM_MODE_TEST);
+            bCommLogger = strCommMode.equals(Setup.SETUP_VALUE_COMM_MODE_LOGPLAY);
+            bCommVECU   = strCommMode.equals(Setup.SETUP_VALUE_COMM_MODE_VECU);
+            //} else if (strCommMode.equals(Setup.SETUP_VALUE_COMM_MODE_VECU)) {
+        } else {
+            // Potentially use deprecated config values
+            bCommTest   = new Boolean(
+                    Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_TEST)
+                    ).booleanValue();
+            bCommLogger = new Boolean(
+                    Setup.getSetup().get(Setup.SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK)
+                    ).booleanValue();
+            bCommVECU   = false;
+            bCommNormal = ! (bCommTest | bCommLogger | bCommVECU);
+        }
+        this.btnCommNormal_.setSelected(bCommNormal);
+		this.btnCommTest_.setSelected(bCommTest);
+		this.btnCommLogger_.setSelected(bCommLogger);
+		this.btnCommVECU_.setSelected(bCommVECU);
+                
+        System.out.println("(normal,test,logger,vecu)" +
+                bCommNormal + "; " + 
+                bCommTest + "; " +
+                bCommLogger + "; " +
+                bCommVECU + "; ");
+
+       
 		this.skinClassDesc_ = new JTextArea();
 		this.comPortDesc_ = new JTextArea("The serial com port to connect to. In windows" +
 											" this is something like \"com1\" or \"com5\"." +
@@ -274,12 +310,15 @@ public class ConfigureFrame extends JFrame
 		/* Monitor File */
 		addLabeledComp("Monitor:", this.monitorParamFile_, this.monitorParamFileDesc_, mainPanel);
 		
-		/* Test and logger Monitor */
-		JPanel tlPanel = new JPanel();
-		tlPanel.setLayout(new BoxLayout(tlPanel, BoxLayout.Y_AXIS));
-		tlPanel.add(this.testMonitor_);
-		tlPanel.add(this.loggerMonitor_);
-		addLabeledComp("", tlPanel, new JTextArea("Enable monitor simulator or Logger Playback mode. No serial connection needed.  You can't select both together.\n\n" +
+		/* ECU Communication (Normal, test and logger) Monitor */
+		JPanel radioECUPanel = new JPanel();
+		radioECUPanel.setLayout(new BoxLayout(radioECUPanel, BoxLayout.Y_AXIS));
+        radioECUPanel.add(new JLabel("ECU Communication Mode"));
+		radioECUPanel.add(this.btnCommNormal_);
+		radioECUPanel.add(this.btnCommTest_);
+        radioECUPanel.add(this.btnCommLogger_);
+        radioECUPanel.add(this.btnCommVECU_);
+		addLabeledComp("", radioECUPanel, new JTextArea("Enable monitor simulator or Logger Playback mode. No serial connection needed.  You can't select both together.\n\n" +
 				" ** NOTE: If your using \"Logger Playback\" Mode, it is critical that you also select the monitor that was used to generate the selected log.  This is" +
 				" becuase the specific monitor defines how the ECU Parameters are read and recorded and is used during log playback to format the values." +
 				" A different monitor will not understand the format of log data from a another monitor. "), mainPanel);
@@ -323,6 +362,7 @@ public class ConfigureFrame extends JFrame
 
 		/* Pack it up */
 		pack();
+        setVisible(true);
 		
 	}
 	
@@ -484,14 +524,38 @@ public class ConfigureFrame extends JFrame
 				Skin skin = (Skin)this.skinClass_.getSelectedItem();
 				XMLParameterLoader loader = (XMLParameterLoader)this.monitorParamFile_.getSelectedItem();
 				
+                // TODO: Fix the config file.
+                // Decode the radiobutton selection into a config file value
+                boolean bCommTest    = this.btnCommTest_.isSelected();
+                boolean bCommLogplay = this.btnCommLogger_.isSelected();
+                boolean bCommNormal  = this.btnCommNormal_.isSelected();
+                boolean bCommVECU    = this.btnCommVECU_.isSelected();
+                String  strCommMode  = null;
+
+                if (bCommTest)    strCommMode = Setup.SETUP_VALUE_COMM_MODE_TEST;
+                if (bCommLogplay) strCommMode = Setup.SETUP_VALUE_COMM_MODE_LOGPLAY;
+                if (bCommNormal)  strCommMode = Setup.SETUP_VALUE_COMM_MODE_NORMAL;
+                if (bCommVECU)    strCommMode = Setup.SETUP_VALUE_COMM_MODE_VECU;
 				
 				Setup.getSetup().set(Setup.SETUP_CONFIG_SKINFACTORY_CLASS,  	skin.getOwnerFactory().getClass().getName());
 				Setup.getSetup().set(Setup.SETUP_CONFIG_SKIN_ID,        		skin.getId());
 				Setup.getSetup().set(Setup.SETUP_CONFIG_MONITOR_PORT,   		this.comPort_.getText());
 				Setup.getSetup().set(Setup.SETUP_CONFIG_PARAMETER_FILE, 		loader.getFile().getName());
-				Setup.getSetup().set(Setup.SETUP_CONFIG_ENABLE_TEST,			new Boolean(this.testMonitor_.isSelected()).toString());
-				Setup.getSetup().set(Setup.SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK,	new Boolean(this.loggerMonitor_.isSelected()).toString());
-			
+
+                // These parameters are deprecated
+                Setup.getSetup().set(Setup.SETUP_CONFIG_ENABLE_TEST,			new Boolean(bCommTest).toString());
+                Setup.getSetup().set(Setup.SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK,	new Boolean(bCommNormal).toString());
+                
+                if (strCommMode != null)
+                    Setup.getSetup().set(Setup.SETUP_CONFIG_COMM_MODE, strCommMode);
+                else
+                    System.out.println("No communication mode selected!");
+
+                System.out.println("ecucomm.mode = " + strCommMode);
+                dumpGUIValues();
+                
+                // GN.  Just for testing.
+                //System.out.println("Saving of config file temporarily disabled.");
 				Setup.getSetup().saveConfigFile();
 			}
 			
@@ -511,5 +575,18 @@ public class ConfigureFrame extends JFrame
 		
 	}
 	
+    void dumpGUIValues()
+    {
+        Skin skin = (Skin)this.skinClass_.getSelectedItem();
+        XMLParameterLoader loader = (XMLParameterLoader)this.monitorParamFile_.getSelectedItem();
+        // Print values obtained for debug.
+        System.out.println("Skinfactory classname: " + skin.getOwnerFactory().getClass().getName());
+        System.out.println("Skin ID: " + skin.getId());
+        System.out.println("Comm Port: " + this.comPort_.getText());
+        System.out.println("ECU Parameter file:  " + loader.getFile().getName());
+        System.out.println("ECUComm mode Test:   " + new Boolean(this.btnCommTest_.isSelected()).toString());
+        System.out.println("ECUComm mode Logger: " + new Boolean(this.btnCommLogger_.isSelected()).toString());
+
+    }
 
 }

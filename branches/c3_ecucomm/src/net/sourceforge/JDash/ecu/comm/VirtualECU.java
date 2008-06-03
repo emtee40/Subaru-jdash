@@ -43,13 +43,23 @@ package net.sourceforge.JDash.ecu.comm;
 import java.io.*;
 import java.lang.RuntimeException;
 
+// for VirtualECUConsole
+import javax.swing.*;
+import java.awt.*;
+import net.sourceforge.JDash.ecu.param.*;
+
 
 public class VirtualECU implements Runnable {
-	protected VirtualECUPort emuport;
-	protected boolean        bIsRunning;
+	protected VirtualECUPort emuport    = null;
+	protected boolean        bIsRunning = false;
+    
+    public boolean           bShowDebugConsole = true;
+    public VECUConsoleFrame  vecuConsoleFrame  = null;
 	
-	Thread t;
-	int signal;
+    public ParameterRegistry paramRegistry_ = null;
+    
+	Thread t      = null;
+	int    signal = 0;;
 	
 	VirtualECU() {
 		signal = 0;
@@ -82,6 +92,12 @@ public class VirtualECU implements Runnable {
 	 * @return thread of execution.
 	 */
 	public Thread start() {
+        System.out.println( this.getClass().getName() + ".start();");
+        if (bShowDebugConsole) 
+        {
+            System.out.println("Creating VirtualECU Console Frame");
+            vecuConsoleFrame = new VECUConsoleFrame();
+        }
 		t = new Thread(this);
 		t.setName("VirtualECU");
 		t.start();
@@ -97,6 +113,16 @@ public class VirtualECU implements Runnable {
 	 */
 	public void run() {
 		System.out.println("VirtualECU started.");
+        if (emuport == null) {
+            System.out.println("VirtualECU waiting for connection to VirtualECUPort");
+            while (emuport == null && getSignal() == 0) {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+            }
+            if (getSignal() != 0) return;
+        }
+        
 		InputStream  is = emuport.getECUInputStream();
 		OutputStream os = emuport.getECUOutputStream();
 		bIsRunning = true;
@@ -128,10 +154,12 @@ public class VirtualECU implements Runnable {
 	* before calling the start() method.  This method cannot be called while the 
 	* VirtualECU is running.
 	*/
-	public void connect(VirtualECUPort emuport) throws RuntimeException{
+	public void connect(VirtualECUPort emuport) throws IOException {
 		if (bIsRunning) 
 			throw new RuntimeException("Cannot change VirtualECUPort while VirtualECU is running.");
 		this.emuport = emuport;
+        if (!emuport.ecuOpen())
+            throw new RuntimeException("VirtualECUPort.ecuOpen returned false");
 	}
 	
 	//abstract void init();
@@ -142,7 +170,7 @@ public class VirtualECU implements Runnable {
 	 * Allows you to test out this VirtualECU by sending it commands.
 	 * @param emu
 	 */
-	public static void emulatorConsoleTest(VirtualECU emu) {
+	public static void emulatorConsoleTest(VirtualECU emu) throws IOException {
 		VirtualECUPort emuport = new VirtualECUPort();
 		emu.connect(emuport);
 		String instr;
@@ -189,11 +217,56 @@ public class VirtualECU implements Runnable {
 			e.printStackTrace();
 		} 
 	} // end emulatorConsoleTest
-	
+
+    /// A GUI class for showing what's going on inside the VirtualECU
+    public static class VECUConsoleFrame extends JFrame {
+        
+        protected JTextField textConsole;
+        
+        public VECUConsoleFrame() {
+            super();
+            /* Set the frame title */
+            setTitle("VirtualECU Console");
+            //setIconImage(new ImageIcon(ICON).getImage());
+            initComponents();
+        }
+        void initComponents() {
+            textConsole = new JTextField();
+            
+            ////////////////////////////////
+            // Init Layout
+            /* Init the content pane */
+            JPanel contentPanel = new JPanel();
+            setContentPane(contentPanel);
+            contentPanel.setLayout(new BorderLayout());
+
+               
+            /* Setup the main content panel */
+            JPanel mainPanel = new JPanel(new GridBagLayout());
+            JScrollPane mainScrollPane = new JScrollPane(mainPanel);
+            getContentPane().add(mainScrollPane);
+            mainScrollPane.setHorizontalScrollBarPolicy(
+                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+                    );
+            
+            mainPanel.add(textConsole);
+            
+            
+    		pack();
+        } // end initComponents()
+                   
+        
+    } // end VECUConsoleFrame
+    
+    
 
 	// Test the VirtualECU using 
 	public static void main(String args[]) {
 		VirtualECU emu = new VirtualECU();
-		emulatorConsoleTest(emu);
+        try {
+    		emulatorConsoleTest(emu);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 	}
 }

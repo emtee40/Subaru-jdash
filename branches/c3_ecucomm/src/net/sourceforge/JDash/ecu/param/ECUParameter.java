@@ -39,7 +39,8 @@ import net.sourceforge.JDash.util.ByteUtil;
  * might be a 10 byte array of command codes. (Note: I do NOT 
  * have an ELM scanner, so I made that last bit up as an example).
  ******************************************************/
-public class ECUParameter extends Parameter
+public class ECUParameter extends Parameter 
+        implements Cloneable
 {
 	
     private byte[] _address;
@@ -68,6 +69,16 @@ public class ECUParameter extends Parameter
         	error += ByteUtil.bytesToString(this._address);
         	throw new RuntimeException(error);  
         }
+    }
+    
+    @Override
+    public ECUParameter clone()
+    {
+        byte[] address = new byte[_address.length];
+        for (int i=0; i < _address.length; i++) 
+            address[i] = _address[i];
+        
+        return new ECUParameter(address, _name, _description, rate_);
     }
 
     /******************************************************
@@ -131,6 +142,16 @@ public class ECUParameter extends Parameter
     public byte[] getAddress()
     {
     	return this._address;
+    }
+    /**
+     * Return the address as a long integer.  
+     * Open issue: should this interpret the address as litle
+     * or big endian?
+     * @return
+     */
+    public long getAddressAsLong() 
+    {
+        return ByteUtil.byteArrayToLongBE(_address);
     }
 
     /*******************************************************

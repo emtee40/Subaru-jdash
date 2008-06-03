@@ -1,13 +1,18 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ * 
+ * A wrapper class for use with the RXTXSerialPort so that it conforms to the
+ * BasePort class.
+ * 
+ * 
  */
 
 package net.sourceforge.JDash.ecu.comm;
 import gnu.io.RXTXPort;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import java.io.IOException;
 /**
  *
  * @author greg
@@ -62,7 +67,7 @@ public class RXTXSerialPort extends BasePort {
 	/**
 	 * Set the serial communications parameters.  Parameters may only be set
 	 * while a communications port is not open.
-	 * @param strPortName
+	 * @param strPortName  the name of the port, e.g., COM1, or /dev/tty/USB0
 	 * @param serialBaud
 	 * @param data
 	 * @param parity
@@ -106,7 +111,7 @@ public class RXTXSerialPort extends BasePort {
 	}
 	
 
-	public boolean close() throws Exception
+	public boolean close() throws IOException
 	{
 		if (this.port_ == null) return false;
 		// GN: is close necessary?
@@ -125,7 +130,7 @@ public class RXTXSerialPort extends BasePort {
 	 * or setParams.
 	 * @return
 	 */
-	public boolean open() throws Exception {
+	public boolean open(int timeout) throws IOException {
 	  
 		try
 		{
@@ -144,10 +149,17 @@ public class RXTXSerialPort extends BasePort {
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			throw new Exception("Unable to open communications port [" + 
-					strPortName_ + "]\n" + e.getMessage());
+            String errMsg = "Unable to open RS232 communications port";
+            errMsg += " [" + strPortName_ + "]\n";
+            errMsg += e.getClass().getName() + ": " + e.getMessage();
+            
+			throw new IOException(errMsg);
 		}
 		return true;
 	}
+    
+    public boolean open() throws IOException {
+        return open(0);
+    }
 
 }

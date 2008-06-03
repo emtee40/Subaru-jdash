@@ -39,6 +39,8 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import java.io.IOException;
+
 
 /******************************************************
  * All monitors should really extend this class.  Although
@@ -57,7 +59,13 @@ import java.util.Collections;
  * The communication configurator will need to specify a couple different things:
  * - ECU protocol (SSM)
  * - Hardware driver (RXTXPort [serial], Cobb Serial, virtual)
- * 
+ *   * The hardware driver is called a "Port" and is initialized and finalized
+ *     by the initPort() and closePort() objects.
+ *   * It is the monitor's responsibility to set up the port object correctly.
+ *     Typically, each protocol requires certain serial protocol parameters.
+ *     These protocol impl. details are typically handled by the port object.
+ *     for example, it may need to set the baud rate and flow control parameters.
+ 
  * 
  * @author greg
  */
@@ -119,6 +127,75 @@ public abstract class BaseMonitor implements ECUMonitor
         this.doRun_ = new Boolean(true);
     }
     
+    /**
+     * If no BasePort object has been initialized for this BaseMonitor object,
+     * then this method checks whether the BasePort object is of the supported
+     * type, then initializes it and opens the port.  
+     * 
+     * In general, overrides should check whether the port object is of the
+     * supported type, and perform any necessary initialization to use this 
+     * BasePort object.
+     * 
+     * The BasePort implementation of the initPort() method supports the
+     * VirtualECUPort class.  See the implementation of this function to understand
+     * how you should structure initPort() methods for overrides.
+     * 
+     * @param port A BasePort class or derived class. If null, the method will 
+     *             not succeed.
+     * @param strPortName name of the port resource (may be used in overrides, 
+     *        but is not used in the BasePort implementation of this method)
+     * @return the initialized BasePort object (should be equal to input parameter
+     * port) if success, otherwise null.
+     */
+    public BasePort initPort(BasePort port, String strPortName) throws IOException
+    {
+        if (commPort != null) 
+        {
+            System.out.println("Warning: BasePort.commPort is already initialized!");
+            return commPort;
+        }
+
+        // Can't initialize a null port
+        if (port == null) return null;
+        
+        if (port instanceof VirtualECUPort) 
+        {
+            // Nothing to do. Just accept the port.
+            commPort = port;
+        } 
+        else 
+        {
+            // This is not a supported port type.  Return null.
+            // TODO: make this warning message more informative.
+            System.out.println("Warning: BaseMonitor doesn't support this type of BasePort");
+        }
+        
+        // TODO: In all cases, wait for the comm port to say that it's ready.
+
+        return commPort;
+    }
+    
+    /**
+     * In your override, perform any protocol-specific cleanup before calling 
+     * this routine.
+     * 
+     * BasePort.closePort() calls the close() method of the commPort object,
+     * then invalidates the commPort object attached to this monitor.
+     * 
+     * @return
+     */
+    public boolean closePort() 
+    {
+        try {
+            commPort.close();
+            commPort = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+    
     
     /*******************************************************
      * If you extend this class, you MUST call this super.init() method.
@@ -169,19 +246,19 @@ public abstract class BaseMonitor implements ECUMonitor
     }
     
     /********************************************************
-     * @param l
+     * @param mel
      *******************************************************/
-    public void addMonitorListener(MonitorEventListener l)
+    public void addMonitorListener(MonitorEventListener mel)
     {
-    	this.monitorListeners_.add(l);
+    	this.monitorListeners_.add(mel);
     }
     
     /********************************************************
-     * @param l
+     * @param mel
      *******************************************************/
-    public void removeMonitorListener(MonitorEventListener l)
+    public void removeMonitorListener(MonitorEventListener mel)
     {
-    	this.monitorListeners_.remove(l);
+    	this.monitorListeners_.remove(mel);
     }
     
     
@@ -190,9 +267,9 @@ public abstract class BaseMonitor implements ECUMonitor
      *******************************************************/
     public void fireProcessingStartedEvent()
     {
-    	for (MonitorEventListener l : this.monitorListeners_)
+    	for (MonitorEventListener mel : this.monitorListeners_)
     	{
-    		l.processingStarted();
+    		mel.processingStarted();
     	}
     }
     

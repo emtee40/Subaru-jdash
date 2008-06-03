@@ -37,7 +37,7 @@ import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 
 //import net.sourceforge.JDash.ecu.comm.SSMOBD2ProtocolHandler;
 import net.sourceforge.JDash.ecu.comm.SSMOBD2ProtocolHandler.SSMPacket;
-
+import java.io.IOException;
 
 /***************************************************************************************************
  * This extension to the SSMMonitor is setup to use the OBD-II version of SSM
@@ -58,16 +58,74 @@ public class SSMOBD2Monitor extends BaseMonitor
 	 **************************************************************************/
 	public SSMOBD2Monitor() throws Exception
 	{
-		commPort = new RS232Stream(
-				SSMOBD2ProtocolHandler.DEFAULT_SSM_BAUD, 
+        //initDefaultPortObject();
+
+		ssmprotohandler = new SSMOBD2ProtocolHandler();
+	}
+
+    /* The SSM protocol requires that communication be initialized to 4800 Baud,
+     * N81.
+     * 
+     * 
+     * */
+    
+    
+    /**
+     * 
+     * This method initializes a BasePort object to be ready to use the SSM
+     * protocol.  If the BasePort-derived class is not supported, the routnie
+     * returns false.
+     * 
+     * TODO: determine if strPortName needs to be made into a more generic parameter.
+     * 
+     * @param port A reference to an initialized BasePort object.  
+     * @param strPortName Name of the port resource to connect to.
+     * @return port object if initialization succeeds, null if it fails (e.g., if the
+     * baseport class is not supported.)
+     * @throws java.lang.Exception
+     */
+    
+    
+	public BasePort initPort(BasePort port, String strPortName) throws IOException
+    {
+        
+        if (commPort != null) {
+            System.out.println("Warning: SSMOBD2Monitor.commPort object is already initialized!");
+            return commPort;
+        }
+
+        // Can't initialize a null port [this case implicitly handled by super]
+        if (port == null) return null;
+        
+        if (port instanceof RXTXSerialPort) 
+        {
+            // Set the port to baud 4800, N81.
+            ((RXTXSerialPort)port).setSerialParams(strPortName,
+                SSMOBD2ProtocolHandler.DEFAULT_SSM_BAUD,
 				RXTXPort.DATABITS_8, 
 				RXTXPort.PARITY_NONE, 
 				RXTXPort.STOPBITS_1);
+            commPort = port;
+        } 
+        else 
+        {
+            if (super.initPort(port, strPortName) == null) 
+                throw new RuntimeException(
+                        "This BasePort derived class is not supported.");
+        }
+        commPort.open();
 
-		ssmprotohandler = new SSMOBD2ProtocolHandler(commPort);
-	}
-
-	
+        
+        //ssmprotohandler.comm_serial = commPort;
+        ssmprotohandler.is_ = commPort.getInputStream();
+        ssmprotohandler.os_ = commPort.getOutputStream();
+        
+        return commPort;
+    }
+    
+    public boolean closePort() {
+        return super.closePort();
+    }
 	
 	/***********************************************************************************************
 	 * Override

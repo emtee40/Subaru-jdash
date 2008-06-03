@@ -92,12 +92,19 @@ public class Setup implements Version
 	/** The get() config key to return the ecu parameter file name */
 	public static final String SETUP_CONFIG_PARAMETER_FILE = "parameter.file";
 	
-	
+    ////////////////////////////////////////////////////////////////////////////
+	// TODO: enable.test and log.playback should be unified into a "mode" option
 	/** The flag indicating that the emulations/tester monitor should be started */
 	public static final String SETUP_CONFIG_ENABLE_TEST = "enable.test";
 	
 	/** This flag indicating that the playback monitor should be started */
 	public static final String SETUP_CONFIG_ENABLE_LOGGER_PLAYBACK = "log.playback";
+    
+    public static final String SETUP_CONFIG_COMM_MODE        = "ecucomm.mode";
+    public static final String SETUP_VALUE_COMM_MODE_TEST    = "test";
+    public static final String SETUP_VALUE_COMM_MODE_LOGPLAY = "logplayback";
+    public static final String SETUP_VALUE_COMM_MODE_NORMAL  = "normal";
+    public static final String SETUP_VALUE_COMM_MODE_VECU    = "virtualecu";
 	
 	
 	/** The jar file URL Prefix */
@@ -253,7 +260,8 @@ public class Setup implements Version
 	/*******************************************************
 	 * Call this to get a setup configuration value.
 	 * @param setupConfigName IN - the config parameter to get.
-	 * @return the parameter value, if it exists.
+	 * @return the parameter value, if it exists. If it doesn't returns null
+     *         (according to behavior of Properties.getProperty())
 	 ******************************************************/
 	public String get(String setupConfigName)
 	{

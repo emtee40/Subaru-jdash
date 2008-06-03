@@ -79,7 +79,7 @@ public class TimeParameter extends Parameter
     public void marktime()
     {
         if(_init == 0) _init = System.currentTimeMillis();
-        marktime(System.currentTimeMillis() - (long)_init);
+        marktime(System.currentTimeMillis() - _init);
     }
 
     /******************************************************

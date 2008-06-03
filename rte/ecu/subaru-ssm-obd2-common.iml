@@ -1,7 +1,10 @@
 <!-- ======================================================
      EVERY known to us  SSM parameter
      ====================================================== -->
-<parameters name="Subaru SSM/OBD-II with OpenPort cable" monitor-class="net.sourceforge.JDash.ecu.comm.SSMOBD2Monitor">
+<parameters name="Subaru SSM/OBD-II with OpenPort cable" 
+            monitor-class="net.sourceforge.JDash.ecu.comm.SSMOBD2Monitor"
+            virtualecu-class="net.sourceforge.JDash.ecu.comm.SSMOBD2VirtualECU"
+>
 
     <description>All Subaru Models with OBD-II compliance using the SSM Protocol on an OpenPort cable. This should include all models from 1998 to present. With some exceptions.</description>
     

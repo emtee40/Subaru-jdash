@@ -23,17 +23,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.ecu.comm;
 
-import gnu.io.RXTXPort;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Date;
+import java.util.Arrays;
 
-import net.sourceforge.JDash.Setup;
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.Parameter;
-import net.sourceforge.JDash.ecu.param.ParameterRegistry;
 import net.sourceforge.JDash.util.ByteUtil;
 
 //import net.sourceforge.JDash.
@@ -46,6 +44,10 @@ import net.sourceforge.JDash.util.ByteUtil;
  *************************************************************************************************
  * A ProtocolHandler implements protocols for communicating with the ECU.
  * This includes any packet formats, initialization, handshaking protocols.
+ * 
+ * Any routine which requires knowledge of protocol state (e.g., init, close, etc.)
+ * should probably be a member of the ProtocolHandler.  Anything that is just
+ * packet formatting could probably be made part of the SSMPacket class.
  * 
  * 
  
@@ -67,8 +69,6 @@ public class SSMOBD2ProtocolHandler
 	// getecuid?
 	// end ProtocolHandler functionality
 	
-	
-	
 
 	/** This is the default BAUD rate for the SSM protocol */
 	public static final int	DEFAULT_SSM_BAUD		= 4800;
@@ -84,10 +84,13 @@ public class SSMOBD2ProtocolHandler
 	private Integer			semaphore_				= new Integer(0);
 	private String			ecuId_					= null;
 	
-	private static final byte SSM_READ_COMMAND 		= (byte) 0xA8;
-	private static final byte SSM_WRITE_COMMAND 	= (byte) 0xB8;
-	private static final byte SSM_DEVICE_ECU		= (byte) 0x10;
-	private static final byte SSM_DEVICE_APP		= (byte) 0xF0;
+    
+    // TODO: I think this should be a member of SSMPacket?
+	public static final byte SSM_READ_COMMAND   = (byte) 0xA8;
+	public static final byte SSM_WRITE_COMMAND 	= (byte) 0xB8;
+    public static final byte SSM_INIT_COMMAND   = (byte) 0xBF;
+	public static final byte SSM_DEVICE_ECU		= (byte) 0x10;
+	public static final byte SSM_DEVICE_APP		= (byte) 0xF0;
 	
 	
 	
@@ -101,7 +104,13 @@ public class SSMOBD2ProtocolHandler
 	
 	private static final int MAX_PACKET_FAILURES = 5;
 	
-	BasePort comm_serial;
+    // TODO: actually, I think we want to change this to use
+    // the inputstream and outputstreams.
+	//BasePort comm_serial;
+    public InputStream  is_;
+    public OutputStream os_;
+    
+    
 	public ArrayList<Parameter> paramList;
 	
 	public String getECUID() {
@@ -111,9 +120,16 @@ public class SSMOBD2ProtocolHandler
 	/***********************************************************************************************
 	 * Create a new SSM OBD-II capable monitor.
 	 **********************************************************************************************/
-	SSMOBD2ProtocolHandler(BasePort bs)
+    SSMOBD2ProtocolHandler() 
+    {
+        is_ = null;
+        os_ = null;
+    }
+	SSMOBD2ProtocolHandler(InputStream is, OutputStream os)
 	{
-		comm_serial = bs;
+		//comm_serial = bp;
+        is_ = is;
+        os_ = os;
 	}
 
 		
@@ -127,10 +143,13 @@ public class SSMOBD2ProtocolHandler
 		
 						//super.init(reg, initListener);
 
-		/* Setup the init packet */
+		/* Setup the init packet. DST=Subaru ECU(0x10), SRC=App(0xF0), 
+           Command=0xBF */
 		SSMPacket txPacket = new SSMPacket(); //RS232Packet txPacket = new RS232Packet();
-		txPacket.setHeader(new byte[] { (byte) 0x80, (byte) 0x10, (byte) 0xF0 });
-		txPacket.setData(new byte[] { (byte) 0xBF });
+		txPacket.setHeader(new byte[] { (byte) 0x80, 
+            SSMPacket.SSM_DEVICE_ECU, 
+            SSMPacket.SSM_DEVICE_APP });
+		txPacket.setData(new byte[] { SSMPacket.SSM_CMD_INIT });
 		txPacket.setChecksum();
 
 		/*
@@ -139,25 +158,46 @@ public class SSMOBD2ProtocolHandler
 		 * echos our init packet, along with the regular data
 		 */
 		//initListener.update("Initialize Interface", 1, 1);
+        
+        // GN: I think that after we send the init packet, the ECU is supposed
+        // to send back a packet with the same header and INIT head, but is also
+        // supposed to send back the ECU ID after that first init byte.
 		
 		//RS232Packet rxPacket = sendPacket(txPacket, SSM_HEADER_LEN);
-		SSMPacket rxPacket = sendAndReceivePacket(txPacket);
+        System.out.println("SSMOBD2PH::Sending init packet.");
+		//SSMPacket rxPacket = sendAndReceivePacket(txPacket);
+        sendPacket(txPacket, true);
+        System.out.println("SSMOBD2PH::Sent init packet.");
+		SSMPacket rxPacket = receivePacket(0);
+        System.out.println("SSMOBD2PH::waiting for init packet echo.");
+        
 
+        /* New: The received packet header should have DST=APP(0xF0) and 
+         * SRC=ECU(0x10), and a data payload, of which we take bytes 2-9 as
+         * the ECU ID.
 		/*
 		 * The rxPacket header should contain the init packet, plus the last 3 bytes should be the
 		 * response header of 0x80 0xf0 0x10
 		 */
 		// GN: not sure how this check is affected since I have made
 		// it impossible for the header's length not to be SSM_HEADER_LEN
-		if (rxPacket.getHeader().length != SSM_HEADER_LEN)
+        byte[] header = rxPacket.getHeader();
+        if (!rxPacket.isHeaderSourceDest(SSM_DEVICE_ECU, SSM_DEVICE_APP))
 		{
-			throw new Exception("Init RX packet did not return the expected header\n"
-					+ "Expected: " + ByteUtil.bytesToString(txPacket.getHeader())
-					+ txPacket.getDataLength() + " " + ByteUtil.bytesToString(txPacket.getData()) + " "
-					+ txPacket.getChecksum() + " 0x80 0xf0 0x10\n" + "Received: "
-					+ ByteUtil.bytesToString(rxPacket.getHeader()));
+            // TODO: just ignore it?
+			throw new RuntimeException("Init RX packet's source and dest incorrect"
+                    + "\nReceived: " + rxPacket.toString());
 		}
-
+        if (rxPacket.getDataLength() < 9)
+		{
+            // 
+			throw new RuntimeException("Init RX packet must have at least " +
+                    "9 bytes of data for ecuid. received " + rxPacket.getDataLength() +
+                    " bytes. Received: " + rxPacket.toString());
+		} 
+        
+        System.out.println("SSMOBD2PH verified init packet.");
+        
 		/* Ecu ID */
 		this.ecuId_ = String.format("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
 				rxPacket.getData()[1], rxPacket.getData()[2], rxPacket.getData()[3], rxPacket
@@ -182,7 +222,7 @@ public class SSMOBD2ProtocolHandler
 			byte mask = (byte) (0x01 << cap.bitIndex_);
 
 			/* Make sure the ECU has returned a bitmask byte for the capability we're testing */
-			if (rxPacket.getData().length <= (int) cap.byteIndex_)
+			if (rxPacket.getData().length <= cap.byteIndex_)
 			{
 				break;
 			}
@@ -190,7 +230,8 @@ public class SSMOBD2ProtocolHandler
 			/* For each bit definition */
 			if ((rxPacket.getData()[cap.byteIndex_] & mask) != 0)
 			{
-				ECUParameter newParam = new ECUParameter((byte[]) cap.address_, cap.name_,
+				ECUParameter newParam = new ECUParameter( 
+                        cap.address_, cap.name_,
 						cap.description_, 1);
 				paramList.add(newParam);
 			}
@@ -206,6 +247,7 @@ public class SSMOBD2ProtocolHandler
 	
 	private int flushInputStream(InputStream is) throws IOException {
 		/* Read any stale bytes on the input stream */
+        System.out.println("Flushing inputstream");
 		if (is.available() != 0)
 		{
 			// Wait for just a little bit longer.  Giving the stale
@@ -250,42 +292,72 @@ public class SSMOBD2ProtocolHandler
 	 **********************************************************************************************/
 	public SSMPacket sendAndReceivePacket(SSMPacket txPacket) throws Exception
 	{
+        return sendAndReceivePacket(txPacket, 0);
+    }
+
+    /**
+     * 
+     * @param txPacket - packet to transmit
+     * @param timeout - Timeout value in milliseconds.
+     * @return
+     * @throws java.lang.Exception
+     */
+    public SSMPacket sendAndReceivePacket(SSMPacket txPacket, int timeout) throws Exception
+	{
+        
+       long now = (new Date()).getTime();
 
 		synchronized (this.semaphore_)
 		{
 
 			try
 			{
-
 				/* Get the ports streams */
-				OutputStream os = comm_serial.getOutputStream();
-				InputStream  is = comm_serial.getInputStream();
+				OutputStream os = os_;
+				InputStream  is = is_;
 				
-				flushInputStream(is);
+                if (os == null || is == null)
+                    throw new NullPointerException("SSMOBD2PH: comm_serial is null");
+
+                flushInputStream(is);
 
 				/* Send the TX packet */
+                System.out.println("Writing packet.");
 				txPacket.write(os);
-				os.flush();
-
+				os.flush();                                                                                                                                     
+                System.out.println("os.flush finished. is.available=()" + is.available());
 				/*
 				 * Read the bytes on the port until we get to the start of 
 				 * the return packet. That means we need to first skip the 
 				 * tx packet
 				 */
 				
-				while ((is.available() < txPacket.length()) && 
-						comm_serial.isOpen())
+                int nBytesAvailable=0, nLastBytesAvailable=0;
+				while ((is.available() < txPacket.length())
+                        //&& comm_serial.isOpen()
+                        )
 				{
-					Thread.sleep(10);
+                    nBytesAvailable = is.available();
+                    if (nBytesAvailable != nLastBytesAvailable) {
+                        System.out.println("SSMPH: SendAndReceivePacket now has " +
+                                nBytesAvailable + " bytes available");
+                    }
+                    nLastBytesAvailable = nBytesAvailable;
+                    
+                    try { Thread.sleep(10); } 
+                    catch (InterruptedException e) { }
 				}
+                System.out.println("received enough for a packet.");
+                
 				// If for some reason the port closed, then don't try to read
 				// the rest of the packet.
-				if (! comm_serial.isOpen()) 
-                                    return null;
+				// if (! comm_serial.isOpen()) return null;
 				
+                System.out.println("is.skip.");
                 // GN: apparently the ECU is supposed to echo back the request packet?
 				//comm_serial.readBytes(is, txPacket.length());
 				is.skip(txPacket.length());
+                System.out.println("doneskipping.");
 
 				/* Create the RX packet */
 				SSMPacket rxPacket = new SSMPacket();
@@ -294,7 +366,7 @@ public class SSMOBD2ProtocolHandler
 				/* Check the checksum against the packet */
 				if (! rxPacket.verifyChecksum())
 				{
-					throw new Exception(
+					throw new RuntimeException(
 							"The checksum on the RX packet didn't match our calculations.  We calculated ["
 									+ rxPacket.calcChecksum() + "]" + " but the packet has ["
 									+ rxPacket.getChecksum() + "]\n" + rxPacket);
@@ -305,9 +377,10 @@ public class SSMOBD2ProtocolHandler
 			}
 			catch (Exception e)
 			{
-				throw new Exception(
-						"There was a problem during the send/receive operation to the serial port ["
-								+ Setup.getSetup().get(Setup.SETUP_CONFIG_MONITOR_PORT) + "]\n", e);
+                
+				throw new Exception(e.getClass().getName() + ": " + 
+						"There was a problem during the send/receive operation to SSMOBD2VirtualECU port" 
+                        + e.getMessage(), e);
 			}
 
 		} /* end semaphore */
@@ -321,8 +394,12 @@ public class SSMOBD2ProtocolHandler
 		synchronized (this.semaphore_)
 		{
 			/* Get the ports streams */
-			OutputStream os = comm_serial.getOutputStream();
-			InputStream  is = comm_serial.getInputStream();
+			//OutputStream os = comm_serial.getOutputStream();
+			//InputStream  is = comm_serial.getInputStream();
+            OutputStream os = os_;
+            InputStream  is = is_;
+            if (os == null || is == null)
+                throw new NullPointerException("Stream is null");
 
 			if (bFlushInputStreamFirst) flushInputStream(is);
 
@@ -342,7 +419,8 @@ public class SSMOBD2ProtocolHandler
 
 			//try
 			//{
-				InputStream is = comm_serial.getInputStream();
+				InputStream is = is_;//comm_serial.getInputStream();
+                if (is == null) throw new NullPointerException("InputStream is null");
 
 				// TODO: support timeout
 				// Create the RX packet 
@@ -371,7 +449,7 @@ public class SSMOBD2ProtocolHandler
 		} /* end semaphore */
 	}
 
-
+    // TODO: I think this should be a member of SSMPacket.
 	/***********************************************************************************************
 	 * @param params IN - the list of ECUParameters to be queried
 	 * @param typeRead IN - Is this a READ or WRITE packet?
@@ -427,6 +505,38 @@ public class SSMOBD2ProtocolHandler
 
 	}
 
+    // TODO: I think this should be a member of SSMPacket.
+    /**
+     * Return a packet that represents an init request from the application
+     * to the ECU.
+     * @return
+     */
+	public static SSMPacket encodeInitPacket()
+	{
+        return SSMPacket.packetInit();
+    }
+    
+    /*
+    // TODO: I think this should be a member of SSMPacket.
+    public static boolean isInitPacket(SSMPacket packet)
+    {
+        byte[] data = packet.getData();
+        return  isPacketHeaderECUApp(packet) && 
+                (data.length == 1) &&
+                (data[0] == SSM_INIT_COMMAND);
+    }
+    // TODO: I think this should be a member of SSMPacket.
+    public static boolean isPacketHeaderECUApp(SSMPacket packet) {
+		byte[] header = packet.getHeader();
+        return (header.length == 3) &&
+               (header[0] == (byte)0x80    ) &&
+		       (header[1] == SSM_DEVICE_ECU) &&
+		       (header[2] == SSM_DEVICE_APP)
+		      ;
+    }
+    */
+    
+    // TODO: I think this should be a member of SSMPacket.
 	/***********************************************************************************************
 	 * @param packet   IN  - the packet to be decoded
 	 * @param params   OUT - the list of ECUParameters to be queried
@@ -434,20 +544,16 @@ public class SSMOBD2ProtocolHandler
 	 **********************************************************************************************/
 	public static boolean decodeECUParameterQueryPacket(SSMPacket packet, List<ECUParameter> params)
 	{
-		/* Check the header */
-		byte[] header = packet.getHeader();
 		int index;
-		if (!(header[0] == 0x80 &&
-		      header[1] == SSM_DEVICE_ECU &&
-		      header[2] == SSM_DEVICE_APP
-		      ))
+		/* Check the header */
+		if (! packet.isHeaderSourceDest(SSMPacket.SSM_DEVICE_APP,SSMPacket.SSM_DEVICE_ECU))
 		{
 			// This isn't a properly formatted header
-			throw new RuntimeException("Not an ECUParameter Query packet!");
+			throw new RuntimeException("SSMPacket: Unexpected source and dest: " + packet.toString());
 		}
 		if (!packet.verifyChecksum()) {
 			// This isn't a properly formatted header
-			throw new RuntimeException("Invalid packet error: invalid data checksum");
+			throw new RuntimeException("SSMPacket: invalid data checksum: " + packet.toString());
 		}
 			
 		byte[] data = packet.getData();
@@ -456,10 +562,10 @@ public class SSMOBD2ProtocolHandler
 		/* Read the command byte */
 		boolean typeRead;
 		switch (data[0]) {
-			case SSM_READ_COMMAND:  typeRead = true; break;
+			case SSM_READ_COMMAND:  typeRead = true;  break;
 			case SSM_WRITE_COMMAND: typeRead = false; break;
 			default: throw new RuntimeException(
-					"Invalid packet error: Command specifier (read/write) is invalid");
+					"Invalid packet error: Command specifier (read/write) is invalid (" + data[0] + ")");
 		}
 		
 		// TODO: assert data[1] == 00?
@@ -490,6 +596,7 @@ public class SSMOBD2ProtocolHandler
 	
 		
 
+    // TODO: I think this should be a member of SSMPacket.
 	/** 
 	 * Encode the response sent to be sent by the ECU when the ECU is responding
 	 * to a parameter query event.  For use by the SSMOBD2VirtualECU.  Written by GN.
@@ -511,8 +618,10 @@ public class SSMOBD2ProtocolHandler
 		}
 
 		SSMPacket packet = new SSMPacket();
-		// TODO: what are we supposed to set the header to?
+        packet.setHeaderSource(SSMPacket.SSM_DEVICE_ECU);
+        packet.setHeaderDest  (SSMPacket.SSM_DEVICE_APP);
 		packet.setData(data);
+        packet.setChecksum();
 		return packet;
 	}
 	
@@ -1231,14 +1340,35 @@ public class SSMOBD2ProtocolHandler
 			this.address_ = address;
 
 		}
+        
+        public long getAddressAsLong()
+        {
+            return ByteUtil.byteArrayToLongBE(address_);
+        }
 	}
 
 	
 	
 	
 
-	public static class SSMPacket implements ByteStreamable
+	public static class SSMPacket implements ByteStreamable, Cloneable
 	{
+        
+        ////////////////////////////////////////////////
+        // HEADER Source and destination fields:
+        public static final byte SSM_DEVICE_ECU		= (byte) 0x10;
+        public static final byte SSM_DEVICE_APP		= (byte) 0xF0;        
+
+        ////////////////////////////////////////////////
+        // Commands
+        
+        // SSM_CMD_READ_MEM: Read a block of memory
+        public static final byte SSM_CMD_READ_MEM   = (byte) 0xA0;
+        public static final byte SSM_CMD_READ_ADDR  = (byte) 0xA8;
+        public static final byte SSM_CMD_WRITE_MEM  = (byte) 0xB0;
+        public static final byte SSM_CMD_WRITE_ADDR = (byte) 0xB8;
+        public static final byte SSM_CMD_INIT       = (byte) 0xBF;
+        
 		public static int SSM_HEADER_LEN = 3;
 		// This is the theoretical minimum.  You don't need to block on a read
 		// until you have this many bits available.
@@ -1248,11 +1378,11 @@ public class SSMOBD2ProtocolHandler
 		public static final int MAX_DATA_LENGTH = 128;
 		
 		
-		private byte[] fieldHeader   = null;
+		private byte[] fieldHeader;
 		private int    fieldDataLen  = 0;
 		private byte[] fieldData     = null;
 		private byte   fieldChecksum = 0;
-		
+        
 		
 		/******************************************************
 		 * Create a new empty packet
@@ -1260,56 +1390,84 @@ public class SSMOBD2ProtocolHandler
 		public SSMPacket()
 		{
 			fieldHeader = new byte[SSM_HEADER_LEN];
+            fieldHeader[0] = (byte)0x80;
 		}
 		
-		/******************************************************
-		 * @return
-		 ******************************************************/
-		public byte[] getHeader()
-		{
-			return this.fieldHeader;
-		}
-		
-		/*******************************************************
-		 * @param header
-		 ******************************************************/
-		public void setHeader(byte[] header)
-		{
-			this.fieldHeader = header;
-		}
-		
-	
-		/*******************************************************
-		 * @return
-		 ******************************************************/
-		public int getDataLength()
-		{
-			return this.fieldDataLen;
-		}
-		
-		/*******************************************************
-		 * @param b
-		 ******************************************************/
-		public void setDataLength(byte b)
-		{
-			setDataLength(ByteUtil.unsignedByteToInt(b));
-		}
+
+        /******************************************************
+         * @return
+         ******************************************************/
+        public byte[] getHeader()
+        {
+            return this.fieldHeader;
+        }
+
+        /*******************************************************
+         * @param header
+         ******************************************************/
+        public void setHeader(byte[] header)
+        {
+            for (int i=0; i < SSM_HEADER_LEN; i++)
+                this.fieldHeader[i] = header[i];
+        }
+        
+        public void setHeaderDest(byte dest)
+        {
+            this.fieldHeader[1] = dest;
+        }
+
+        public void setHeaderSource(byte src) 
+        {
+            this.fieldHeader[2] = src;
+        }
+        
+        public byte getHeaderDest() 
+        {
+            return this.fieldHeader[1];
+        }
+
+        public byte getHeaderSource()
+        {
+            return this.fieldHeader[2];
+        }
+        
+        public boolean isHeaderSourceDest(byte src, byte dest)
+        {
+            return ((this.fieldHeader[1] == dest) &&
+                    (this.fieldHeader[2] == src));
+        }
+        
+        /*******************************************************
+         * @return
+         ******************************************************/
+        public int getDataLength()
+        {
+            return this.fieldDataLen;
+        }
+
+        /*******************************************************
+         * @param b
+         ******************************************************/
+        public void setDataLength(byte b)
+        {
+            setDataLength(ByteUtil.unsignedByteToInt(b));
+        }
 		
 		/*******************************************************
 		 * @param len
 		 ******************************************************/
-		public void setDataLength(int len)
-		{
-			if (len > MAX_DATA_LENGTH)
-			{
-				throw new RuntimeException(
-						"Maximum of [" + MAX_DATA_LENGTH + 
-						"] data bytes exceeded in SSMPacket. [" 
-						+ len + "]"); 
-			}
-			
-			this.fieldDataLen = len;
-		}
+        public void setDataLength(int len)
+        {
+            if (len > MAX_DATA_LENGTH)
+            {
+                throw new RuntimeException(
+                        "Maximum of [" + MAX_DATA_LENGTH + 
+                        "] data bytes exceeded in SSMPacket. [" 
+                        + len + "]"); 
+            }
+
+            this.fieldDataLen = len;
+        }
 		
 		/*******************************************************
 		 * @return
@@ -1423,7 +1581,12 @@ public class SSMOBD2ProtocolHandler
 			os.write(getData());
 			os.write(getChecksum());
 		}
+
 		public void read(InputStream is) throws IOException
+		{
+            read(is, 0);
+		}			
+		public void read(InputStream is, int timeout) throws IOException
 		{
 			is.read(fieldHeader, 0, SSM_HEADER_LEN); // header
 			setDataLength( is.read() );              // data length
@@ -1435,9 +1598,7 @@ public class SSMOBD2ProtocolHandler
 			is.read( fieldData, 0, fieldDataLen );   // data field
 			fieldChecksum = (byte)(is.read() & 0xff);// checksum
 				
-		}
-			
-		
+		}		
 		/******************************************************
 		 * Override
 		 * @see java.lang.Object#toString()
@@ -1455,6 +1616,47 @@ public class SSMOBD2ProtocolHandler
 			
 			return ret;
 		}
+        
+        public SSMPacket clone()
+        {
+            SSMPacket packet = new SSMPacket();
+
+            packet.fieldHeader   = new byte[this.fieldHeader.length];
+            packet.fieldDataLen  = this.fieldDataLen;
+            packet.fieldData     = new byte[this.fieldData.length];
+            packet.fieldChecksum = this.fieldChecksum;
+            int i;
+            
+            for (i=0; i < this.fieldHeader.length; i++) 
+                packet.fieldHeader[i] = this.fieldHeader[i];
+            for (i=0; i < this.fieldData.length; i++)
+                packet.fieldData[i] = this.fieldData[i];
+                
+            return packet;
+        }
+        public boolean equals(SSMPacket packet) 
+        {
+            if (fieldDataLen  != packet.fieldDataLen)
+                return false;
+
+            return (
+                    fieldChecksum == packet.fieldChecksum &&
+                    Arrays.equals(fieldHeader, packet.fieldHeader) &&
+                    Arrays.equals(fieldData  , packet.fieldData)
+                    );
+        }
+        
+        ////////////////////////////////////////////////////////
+        // 
+        
+        public static SSMPacket packetInit()
+        {
+            SSMPacket packetInit = new SSMPacket(); //RS232Packet txPacket = new RS232Packet();
+            packetInit.setHeader(new byte[] { (byte) 0x80, SSM_DEVICE_ECU, SSM_DEVICE_APP });
+            packetInit.setData(new byte[] { SSM_INIT_COMMAND });
+            packetInit.setChecksum();        
+            return packetInit;
+        }
 		
 	}
 

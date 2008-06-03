@@ -206,7 +206,7 @@ public class RS232Packet
 
 	
 	/*******************************************************
-	 * This is a simple convience method to write the contents
+	 * This is a simple convenience method to write the contents
 	 * of this packet to the given output steam.
 	 * @param os
 	 *******************************************************/

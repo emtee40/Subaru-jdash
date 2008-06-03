@@ -44,10 +44,15 @@ import org.mozilla.javascript.ScriptableObject;
 public class JSMetaParam extends MetaParameter
 {
 
-	
 	private static final String ARG_NAME_SCRIPT = "script";
 	private static final String ARG_NAME_DEPENDANT = "dependant"; 
-	
+
+    // Compute reverse meta-parameter values. i.e., compute the inverse
+    // of the "script"
+	private static final String ARG_NAME_SCRIPT_INV    = "script-inv";
+	private static final String ARG_NAME_DEPENDANT_INV = "dependant-inv"; 
+    
+    
 	private static final String JS_THIS_REFERENCE = "meta";
 
 	

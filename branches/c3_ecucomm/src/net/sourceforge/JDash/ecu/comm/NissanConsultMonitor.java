@@ -41,6 +41,9 @@ import java.util.List;
  * This is a Nissan Consult capable monitor. At present, this
  * module is pretty much stubbed out.  I'm hoping someone with
  * a Nissan can step up and write the gutts of this one.
+ * Ideally, you should put details of how things are done
+ * into a NissanConsultProtocolHandler and use this to
+ * instantiate it.
  *****************************************************/
 public class NissanConsultMonitor extends BaseMonitor
 {
@@ -114,7 +117,8 @@ public class NissanConsultMonitor extends BaseMonitor
 			while(doRun_.booleanValue())
 			{
 				
-				/* Refer to one of the other montiors on what to do here.  The Subaru SSM is the most complete */
+				/* Refer to one of the other montiors on what to do here.  
+                 The Subaru SSM is the most complete */
 				
 			}
 			    

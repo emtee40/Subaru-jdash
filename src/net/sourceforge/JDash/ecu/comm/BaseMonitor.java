@@ -57,7 +57,7 @@ import java.io.IOException;
 /***
  * 
  * The communication configurator will need to specify a couple different things:
- * - ECU protocol (SSM)
+ * - ECU protocol (e.g., SSM)
  * - Hardware driver (RXTXPort [serial], Cobb Serial, virtual)
  *   * The hardware driver is called a "Port" and is initialized and finalized
  *     by the initPort() and closePort() objects.
@@ -136,6 +136,9 @@ public abstract class BaseMonitor implements ECUMonitor
      * supported type, and perform any necessary initialization to use this 
      * BasePort object.
      * 
+     * initPort should assign the internal commPort class member so that the 
+     * Monitor can use this commPort for communication.
+     * 
      * The BasePort implementation of the initPort() method supports the
      * VirtualECUPort class.  See the implementation of this function to understand
      * how you should structure initPort() methods for overrides.
@@ -176,8 +179,11 @@ public abstract class BaseMonitor implements ECUMonitor
     }
     
     /**
-     * In your override, perform any protocol-specific cleanup before calling 
-     * this routine.
+     * In your override, perform any monitor or protocol-specific 
+     * cleanup before calling this routine.
+     * 
+     * The details of the cleanup should be hidden in a ProtocolHandler
+     * class, to keep this method simple.
      * 
      * BasePort.closePort() calls the close() method of the commPort object,
      * then invalidates the commPort object attached to this monitor.
@@ -396,7 +402,8 @@ public abstract class BaseMonitor implements ECUMonitor
 			{
 				list.add(p);
 				// Don't set the fetch time because it might not
-				// actually get fetched.
+				// actually get fetched.  We'll set this later when
+                // it actually gets updatd.
             	// p.setLastFetchTime(System.currentTimeMillis());
 			}
 		}

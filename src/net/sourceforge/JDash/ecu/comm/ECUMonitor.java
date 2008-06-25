@@ -34,12 +34,17 @@ import java.util.List;
 
 
 /******************************************************
- * An ECU Monitor represents the methos required by the main
- * applicaiton to communicate with the ECU.  The steps 
+ * An ECU Monitor represents the methods required by the main
+ * application to communicate with the ECU.  The steps 
  * the app will follow on the concrete monitor are
  *  1. init()
  *  2. addAllParam()
  *  3. start the monitor in it's own thread.
+ * 
+ * The ECUMonitor acts as a gasket between the protocol
+ * handler that knows *how* to make and process requests,
+ * and primarily handles the timing of such requests.
+ * 
  ******************************************************/
 public interface ECUMonitor extends Runnable, SkinEventListener
 {

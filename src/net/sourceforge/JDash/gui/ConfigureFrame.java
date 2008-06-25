@@ -83,6 +83,7 @@ public class ConfigureFrame extends JFrame
 	private JTextField comPort_ = null;
 	private JComboBox monitorParamFile_ = null;
 	
+    // Buttons related to the communication configuration option
     private ButtonGroup  btngrpComm_     = null;
     private JRadioButton btnCommNormal_ = null;
 	private JRadioButton btnCommTest_   = null;

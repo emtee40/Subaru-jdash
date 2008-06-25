@@ -49,7 +49,7 @@ These are the known commands:
 A0 Block Read Request
 
 A0 PP AA AA AA CC
-
+Sub
 PP == pad?
 AA AA AA = address
 CC == byte count - 1

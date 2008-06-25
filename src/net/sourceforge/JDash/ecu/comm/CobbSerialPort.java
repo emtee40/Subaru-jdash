@@ -23,7 +23,7 @@ import java.io.IOException;
 public class CobbSerialPort extends BasePort {
 
     // interfaces to the native Cobb driver methods.
-    private native static int  nativeStart();
+    private native static int  nativeStart(int timeout);
 
     private native static void nativeStop(int nSessionID);
 
@@ -34,8 +34,8 @@ public class CobbSerialPort extends BasePort {
     private native static int  nativePurge(int nSessionID);
     
 	protected int nSessionID;
-	protected CobbSerialInputStream istream;
-	protected CobbSerialOutputStream ostream;
+	protected CobbSerialInputStream istream = null;
+	protected CobbSerialOutputStream ostream = null;
 
 	public static final String MSG_EXCP_NULLPTR =
 		"Pointer to CobbSerialPort cport is null.";
@@ -54,7 +54,7 @@ public class CobbSerialPort extends BasePort {
      * @return true on success, false on failure
      */
     public boolean open(int timeout) throws IOException {
-		nSessionID = nativeStart();
+		nSessionID = nativeStart(timeout);
 		istream = new CobbSerialInputStream(this);
 		ostream = new CobbSerialOutputStream(this);
 		
@@ -105,7 +105,7 @@ public class CobbSerialPort extends BasePort {
 
 		CobbSerialInputStream(CobbSerialPort cstream) 
 		{
-			this.cport = cport;
+			this.cport = cstream;
 		}
 
 		public int read() throws IOException 
@@ -176,12 +176,19 @@ public class CobbSerialPort extends BasePort {
 		}
     } // end CobbSerialOutputStream
 	
+    /**
+     * A static method to see whether the given serialport is open.  If not,
+     * throw an exception.  This method is static because it also checks to
+     * see if the serial port is null.
+     * @param cport
+     * @throws java.io.IOException
+     */
 	public static void checkPortIsOpen(CobbSerialPort cport) 
 			throws IOException 
 	{
 	    if (cport == null)
 			throw new NullPointerException(MSG_EXCP_NULLPTR);
-	    if ( cport.nSessionID <= 0) 
+	    if (! cport.isOpen()) 
 			throw new IOException(MSG_EXCP_STREAM_NOT_OPEN);
 	}
 	

@@ -50,23 +50,27 @@ public class ECUParameter extends Parameter
     private int rate_ = 0;
     private long lastFetchTime_ = 0;
     
-    
-    /******************************************************
-     * @param address
-     * @param name
-     * @param handler
-     ******************************************************/
+
+    /**
+     * 
+     * @param address A byte array representing the address to query
+     * @param name A simple name for the parameter
+     * @param description A longer description for the parameter
+     * @param rate Preferred sampling rate in milliseconds per sample.
+     */
     public ECUParameter(byte[] address, String name, String description, int rate)
     {
-        this._address = address;
-        this._name = name;
+        this._address     = address;
+        this._name        = name;
         this._description = description;
-        this.rate_ = rate;
+        this.rate_        = rate;
+        this._result      = null;
         
         if (this._name == null)
         {
-        	String error = "Cannot create an ECU parameter with a null name.\nName: " + this._name + "\nDesc: " + this._description + "\nAddr: ";
-        	error += ByteUtil.bytesToString(this._address);
+        	String error = "Cannot create an ECU parameter with a null name." +
+                    this.toString();
+            
         	throw new RuntimeException(error);  
         }
     }
@@ -79,6 +83,20 @@ public class ECUParameter extends Parameter
             address[i] = _address[i];
         
         return new ECUParameter(address, _name, _description, rate_);
+    }
+    
+    @Override
+    public String toString() {
+        String s;
+
+        
+        s  =   "Name: " + this._name +
+             "\nDesc: " + this._description + 
+             "\nAddr: " + ByteUtil.bytesToString(this._address) + 
+             "\nRate: " + this.rate_ + " ms/sample" + 
+             "\nLastFetch: " + this.lastFetchTime_+ 
+             "\nResult: " + this._result;
+        return s;
     }
 
     /******************************************************
@@ -145,8 +163,7 @@ public class ECUParameter extends Parameter
     }
     /**
      * Return the address as a long integer.  
-     * Open issue: should this interpret the address as litle
-     * or big endian?
+     * We interpret the address as a big endian value.
      * @return
      */
     public long getAddressAsLong() 
@@ -165,7 +182,10 @@ public class ECUParameter extends Parameter
     {
     	return this.rate_;
     }
-
+    public void setPreferredRate(int rate)
+    {
+    	this.rate_ = rate;
+    }
     
     /********************************************************
      * This value is used by the monitor to keep track of the 

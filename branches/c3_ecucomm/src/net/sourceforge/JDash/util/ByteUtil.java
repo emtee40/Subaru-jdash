@@ -11,7 +11,7 @@ public class ByteUtil
 	 *******************************************************/
 	public static String bytesToString(byte[] bytes)
 	{
-		StringBuffer sb = new StringBuffer();
+		StringBuffer sb = new StringBuffer(3*bytes.length);
 		
 		for(byte b : bytes)
 		{

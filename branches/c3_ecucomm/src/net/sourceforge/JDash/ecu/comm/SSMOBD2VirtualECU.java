@@ -77,7 +77,8 @@ public class SSMOBD2VirtualECU extends VirtualECU {
      */
 	public void run() {
 		SSMPacket rxPacket, txPacket;
-		System.out.println("SSMOBD2VirtualECU started.");
+        if (DEBUGLEVEL > 0)
+    		System.out.println("SSMOBD2VirtualECU started.");
 
         if (emuport == null) throw new NullPointerException("EMUPort is null");
         
@@ -148,8 +149,10 @@ public class SSMOBD2VirtualECU extends VirtualECU {
                         txPacket = new SSMPacket();
                         txPacket.setHeaderDest  (SSMPacket.SSM_DEVICE_APP);
                         txPacket.setHeaderSource(SSMPacket.SSM_DEVICE_ECU);
+                        // TODO: figure out some more sensical values to return
+                        // here.
                         txPacket.setData(new byte[] {
-                            0x00, //"I don't know which byte " this should be.
+                            0x00, //I don't know which byte this should be.
                             (byte)0xaa, (byte)0xaa,
                             (byte)0xaa, (byte)0xaa,
                             (byte)0xaa, (byte)0xaa,
@@ -219,7 +222,7 @@ public class SSMOBD2VirtualECU extends VirtualECU {
             
         } // end while (getSignal() == 0)
         
-        System.out.println("SSMOBD2VirtualECU Quitting thread");
+        System.out.println("SSMOBD2VirtualECU quitting thread");
 
         
 //		System.out.println("SSMOBD2VirtualECU listening.");

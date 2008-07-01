@@ -873,7 +873,7 @@ public class XMLSkin extends Skin
 	
 	
 	/********************************************************
-	 * Create an analog gague from the given gauge index
+	 * Create an analog gauge from the given gauge index
 	 * @return
 	 ******************************************************/
 	public AnalogGauge createAnalogGauge(int index) throws Exception

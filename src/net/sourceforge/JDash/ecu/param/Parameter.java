@@ -120,8 +120,7 @@ public abstract class Parameter implements DoubleParameter
 	}
 	
 	/*******************************************************
-	 * Get the string Name/ID of this parameter.
-	 * @return
+	 * @return the string Name/ID of this parameter.
 	 *******************************************************/
     public abstract String getName();
     
@@ -142,7 +141,7 @@ public abstract class Parameter implements DoubleParameter
      * math is done on this value.  For raw ECU parameter values, this
      * will always be an integer, but the MetaParameter class
      * can easily return a decimal value.
-     * @return
+     * @return value of this parameter as a double
      *******************************************************/
     public abstract double getResult();
     
@@ -166,8 +165,8 @@ public abstract class Parameter implements DoubleParameter
     
 
 	/******************************************************
-	 * Has this parameter been enabled?  This is true by default.
-	 * @return
+	 * Has this parameter been enabled?  
+	 * @return true if enabled, false otherwise.
 	 *******************************************************/
 	public boolean isEnabled()
 	{
@@ -178,7 +177,8 @@ public abstract class Parameter implements DoubleParameter
 	/*******************************************************
 	 * Set this parameters to enabled or disabled.  Disabled,
 	 * the parameter will NOT be fetched by the monitor.
-	 * @return
+     * 
+     * @param enable true to set this parameter as enabled, false otherwise.
 	 *******************************************************/
 	public void setEnabled(boolean enable)
 	{

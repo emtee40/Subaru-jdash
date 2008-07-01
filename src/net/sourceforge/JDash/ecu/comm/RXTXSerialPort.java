@@ -45,13 +45,14 @@ public class RXTXSerialPort extends BasePort {
 		
 	/*******************************************************
 	 *  Create a new instance of an RS232Monitor.
-	 *  @param rxEchosTx IN - this indicates that the ecu at the
+	 *  param rxEchosTx IN - this indicates that the ecu at the
 	 *  other end of the serial port will echo our TX packet
 	 *  back on the RX packet.  This TX echo will be stripped
 	 *  from the RX packet before it's returned in the
 	 *  sendPacket() method.  The default RX Timeout will be set to a
 	 *  value of 1000ms.
 	 *  
+     *  @param strPortName String value to represent this portname for debugging.
 	 *  @param serialBaud IN - the default BAUD rate to set the serial port to.
 	 *  @param data IN - The data bits, use the constants from RXTXPort
 	 *  @param parity IN - the parity state, use the constants from RXTXPort
@@ -68,10 +69,10 @@ public class RXTXSerialPort extends BasePort {
 	 * Set the serial communications parameters.  Parameters may only be set
 	 * while a communications port is not open.
 	 * @param strPortName  the name of the port, e.g., COM1, or /dev/tty/USB0
-	 * @param serialBaud
-	 * @param data
-	 * @param parity
-	 * @param stop
+	 * @param baud         baud for the comm port
+	 * @param data         data for the comm port
+	 * @param parity       parity for the comm port
+	 * @param stop         stop value for the comm port
 	 * @return true if setting of parameters succeeds, false otherwise.
 	 */
 	public boolean setSerialParams(String strPortName, int baud, int data, int parity, int stop) {
@@ -127,8 +128,9 @@ public class RXTXSerialPort extends BasePort {
 	
 	/**
 	 * Open the communications port using the parameters set in the constructor
-	 * or setParams.
-	 * @return
+	 * or setParams.  Throws an IOException if we are unable to create the 
+     * underlying port object.
+	 * @return true if method succeeds, false otherwise. 
 	 */
 	public boolean open(int timeout) throws IOException {
 	  

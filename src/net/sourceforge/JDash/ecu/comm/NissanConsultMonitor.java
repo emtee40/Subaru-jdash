@@ -71,7 +71,7 @@ public class NissanConsultMonitor extends BaseMonitor
 
 	/*****************************************************
 	 * Override
-	 * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry)
+     * @see net.sourceforge.JDash.ecu.comm.BaseMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry, net.sourceforge.JDash.ecu.comm.InitListener)
 	 *******************************************************/
 	public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception
 	{

@@ -82,7 +82,7 @@ public class RS232Stream extends BasePort
 		
 	/*******************************************************
 	 *  Create a new instance of an RS232Monitor.
-	 *  @param rxEchosTx IN - this indicates that the ecu at the
+	 *  param rxEchosTx IN - this indicates that the ecu at the
 	 *  other end of the serial port will echo our TX packet
 	 *  back on the RX packet.  This TX echo will be stripped
 	 *  from the RX packet before it's returned in the
@@ -104,7 +104,7 @@ public class RS232Stream extends BasePort
 	/**
 	 * Set the serial communications parameters.  Parameters may only be set
 	 * while a communications port is not open.
-	 * @param serialBaud
+	 * @param baud
 	 * @param data
 	 * @param parity
 	 * @param stop
@@ -149,7 +149,7 @@ public class RS232Stream extends BasePort
 	}
 	
 	/*******************************************************
-	 * @return
+	 * @return rxTxTimeout value in milliseconds
 	 ******************************************************/
 	public int getTxRxTimeout()
 	{
@@ -158,7 +158,7 @@ public class RS232Stream extends BasePort
 	
 	
 	/*******************************************************
-	 * @param timeout
+	 * @param timeout timeout value in milliseconds
 	 ******************************************************/
 	public void setTxRxTimeout(int timeout)
 	{
@@ -185,7 +185,7 @@ public class RS232Stream extends BasePort
 	/**
 	 * Open the communications port using the parameters set in the constructor
 	 * or setParams.
-	 * @return
+	 * @return true if method succeeds, false otherwise.
 	 */
 	public boolean open() throws IOException {
 	  
@@ -241,9 +241,8 @@ public class RS232Stream extends BasePort
 	 * will be read. No more, no less.  The return byte[] will
 	 * be the bytes you requested.
 	 * 
-	 * @param is IN - the input stream to read from.
-	 * @param bytes IN - the number of bytes to read.
-	 * @return the read bytes.
+	 * @param numBytes IN - the number of bytes to read.
+	 * @return the bytes that were read.
 	 * @throws Exception If there was a problem reading the bytes. Like
 	 * the read timed out.
 	 ******************************************************/

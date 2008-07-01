@@ -287,7 +287,7 @@ public class SSMOBD2ProtocolHandler
      *
      * @param txPacket - packet to transmit
      * @param timeout - Timeout value in milliseconds.
-     * @return
+     * @return SSM packet received from input stream
      * @throws java.lang.Exception
      */
     public SSMPacket sendAndReceivePacket(SSMPacket txPacket, int timeout) throws Exception
@@ -606,10 +606,11 @@ public class SSMOBD2ProtocolHandler
 
 
 
-	/***********************************************************************************************
-	 * @param withAirCon
-	 * @return
-	 **********************************************************************************************/
+	/***************************************************************************
+	 * @param withAirCon true to get the idle speed with the air conditioning
+     *        on, false to get the idle speed with air conditioning off
+	 * @return idle speed in revolutions per minute (RPM)
+	 **************************************************************************/
 	public long getIdleSpeed(boolean withAirCon) throws Exception
 	{
 		long idleSpeed = -1;
@@ -633,23 +634,24 @@ public class SSMOBD2ProtocolHandler
 		return idleSpeed;
 	}
 
-	/***********************************************************************************************
-	 * @param withAirCon
-	 * @return
-	 **********************************************************************************************/
+	/***************************************************************************
+	 * Currently unimplemented!
+     * @param withAirCon sets the idle speed
+	 **************************************************************************/
 	public static void setIdleSpeed(boolean withAirCon) throws Exception
 	{
-
+        throw new Exception("setIdleSpeed() is unimplemented!");
 	}
 
 
-	/***********************************************************************************************
-	 * Generate, and return a list with all of the ecu capabilities. why not a static array list?
-	 * Well, we only use this list once, then we're done with it, making it a returnable variable
-	 * will also make it garbage collectable.
+	/***************************************************************************
+	 * Generate, and return a list with all of the ecu capabilities. why not a 
+     * static array list? Well, we only use this list once, then we're done 
+     * with it, making it a returnable variable will also make it garbage 
+     * collectable.
 	 *
-	 * @return
-	 **********************************************************************************************/
+	 * @return ArrayList of the ECU capabilities
+	 **************************************************************************/
 	public static ArrayList<ECUCap> getEcuCapabilities()
 	{
 		/*
@@ -1358,7 +1360,7 @@ public class SSMOBD2ProtocolHandler
 
 
         /******************************************************
-         * @return
+         * @return header field of SSM packet
          ******************************************************/
         public byte[] getHeader()
         {
@@ -1366,7 +1368,9 @@ public class SSMOBD2ProtocolHandler
         }
 
         /*******************************************************
-         * @param header
+         * @param header byte array representing the header value.
+         *        It will only use the first SSM_HEADER_LEN bytes
+         *        to set the header.
          ******************************************************/
         public void setHeader(byte[] header)
         {
@@ -1401,7 +1405,7 @@ public class SSMOBD2ProtocolHandler
         }
 
         /*******************************************************
-         * @return
+         * @return data length field of SSM packet
          ******************************************************/
         public int getDataLength()
         {
@@ -1409,16 +1413,13 @@ public class SSMOBD2ProtocolHandler
         }
 
         /*******************************************************
-         * @param b
+         * @param b byte value for SSM packet
          ******************************************************/
         public void setDataLength(byte b)
         {
             setDataLength(ByteUtil.unsignedByteToInt(b));
         }
 
-		/*******************************************************
-		 * @param len
-		 ******************************************************/
         public void setDataLength(int len)
         {
             if (len > MAX_DATA_LENGTH)
@@ -1433,7 +1434,7 @@ public class SSMOBD2ProtocolHandler
         }
 
 		/*******************************************************
-		 * @return
+		 * @return data field of the SSMPacket
 		 ******************************************************/
 		public byte[] getData()
 		{
@@ -1467,7 +1468,7 @@ public class SSMOBD2ProtocolHandler
 		}
 
 		/*******************************************************
-		 * @return
+		 * @return Read the checksum field
 		 ******************************************************/
 		public byte getChecksum()
 		{
@@ -1475,7 +1476,7 @@ public class SSMOBD2ProtocolHandler
 		}
 
 		/*******************************************************
-		 * @param checkSum
+		 * @param checksum 
 		 ******************************************************/
 		public void setChecksum(byte checksum)
 		{
@@ -1521,7 +1522,7 @@ public class SSMOBD2ProtocolHandler
 		 * is the length of the header array, plus 1 for the
 		 * data length byte, plus the length of the data array
 		 * plus 1 for the checksum byte.
-		 * @return
+		 * @return length of packet
 		 *******************************************************/
 		public int length()
 		{

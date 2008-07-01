@@ -108,7 +108,7 @@ public class ECUParameter extends Parameter
     }
 
     /********************************************************
-     * @return
+     * @return string description of this parameter
      *******************************************************/
     public String getDescrption()
     {
@@ -131,7 +131,7 @@ public class ECUParameter extends Parameter
      * Set the value of the result value using a byte value.
      * Bytes are ALWAYS assumed to be unsigned bytes.  No negative
      * values allowed, the are treated as ints.  0xff = 256, NOT -127
-     * @param b
+     * @param b byte result of the parameter
      *******************************************************/
     public void setResult(byte b)
     {
@@ -155,7 +155,7 @@ public class ECUParameter extends Parameter
     }
 
     /*******************************************************
-     * @return
+     * @return address field of this parameter as a byte array
      *******************************************************/
     public byte[] getAddress()
     {
@@ -164,7 +164,7 @@ public class ECUParameter extends Parameter
     /**
      * Return the address as a long integer.  
      * We interpret the address as a big endian value.
-     * @return
+     * @return address field of this parameter as long int, big endian.
      */
     public long getAddressAsLong() 
     {
@@ -176,12 +176,16 @@ public class ECUParameter extends Parameter
      * It is up to the monitor, but you can optionally support
      * the ONLY sending of parameter requests if within the speed
      * setting define.
-     * @return
+     * @return preferred rate of update in times per second (Hz).
      ******************************************************/
     public int getPreferredRate()
     {
     	return this.rate_;
     }
+    /**
+     * 
+     * @param rate value to set
+     */
     public void setPreferredRate(int rate)
     {
     	this.rate_ = rate;
@@ -191,7 +195,6 @@ public class ECUParameter extends Parameter
      * This value is used by the monitor to keep track of the 
      * last time this parameter was fetched. 
      * @param time
-     * @return
      ******************************************************/
     public void setLastFetchTime(long time)
     {
@@ -201,7 +204,7 @@ public class ECUParameter extends Parameter
     /*******************************************************
      * This value is used by the monitor to keep track of the
      * last time this parameter was fetched.
-     * @return
+     * @return last fetch time as set by setLastFetchTime.
      *******************************************************/
     public long getLastFetchTime()
     {

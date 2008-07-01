@@ -28,7 +28,7 @@ package net.sourceforge.JDash.ecu.comm;
  * When the init method on a monitor is called, an instance
  * of this class can be passed to it. This listener will
  * receive init event messages as the init runs.  This
- * is really just usefull for the splash screen.
+ * is really just useful for the splash screen.
  ******************************************************/
 public abstract class InitListener
 {
@@ -45,7 +45,7 @@ public abstract class InitListener
 	}
 	
 	/*******************************************************
-	 * @return
+	 * @return 
 	 *******************************************************/
 	public String getPrefix()
 	{

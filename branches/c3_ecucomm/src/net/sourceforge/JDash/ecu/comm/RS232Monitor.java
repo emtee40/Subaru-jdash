@@ -79,12 +79,12 @@ public class RS232Monitor
 	
 	/*******************************************************
 	 *  Create a new instance of an RS232Monitor.
-	 *  @param rxEchosTx IN - this indicates that the ecu at the
+	 *  param rxEchosTx IN - this indicates that the ecu at the
 	 *  other end of the serial port will echo our TX packet
 	 *  back on the RX packet.  This TX echo will be stripped
 	 *  from the RX packet before it's returned in the
 	 *  sendPacket() method.  The default RX Timeout will be set to a
-	 *  value of 1000ms.
+	 *  value of DEFAULT_TXRX_TIMEOUT (4000 ms).
 	 *  
 	 *  @param serialBaud IN - the default BAUD rate to set the serial port to.
 	 *  @param data IN - The data bits, use the constants from RXTXPort
@@ -116,7 +116,7 @@ public class RS232Monitor
 	}
 	
 	/*******************************************************
-	 * @return
+	 * @return timeout value in milliseconds
 	 ******************************************************/
 	public int getTxRxTimeout()
 	{
@@ -125,7 +125,7 @@ public class RS232Monitor
 	
 	
 	/*******************************************************
-	 * @param timeout
+	 * @param timeout timeout value in milliseconds
 	 ******************************************************/
 	public void setTxRxTimeout(int timeout)
 	{
@@ -193,9 +193,9 @@ public class RS232Monitor
   
 	
 	/*******************************************************
-	 * Calculate the checksum value for the given byte array
-	 * @param b
-	 * @return
+	 * Calculate the 8-bit checksum value for the given byte array
+	 * @param byteArray data bytearray
+	 * @return 8-bit checksum value
 	 *******************************************************/
 	protected static byte calcCheckSum(byte[] byteArray)
 	{
@@ -240,7 +240,7 @@ public class RS232Monitor
 	 * be the bytes you requested.
 	 * 
 	 * @param is IN - the input stream to read from.
-	 * @param bytes IN - the number of bytes to read.
+	 * @param numBytes IN - the number of bytes to read.
 	 * @return the read bytes.
 	 * @throws Exception If there was a problem reading the byes. Like
 	 * the read timed out.

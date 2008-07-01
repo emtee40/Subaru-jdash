@@ -348,7 +348,7 @@ public class ELMUtil
 	 * not included it.
 	 * 
 	 * @param cmd
-	 * @return
+	 * @return ELM string response
 	 *******************************************************/
 	public static String sendELMString(String cmd) throws Exception
 	{

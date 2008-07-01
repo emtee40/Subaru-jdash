@@ -81,7 +81,7 @@ public class KWP2000Monitor extends BaseMonitor
 
 	/*****************************************************
 	 * Override
-	 * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry)
+     * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(ParameterRegistry, InitListener)
 	 *******************************************************/
 	public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception
 	{

@@ -188,7 +188,7 @@ public abstract class BaseMonitor implements ECUMonitor
      * BasePort.closePort() calls the close() method of the commPort object,
      * then invalidates the commPort object attached to this monitor.
      * 
-     * @return
+     * @return true if the method succeeds, false otherwise.
      */
     public boolean closePort() 
     {
@@ -210,10 +210,11 @@ public abstract class BaseMonitor implements ECUMonitor
      * parameter list, and return it, if you wish.
      * 
      * Override
-     * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry)
+     * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(ParameterRegistry, InitListener)
      *******************************************************/
     public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception
     {
+     ///* @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry, net.sourceforge.JDash.ecu.comm.util.InitListener)
     	this.time_ = (TimeParameter)reg.getParamForName(ParameterRegistry.TIME_PARAM);
     	
     	this.paramRegistry_ =  reg;
@@ -244,7 +245,7 @@ public abstract class BaseMonitor implements ECUMonitor
     }
     
     /********************************************************
-     * @return
+     * @return Internal ParameterRegistry object
      *******************************************************/
     public ParameterRegistry getParameterRegistry()
     {
@@ -320,8 +321,7 @@ public abstract class BaseMonitor implements ECUMonitor
     }
 
     /*******************************************************
-     * Get the time parameter.
-     * @return
+     * @return TimeParameter for this monitor
      *******************************************************/
     public final TimeParameter getTime()
     {
@@ -330,7 +330,7 @@ public abstract class BaseMonitor implements ECUMonitor
     
     /*******************************************************
      * Override
-     * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#addParameter(net.sourceforge.JDash.ecu.param.Parameter)
+     * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#addParam(net.sourceforge.JDash.ecu.param.Parameter)
      *******************************************************/
     public void addParam(Parameter param)
     {

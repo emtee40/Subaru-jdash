@@ -49,8 +49,7 @@ public class TestMonitor extends BaseMonitor
 	private static final int DELAY = 50; // milliseconds
 	
 	/*****************************************************
-	 * @param params IN - the list of parameters to monitor.
-	 * @throws ParameterException
+	 * @throws Exception
 	 ******************************************************/
     public TestMonitor() throws Exception
     {

@@ -61,7 +61,7 @@ public class RS232Packet
 	}
 	
 	/******************************************************
-	 * @return
+	 * @return header of packet
 	 ******************************************************/
 	public byte[] getHeader()
 	{
@@ -69,7 +69,7 @@ public class RS232Packet
 	}
 	
 	/*******************************************************
-	 * @param header
+	 * @param header header field of SSM packet
 	 ******************************************************/
 	public void setHeader(byte[] header)
 	{
@@ -78,7 +78,7 @@ public class RS232Packet
 	
 
 	/*******************************************************
-	 * @return
+	 * @return data length field of RS232Packet
 	 ******************************************************/
 	public int getDataLength()
 	{
@@ -107,7 +107,7 @@ public class RS232Packet
 	}
 	
 	/*******************************************************
-	 * @return
+	 * @return data value as a byte array
 	 ******************************************************/
 	public byte[] getData()
 	{
@@ -143,7 +143,7 @@ public class RS232Packet
 	}
 	
 	/*******************************************************
-	 * @return
+	 * @return Return the checksum field of this packet.
 	 ******************************************************/
 	public byte getCheckSum()
 	{
@@ -151,7 +151,7 @@ public class RS232Packet
 	}
 	
 	/*******************************************************
-	 * @param checkSum
+	 * @param checkSum Set the checksum field of this packet
 	 ******************************************************/
 	public void setCheckSum(byte checkSum)
 	{
@@ -159,8 +159,8 @@ public class RS232Packet
 	}
 	
 	/******************************************************
-	 * Given the current state of this packet, calcualte and set
-	 * it's checksum.
+	 * Given the current state of this packet, calculate and set
+	 * its checksum.
 	 ******************************************************/
 	public void setCheckSum()
 	{
@@ -171,6 +171,8 @@ public class RS232Packet
 	/*******************************************************
 	 * Given the current state of the header, datalength, and data values,
 	 * this method will calculate the checksum and return it.
+     * 
+     * @return Checksum value of all fields in this packet.
 	 *******************************************************/
 	public byte calcCheckSum()
 	{
@@ -188,6 +190,11 @@ public class RS232Packet
 		return checksum;
 	}
 	
+    /**
+     * 
+     * @return true if the checksum field matches the calculated checksum
+     * of data and header fields.
+     */
 	public boolean verifyCheckSum() {
 		return (checkSum_ == calcCheckSum());
 	}
@@ -197,7 +204,7 @@ public class RS232Packet
 	 * is the length of the header array, plus 1 for the 
 	 * data length byte, plus the length of the data array
 	 * plus 1 for the checksum byte.
-	 * @return
+	 * @return length of data packet
 	 *******************************************************/
 	public int length()
 	{

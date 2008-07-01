@@ -136,7 +136,7 @@ public class SSMOBD2Monitor extends BaseMonitor
 	/***********************************************************************************************
 	 * Override
 	 *
-	 * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(net.sourceforge.JDash.ecu.param.ParameterRegistry)
+     * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#init(ParameterRegistry, InitListener)
 	 **********************************************************************************************/
 	public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception
 	{
@@ -148,22 +148,22 @@ public class SSMOBD2Monitor extends BaseMonitor
 		return ssmprotohandler.paramList;
 	}
 
-	/***********************************************************************************************
+	/***************************************************************************
 	 * Override
 	 *
 	 * @see net.sourceforge.JDash.ecu.comm.ECUMonitor#getEcuInfo()
-	 **********************************************************************************************/
+	 **************************************************************************/
 	public String getEcuInfo() throws Exception
 	{
 		// TODO Auto-generated method stub
 		return "SSP Monitor:\nECUID: " + ssmprotohandler.getECUID();
 	}
 
-	/***********************************************************************************************
+	/***************************************************************************
 	 * Kick off communications with the ECU. Override
 	 *
 	 * @see java.lang.Runnable#run()
-	 **********************************************************************************************/
+	 **************************************************************************/
 	public void run()
 	{
 

@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 /**
+ * BasePort is a base class for classes that represent the interface of Java to
+ * drivers to the communications port object.
  *
  * @author greg
  */

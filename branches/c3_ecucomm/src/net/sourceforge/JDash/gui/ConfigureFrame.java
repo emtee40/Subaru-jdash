@@ -99,10 +99,7 @@ public class ConfigureFrame extends JFrame
 	/*******************************************************
 	 *  Create a new frame instance.
 	 *  
-	 *  @param testMode IN - run this frame in test mode or not.  Test mode
-	 *  will setup a test monitor which will simply provide random values
-	 *  for each desired monitor.
-	 ******************************************************/
+     ********************************************************/
 	public ConfigureFrame()
 	{
 		super();

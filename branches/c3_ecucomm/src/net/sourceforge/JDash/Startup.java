@@ -257,8 +257,14 @@ public class Startup
                 }
 				
 				System.out.println("Monitor: " + monitor_.getClass().getName());
-				System.out.println("Port:    " + port_.getClass().getName());
-				System.out.println("VECU:    " + vecu_.getClass().getName());
+				if (this.port_ != null)
+				{
+					System.out.println("Port:    " + port_.getClass().getName());
+				}
+				if (this.vecu_ != null)
+				{
+					System.out.println("VECU:    " + this.vecu_.getClass().getName());
+				}
 
 				/* Initialize the monitor */
                 // GN: TODO: report which parameter set we're loading.

@@ -29,6 +29,7 @@ import net.sourceforge.JDashLite.config.Preferences;
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandlerThread;
+import net.sourceforge.JDashLite.ecu.comm.TestProtocol;
 import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter;
 import net.sourceforge.JDashLite.error.ErrorDialog;
@@ -358,6 +359,12 @@ public class JDashLiteMainWindow extends GameEngine
 			
 			/* create the protocol handler  */
 			this.protocolHandler_ = ((ProtocolHandler)Class.forName(this.activeProfile_.getProtocolClass()).newInstance());
+			
+			/* But.. is this TEST mode? */
+			if (getPreferences().getInt(Preferences.KEY_TEST_MODE, 0) == 1)
+			{
+				this.protocolHandler_ = new TestProtocol(this.protocolHandler_);
+			}
 			
 			/* Add the refresh listener.  This forces refreshes when the protocol handler fetches a batch */
 			this.protocolHandler_.addProtocolEventListener(this.protocolRefreshListener_);

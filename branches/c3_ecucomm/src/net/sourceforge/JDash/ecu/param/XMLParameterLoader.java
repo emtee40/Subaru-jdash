@@ -126,7 +126,7 @@ public class XMLParameterLoader
     // This value is compatible with modules that use the Tactrix OpenPort cable.
     public static final String PORT_CLASS_DEFAULT =
                     "net.sourceforge.JDash.ecu.comm.RXTXSerialPort";
-    private String portClass_ = PORT_CLASS_DEFAULT;
+    private String portClass_ = null;
 
 
     private String virtualecuClass_ = null;
@@ -312,6 +312,8 @@ public class XMLParameterLoader
             this.portClass_ = getAttribute(ATTR_PORT_CLASS);
             System.out.println("Returned port class [" + this.portClass_ + "]");
     	}
+        
+        System.out.println("XMLParameterLoader.getPortClass(): Using port class " + this.portClass_ + ".");
 
     	return (this.portClass_ == null) ? PORT_CLASS_DEFAULT : this.portClass_;
     }

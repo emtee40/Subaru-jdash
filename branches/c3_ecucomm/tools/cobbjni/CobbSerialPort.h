@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     net_sourceforge_JDash_ecu_comm_CobbSerialPort
  * Method:    nativeStart
- * Signature: ()I
+ * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_nativeStart
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     net_sourceforge_JDash_ecu_comm_CobbSerialPort

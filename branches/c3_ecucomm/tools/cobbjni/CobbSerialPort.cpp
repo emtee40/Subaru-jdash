@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <afx.h>
 
 
+//#define DO_NOTHING 1
 
 //extern void	nuke();
 //extern void	OutputString(CString sMessage,unsigned short usMessageType = 0);
@@ -63,9 +64,9 @@ t_CobbCommsPurge CobbCommsDLL_Purge = NULL;
 
 
 JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_nativeStart
-  (JNIEnv *jenv, jclass jc)
+  (JNIEnv *jenv, jclass jc, jint timeout)
 {
-
+#ifndef DO_NOTHING
 	// load dll
 	g_library = LoadLibraryA("COBBdriver.dll");
 
@@ -93,7 +94,7 @@ JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
 	if ( g_SessionID < 0 ) {
 		return -2; //F_COMMS_ERROR
 	}
-
+#endif
 	return 0;
 
 }
@@ -101,7 +102,7 @@ JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
 JNIEXPORT void JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_nativeStop
   (JNIEnv *jenv, jclass jc, jint nSessionID)
 {
-
+#ifndef DO_NOTHING
 	if ( g_SessionID >= 0 ) {
 		CobbCommsDLL_Stop(g_SessionID);
 	}
@@ -117,7 +118,7 @@ JNIEXPORT void JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
 		//FreeLibrary(static_cast<HMODULE>(g_library));
 		g_library = NULL;
 	}
-
+#endif
 
 }
 JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_nativeRead
@@ -125,6 +126,7 @@ JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
 {
 	int nRead = 0;
 	unsigned int dwResult = 0;
+#ifndef DO_NOTHING
 
 	// This is too much data for the CobbCommsRead routine.
 	if (nLength <= 0 || nLength > 0xffff) return -1;
@@ -149,7 +151,7 @@ JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
 */
 	jenv->SetByteArrayRegion(jbuff, 0, nLength, sBuff);
 	delete [] sBuff;
-
+#endif
 	return (unsigned short)dwResult;
 }
 
@@ -161,7 +163,7 @@ JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
 
 	DWORD dwLength = 0;
 	jbyte* sBuff = new jbyte[nLength];
-
+#ifndef DO_NOTHING
 	jenv->GetByteArrayRegion(jbuff, 0, nLength, sBuff);
 	
 //TRYTRY
@@ -171,6 +173,8 @@ JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
 	}
 
 	dwLength = CobbCommsDLL_Write(g_SessionID, (unsigned char*)sBuff, (unsigned short)nLength);
+
+#endif
 
 //CATCHCATCH("commSerial::Write()");
 	delete [] sBuff;
@@ -189,8 +193,13 @@ JNIEXPORT jint JNICALL Java_net_sourceforge_JDash_ecu_comm_CobbSerialPort_native
   (JNIEnv *jenv, jclass jc, jint nSessionID)
 
 {
+#ifndef DO_NOTHING
 	if ( g_SessionID >= 0 ) {
 		CobbCommsDLL_Purge(g_SessionID);
 		return 0;
-	} return -1;
+	} 
+	return -1;
+#else
+	return 0;
+#endif	
 }

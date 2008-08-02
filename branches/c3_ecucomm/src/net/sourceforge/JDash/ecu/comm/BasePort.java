@@ -56,7 +56,12 @@ public abstract class BasePort {
 	 * @throws IOException
 	 *******************************************************/
     abstract public boolean open(int timeout) throws IOException;
-    abstract public boolean open()            throws IOException;
+    
+    public boolean open()            throws IOException 
+    {
+        return open(0);
+    }
+    
 
 	/**
 	 * Indicates whether the stream object is open

@@ -152,7 +152,10 @@
 		<move file="jdash" tofile="rte"/>
 	</target>
 		
-	<!-- Generate Java Native Interface header files -->
+	<!-- Generate Java Native Interface header files. You only need
+         to do this if you change the prototypes of the methods in
+         CobbSerialPort.
+    -->
 	<target name="jni-headers" depends="compile">
 		<echo message="Generating JNI Headers for CobbSerialPort"/>
 		<javah 
@@ -195,14 +198,19 @@
 	<!-- clean -->
 	<target name="clean" depends="init">
 		<echo message="Cleaning..." />
-		<delete failonerror="no" dir="${outputDir}" />
+		<delete failonerror="no"  includeemptydirs="true">
+            <!-- delete everything within outputDir but not outputdir itself. -->
+            <fileset dir="${outputDir}" includes="**/*"/>
+        </delete>
 		<delete failonerror="no" file="${rteDir}/${JDashJar}" />
 	</target>
 	
 	
 	<!-- Launch -->
 	<target name="launch" depends="rte">
-		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true"/>
+		<java jar="${rteDir}/${JDashJar}" fork="true" dir="${rteDir}/" failonerror="true">
+            <arg line="-verbose:jni"/>
+        </java>
 	</target>
 
 	<!-- Launch Config -->

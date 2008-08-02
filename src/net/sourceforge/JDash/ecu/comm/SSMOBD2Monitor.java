@@ -102,6 +102,8 @@ public class SSMOBD2Monitor extends BaseMonitor
         // Can't initialize a null port [this case implicitly handled by super]
         if (port == null) return null;
 
+        // Perform any instance-specific initialization.  Should probably
+        // try to move this code into the serial port?  I dunno.
         if (port instanceof RXTXSerialPort)
         {
             // Set the port to baud 4800, N81.
@@ -110,6 +112,14 @@ public class SSMOBD2Monitor extends BaseMonitor
 				RXTXPort.DATABITS_8,
 				RXTXPort.PARITY_NONE,
 				RXTXPort.STOPBITS_1);
+            commPort = port;
+        }
+        else if (port instanceof CobbSerialPort)
+        {
+            // TODO: only do this once.
+            System.out.println("Loading Cobb USB JNI library.");
+            System.loadLibrary("cobbjni");
+            System.out.println("done.");
             commPort = port;
         }
         else

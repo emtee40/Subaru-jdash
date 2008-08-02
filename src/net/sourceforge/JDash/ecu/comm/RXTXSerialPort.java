@@ -42,9 +42,14 @@ public class RXTXSerialPort extends BasePort {
 	/** The serial port */
 	private RXTXPort port_ = null;
 
+    public RXTXSerialPort() throws Exception
+    {
+        this(null, 0, 0, 0, 0);
+    }
+    
 		
 	/*******************************************************
-	 *  Create a new instance of an RS232Monitor.
+	 *  Create a new instance of an RXTXSerialPort.
 	 *  param rxEchosTx IN - this indicates that the ecu at the
 	 *  other end of the serial port will echo our TX packet
 	 *  back on the RX packet.  This TX echo will be stripped
@@ -58,7 +63,8 @@ public class RXTXSerialPort extends BasePort {
 	 *  @param parity IN - the parity state, use the constants from RXTXPort
 	 *  @param stop IN - the stop bit, use the constatns from RXTXPOrt
 	 ******************************************************/
-	public RXTXSerialPort(String strPortName, int serialBaud, int data, int parity, int stop) throws Exception
+	public RXTXSerialPort(String strPortName, int serialBaud, int data, int parity, int stop) 
+            throws Exception
 	{
 		super();
 		setSerialParams(strPortName, serialBaud, data, parity, stop);
@@ -86,16 +92,19 @@ public class RXTXSerialPort extends BasePort {
 	}
 	
 	
-	public InputStream getInputStream() {
+	public InputStream getInputStream() 
+    {
 		if (port_ == null) return null;
 		return port_.getInputStream();
 	}
 	
-	public OutputStream getOutputStream() {
+	public OutputStream getOutputStream() 
+    {
 		if (port_ == null) return null;
 		return port_.getOutputStream();
 	}
 	
+    @Override
 	public boolean isOpen() {
 		return (port_ == null);
 	}
@@ -110,7 +119,6 @@ public class RXTXSerialPort extends BasePort {
 		close();
 		super.finalize();
 	}
-	
 
 	public boolean close() throws IOException
 	{
@@ -159,9 +167,6 @@ public class RXTXSerialPort extends BasePort {
 		}
 		return true;
 	}
-    
-    public boolean open() throws IOException {
-        return open(0);
-    }
+
 
 }

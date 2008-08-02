@@ -429,7 +429,14 @@ public class Startup
 		}
 
 		/* Create an instance of the monitor class */
-		Object port = Class.forName(portClass).newInstance();
+        Object port;
+        try {
+            port = Class.forName(portClass).newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    e.toString() + 
+                    ";\nUnable to create instance of monitor class [" + portClass + "]");
+        }
 		if (port == null)
 		{
 			throw new RuntimeException(

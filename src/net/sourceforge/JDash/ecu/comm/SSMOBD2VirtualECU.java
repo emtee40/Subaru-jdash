@@ -64,7 +64,7 @@ public class SSMOBD2VirtualECU extends VirtualECU {
         }
         
         
-        System.out.println("Creating SSMOBD2VirtualECU object");
+        if (DEBUGLEVEL > 0) System.out.println("Creating SSMOBD2VirtualECU object");
 	}
     
     

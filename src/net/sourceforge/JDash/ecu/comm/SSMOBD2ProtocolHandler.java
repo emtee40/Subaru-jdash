@@ -235,7 +235,8 @@ public class SSMOBD2ProtocolHandler
 
 	private int flushInputStream(InputStream is) throws IOException {
 		/* Read any stale bytes on the input stream */
-        System.out.println("Flushing inputstream");
+        if (DEBUGLEVEL > 1) 
+            System.out.println("Flushing inputstream");
 		if (is.available() != 0)
 		{
 			// Wait for just a little bit longer.  Giving the stale
@@ -311,10 +312,12 @@ public class SSMOBD2ProtocolHandler
                 flushInputStream(is);
 
 				/* Send the TX packet */
-                System.out.println("Writing packet.");
+                if (DEBUGLEVEL > 1) 
+                    System.out.println("Writing packet.");
 				txPacket.write(os);
 				os.flush();
-                System.out.println("os.flush finished. is.available=()" + is.available());
+                if (DEBUGLEVEL > 1) 
+                    System.out.println("os.flush finished. is.available=()" + is.available());
 				/*
 				 * Read the bytes on the port until we get to the start of
 				 * the return packet. That means we need to first skip the
@@ -339,7 +342,7 @@ public class SSMOBD2ProtocolHandler
                     start = (new Date()).getTime();
 				}
 
-                if (DEBUGLEVEL > 0)
+                if (DEBUGLEVEL > 1)
                     System.out.println("received enough for a packet.");
 
 				// If for some reason the port closed, then don't try to read
@@ -1565,7 +1568,7 @@ public class SSMOBD2ProtocolHandler
             long tlimit = (timeout > 0) ?
                 ((new Date()).getTime() + timeout)
                 :
-                0xffffffff;
+                0;
 
             waitForInput(is, (SSM_HEADER_LEN+1), tlimit);
 
@@ -1587,14 +1590,14 @@ public class SSMOBD2ProtocolHandler
          * or (new Date).getTime() passes tLimit.
          * @param is an inputstream object
          * @param nAvail Number of bytes to wait for
-         * @param tlimit Time
+         * @param tlimit Timestamp to wait until. tlimit = 0 means no timeout.
          * @throws java.io.IOException
          */
         public static void waitForInput(InputStream is, int nAvail, long tlimit)
                 throws IOException
         {
             while (is.available() < nAvail) {
-                if ((new Date()).getTime() > tlimit)
+                if (tlimit != 0 && (new Date()).getTime() > tlimit)
                     throw new IOException("SSMPacket read timed out.");
                 try { Thread.sleep(10); }
                 catch (InterruptedException e) {}

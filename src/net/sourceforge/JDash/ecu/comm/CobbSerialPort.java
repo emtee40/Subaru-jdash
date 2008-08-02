@@ -13,6 +13,8 @@
  * The CobbSerialInputStream and CobbSerialOutputStreams make some attempt
  * at thread-safeness by specifying any methods that call the native* methods 
  * as 'synchronized'.
+ *
+ * Actually this is a COBB *USB* serial port.
  */
 package net.sourceforge.JDash.ecu.comm;
 
@@ -55,6 +57,12 @@ public class CobbSerialPort extends BasePort {
      */
     public boolean open(int timeout) throws IOException {
 		nSessionID = nativeStart(timeout);
+        
+        if (nSessionID < 0) 
+            throw new IOException(
+                    "Couldn't open Cobb USB Driver! Error " 
+                    + nSessionID);
+        
 		istream = new CobbSerialInputStream(this);
 		ostream = new CobbSerialOutputStream(this);
 		
@@ -163,8 +171,8 @@ public class CobbSerialPort extends BasePort {
 			if (n != len) 
 			{
 				throw new IOException(
-						"Not all data was written to CobbSerialPort (only" 
-						+ n + " bytes");
+						"Not all data was written to CobbSerialPort (only " 
+						+ n + " bytes)");
 			}
 		}
 

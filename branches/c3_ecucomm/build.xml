@@ -7,6 +7,7 @@
  jar = Build the JAR file
  rte = Build the RTE. This is the same as "all"
  javadoc = Build the javadoc files
+ jni-headers = Java Native Interface header files
  launch = Launch the application
  launch-config = Launch the config application
  clean = clean up all build files
@@ -151,7 +152,19 @@
 		<move file="jdash" tofile="rte"/>
 	</target>
 		
-	
+	<!-- Generate Java Native Interface header files -->
+	<target name="jni-headers" depends="compile">
+		<echo message="Generating JNI Headers for CobbSerialPort"/>
+		<javah 
+            outputfile="${toolsDir}/cobbjni/CobbSerialPort.h"
+            classpath="${rteDir}/${JDashJar};${classpath}" 
+            class="net.sourceforge.JDash.ecu.comm.CobbSerialPort"
+            verbose="true"
+		>
+        </javah>
+
+	</target>
+    
 	<!-- Increment the build number -->
 	<target name="increment-build-number">
 		<echo message="Incrementing Build Number..."/>

@@ -55,6 +55,17 @@ import waba.sys.Vm;
 public class ELMProtocol extends AbstractProtocol
 {
 	
+	private static final int STAGE_RESET 			= 10;
+	private static final int STAGE_2ND_RESET 		= 15;
+	private static final int STAGE_ECHO_OFF 		= 30;
+	private static final int STAGE_LINEFEED_OFF		= 40;
+	private static final int STAGE_GET_PIDS 		= 50;
+	private static final int STAGE_OBD_REQ			= 60;
+	
+	private static final int MODE_TX			= 1;
+	private static final int MODE_RX			= 2;
+	
+	
 	private static final int COM_READ_TIME_IN_MS = 25;
 	private static final int INIT_TIMEOUT_MS = 10000;
 	private static final int HARD_TIMEOUT_MS = 2000;
@@ -86,7 +97,9 @@ public class ELMProtocol extends AbstractProtocol
 	/* The supported parametes list */
 	private static final ELMParameter[] SUPPORTD_PARAMS = new ELMParameter[]
 	{
-		new RPMParameter()
+		new AllParameters.RPM(),
+		new AllParameters.STFT1(),
+		new AllParameters.LTFT1()
 	};
 	
 	
@@ -97,7 +110,7 @@ public class ELMProtocol extends AbstractProtocol
 	private int responseBufferOffset_ = 0;
 	
 	/* The reusable array of response bytes.  For max performance */
-	private byte[] responseBuffer_ = new byte[1024];
+	private byte[] responseBuffer_ = new byte[512];
 	
 	/********************************************************
 	 * 
@@ -258,14 +271,33 @@ public class ELMProtocol extends AbstractProtocol
 		
 					
 					/* Process the desired parameter */
-					process(p);
+					boolean success = sendELMCommand(p.getFullCommand());
+					
+					if (!success)
+					{
+						throw new Exception("Error Requesting " + p.getName());
+					}
+					
+
+					try
+					{
+						extractResponseBytes(p);
+					}
+					catch(Exception e2)
+					{
+						/* An exception here is not normal, nor expected.  If it happens, we'll do a re-init */
+						ErrorLog.error("Parameter Fetch Exception, do reset.", e2);
+						reInitElmInterface();
+					}
+					
 					
 				}
 			}
 			catch(Exception e)
 			{
 				ErrorLog.error("Getting ECU Value", e);
-//				throw new RuntimeException(e);
+	// TODO:  will this work?
+				reInitElmInterface();
 			}
 			
 			fireEndParameterBatchEvent();
@@ -289,29 +321,29 @@ public class ELMProtocol extends AbstractProtocol
 		
 	}
 	
-
-	/********************************************************
-	 * Send the command code to the ECU, retreive it's response
-	 * and set the response value into the parameter.
-	 * @param p
-	 * @return
-	 ********************************************************/
-	private boolean process(ELMParameter p) throws Exception
-	{
-		boolean success = false;
-		
-		success = sendELMCommand(p.getFullCommand());
-		
-		if (!success)
-		{
-			throw new Exception("Error Requesting " + p.getName());
-		}
-		
-		extractResponseBytes(p);
-		
-		
-		return true;
-	}
+//
+//	/********************************************************
+//	 * Send the command code to the ECU, retreive it's response
+//	 * and set the response value into the parameter.
+//	 * @param p
+//	 * @return
+//	 ********************************************************/
+//	private boolean process(ELMParameter p) throws Exception
+//	{
+//		boolean success = false;
+//		
+//		success = sendELMCommand(p.getFullCommand());
+//		
+//		if (!success)
+//		{
+//			throw new Exception("Error Requesting " + p.getName());
+//		}
+//		
+//		extractResponseBytes(p);
+//		
+//		
+//		return true;
+//	}
 	
 	
 	/********************************************************
@@ -341,7 +373,7 @@ public class ELMProtocol extends AbstractProtocol
 		
 		bytesRead = getSerialPort().readBytes(this.responseBuffer_, 0, getSerialPort().readCheck());
 //		ErrorLog.info("Clearing Buffer: " + bytesRead + "\n" + responseToString());
-//		ErrorLog.info("TX\n[" + cmd + "]");
+		ErrorLog.debug("TX: [" + cmd + "]");
 
 		
 		/* Send the data bytes */
@@ -403,7 +435,7 @@ public class ELMProtocol extends AbstractProtocol
 		/* Check the buffer for known error strings */
 		boolean hasError = checkBufferForErrorString();
 		
-//		ErrorLog.info("RX:\n[" + responseToString() + "]");
+		ErrorLog.debug("RX: [" + responseToString() + "]");
 			
 		return true;
 	}

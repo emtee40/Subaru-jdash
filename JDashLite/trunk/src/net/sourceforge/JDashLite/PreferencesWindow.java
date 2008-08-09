@@ -68,13 +68,22 @@ public class PreferencesWindow extends AbstractWindow
 		new ListItem(0, "No")
 	};
 	
+//	private static final ListItem[] LOGLEVEL_LIST = new ListItem[]
+//	{
+//		new ListItem(0, ErrorLog.LOG_LEVEL_OFF),
+//		new ListItem(1, ErrorLog.LOG_LEVEL_INFO),
+//		new ListItem(2, ErrorLog.LOG_LEVEL_WARNING),
+//		new ListItem(3, ErrorLog.LOG_LEVEL_ERROR),
+//		new ListItem(4, ErrorLog.LOG_LEVEL_FATAL),
+//		new ListItem(5, ErrorLog.LOG_LEVEL_DEBUG),
+//	};
 	
 	private ComboBox guiStyleComboBox_ = null;
 	private ComboBox portComboBox_ = null;
 	private ComboBox autoConnectComboBox_ = null;
 	private ComboBox scanDisplayedOnlyComboBox_ = null;
 	private ComboBox testModeComboBox_ = null;
-	private ComboBox enableErrorLog_ = null;
+	private ComboBox logLevel_ = null;
 	
 
 	private ProfilesContainer profilesContainer_ = null;
@@ -150,10 +159,10 @@ public class PreferencesWindow extends AbstractWindow
 		settingsContainer.add(new Label("Test Mode:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
-		/* ErrorLog */
-		this.enableErrorLog_ = new ComboBox(YESNO_LIST);
-		settingsContainer.add(this.enableErrorLog_, RIGHT, AFTER + CONTROL_SPACE);
-		settingsContainer.add(new Label("Enable Error Log:"), BEFORE - CONTROL_SPACE, SAME);
+		/* Log Level */
+		this.logLevel_ = new ComboBox(ErrorLog.LOG_LEVELS);
+		settingsContainer.add(this.logLevel_, RIGHT, AFTER + CONTROL_SPACE);
+		settingsContainer.add(new Label("Log Level:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
 		/* Add the profiles container */
@@ -167,7 +176,7 @@ public class PreferencesWindow extends AbstractWindow
 		this.autoConnectComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_AUTO_CONNET, YESNO_LIST[0].getId())));
 		this.scanDisplayedOnlyComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_DISPLAYED_SENSORS, YESNO_LIST[0].getId())));
 		this.testModeComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_TEST_MODE, YESNO_LIST[0].getId())));
-		this.enableErrorLog_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_ENABLE_ERROR_LOG, YESNO_LIST[0].getId())));
+		this.logLevel_.select(this.prefs_.getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVELS[0]));
 	}
 
 	/*********************************************************
@@ -189,7 +198,7 @@ public class PreferencesWindow extends AbstractWindow
 		this.prefs_.setInt(Preferences.KEY_AUTO_CONNET, ((ListItem)this.autoConnectComboBox_.getSelectedItem()).getId());
 		this.prefs_.setInt(Preferences.KEY_DISPLAYED_SENSORS, ((ListItem)this.scanDisplayedOnlyComboBox_.getSelectedItem()).getId());
 		this.prefs_.setInt(Preferences.KEY_TEST_MODE, ((ListItem)this.testModeComboBox_.getSelectedItem()).getId());
-		this.prefs_.setInt(Preferences.KEY_ENABLE_ERROR_LOG, ((ListItem)this.enableErrorLog_.getSelectedItem()).getId());
+		this.prefs_.setString(Preferences.KEY_LOG_LEVEL, this.logLevel_.getSelectedItem().toString());
 
 		this.prefs_.save();
 		

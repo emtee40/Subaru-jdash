@@ -1,8 +1,8 @@
 /*********************************************************
  * 
  * @author spowell
- * ELMProtocol.java
- * Jul 26, 2008
+ * ProfilePage.java
+ * Jul 30, 2008
  *
 Copyright (C) 2008 Shane Powell
 
@@ -22,36 +22,54 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *********************************************************/
 
-package net.sourceforge.JDashLite.ecu.comm.ELM;
+package net.sourceforge.JDashLite.profile;
 
+import waba.util.Vector;
 
 /*********************************************************
  * 
  *
  *********************************************************/
-public class RPMParameter extends ELMParameter
+public class ProfilePage
 {
 	
-	/********************************************************
-	 * @param name
-	 * @param command
-	 *******************************************************/
-	public RPMParameter()
-	{
-		super(RPM, 1, 0x0c, 2);
-	}
-
+	private waba.util.Vector rows_ = new Vector(3);
 	
-	/*********************************************************
-	 * (non-Javadoc)
-	 * @see net.sourceforge.JDashLite.ecu.comm.ECUParameter#getValue()
+	
+	/********************************************************
+	 * @param index
+	 * @return
 	 ********************************************************/
-	public double getValue()
+	public ProfileRow getRow(int index)
 	{
-		int a = getResponseByte(0);
-		int b = getResponseByte(1);
-		
-		return ((a * 256) + b) / 4; 
+		return (ProfileRow)this.rows_.items[index];
 	}
+	
 
+	/*******************************************************
+	 * @param row
+	 ********************************************************/
+	public void addRow(ProfileRow row)
+	{
+		this.rows_.addElement(row);
+	}
+	
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public int getRowCount()
+	{
+		return this.rows_.size();
+	}
+	
+	
+	/*******************************************************
+	 * @param index
+	 ********************************************************/
+	public void removeRow(int index)
+	{
+		this.rows_.removeElementAt(index);
+	}
+	
 }

@@ -1,8 +1,8 @@
 /*********************************************************
  * 
  * @author spowell
- * Parameter.java
- * Jul 27, 2008
+ * ProfileRow.java
+ * Aug 7, 2008
  *
 Copyright (C) 2008 Shane Powell
 
@@ -22,67 +22,70 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *********************************************************/
 
-package net.sourceforge.JDashLite.ecu.comm;
+package net.sourceforge.JDashLite.profile;
+
+import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
+import waba.util.Vector;
 
 /*********************************************************
- * The base class of all parameters.  By default
- * Parameters handled by JDash deal in double values.
+ * 
  *
  *********************************************************/
-public abstract class ECUParameter
+public class ProfileRow
 {
-	public static final String RATE = "RATE";
-	
-	public static final RateSpecialParameter SPECIAL_PARAM_RATE = new RateSpecialParameter();
-	
-	private boolean isEnabled_ = true;
-	private String name_ = null;
-	
-	/********************************************************
-	 *  A parameter is identified by it's name.  The name of
-	 *  each parameter must be unique.
-	 *******************************************************/
-	public ECUParameter(String name)
-	{
-		this.name_ = name;
-	}
 
+	private double heightPercent_ = -1;
+	private Vector gauges_ = new Vector(2);
+	
 	
 	/********************************************************
-	 * An enabled parameter is one that is ready and willing
-	 * to be used to fetch and display parameters.  A disabled
-	 * parameter might be one that the profile has determined
-	 * is not visible, and therefor is not needed to be fetched.
-	 * So, it will be disabled.
-	 * @return the isEnabled
+	 * @param index
+	 * @return
 	 ********************************************************/
-	public boolean isEnabled()
+	public ProfileGauge getGauge(int index)
 	{
-		return this.isEnabled_;
+		return (ProfileGauge)this.gauges_.items[index];
+	}
+	
+	/********************************************************
+	 * @return the heightPercent
+	 ********************************************************/
+	public double getHeightPercent()
+	{
+		return this.heightPercent_;
 	}
 	
 	
 	/********************************************************
-	 * @param isEnabled the isEnabled to set
+	 * @param heightPercent the heightPercent to set
 	 ********************************************************/
-	public void setEnabled(boolean isEnabled)
+	public void setHeightPercent(double heightPercent)
 	{
-		this.isEnabled_ = isEnabled;
+		this.heightPercent_ = heightPercent;
 	}
+	
+	/********************************************************
+	 * @param gauge
+	 ********************************************************/
+	public void addGauge(ProfileGauge gauge)
+	{
+		this.gauges_.addElement(gauge);
+	}
+	
 	
 	/*******************************************************
 	 * @return
 	 ********************************************************/
-	public String getName()
+	public int getGaugeCount()
 	{
-		return this.name_;
+		return this.gauges_.size();
 	}
-
-	/********************************************************
-	 * Return the adjusted, calculated and formatted value
-	 * this parameter represents
-	 * @return
-	 ********************************************************/
-	public abstract double getValue();
 	
+	/********************************************************
+	 * @param index
+	 ********************************************************/
+	public void removeGauge(int index)
+	{
+		this.gauges_.removeElementAt(index);
+	}
 }

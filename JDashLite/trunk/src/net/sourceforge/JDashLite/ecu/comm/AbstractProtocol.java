@@ -52,18 +52,19 @@ public abstract class AbstractProtocol implements ProtocolHandler
 	
 	/*******************************************************
 	 * Given the list of parameters supported, find the one
-	 * by it's name.
+	 * by it's name.  This is just a simple utility method 
+	 * to search the array of params from getSupportedParameters()
 	 * 
 	 * @param name
 	 * @return
 	 ********************************************************/
-	public static ECUParameter getParameter(String name, ECUParameter[] parameters)
+	public ECUParameter getParameter(String name)
 	{
-		for (int index = 0; index < parameters.length; index++)
+		for (int index = 0; index < getSupportedParameters().length; index++)
 		{
-			if (name.equals(parameters[index].getName()))
+			if (name.equals(getSupportedParameters()[index].getName()))
 			{
-				return parameters[index];
+				return getSupportedParameters()[index];
 			}
 		}
 		return null;
@@ -71,16 +72,8 @@ public abstract class AbstractProtocol implements ProtocolHandler
 
 	
 	/*********************************************************
-	 * (non-Javadoc)
-	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#getParameter(java.lang.String)
-	 ********************************************************/
-	public ECUParameter getParameter(String name)
-	{
-		return AbstractProtocol.getParameter(name, getSupportedParameters());
-	}
-	
-	
-	/*********************************************************
+	 * This method will automatcially close the serial port, if it
+	 * has been set, and remove all event listeners.
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#disconnect()
 	 ********************************************************/

@@ -109,4 +109,13 @@ public abstract class ELMParameter extends ECUParameter
 		return this.responseBytes_[index];
 	}
 
+	/*******************************************************
+	 * For convience, simply casts the byte into a float.
+	 * @param index
+	 * @return
+	 ********************************************************/
+	public double getResponseDouble(int index)
+	{
+		return (double)getResponseByte(index);
+	}
 }

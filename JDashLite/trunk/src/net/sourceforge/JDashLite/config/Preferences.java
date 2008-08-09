@@ -41,7 +41,7 @@ public class Preferences
 	public static final String KEY_DISPLAYED_SENSORS 	= "displayed.sensors";
 	public static final String KEY_ACTIVE_PROFILE		= "active.profile";
 	public static final String KEY_TEST_MODE 			= "test.mode";
-	public static final String KEY_ENABLE_ERROR_LOG		= "enable.errorlog";
+	public static final String KEY_LOG_LEVEL			= "log.level";
 
 	private Options appOptions_ = null;
 	

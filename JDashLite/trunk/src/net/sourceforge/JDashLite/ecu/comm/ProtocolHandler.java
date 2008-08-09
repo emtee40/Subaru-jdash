@@ -59,6 +59,10 @@ public interface ProtocolHandler
 	
 	/********************************************************
 	 * Called in order to initiate and initialize the connection.
+	 * But.. DON'T actually make the connection here.  Instead, 
+	 * do it in a few of the opening calls to doTask();
+	 * You can and should however, at least open the serial
+	 * port here.
 	 * @return
 	 ********************************************************/
 	public boolean connect();
@@ -85,18 +89,15 @@ public interface ProtocolHandler
 
 	/********************************************************
 	 * This method will return a list of supported parameters.
+	 * Make sure this is a FAST call.  Infact, it should be 
+	 * a simple return of a member variable. Dont' computer
+	 * the list of paramters each time because this method
+	 * will get used in for(;;) loops quite often.
 	 * @return
 	 ********************************************************/
 	public ECUParameter[] getSupportedParameters();
 	
-	
-	/********************************************************
-	 * Gets the parameter by it's name.  Returns null if it's not found
-	 * @param name
-	 * @return
-	 ********************************************************/
-	public ECUParameter getParameter(String name);
-	
+		
 	/*******************************************************
 	 * @param l
 	 ********************************************************/

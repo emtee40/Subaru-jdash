@@ -1,8 +1,8 @@
 /*********************************************************
  * 
  * @author spowell
- * Parameter.java
- * Jul 27, 2008
+ * AbstractGauge.java
+ * Jul 30, 2008
  *
 Copyright (C) 2008 Shane Powell
 
@@ -22,67 +22,63 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *********************************************************/
 
-package net.sourceforge.JDashLite.ecu.comm;
+package net.sourceforge.JDashLite.profile.gauge;
+
 
 /*********************************************************
- * The base class of all parameters.  By default
- * Parameters handled by JDash deal in double values.
+ * 
  *
  *********************************************************/
-public abstract class ECUParameter
+public abstract class AbstractGauge extends ProfileGauge
 {
-	public static final String RATE = "RATE";
+
+	/* The current high value */
+	private double highValue_ = 0.0;
 	
-	public static final RateSpecialParameter SPECIAL_PARAM_RATE = new RateSpecialParameter();
-	
-	private boolean isEnabled_ = true;
-	private String name_ = null;
+	/* The current low value */
+	private double lowValue_ = 0.0;
 	
 	/********************************************************
-	 *  A parameter is identified by it's name.  The name of
-	 *  each parameter must be unique.
+	 * 
 	 *******************************************************/
-	public ECUParameter(String name)
+	public AbstractGauge()
 	{
-		this.name_ = name;
 	}
 
 	
 	/********************************************************
-	 * An enabled parameter is one that is ready and willing
-	 * to be used to fetch and display parameters.  A disabled
-	 * parameter might be one that the profile has determined
-	 * is not visible, and therefor is not needed to be fetched.
-	 * So, it will be disabled.
-	 * @return the isEnabled
+	 * @return the highValue
 	 ********************************************************/
-	public boolean isEnabled()
+	public double getHighValue()
 	{
-		return this.isEnabled_;
+		return this.highValue_;
+	}
+	
+	
+	
+	/********************************************************
+	 * @param highValue the highValue to set
+	 ********************************************************/
+	public void setHighValue(double highValue)
+	{
+		this.highValue_ = highValue;
 	}
 	
 	
 	/********************************************************
-	 * @param isEnabled the isEnabled to set
+	 * @return the lowValue
 	 ********************************************************/
-	public void setEnabled(boolean isEnabled)
+	public double getLowValue()
 	{
-		this.isEnabled_ = isEnabled;
+		return this.lowValue_;
 	}
 	
-	/*******************************************************
-	 * @return
-	 ********************************************************/
-	public String getName()
-	{
-		return this.name_;
-	}
-
+	
 	/********************************************************
-	 * Return the adjusted, calculated and formatted value
-	 * this parameter represents
-	 * @return
+	 * @param lowValue the lowValue to set
 	 ********************************************************/
-	public abstract double getValue();
-	
+	public void setLowValue(double lowValue)
+	{
+		this.lowValue_ = lowValue;
+	}
 }

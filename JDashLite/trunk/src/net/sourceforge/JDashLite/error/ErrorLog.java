@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDashLite.error;
 
+import sun.nio.cs.ext.ISCII91;
 import waba.sys.Vm;
 
 /*******************************************************
@@ -34,17 +35,50 @@ import waba.sys.Vm;
  ******************************************************/
 public class ErrorLog
 {
-	private static final String INFO = "INFO: ";
-	private static final String ERR = "ERR: ";
+	public static final String LOG_LEVEL_OFF 		= "Off";
+	public static final String LOG_LEVEL_INFO 		= "Info";
+	public static final String LOG_LEVEL_WARNING	= "Warning";
+	public static final String LOG_LEVEL_ERROR		= "Error";
+	public static final String LOG_LEVEL_FATAL		= "Fatal";
+	public static final String LOG_LEVEL_DEBUG		= "Debug";
 	
-	private static boolean enable_ = false;
+	public static final String[] LOG_LEVELS = {LOG_LEVEL_OFF, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR, LOG_LEVEL_FATAL, LOG_LEVEL_DEBUG};
+	
+	private static String level_ = LOG_LEVEL_OFF;
 
 	/********************************************************
 	 * Initialize the logger.
 	 *******************************************************/
-	public static void init(boolean enable)
+	public static void setLevel(String logLevel)
 	{
-		ErrorLog.enable_ = enable; 
+		ErrorLog.level_ = logLevel; 
+	}
+	
+	/*******************************************************
+	 * If the current log level is at least this level, then
+	 * retun true, else return false.
+	 * @param level
+	 * @return
+	 ********************************************************/
+	private static boolean isCurrentlyAtleastLevel(String level)
+	{
+		int currentLevel = 0;
+		int checkLevel = 0;
+		
+		for (int index = 0; index < LOG_LEVELS.length; index++)
+		{
+			if (ErrorLog.level_.equals(LOG_LEVELS[index]))
+			{
+				currentLevel = index;
+			}
+			
+			if (level.equals(LOG_LEVELS[index]))
+			{
+				checkLevel = index;
+			}
+		}
+		
+		return checkLevel <= currentLevel;
 	}
 	
 	/*******************************************************
@@ -52,23 +86,25 @@ public class ErrorLog
 	 *******************************************************/
 	public static void info(String message)
 	{
-		if (ErrorLog.enable_)
-		{
-			Vm.debug(INFO + message);
-		}
+		ErrorLog.print(LOG_LEVEL_INFO, message, null);
 	}
 	
+	/********************************************************
+	 * @param message
+	 ******************************************************/
+	public static void warn(String message)
+	{
+		ErrorLog.print(LOG_LEVEL_WARNING, message, null);
+	}
 	
 	/********************************************************
 	 * @param message
 	 ******************************************************/
 	public static void error(String message)
 	{
-		if (ErrorLog.enable_)
-		{
-			Vm.debug(ERR + message);
-		}
+		ErrorLog.error(message, null);
 	}
+	
 	
 	/*******************************************************
 	 * @param message
@@ -76,11 +112,59 @@ public class ErrorLog
 	 *******************************************************/
 	public static void error(String message, Throwable e)
 	{
-		if (ErrorLog.enable_)
-		{
-			e.printStackTrace();
-			Vm.debug(ERR + message);
-		}
+		ErrorLog.print(LOG_LEVEL_ERROR, message, e);
+	}
+
+	
+	/*******************************************************
+	 * @param message
+	 ********************************************************/
+	public static void fatal(String message)
+	{
+		ErrorLog.fatal(message, null);
 	}
 	
+	/*******************************************************
+	 * @param message
+	 * @param e
+	 *******************************************************/
+	public static void fatal(String message, Throwable e)
+	{
+		ErrorLog.print(LOG_LEVEL_FATAL, message, e);
+	}
+	
+	
+	/*******************************************************
+	 * @param message
+	 ********************************************************/
+	public static void debug(String message)
+	{
+		ErrorLog.debug(message, null);
+	}
+	
+	/*******************************************************
+	 * @param message
+	 * @param e
+	 *******************************************************/
+	public static void debug(String message, Throwable e)
+	{
+		ErrorLog.print(LOG_LEVEL_DEBUG, message, e);
+	}
+	
+	/*******************************************************
+	 * @param message
+	 * @param e
+	 ********************************************************/
+	private static void print(String level, String message, Throwable e)
+	{
+		
+		if (ErrorLog.isCurrentlyAtleastLevel(level))
+		{
+			if (e != null)
+			{
+				e.printStackTrace();
+			}
+			Vm.debug(level + ": " + message);
+		}
+	}
 }

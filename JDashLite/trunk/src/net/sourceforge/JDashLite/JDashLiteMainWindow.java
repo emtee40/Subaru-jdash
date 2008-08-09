@@ -42,6 +42,8 @@ import waba.fx.Graphics;
 import waba.sys.Vm;
 import waba.ui.ControlEvent;
 import waba.ui.Event;
+import waba.ui.IKeys;
+import waba.ui.KeyEvent;
 import waba.ui.MenuBar;
 
 
@@ -84,10 +86,6 @@ public class JDashLiteMainWindow extends GameEngine
 	/** This listener refreshes the drawing area as needed */
 	private ProtocolRefreshListener protocolRefreshListener_ = null;
 	
-	/* This flag gets tripped when new data is read and a re-render is due. 
-	 * We start with true to force the first render */
-	private boolean dataUpdated_ = true;
-	
 
 	
 	/*******************************************************
@@ -97,6 +95,7 @@ public class JDashLiteMainWindow extends GameEngine
 	public JDashLiteMainWindow()
 	{
 		super();  /* No Title and No Border */
+		
 		this.highResPrepared = true;
 		waba.sys.Settings.keyboardFocusTraversable = true;
 		
@@ -108,15 +107,16 @@ public class JDashLiteMainWindow extends GameEngine
 		this.gameCreatorID = JDASH_CREATOR_ID;
 		this.gameVersion = JDASH_VERSION_MAJOR;
 		//this.gameRefreshPeriod = NO_AUTO_REFRESH;
-		this.gameRefreshPeriod = 75;  /* 75 = 13 fps */
+		this.gameRefreshPeriod = 50;  /* 75 = 13fps, 50 = 20fps, 40=25fps */
 		this.gameIsDoubleBuffered = true;
 		this.gameDoClearScreen = true;
 		this.gameHasUI = false;
 		
 		/* For debugging, lets set a default active profile now */
 		this.activeProfile_ = new Profile();
-		this.activeProfile_.setName("TEST PROFILE");
-		this.activeProfile_.setProtocolClass(ELMProtocol.class.getName());
+//		this.activeProfile_.setName("TEST PROFILE");
+//		this.activeProfile_.setProtocolClass(ELMProtocol.class.getName());
+		
 		getPreferences().setString(Preferences.KEY_ACTIVE_PROFILE, this.activeProfile_.getName());
 		
 	}
@@ -127,13 +127,18 @@ public class JDashLiteMainWindow extends GameEngine
 	 *******************************************************/
 	public void onGameInit()
 	{
+		
 		try
 		{
 			/* Setup the look and feel */
 			waba.sys.Settings.setUIStyle((byte)getPreferences().getInt(Preferences.KEY_GUI_STYLE, waba.sys.Settings.WinCE));
 			
 			/* Initialize the Logger instance */
-			ErrorLog.init(getPreferences().getInt(Preferences.KEY_ENABLE_ERROR_LOG, 0) == 1);
+			ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVEL_OFF));
+
+			/* TEST Profile TEST */
+			this.activeProfile_.loadFromXml(Profile.TEST_PROFILE_XML);
+
 			
 			/* Setup the protocol thread */
 			this.protocolHandlerThread_ = new ProtocolHandlerThread();
@@ -311,14 +316,15 @@ public class JDashLiteMainWindow extends GameEngine
 	
 	
 	
+	
 	/*******************************************************
 	 * Respond to window events.
 	 *******************************************************/
 	public void onOtherEvent(Event event)
 	{
-		
 		switch(event.type)
 		{
+			/* Window Close, like the menu bar */
 			case ControlEvent.WINDOW_CLOSED:
 				if (event.target == this.menubar)
 				{
@@ -332,11 +338,31 @@ public class JDashLiteMainWindow extends GameEngine
 					
 				}
 			break;
+			
 		}
 //		super.onEvent(event);
 	
 	}
+
 	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see superwaba.ext.xplat.game.GameEngine#onKey(waba.ui.KeyEvent)
+	 ********************************************************/
+	public void onKey(KeyEvent ke)
+	{
+		/* Respond to the nav keys */
+		if (ke.key == IKeys.LEFT)
+		{
+			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage()-1);
+		}
+		
+		if (ke.key == IKeys.RIGHT)
+		{
+			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage()+1);
+		}
+	}
 	
 	
 	
@@ -432,7 +458,7 @@ public class JDashLiteMainWindow extends GameEngine
 		prefs.popupBlockingModal();
 		
 		/* Re-Initialize the Logger instance */
-		ErrorLog.init(getPreferences().getInt(Preferences.KEY_ENABLE_ERROR_LOG, 0) == 1);
+		ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL,  ErrorLog.LOG_LEVEL_OFF));
 		
 
 	}
@@ -481,41 +507,22 @@ public class JDashLiteMainWindow extends GameEngine
 	 ********************************************************/
 	public void onPaint(Graphics g)
 	{
-		//super.onPaint(g);
 		
-//		try
-//		{
-//			throw new Exception("on paint");
-//		}
-//		catch(Exception te)
-//		{
-//			te.printStackTrace();
-//		}
-//		
 		try
 		{
 			/* The renderer is setup, so let it draw */
-			if (this.profileRenderer_ != null && this.dataUpdated_)
+			if (this.profileRenderer_ != null)
 			{
-				this.dataUpdated_ = false;
-				this.profileRenderer_.render(g);
+				this.profileRenderer_.render(g, getClientRect());
 			}
 			
-//			//if (this.protocolHandler_ != null && this.protocolHandler_.isRunning())
-//			System.out.println((this.protocolHandler_ != null) + "  " + (this.profileRenderer_ != null));
-//			if (this.protocolHandler_ != null)
-//			{
-//				if (this.profileRenderer_ != null)
-//				{
-//					this.profileRenderer_.render(g);
-//				}
-//				
-//			}
 		}
 		catch(Exception e)
 		{
-			ErrorLog.error("onPaint", e);
+			stop();
+			ErrorLog.fatal("onPaint", e);
 			ErrorDialog.showError("Fatal Error", e);
+			this.profileRenderer_ = null;
 			doExit();
 		}
 		
@@ -559,7 +566,7 @@ public class JDashLiteMainWindow extends GameEngine
 		public void endParameterBatch()
 		{
 			ECUParameter.SPECIAL_PARAM_RATE.setRate(Vm.getTimeStamp() - this.startTime_);
-			this.wnd_.dataUpdated_ = true;
+			this.wnd_.profileRenderer_.setNewDataReady(true);
 		}
 		
 	}

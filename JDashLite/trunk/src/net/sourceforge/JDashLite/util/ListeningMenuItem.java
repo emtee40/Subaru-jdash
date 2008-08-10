@@ -62,16 +62,28 @@ public class ListeningMenuItem extends MenuItem
 	{
 		if (this.actionListener_ != null)
 		{
-			this.actionListener_.actionPerformed();
+			this.actionListener_.actionPerformed(this.actionListener_.ref_);
 		}
 	}
 	
-	/*********************************************************
+	
+	/********************************************************
 	 * 
 	 *
 	 *********************************************************/
-	public static interface MenuActionListener
+	public abstract static class MenuActionListener
 	{
-		public void actionPerformed();
+		protected Object ref_ = null;
+		public MenuActionListener(Object ref)
+		{
+			this.ref_ = ref;
+		}
+		
+		public MenuActionListener()
+		{
+			this(null);
+		}
+		
+		public abstract void actionPerformed(Object o);
 	}
 }

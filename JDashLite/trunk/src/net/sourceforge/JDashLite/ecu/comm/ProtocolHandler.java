@@ -43,10 +43,10 @@ public interface ProtocolHandler
 	public static final String E_KPH = "KPH"; 
 
 	
-	/*******************************************************
-	 * @param profile
-	 ********************************************************/
-	public void setProfile(Profile profile);
+//	/*******************************************************
+//	 * @param profile
+//	 ********************************************************/
+//	public void setProfile(Profile profile);
 	
 	/*******************************************************
 	 * Start this protocol handler.  Pass in the serial port 

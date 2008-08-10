@@ -24,9 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.profile;
 
-import superwaba.ext.xplat.xml.XmlReader;
-import net.sourceforge.JDashLite.ProfilesContainer;
-import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import waba.util.Vector;
 
@@ -71,31 +68,21 @@ import waba.util.Vector;
 public class Profile
 {
 
-	public static final String TEST_PROFILE_XML =
-" <profile name=\"Test Profile\" protocolClass=\"" + ELMProtocol.class.getName() +  "\"> " +
+	public static final String SAMPLE_PROFILE_XML =
+" <profile name=\"Sample Profile 2\" protocolClass=\"" + ELMProtocol.class.getName() +  "\"> " +
 "   <page> " +
-"     <row height=\"0.5\"> " +
-"       <gauge type=\"digital\" param=\"RPM\" width=\".2\"/> " +
-"       <gauge type=\"digital\" param=\"RPM\" width=\".4\"/> " +
+"     <row" +
 "       <gauge type=\"digital\" param=\"RPM\"/> " +
-"     </row> " +
-"     <row height=\"0.2\"> " +
 "     </row> " +
 "     <row> " +
-"       <gauge type=\"digital\" param=\"RPM\" width=\"0.25\"/> " +
-"       <gauge type=\"digital\" param=\"RPM\"/> " +
+"       <gauge type=\"digital\" param=\"STFT1" + "\"/> " +
+"       <gauge type=\"digital\" param=\"LTFT1\"/> " +
 "     </row> " +
 "   </page> " +
 "	<page> " +
 "     <row> " +
-"     </row> " +
-"   </page> " +
-"   <page> " +
-"   </page> " +
-"   <page> " +
-"     <row> " +
-"     </row> " +
-"     <row> " +
+"       <gauge type=\"digital\" param=\"RPM\"/> " +
+"       <gauge type=\"digital\" param=\"RPM\"/> " +
 "     </row> " +
 "   </page> " +
 " </profile> ";
@@ -126,6 +113,16 @@ public class Profile
 		
 	}
 	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 ********************************************************/
+	public String toString()
+	{
+		return getName();
+	}
+	
 	/*******************************************************
 	 * Setup the values in this profile according to the 
 	 * provided XML file.
@@ -135,18 +132,29 @@ public class Profile
 	{
 		ProfileXMLContentHandler contentHandler = new ProfileXMLContentHandler(this);
 		contentHandler.parse(xml);
+		
+		if (getName() == null)
+		{
+			throw new Exception("Profile is missing name \n" + xml);
+		}
+		
+		if (getProtocolClass() == null)
+		{
+			throw new Exception("Profile is missign protocol\n" + xml);
+		}
 	}
 	
 	
 	/*******************************************************
-	 * Given this profile, generate an XML file that represents it.
 	 * @return
+	 * @throws Exception
 	 ********************************************************/
-	public String getAsXml()
+	public String toXml() throws Exception
 	{
-		return "";
+		ProfileXMLContentHandler contentHandler = new ProfileXMLContentHandler(this);
+		return contentHandler.generateXml();
 	}
-	
+
 	
 	/********************************************************
 	 * @return the name

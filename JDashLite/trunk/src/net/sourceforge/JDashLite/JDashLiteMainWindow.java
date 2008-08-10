@@ -26,12 +26,9 @@ package net.sourceforge.JDashLite;
 
 import superwaba.ext.xplat.game.GameEngine;
 import net.sourceforge.JDashLite.config.Preferences;
-import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandlerThread;
 import net.sourceforge.JDashLite.ecu.comm.TestProtocol;
-import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
-import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
@@ -82,11 +79,9 @@ public class JDashLiteMainWindow extends GameEngine
 	
 	/* The handler thread */
 	private ProtocolHandlerThread protocolHandlerThread_ = null;
-	
-	/** This listener refreshes the drawing area as needed */
-	private ProtocolRefreshListener protocolRefreshListener_ = null;
-	
 
+	/* Remember the previous system off time */
+	private int originalSystemOffTime_ = 0;
 	
 	/*******************************************************
 	 * Override
@@ -99,25 +94,19 @@ public class JDashLiteMainWindow extends GameEngine
 		this.highResPrepared = true;
 		waba.sys.Settings.keyboardFocusTraversable = true;
 		
-		/* Set the refresh listener */
-		this.protocolRefreshListener_ = new ProtocolRefreshListener(this);
-		
 		/* Setup the game options */
 		this.gameName = JDASH_TITLE;
 		this.gameCreatorID = JDASH_CREATOR_ID;
 		this.gameVersion = JDASH_VERSION_MAJOR;
 		//this.gameRefreshPeriod = NO_AUTO_REFRESH;
 		this.gameRefreshPeriod = 50;  /* 75 = 13fps, 50 = 20fps, 40=25fps */
-		this.gameIsDoubleBuffered = true;
-		this.gameDoClearScreen = true;
+		this.gameIsDoubleBuffered = false;
+		this.gameDoClearScreen = false;
 		this.gameHasUI = false;
 		
 		/* For debugging, lets set a default active profile now */
-		this.activeProfile_ = new Profile();
-//		this.activeProfile_.setName("TEST PROFILE");
-//		this.activeProfile_.setProtocolClass(ELMProtocol.class.getName());
+		this.activeProfile_ = null;
 		
-		getPreferences().setString(Preferences.KEY_ACTIVE_PROFILE, this.activeProfile_.getName());
 		
 	}
 
@@ -130,16 +119,24 @@ public class JDashLiteMainWindow extends GameEngine
 		
 		try
 		{
+			/* Turn off the auto off? */
+			if (getPreferences().getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, 0) == 1)
+			{
+				this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
+			}
+			
 			/* Setup the look and feel */
 			waba.sys.Settings.setUIStyle((byte)getPreferences().getInt(Preferences.KEY_GUI_STYLE, waba.sys.Settings.WinCE));
 			
 			/* Initialize the Logger instance */
 			ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVEL_OFF));
 
-			/* TEST Profile TEST */
-			this.activeProfile_.loadFromXml(Profile.TEST_PROFILE_XML);
+			/* Make sure there is at least SOMETHING in the profile list */
+			if (getPreferences().getProfileCount() == 0)
+			{
+				getPreferences().addProfile(Profile.SAMPLE_PROFILE_XML);
+			}
 
-			
 			/* Setup the protocol thread */
 			this.protocolHandlerThread_ = new ProtocolHandlerThread();
 			addThread(this.protocolHandlerThread_, false);
@@ -152,8 +149,8 @@ public class JDashLiteMainWindow extends GameEngine
 				this.menuBar_ = new MenuBar(this.menuItems_);
 				setMenuBar(this.menuBar_);
 				
-				/* Set the active profile.. to active!! */
-				doSetActiveProfile(this.activeProfile_);
+//				/* Set the active profile.. to active!! */
+//				doSetActiveProfile(this.activeProfile_);
 
 				/* Auto Connect? */
 				if (getPreferences().getInt(Preferences.KEY_AUTO_CONNET, 0) == 1)
@@ -187,6 +184,12 @@ public class JDashLiteMainWindow extends GameEngine
 	 *******************************************************/
 	public void onGameExit()
 	{
+		/* restore the system off time */
+		if (this.originalSystemOffTime_ > 0)
+		{
+			Vm.setDeviceAutoOff(this.originalSystemOffTime_);
+		}
+		
 		stop();
 		doDisconnect();
 		killThreads();
@@ -194,6 +197,39 @@ public class JDashLiteMainWindow extends GameEngine
 		super.onGameExit();
 	}
 	
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void populateProfileMenu()
+	{
+		
+		int profileCount = getPreferences().getProfileCount();
+		
+		for (int index = 0; index < profileCount; index++)
+		{
+			Profile p = new Profile();
+			try
+			{
+				p.loadFromXml(getPreferences().getProfile(index));
+			}
+			catch(Exception e)
+			{
+				ErrorLog.error("Can't add profile to menu", e);
+			}
+		}
+		
+		
+//		helpMenu[++menuIndex] = new ListeningMenuItem("About");
+//		helpMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+//		{
+//			public void actionPerformed()
+//			{
+//				doAbout();
+//			}
+//		});
+		
+	}
 
 	
 	/*********************************************************
@@ -219,8 +255,9 @@ public class JDashLiteMainWindow extends GameEngine
 	private ListeningMenuItem[][] createMenuItems()
 	{
 
+		int profileCount = getPreferences().getProfileCount();
 		ListeningMenuItem[] mainMenu = new ListeningMenuItem[5];
-		ListeningMenuItem[] profileMenu = new ListeningMenuItem[1];
+		ListeningMenuItem[] profileMenu = new ListeningMenuItem[profileCount + 1];
 		ListeningMenuItem[] helpMenu = new ListeningMenuItem[2];
 		
 
@@ -232,7 +269,7 @@ public class JDashLiteMainWindow extends GameEngine
 			mainMenu[++menuIndex] = new ListeningMenuItem("Connect");
 			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
-				public void actionPerformed()
+				public void actionPerformed(Object ref)
 				{
 					doConnect();
 				}
@@ -241,7 +278,7 @@ public class JDashLiteMainWindow extends GameEngine
 			mainMenu[++menuIndex] = new ListeningMenuItem("Disconnect");
 			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
-				public void actionPerformed()
+				public void actionPerformed(Object ref)
 				{
 					doDisconnect();
 				}
@@ -250,7 +287,7 @@ public class JDashLiteMainWindow extends GameEngine
 			mainMenu[++menuIndex] = new ListeningMenuItem("Preferences");
 			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
-				public void actionPerformed()
+				public void actionPerformed(Object ref)
 				{
 					doPreferences();
 				}
@@ -259,7 +296,7 @@ public class JDashLiteMainWindow extends GameEngine
 			mainMenu[++menuIndex] = new ListeningMenuItem("Exit");
 			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
-				public void actionPerformed()
+				public void actionPerformed(Object ref)
 				{
 					doExit();
 				}
@@ -273,6 +310,29 @@ public class JDashLiteMainWindow extends GameEngine
 		{
 			menuIndex = -1;
 			profileMenu[++menuIndex] = new ListeningMenuItem("Profile");
+			
+			/* Add each profile */
+			for (int index = 0; index < profileCount; index++)
+			{
+				Profile p = new Profile();
+				try
+				{
+					p.loadFromXml(getPreferences().getProfile(index));
+					profileMenu[++menuIndex] = new ListeningMenuItem(p.getName());
+					profileMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+					{
+						public void actionPerformed(Object ref)
+						{
+							System.out.println("Set Profile");
+						}
+					});
+				}
+				catch(Exception e)
+				{
+					ErrorLog.error("Unable to add profile to menu", e);
+				}
+			}
+			
 		}
 		
 
@@ -284,7 +344,7 @@ public class JDashLiteMainWindow extends GameEngine
 			helpMenu[++menuIndex] = new ListeningMenuItem("About");
 			helpMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
-				public void actionPerformed()
+				public void actionPerformed(Object ref)
 				{
 					doAbout();
 				}
@@ -383,24 +443,6 @@ public class JDashLiteMainWindow extends GameEngine
 			/* Do a disconnect first */
 			doDisconnect();
 			
-			/* create the protocol handler  */
-			this.protocolHandler_ = ((ProtocolHandler)Class.forName(this.activeProfile_.getProtocolClass()).newInstance());
-			
-			/* But.. is this TEST mode? */
-			if (getPreferences().getInt(Preferences.KEY_TEST_MODE, 0) == 1)
-			{
-				this.protocolHandler_ = new TestProtocol(this.protocolHandler_);
-			}
-			
-			/* Add the refresh listener.  This forces refreshes when the protocol handler fetches a batch */
-			this.protocolHandler_.addProtocolEventListener(this.protocolRefreshListener_);
-			
-			/* Give the protocol handler access to the active profile for access to the desired params */
-			this.protocolHandler_.setProfile(this.activeProfile_);
-			
-			/* Give the list of parameters to the renderer */
-			this.profileRenderer_.setParameters(this.protocolHandler_.getSupportedParameters());
-			
 			/* start the protocol handler */
 			int serialPort = getPreferences().getInt(Preferences.KEY_COM_PORT, -3);
 			if (serialPort == -1)
@@ -443,7 +485,6 @@ public class JDashLiteMainWindow extends GameEngine
 			this.protocolHandlerThread_.setEnabled(false);
 			this.protocolHandlerThread_.setProtocolHandler(null);
 			this.protocolHandler_.disconnect();
-			this.protocolHandler_ = null;
 		}
 		
 	}
@@ -459,7 +500,12 @@ public class JDashLiteMainWindow extends GameEngine
 		
 		/* Re-Initialize the Logger instance */
 		ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL,  ErrorLog.LOG_LEVEL_OFF));
-		
+
+		/* Set the auto off */
+		if (getPreferences().getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, 0) == 1)
+		{
+			this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
+		}
 
 	}
 	
@@ -485,18 +531,37 @@ public class JDashLiteMainWindow extends GameEngine
 	 * Take the provided profile object, and set it 
 	 * @param p
 	 ********************************************************/
-	private void doSetActiveProfile(Profile p)
+	private void doSetActiveProfile(Profile p) throws Exception
 	{
+		
+		/* Disconnect any active connection and protocol handler */
+		doDisconnect();
+		
 		this.activeProfile_ = p;
 		getPreferences().setString(Preferences.KEY_ACTIVE_PROFILE, this.activeProfile_.getName());
 		
-		/* Stop and clean up the current profile */
 		
 		/* Release any resources */
 		
 		/* Create a new profile display container, But, you'll notice we dont' add it. Because
 		 * we are not acutally using any GUI components.  This is display ONLY */
 		this.profileRenderer_ = new ProfileRenderer(this.activeProfile_);
+		
+		
+		/* create the protocol handler  */
+		this.protocolHandler_ = ((ProtocolHandler)Class.forName(this.activeProfile_.getProtocolClass()).newInstance());
+		
+		/* But.. is this TEST mode? */
+		if (getPreferences().getInt(Preferences.KEY_TEST_MODE, 0) == 1)
+		{
+			this.protocolHandler_ = new TestProtocol(this.protocolHandler_);
+		}
+
+		/* Give the list of parameters to the renderer */
+		this.profileRenderer_.setParameters(this.protocolHandler_.getSupportedParameters());
+		
+		/* Add the profile render event listener.  This forces refreshes when the protocol handler fetches a batch */
+		this.protocolHandler_.addProtocolEventListener(this.profileRenderer_.getEventAdapter());
 		
 	
 	}
@@ -507,6 +572,12 @@ public class JDashLiteMainWindow extends GameEngine
 	 ********************************************************/
 	public void onPaint(Graphics g)
 	{
+		
+		/* If no profile is yet set, then warn the user, and pop the preferences dialog */
+		if (this.activeProfile_ == null)
+		{
+			return;
+		}
 		
 		try
 		{
@@ -530,47 +601,5 @@ public class JDashLiteMainWindow extends GameEngine
 	}
 
 	
-	
-	/*********************************************************
-	 * 
-	 *
-	 *********************************************************/
-	private static class ProtocolRefreshListener extends ProtocolEventAdapter
-	{
-		private JDashLiteMainWindow wnd_ = null;
-		
-		private int startTime_ = 0;
-		
-		/********************************************************
-		 * 
-		 *******************************************************/
-		public ProtocolRefreshListener(JDashLiteMainWindow wnd)
-		{
-			this.wnd_ = wnd;
-		}
-		
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#beginParameterBatch(int)
-		 ********************************************************/
-		public void beginParameterBatch(int count)
-		{
-			this.startTime_ = Vm.getTimeStamp();
-		}
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener#endParameterBatch()
-		 ********************************************************/
-		public void endParameterBatch()
-		{
-			ECUParameter.SPECIAL_PARAM_RATE.setRate(Vm.getTimeStamp() - this.startTime_);
-			this.wnd_.profileRenderer_.setNewDataReady(true);
-		}
-		
-	}
-
-
 }
 

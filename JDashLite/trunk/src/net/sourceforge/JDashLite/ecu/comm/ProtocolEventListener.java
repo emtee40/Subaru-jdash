@@ -26,7 +26,7 @@ package net.sourceforge.JDashLite.ecu.comm;
 
 /*********************************************************
  * A protocol handler, during it's cycle of tasks, 
- * fires of events to it's added listeners.
+ * fires off events to it's added listeners.  
  *
  *********************************************************/
 public interface ProtocolEventListener
@@ -42,31 +42,83 @@ public interface ProtocolEventListener
 	 ********************************************************/
 	public void protocolStopped();
 	
+	
+	/*******************************************************
+	 * Called when the protocol starts it's init phase.
+	 ********************************************************/
+	public void initStarted();
+	
+	/********************************************************
+	 * Called when the protocl is finished it's init phase.
+	 ********************************************************/
+	public void initFinished();
+	
+	/*******************************************************
+	 * When a protocol is going through it's init phase, it will
+	 * fire off a sequence of message through this method.
+	 * 
+	 * @param statusMessage
+	 ********************************************************/
+	public void initStatus(String statusMessage);
+	
 	/********************************************************
 	 * Called when the a set of parameters to be fetched has begun.
+	 * Some protocols patch a series of parameters at once, some
+	 * do them one at a time.
 	 * @param count IN - the number of parameters about to be fetched.
 	 ********************************************************/
 	public void beginParameterBatch(int count);
 	
-	/*******************************************************
-	 * Called after each individual parameter is fetched
-	 ********************************************************/
-	public void parameterFetched();
 	
+	/*******************************************************
+	 * Called after each individual parameter is successfully fetched
+	 ********************************************************/
+	public void parameterFetched(ECUParameter p);
+	
+
 	/********************************************************
 	 * Called after the batch of parameters has been fetched.
 	 *******************************************************/
 	public void endParameterBatch();
 	
 
+	/*******************************************************
+	 * Called as the protocol enters a comms TX phase.
+	 ********************************************************/
+	public void commTX();
+	
+	
+	/*******************************************************
+	 * Called as the protocol enters a comms RX phase.
+	 ********************************************************/
+	public void commRX();
+	
+	
+	/*******************************************************
+	 * Called as the protocll enters a comms ready, or non TX/RX phase.
+	 ********************************************************/
+	public void commReady();
+	
+
+	/*********************************************************
+	 * 
+	 *
+	 *********************************************************/
 	public static class ProtocolEventAdapter implements ProtocolEventListener
 	{
-		public void protocolStarted()  {}
-		public void protocolStopped()  {}
-		public void beginParameterBatch(int count)  {}
-		public void parameterFetched()  {}
-		public void endParameterBatch() {}
-			
+		
+		public void protocolStarted() {};
+		public void protocolStopped() {};
+		public void initStarted() {};
+		public void initFinished() {};
+		public void initStatus(String statusMessage) {};
+		public void beginParameterBatch(int count) {};
+		public void parameterFetched(ECUParameter p) {};
+		public void endParameterBatch() {};
+		public void commTX() {};
+		public void commRX() {};
+		public void commReady() {};
 	}
+	
 	
 }

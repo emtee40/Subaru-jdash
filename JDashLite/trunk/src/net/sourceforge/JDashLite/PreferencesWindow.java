@@ -81,6 +81,7 @@ public class PreferencesWindow extends AbstractWindow
 	private ComboBox guiStyleComboBox_ = null;
 	private ComboBox portComboBox_ = null;
 	private ComboBox autoConnectComboBox_ = null;
+	private ComboBox disableAutoOffComboBox_ = null;
 	private ComboBox scanDisplayedOnlyComboBox_ = null;
 	private ComboBox testModeComboBox_ = null;
 	private ComboBox logLevel_ = null;
@@ -111,16 +112,16 @@ public class PreferencesWindow extends AbstractWindow
 	{
 		this.highResPrepared = true;
 		waba.sys.Settings.keyboardFocusTraversable = true;
-		
+
+		/* Add the main buttons now */
+ 		int buttonTop = this.addMainButtons();
+
 		/* The settings tabs */
 		TabPanel tabPanel = new TabPanel(new String[] {"Settings", "Profiles"});
 		add(tabPanel);
 		tabPanel.setGaps(CONTROL_SPACE, CONTROL_SPACE, CONTROL_SPACE, CONTROL_SPACE);
-//		tabPanel.setRect(getClientRect());
-		tabPanel.setRect(LEFT, TOP, FILL, FILL);
+		tabPanel.setRect(LEFT, TOP, FILL, FIT - CONTROL_SPACE);
 		
-		/* Add the main buttons now */
- 		this.addMainButtons();
 		
 		/* Setup the Settings Container */
 		Container settingsContainer = new Container();
@@ -131,37 +132,51 @@ public class PreferencesWindow extends AbstractWindow
 		/* GUI */
 		this.guiStyleComboBox_ = new ComboBox(GUI_LIST);
 		this.guiStyleComboBox_.fullHeight = true;
-		settingsContainer.add(this.guiStyleComboBox_, RIGHT, TOP);
+		settingsContainer.add(new Label(" "), CENTER, TOP);
+		settingsContainer.add(this.guiStyleComboBox_, AFTER, TOP);
 		settingsContainer.add(new Label("Look&Feel:"), BEFORE - CONTROL_SPACE, SAME);
 		
 		
 		/* Port */
 		this.portComboBox_ = new ComboBox(PORT_LIST);
 		this.portComboBox_.fullHeight = true;
-		settingsContainer.add(this.portComboBox_, RIGHT, AFTER + CONTROL_SPACE);
+		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+		settingsContainer.add(this.portComboBox_, AFTER, SAME);
 		settingsContainer.add(new Label("Com Port:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
 		/* Connect at start */
 		this.autoConnectComboBox_ = new ComboBox(YESNO_LIST);
-		settingsContainer.add(this.autoConnectComboBox_, RIGHT, AFTER + CONTROL_SPACE);
+		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+		settingsContainer.add(this.autoConnectComboBox_, AFTER, SAME);
 		settingsContainer.add(new Label("Auto Connect:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
 		/* Scan displayed only */
 		this.scanDisplayedOnlyComboBox_ = new ComboBox(YESNO_LIST);
-		settingsContainer.add(this.scanDisplayedOnlyComboBox_, RIGHT, AFTER + CONTROL_SPACE);
-		settingsContainer.add(new Label("Scan Only Displayed:"), BEFORE - CONTROL_SPACE, SAME);
+		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+		settingsContainer.add(this.scanDisplayedOnlyComboBox_, AFTER, SAME);
+		settingsContainer.add(new Label("Scan Only Visible:"), BEFORE - CONTROL_SPACE, SAME);
+		
+		
+		/* disable auto off */
+		this.disableAutoOffComboBox_ = new ComboBox(YESNO_LIST);
+		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+		settingsContainer.add(this.disableAutoOffComboBox_, AFTER, SAME);
+		settingsContainer.add(new Label("Disable Auto Off:"), BEFORE - CONTROL_SPACE, SAME);
+		
 		
 		/* Test Mode */
 		this.testModeComboBox_ = new ComboBox(YESNO_LIST);
-		settingsContainer.add(this.testModeComboBox_, RIGHT, AFTER + CONTROL_SPACE);
+		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+		settingsContainer.add(this.testModeComboBox_, AFTER, SAME);
 		settingsContainer.add(new Label("Test Mode:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
 		/* Log Level */
 		this.logLevel_ = new ComboBox(ErrorLog.LOG_LEVELS);
-		settingsContainer.add(this.logLevel_, RIGHT, AFTER + CONTROL_SPACE);
+		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+		settingsContainer.add(this.logLevel_, AFTER, SAME);
 		settingsContainer.add(new Label("Log Level:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
@@ -175,8 +190,10 @@ public class PreferencesWindow extends AbstractWindow
 		this.portComboBox_.select(ListItem.findItem(PORT_LIST, this.prefs_.getInt(Preferences.KEY_COM_PORT, PORT_LIST[0].getId())));
 		this.autoConnectComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_AUTO_CONNET, YESNO_LIST[0].getId())));
 		this.scanDisplayedOnlyComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_DISPLAYED_SENSORS, YESNO_LIST[0].getId())));
+		this.disableAutoOffComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, YESNO_LIST[1].getId())));
 		this.testModeComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_TEST_MODE, YESNO_LIST[0].getId())));
 		this.logLevel_.select(this.prefs_.getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVELS[0]));
+		
 	}
 
 	/*********************************************************
@@ -197,9 +214,10 @@ public class PreferencesWindow extends AbstractWindow
 		this.prefs_.setInt(Preferences.KEY_COM_PORT, ((ListItem)this.portComboBox_.getSelectedItem()).getId());
 		this.prefs_.setInt(Preferences.KEY_AUTO_CONNET, ((ListItem)this.autoConnectComboBox_.getSelectedItem()).getId());
 		this.prefs_.setInt(Preferences.KEY_DISPLAYED_SENSORS, ((ListItem)this.scanDisplayedOnlyComboBox_.getSelectedItem()).getId());
+		this.prefs_.setInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, ((ListItem)this.disableAutoOffComboBox_.getSelectedItem()).getId());
 		this.prefs_.setInt(Preferences.KEY_TEST_MODE, ((ListItem)this.testModeComboBox_.getSelectedItem()).getId());
 		this.prefs_.setString(Preferences.KEY_LOG_LEVEL, this.logLevel_.getSelectedItem().toString());
-
+		this.profilesContainer_.save();
 		this.prefs_.save();
 		
 		if (requireRestart)

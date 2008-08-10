@@ -36,6 +36,7 @@ public abstract class ECUParameter
 	public static final RateSpecialParameter SPECIAL_PARAM_RATE = new RateSpecialParameter();
 	
 	private boolean isEnabled_ = true;
+	
 	private String name_ = null;
 	
 	/********************************************************

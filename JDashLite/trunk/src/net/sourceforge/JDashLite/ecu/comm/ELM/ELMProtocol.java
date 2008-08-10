@@ -253,21 +253,16 @@ public class ELMProtocol extends AbstractProtocol
 		if (getSerialPort() != null && getSerialPort().isOpen())
 		{
 			
-			fireBeginParameterBatchEvent(getProfile().getParameterCount());
+			fireBeginParameterBatchEvent(1);
 	
 			/* try to do the fetch.  An error will cause a re-init */
 			try
 			{
-				for (int index = 0; index < getProfile().getParameterCount(); index++)
+				for (int index = 0; index < SUPPORTD_PARAMS.length; index++)
 				{
 		
 					/* Get the parameter */
-					ELMParameter p = (ELMParameter)getParameter(getProfile().getParameterName(index));
-					if (p == null)
-					{
-						ErrorDialog.showError("Profile contains invalid Parameter|" + getProfile().getParameterName(index));
-						return;
-					}
+					ELMParameter p = SUPPORTD_PARAMS[index];
 		
 					
 					/* Process the desired parameter */

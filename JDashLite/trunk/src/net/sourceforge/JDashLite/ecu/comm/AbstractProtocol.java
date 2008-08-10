@@ -36,10 +36,8 @@ import waba.util.Vector;
 public abstract class AbstractProtocol implements ProtocolHandler
 {
 	
-//	private boolean isRunning_ = false;
 	private int serialPortId_ = SerialPort.DEFAULT;
 	private SerialPort serialPort_ = null;
-	private Profile profile_  = null;
 	private Vector eventListeners_ = new Vector(1);
 	
 	/********************************************************
@@ -85,8 +83,6 @@ public abstract class AbstractProtocol implements ProtocolHandler
 			getSerialPort().close();
 		}
 		
-		this.eventListeners_.removeAllElements();
-		
 		return true;
 	}
 
@@ -124,24 +120,6 @@ public abstract class AbstractProtocol implements ProtocolHandler
 	public void setSerialPort(SerialPort serialPort)
 	{
 		this.serialPort_ = serialPort;
-	}
-	
-	/********************************************************
-	 * @return the profile
-	 ********************************************************/
-	public Profile getProfile()
-	{
-		return this.profile_;
-	}
-	
-	
-	/*********************************************************
-	 * (non-Javadoc)
-	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#setProfile(net.sourceforge.JDashLite.profile.Profile)
-	 ********************************************************/
-	public void setProfile(Profile profile)
-	{
-		this.profile_ = profile;
 	}
 	
 	
@@ -194,6 +172,42 @@ public abstract class AbstractProtocol implements ProtocolHandler
 		}	
 	}
 	
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	public void fireInitStartedEvent()
+	{
+		
+		for (int index = 0; index < getEventListenerCount(); index++)
+		{
+			getEventListener(index).initStarted();
+		}
+	}
+	
+	/********************************************************
+	 * 
+	 ********************************************************/
+	public void fireInitFinishedEvent()
+	{
+		
+		for (int index = 0; index < getEventListenerCount(); index++)
+		{
+			getEventListener(index).initFinished();
+		}
+	}
+	
+	/*******************************************************
+	 * @param msg
+	 ********************************************************/
+	public void fireInitStatusEvent(String msg)
+	{
+		for (int index = 0; index < getEventListenerCount(); index++)
+		{
+			getEventListener(index).initStatus(msg);
+		}
+	}
+	
 	/*******************************************************
 	 * @param count
 	 ********************************************************/
@@ -219,14 +233,49 @@ public abstract class AbstractProtocol implements ProtocolHandler
 	/*******************************************************
 	 * 
 	 ********************************************************/
-	public void fireParemeterFetched()
+	public void fireParemeterFetchedEvent(ECUParameter p)
 	{
 		for (int index = 0; index < getEventListenerCount(); index++)
 		{
-			getEventListener(index).parameterFetched();
+			getEventListener(index).parameterFetched(p);
 		}
 	}
 
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	public void fireCommTXEvent()
+	{
+		for (int index = 0; index < getEventListenerCount(); index++)
+		{
+			getEventListener(index).commTX();
+		}
+	}
+	
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	public void fireCommRXEvent()
+	{
+		for (int index = 0; index < getEventListenerCount(); index++)
+		{
+			getEventListener(index).commRX();
+		}
+	}
+	
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	public void fireCommReady()
+	{
+		for (int index = 0; index < getEventListenerCount(); index++)
+		{
+			getEventListener(index).commReady();
+		}
+	}
 	
 	
 }

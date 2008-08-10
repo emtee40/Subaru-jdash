@@ -28,6 +28,7 @@ import waba.fx.Rect;
 import waba.ui.Button;
 import waba.ui.ControlEvent;
 import waba.ui.Event;
+import waba.ui.Label;
 import waba.ui.Window;
 
 /*********************************************************
@@ -63,7 +64,7 @@ public class AbstractWindow extends Window
 	/********************************************************
 	 * 
 	 ********************************************************/
-	public void addMainButtons()
+	public int addMainButtons()
 	{
 
 		switch (this.type_)
@@ -71,16 +72,20 @@ public class AbstractWindow extends Window
 
 			case TYPE_OK:
 				this.okButton_ = new Button("OK");
-				add(this.okButton_, LEFT + CONTROL_SPACE, BOTTOM - CONTROL_SPACE);
+				add(this.okButton_, CENTER, BOTTOM - CONTROL_SPACE);
 			break;
 			
 			case TYPE_OK_CANCEL:
 				this.okButton_ = new Button("OK");
 				this.cancelButton_ = new Button("Cancel");
-				add(this.okButton_, LEFT + CONTROL_SPACE, BOTTOM - CONTROL_SPACE);
-				add(this.cancelButton_, AFTER + CONTROL_SPACE, SAME, this.okButton_);
+				
+				add(new Label(" "), CENTER, BOTTOM - CONTROL_SPACE);
+				add(this.okButton_, BEFORE - (CONTROL_SPACE * 2), SAME);
+				add(this.cancelButton_, AFTER + (CONTROL_SPACE * 2), SAME);
 			break;
 		}
+		
+		return this.okButton_.getRect().y;
 
 	}
 	

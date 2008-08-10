@@ -200,6 +200,160 @@ public class ProfileXMLContentHandler implements ContentHandler
 	}
 	
 	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public String generateXml()
+	{
+		StringBuffer sb = new StringBuffer();
+		
+		/* Add the profile tag */
+		addOpenTag(sb, NODE_PROFILE);
+		addTagAttribute(sb, ATTR_NAME, this.profile_.getName());
+		addTagAttribute(sb, ATTR_PROTOCOL_CLASS, this.profile_.getProtocolClass());
+		closeOpenTag(sb);
+		
+		/* Add each page */
+		for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
+		{
+			ProfilePage page = this.profile_.getPage(pageIndex);
+			
+			/* Add the page tag */
+			addOpenTag(sb, NODE_PAGE);
+			closeOpenTag(sb);
+			
+			/* Add each row */
+			for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
+			{
+				ProfileRow row = page.getRow(rowIndex);
+				
+				/* Add the row tag */
+				addOpenTag(sb, NODE_ROW);
+				if (row.getHeightPercent() > 0)
+				{
+					addTagAttribute(sb, ATTR_HEIGHT, Convert.toString(row.getHeightPercent(), 4));
+				}
+				closeOpenTag(sb);
+				
+				/* Add each gauge */
+				for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
+				{
+					ProfileGauge gauge = row.getGauge(gaugeIndex);
+					addGauge(sb, gauge);
+				}
+				
+				/* close the row tag */
+				addCloseTag(sb, NODE_ROW);
+			}
+			
+			/* Close the page tag */
+			addCloseTag(sb, NODE_PAGE);
+		}
+		
+		/* Close the profile tag */
+		addCloseTag(sb, NODE_PROFILE);
+		
+		return sb.toString();
+	}
+	
+	
+	/********************************************************
+	 * @param sb
+	 * @param tag
+	 ********************************************************/
+	private void addOpenTag(StringBuffer sb, String tag)
+	{
+		if (NODE_PAGE.equals(tag))
+		{
+			sb.append("  ");
+		}
+		
+		if (NODE_ROW.equals(tag))
+		{
+			sb.append("    ");
+		}
+		
+		if (NODE_GAUGE.equals(tag))
+		{
+			sb.append("      ");
+		}
+		
+		sb.append("<" + tag);
+	}
+	
+	
+	/********************************************************
+	 * @param sb
+	 ********************************************************/
+	private void closeOpenTag(StringBuffer sb)
+	{
+		sb.append(">\n");
+	}
+	
+	/*******************************************************
+	 * @param sb
+	 * @param name
+	 * @param value
+	 ********************************************************/
+	private void addTagAttribute(StringBuffer sb, String name, String value)
+	{
+		sb.append(" " + name + "=\"" + value + "\"");
+	}
+	
+	
+	/*******************************************************
+	 * @param sb
+	 * @param tag
+	 ********************************************************/
+	private void addCloseTag(StringBuffer sb, String tag)
+	{
+		if (NODE_PAGE.equals(tag))
+		{
+			sb.append("  ");
+		}
+		
+		if (NODE_ROW.equals(tag))
+		{
+			sb.append("    ");
+		}
+		
+		if (NODE_GAUGE.equals(tag))
+		{
+			sb.append("      ");
+		}
+		
+		sb.append("</" + tag + ">\n");
+	}
+	
+
+	/*******************************************************
+	 * @param sb
+	 * @param gauge
+	 ********************************************************/
+	private void addGauge(StringBuffer sb, ProfileGauge gauge)
+	{
+		addOpenTag(sb, NODE_GAUGE);
+		
+		/* Add the type attr */
+		if (gauge instanceof DigitalGauge)
+		{
+			addTagAttribute(sb, ATTR_TYPE, VALUE_DIGITAL);
+		}
+		
+		/* Width */
+		if (gauge.getWidthPercent() > 0)
+		{
+			addTagAttribute(sb, ATTR_WIDTH, Convert.toString(gauge.getWidthPercent(), 4));
+		}
+		
+		/* Param */
+		addTagAttribute(sb, ATTR_PARAM, gauge.getParameterName());
+		
+		closeOpenTag(sb);
+		addCloseTag(sb, NODE_GAUGE);
+	}
+
+	
 	/********************************************************
 	 * 
 	 *

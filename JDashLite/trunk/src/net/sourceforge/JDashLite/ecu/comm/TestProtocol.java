@@ -36,7 +36,26 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 {
 	
 	
-	private ECUParameter[] stubbedParameters_ = null;
+	/* 
+	 * 0 = open port
+	 * 1 = init interface stage a
+	 * 2 = init interface stage b
+	 * 3 = init interface stage c
+	 * 4 = init interface stage d
+	 * 5 = init complete
+	 * 6 = begin batch
+	 * 7 = end batch
+	 */
+	private int initMode_ = 0;
+	
+	/* 0 = ready, 1 = TX, 2 = RS */
+	private int RxTxMode_ = 0; 
+	
+	
+	
+	private StubbedParameter[] stubbedParameters_ = null;
+	
+	private int prevEventTS_ = 0;
 	
 	/********************************************************
 	 * 
@@ -44,7 +63,7 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	public TestProtocol(ProtocolHandler primaryHandler)
 	{
 		
-		this.stubbedParameters_ = new ECUParameter[primaryHandler.getSupportedParameters().length];
+		this.stubbedParameters_ = new StubbedParameter[primaryHandler.getSupportedParameters().length];
 		
 		/* Setup our stubbed parameters */
 		for (int index = 0; index < primaryHandler.getSupportedParameters().length; index++)
@@ -70,13 +89,76 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	 ********************************************************/
 	public void doTask()
 	{
-		fireBeginParameterBatchEvent(1);
-		
-		/* Do Nothing */
-		Vm.sleep(150);
 		
 		
-		fireEndParameterBatchEvent();
+		if (Vm.getTimeStamp() - 400 < this.prevEventTS_)
+		{
+			return;
+		}
+		
+		this.prevEventTS_ = Vm.getTimeStamp();
+		
+		switch(this.initMode_)
+		{
+			
+			/* Open Port */
+			case 0:
+				fireInitStartedEvent();
+				this.initMode_++;
+			break;
+			
+			/* Init A */
+			case 1:
+				fireInitStatusEvent("Init.   ");
+				this.initMode_++;
+			break;
+			
+			/* Init B */
+			case 2:
+				fireInitStatusEvent("Init..  ");
+				this.initMode_++;
+			break;
+			
+			/* Init C */
+			case 3:
+				fireInitStatusEvent("Init... ");
+				this.initMode_++;
+			break;
+			
+			/* Init D */
+			case 4:
+				fireInitStatusEvent("Init....");
+				this.initMode_++;
+			break;
+			
+			/* Init Complete */
+			case 5:
+				fireInitFinishedEvent();
+				this.initMode_++;
+			break;
+			
+			/* Param Fetch Mode */
+			case 6:
+				fireBeginParameterBatchEvent(getSupportedParameters().length);
+				this.initMode_++;
+			break;
+				
+			case 7:
+				for (int index = 0; index < getSupportedParameters().length; index++)
+				{
+					this.stubbedParameters_[index].value_ += 15.3;
+					fireParemeterFetchedEvent(this.stubbedParameters_[index]);
+				}
+				this.initMode_++;
+			break;
+				
+			case 8:
+				fireEndParameterBatchEvent();
+				this.initMode_ = 6;
+			break;
+			
+		}
+		
 	}
 
 
@@ -86,6 +168,8 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	 ********************************************************/
 	public boolean connect()
 	{
+		
+		this.initMode_ = 0;
 		return true;
 	}
 	
@@ -97,7 +181,7 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	 *********************************************************/
 	private static class StubbedParameter extends ECUParameter
 	{
-		private double value_ = 1.0;
+		public double value_ = 1.0;
 		
 		/********************************************************
 		 * 
@@ -113,7 +197,6 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 		 ********************************************************/
 		public double getValue()
 		{
-			this.value_ = this.value_ + 15.2;
 			return this.value_;
 		}
 	}

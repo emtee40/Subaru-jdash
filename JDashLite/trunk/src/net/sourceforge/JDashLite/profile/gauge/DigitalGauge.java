@@ -26,23 +26,23 @@ package net.sourceforge.JDashLite.profile.gauge;
 
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
+import net.sourceforge.JDashLite.profile.color.ColorModel;
 import waba.fx.Font;
 import waba.fx.Graphics;
 import waba.fx.Rect;
+import waba.sys.Convert;
 
 /*********************************************************
  * 
  *
  *********************************************************/
-public class DigitalGauge extends AbstractGauge
+public class DigitalGauge extends ProfileGauge
 {
+	
+	private double LABEL_HEIGHT = 0.2;
 
-	/* The name of the ECU Parameter whos value wil be displayed */
-	private String parameterName_ = null;
-	
 	/* The default number of decimal places to show */
-	private int decimalPlaces_ = 2;
-	
+	private int decimalPrecision_ = 0;
 	
 	/********************************************************
 	 * 
@@ -51,54 +51,55 @@ public class DigitalGauge extends AbstractGauge
 	{
 	}
 	
-	/********************************************************
-	 * @return the parameterName
-	 ********************************************************/
-	public String getParameterName()
-	{
-		return this.parameterName_;
-	}
-	
-	
-	/********************************************************
-	 * @param parameterName the parameterName to set
-	 ********************************************************/
-	public void setParameterName(String parameterName)
-	{
-		if (parameterName == null)
-		{
-			throw new RuntimeException("Can't create a digital gauge with a null parameter name");
-		}
-		this.parameterName_ = parameterName;
-	}
-	
 	
 	/********************************************************
 	 * @return the decimalPlaces
 	 ********************************************************/
-	public int getDecimalPlaces()
+	public int getDecimalPrecision()
 	{
-		return this.decimalPlaces_;
+		return this.decimalPrecision_;
 	}
 	
 	
 	/********************************************************
 	 * @param decimalPlaces the decimalPlaces to set
 	 ********************************************************/
-	public void setDecimalPlaces(int decimalPlaces)
+	public void setDecimalPrecision(int decimalPrecision)
 	{
-		this.decimalPlaces_ = decimalPlaces;
+		this.decimalPrecision_ = decimalPrecision;
 	}
+
 	
+
 	
 	/*********************************************************
 	 * (non-Javadoc)
-	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect)
+	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r) throws Exception
+	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm)
 	{
-		Font f = ProfileRenderer.findFontBestFitHeight(r.height);
+
+		/* Blank the gauge first */
+		g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
+		g.setBackColor(cm.get(ColorModel.DEFAULT_BACKGROUND));
+		g.fillRect(r.x, r.y, r.width, r.height);
+		g.drawRect(r.x, r.y, r.width, r.height);
+		
+		g.setForeColor(cm.get(ColorModel.DEFAULT_TEXT));
+		
+		Font f = null;
+		if (getLabel() != null)
+		{
+			f = ProfileRenderer.findFontBestFitHeight((int)(r.height * LABEL_HEIGHT));
+			g.setFont(f);
+			g.drawText(getLabel(), r.x + ((r.width - f.fm.getTextWidth(getLabel())) / 2), r.y + r.height - f.fm.height - 1);
+		}
+		
+		/* Draw the current value */
+		f = ProfileRenderer.findFontBestFitHeight((int)(r.height - LABEL_HEIGHT));
 		g.setFont(f);
-		g.drawText(this.getParameterName(), r.x, r.y);
+		String val = Convert.toString(p.getValue(), getDecimalPrecision());
+		g.drawText(val, r.x + ((r.width - f.fm.getTextWidth(val)) / 2), r.y + ((r.height - f.fm.height) / 2));
+			
 	}
 }

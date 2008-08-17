@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDashLite.profile;
 
 import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
+import net.sourceforge.JDashLite.profile.color.ColorModel;
+import net.sourceforge.JDashLite.profile.color.DefaultColorModel;
+import waba.fx.Color;
 import waba.util.Vector;
 
 /*********************************************************
@@ -69,14 +72,21 @@ public class Profile
 {
 
 	public static final String SAMPLE_PROFILE_XML =
-" <profile name=\"Sample Profile 2\" protocolClass=\"" + ELMProtocol.class.getName() +  "\"> " +
+" <profile name=\"Sample Profile\" protocolClass=\"" + ELMProtocol.class.getName() +  "\"> " +
 "   <page> " +
-"     <row" +
-"       <gauge type=\"digital\" param=\"RPM\"/> " +
+"     <row>" +
+"		<gauge type=\"line-graph\" param=\"RPM\" width=\"0.5\"/>" +
+"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"800\"/> " +
 "     </row> " +
 "     <row> " +
-"       <gauge type=\"digital\" param=\"STFT1" + "\"/> " +
-"       <gauge type=\"digital\" param=\"LTFT1\"/> " +
+"		<gauge type=\"line-graph\" param=\"STFT\"/>" +
+"       <gauge type=\"analog\" param=\"STFT1\" label=\"STFT\" precision=\"2\" range-start=\"-30\" range-end=\"30\"/> " +
+"       <gauge type=\"digital\" param=\"STFT1\" precision=\"2\" label=\"STFT%\"/> " +
+"     </row> " +
+"     <row> " +
+"		<gauge type=\"line-graph\" param=\"LTFT\" width=\"0.3\" precision=\"2\"/>" +
+"       <gauge type=\"analog\" param=\"LTFT1\" width=\"0.4\" label=\"STFT\" precision=\"2\" range-start=\"-30\" range-end=\"30\"/> " +
+"       <gauge type=\"digital\" param=\"LTFT1\" precision=\"2\" label=\"LTFT%\"/> " +
 "     </row> " +
 "   </page> " +
 "	<page> " +
@@ -88,7 +98,6 @@ public class Profile
 " </profile> ";
 		
 
-	
 	/* The unique name of this profile */
 	private String name_ = null;
 	
@@ -101,15 +110,18 @@ public class Profile
 	/* The list of parameters added to this profile */
 	private Vector parameterNames_ = new Vector(4);
 	
+	/* The rendering color model */
+	private ColorModel colorModel_ = ColorModel.DEFAULT_COLOR_MODEL;
+	
 	/********************************************************
 	 * Create a new, empty profile.
 	 *******************************************************/
 	public Profile()
 	{
-	// TODO
-		this.parameterNames_.addElement("RPM");
-		this.parameterNames_.addElement("STFT1");
-		this.parameterNames_.addElement("LTFT1");
+//	// TODO
+//		this.parameterNames_.addElement("RPM");
+//		this.parameterNames_.addElement("STFT1");
+//		this.parameterNames_.addElement("LTFT1");
 		
 	}
 	
@@ -130,6 +142,7 @@ public class Profile
 	 ********************************************************/
 	public void loadFromXml(String xml) throws Exception
 	{
+		
 		ProfileXMLContentHandler contentHandler = new ProfileXMLContentHandler(this);
 		contentHandler.parse(xml);
 		
@@ -225,6 +238,14 @@ public class Profile
 	}
 	
 	/********************************************************
+	 * 
+	 ********************************************************/
+	public void removeAllPages()
+	{
+		this.pages_.removeAllElements();
+	}
+	
+	/********************************************************
 	 * @return
 	 ********************************************************/
 	public int getParameterCount()
@@ -242,4 +263,15 @@ public class Profile
 		return (String)this.parameterNames_.items[index];
 	}
 	
+	
+	/********************************************************
+	 * Given one of the CLR_xxx codes, this method will
+	 * return the color associated with it.
+	 * @param colorCode
+	 * @return
+	 ********************************************************/
+	public ColorModel getColorModel()
+	{
+		return this.colorModel_;
+	}
 }

@@ -48,6 +48,14 @@ public class ListeningMenuItem extends MenuItem
 	
 	
 	/*******************************************************
+	 * 
+	 *******************************************************/
+	public ListeningMenuItem(String caption, boolean checked)
+	{
+		super(caption, checked);
+	}
+	
+	/*******************************************************
 	 * @param l
 	 ********************************************************/
 	public void setActionListener(MenuActionListener l)
@@ -62,7 +70,7 @@ public class ListeningMenuItem extends MenuItem
 	{
 		if (this.actionListener_ != null)
 		{
-			this.actionListener_.actionPerformed(this.actionListener_.ref_);
+			this.actionListener_.actionPerformed(this.actionListener_.listenerReferenceObject_);
 		}
 	}
 	
@@ -73,10 +81,11 @@ public class ListeningMenuItem extends MenuItem
 	 *********************************************************/
 	public abstract static class MenuActionListener
 	{
-		protected Object ref_ = null;
+		public Object listenerReferenceObject_ = null;
+		
 		public MenuActionListener(Object ref)
 		{
-			this.ref_ = ref;
+			this.listenerReferenceObject_ = ref;
 		}
 		
 		public MenuActionListener()

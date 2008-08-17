@@ -36,6 +36,7 @@ import net.sourceforge.JDashLite.profile.ProfileRenderer;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Graphics;
+import waba.sys.Convert;
 import waba.sys.Vm;
 import waba.ui.ControlEvent;
 import waba.ui.Event;
@@ -144,11 +145,15 @@ public class JDashLiteMainWindow extends GameEngine
 			try
 			{
 				
+				/* Set the last active profile */
+				doSetActiveProfile(getPreferences().getInt(Preferences.KEY_ACTIVE_PROFILE, 0));
+				
 				/* Setup and Keep the menu bar reference for convinence */
 				this.menuItems_ = createMenuItems();
 				this.menuBar_ = new MenuBar(this.menuItems_);
 				setMenuBar(this.menuBar_);
 				
+// TODO
 //				/* Set the active profile.. to active!! */
 //				doSetActiveProfile(this.activeProfile_);
 
@@ -318,12 +323,13 @@ public class JDashLiteMainWindow extends GameEngine
 				try
 				{
 					p.loadFromXml(getPreferences().getProfile(index));
-					profileMenu[++menuIndex] = new ListeningMenuItem(p.getName());
-					profileMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+					profileMenu[++menuIndex] = new ListeningMenuItem(p.getName(), getPreferences().getInt(Preferences.KEY_ACTIVE_PROFILE, -1) == index);
+					profileMenu[menuIndex].isChecked = false;
+					profileMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener(""+index)
 					{
-						public void actionPerformed(Object ref)
+						public void actionPerformed(Object profileId)
 						{
-							System.out.println("Set Profile");
+							doSetActiveProfile(Convert.toInt(profileId.toString()));
 						}
 					});
 				}
@@ -422,6 +428,7 @@ public class JDashLiteMainWindow extends GameEngine
 		{
 			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage()+1);
 		}
+		
 	}
 	
 	
@@ -498,6 +505,14 @@ public class JDashLiteMainWindow extends GameEngine
 		PreferencesWindow prefs = new PreferencesWindow(getPreferences());
 		prefs.popupBlockingModal();
 		
+		/* Rebuild the preferences menu */
+		if (prefs.getButtonPressedCode() == PreferencesWindow.BUTTON_OK)
+		{
+			this.menuItems_ = createMenuItems();
+			this.menuBar_ = new MenuBar(this.menuItems_);
+			setMenuBar(this.menuBar_);
+		}
+		
 		/* Re-Initialize the Logger instance */
 		ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL,  ErrorLog.LOG_LEVEL_OFF));
 
@@ -506,6 +521,11 @@ public class JDashLiteMainWindow extends GameEngine
 		{
 			this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
 		}
+
+		
+		/* re-enable/disable active params */
+		this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
+		
 
 	}
 	
@@ -531,38 +551,52 @@ public class JDashLiteMainWindow extends GameEngine
 	 * Take the provided profile object, and set it 
 	 * @param p
 	 ********************************************************/
-	private void doSetActiveProfile(Profile p) throws Exception
+	private void doSetActiveProfile(int profileIndex)
 	{
 		
-		/* Disconnect any active connection and protocol handler */
-		doDisconnect();
-		
-		this.activeProfile_ = p;
-		getPreferences().setString(Preferences.KEY_ACTIVE_PROFILE, this.activeProfile_.getName());
-		
-		
-		/* Release any resources */
-		
-		/* Create a new profile display container, But, you'll notice we dont' add it. Because
-		 * we are not acutally using any GUI components.  This is display ONLY */
-		this.profileRenderer_ = new ProfileRenderer(this.activeProfile_);
-		
-		
-		/* create the protocol handler  */
-		this.protocolHandler_ = ((ProtocolHandler)Class.forName(this.activeProfile_.getProtocolClass()).newInstance());
-		
-		/* But.. is this TEST mode? */
-		if (getPreferences().getInt(Preferences.KEY_TEST_MODE, 0) == 1)
+		if ((profileIndex < 0) || (profileIndex >= getPreferences().getProfileCount()))
 		{
-			this.protocolHandler_ = new TestProtocol(this.protocolHandler_);
+			return;
 		}
+		
+		try
+		{
+			/* remember the active profile in our preferences */
+			getPreferences().setInt(Preferences.KEY_ACTIVE_PROFILE, profileIndex);
+			
+			Profile p = new Profile();
+			p.loadFromXml(getPreferences().getProfile(profileIndex));
+			
+			/* Disconnect any active connection and protocol handler */
+			doDisconnect();
 
-		/* Give the list of parameters to the renderer */
-		this.profileRenderer_.setParameters(this.protocolHandler_.getSupportedParameters());
-		
-		/* Add the profile render event listener.  This forces refreshes when the protocol handler fetches a batch */
-		this.protocolHandler_.addProtocolEventListener(this.profileRenderer_.getEventAdapter());
-		
+			/* Remember the now active profile */
+			this.activeProfile_ = p;
+			
+			/* create the protocol handler  */
+			this.protocolHandler_ = ((ProtocolHandler)Class.forName(this.activeProfile_.getProtocolClass()).newInstance());
+
+			/* But.. is this TEST mode? */
+			if (getPreferences().getInt(Preferences.KEY_TEST_MODE, 0) == 1)
+			{
+				this.protocolHandler_ = new TestProtocol(this.protocolHandler_);
+			}
+	
+			/* Create a new profile display container, But, you'll notice we dont' add it. Because
+			 * we are not acutally using any GUI components.  This is display ONLY */
+			this.profileRenderer_ = new ProfileRenderer(this.activeProfile_, this.protocolHandler_);
+			this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
+			
+			/* Add the profile render event listener.  This forces refreshes when the protocol handler fetches a batch */
+			this.protocolHandler_.addProtocolEventListener(this.profileRenderer_.getEventAdapter());
+			
+			
+		}
+		catch(Exception e)
+		{
+			ErrorLog.error("Error setting profle: " + profileIndex, e);
+			ErrorDialog.showError("Unexpected Error", e);
+		}
 	
 	}
 	

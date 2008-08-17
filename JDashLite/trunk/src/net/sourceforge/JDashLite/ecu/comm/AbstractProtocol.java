@@ -24,8 +24,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.ecu.comm;
 
+import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import waba.io.SerialPort;
+import waba.sys.Vm;
 import waba.util.Vector;
 
 /*********************************************************
@@ -40,12 +42,87 @@ public abstract class AbstractProtocol implements ProtocolHandler
 	private SerialPort serialPort_ = null;
 	private Vector eventListeners_ = new Vector(1);
 	
+	
+	/* The current ELM stage */
+	private int currentStage_ = -1;
+	
+	/* The current TX/RX mode */
+	private int currentMode_ = -1;
+	
+
+	/* The operation timer */
+	private int opTimeLimit_ = 0;
+	private int opTimeStart_ = 0;
+	
 	/********************************************************
 	 * 
 	 *******************************************************/
 	public AbstractProtocol()
 	{
 		
+	}
+	
+	/********************************************************
+	 * @param stage
+	 * @param mode
+	 ********************************************************/
+	protected void setStageAndMode(int stage, int mode)
+	{
+		setStage(stage);
+		setMode(mode);
+	}
+	
+	/*******************************************************
+	 * @param stage
+	 ********************************************************/
+	protected void setStage(int stage)
+	{
+		this.currentStage_ = stage;
+	}
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	protected int getStage()
+	{
+		return this.currentStage_;
+	}
+	
+	/*******************************************************
+	 * @param mode
+	 ********************************************************/
+	protected void setMode(int mode)
+	{
+		this.currentMode_ = mode;
+	}
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	protected int getMode()
+	{
+		return this.currentMode_;
+	}
+	
+	/*******************************************************
+	 * This method will reset the current time holder, and 
+	 * keep track of the t value passed in.  Calls to
+	 * isOperationTimerExpired() will compare if the time
+	 * elapsed is over the t value.
+	 * @param t
+	 ********************************************************/
+	protected void setOperationTimer(int timeLimit)
+	{
+		this.opTimeStart_ = Vm.getTimeStamp();
+		this.opTimeLimit_ = timeLimit;
+	}
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	protected boolean isOperationTimerExpired()
+	{
+		return (this.opTimeStart_ + this.opTimeLimit_) < Vm.getTimeStamp();
 	}
 	
 	/*******************************************************

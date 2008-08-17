@@ -32,6 +32,7 @@ package net.sourceforge.JDashLite.config;
 public class ListItem
 {
 	private int id_ = 0;
+	private String strId_ = null;
 	private String label_ = null;
 	
 	/*******************************************************
@@ -43,6 +44,17 @@ public class ListItem
 		this.id_ = id;
 		this.label_ = label;
 	}
+	
+	
+	/*******************************************************
+	 * @param id IN - uses it's hash code and calls this(id, label).
+	 * @param label
+	 *******************************************************/
+	public ListItem(String id, String label)
+	{
+		this(id.hashCode(), label);
+		this.strId_ = id;
+	}
 
 	/********************************************************
 	 * @return the id
@@ -50,6 +62,15 @@ public class ListItem
 	public int getId()
 	{
 		return this.id_;
+	
+	}
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public String getStringId()
+	{
+		return this.strId_;
 	}
 	
 	/********************************************************
@@ -103,4 +124,33 @@ public class ListItem
 		return -1;
 	}
 	
+	
+	/********************************************************
+	 * @param items
+	 * @param id
+	 * @return
+	 ********************************************************/
+	public static ListItem findItem(ListItem[] items, String id)
+	{
+		if (id == null)
+		{
+			return null;
+		}
+		return ListItem.findItem(items, id.hashCode());
+	}
+	
+	
+	/********************************************************
+	 * @param items
+	 * @param id
+	 * @return
+	 ********************************************************/
+	public static int findItemIndex(ListItem[] items, String id)
+	{
+		if (id == null)
+		{
+			return -1;
+		}
+		return ListItem.findItemIndex(items, id.hashCode());
+	}
 }

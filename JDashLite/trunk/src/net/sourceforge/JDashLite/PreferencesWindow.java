@@ -28,12 +28,9 @@ import net.sourceforge.JDashLite.config.ListItem;
 import net.sourceforge.JDashLite.config.Preferences;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
-import waba.fx.Rect;
 import waba.io.SerialPort;
 import waba.ui.ComboBox;
 import waba.ui.Container;
-import waba.ui.ControlEvent;
-import waba.ui.Event;
 import waba.ui.Label;
 import waba.ui.MainWindow;
 import waba.ui.TabPanel;
@@ -68,15 +65,6 @@ public class PreferencesWindow extends AbstractWindow
 		new ListItem(0, "No")
 	};
 	
-//	private static final ListItem[] LOGLEVEL_LIST = new ListItem[]
-//	{
-//		new ListItem(0, ErrorLog.LOG_LEVEL_OFF),
-//		new ListItem(1, ErrorLog.LOG_LEVEL_INFO),
-//		new ListItem(2, ErrorLog.LOG_LEVEL_WARNING),
-//		new ListItem(3, ErrorLog.LOG_LEVEL_ERROR),
-//		new ListItem(4, ErrorLog.LOG_LEVEL_FATAL),
-//		new ListItem(5, ErrorLog.LOG_LEVEL_DEBUG),
-//	};
 	
 	private ComboBox guiStyleComboBox_ = null;
 	private ComboBox portComboBox_ = null;
@@ -111,8 +99,7 @@ public class PreferencesWindow extends AbstractWindow
 	protected void onPopup()
 	{
 		this.highResPrepared = true;
-		waba.sys.Settings.keyboardFocusTraversable = true;
-
+//
 		/* Add the main buttons now */
  		int buttonTop = this.addMainButtons();
 
@@ -202,30 +189,46 @@ public class PreferencesWindow extends AbstractWindow
 	 ********************************************************/
 	public void okPressed()
 	{
-		boolean requireRestart = false;
-
-		/* Check if a restart is needed to affect a settings chagne */
-		if (this.prefs_.getInt(Preferences.KEY_GUI_STYLE, -1) != ((ListItem)this.guiStyleComboBox_.getSelectedItem()).getId())
+		try
 		{
-			requireRestart = true;
-		}
+			boolean requireRestart = false;
+	
+			/* Check if a restart is needed to affect a settings chagne */
+			if ((this.prefs_.getInt(Preferences.KEY_GUI_STYLE, -1) != ((ListItem)this.guiStyleComboBox_.getSelectedItem()).getId()) ||
+				(this.prefs_.getInt(Preferences.KEY_TEST_MODE, -1) != ((ListItem)this.testModeComboBox_.getSelectedItem()).getId()))
+			{
+				requireRestart = true;
+			}
+				
+			/* Pull in all the editable settings */
+			this.prefs_.setInt(Preferences.KEY_GUI_STYLE, ((ListItem)this.guiStyleComboBox_.getSelectedItem()).getId());
+			this.prefs_.setInt(Preferences.KEY_COM_PORT, ((ListItem)this.portComboBox_.getSelectedItem()).getId());
+			this.prefs_.setInt(Preferences.KEY_AUTO_CONNET, ((ListItem)this.autoConnectComboBox_.getSelectedItem()).getId());
+			this.prefs_.setInt(Preferences.KEY_DISPLAYED_SENSORS, ((ListItem)this.scanDisplayedOnlyComboBox_.getSelectedItem()).getId());
+			this.prefs_.setInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, ((ListItem)this.disableAutoOffComboBox_.getSelectedItem()).getId());
+			this.prefs_.setInt(Preferences.KEY_TEST_MODE, ((ListItem)this.testModeComboBox_.getSelectedItem()).getId());
+			this.prefs_.setString(Preferences.KEY_LOG_LEVEL, this.logLevel_.getSelectedItem().toString());
 			
-		this.prefs_.setInt(Preferences.KEY_GUI_STYLE, ((ListItem)this.guiStyleComboBox_.getSelectedItem()).getId());
-		this.prefs_.setInt(Preferences.KEY_COM_PORT, ((ListItem)this.portComboBox_.getSelectedItem()).getId());
-		this.prefs_.setInt(Preferences.KEY_AUTO_CONNET, ((ListItem)this.autoConnectComboBox_.getSelectedItem()).getId());
-		this.prefs_.setInt(Preferences.KEY_DISPLAYED_SENSORS, ((ListItem)this.scanDisplayedOnlyComboBox_.getSelectedItem()).getId());
-		this.prefs_.setInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, ((ListItem)this.disableAutoOffComboBox_.getSelectedItem()).getId());
-		this.prefs_.setInt(Preferences.KEY_TEST_MODE, ((ListItem)this.testModeComboBox_.getSelectedItem()).getId());
-		this.prefs_.setString(Preferences.KEY_LOG_LEVEL, this.logLevel_.getSelectedItem().toString());
-		this.profilesContainer_.save();
-		this.prefs_.save();
-		
-		if (requireRestart)
+			/* Tell the profiles container to save it's changes */
+			this.profilesContainer_.save();
+			
+			/* Save the preferences to the PDB */
+			this.prefs_.save();
+			
+			/* Notify if a restart is needed */
+			if (requireRestart)
+			{
+				ErrorDialog.showInfo("Restart required|for changes to take affect");
+			}
+			
+			unpop();
+		}
+		catch(Exception e)
 		{
-			ErrorDialog.showInfo("Restart required|for changes to take affect");
+			ErrorLog.error("Preferences Save Error", e);
+			ErrorDialog.showError("Unable to save preferences", e);
 		}
 		
-		unpop();
 	}
 	
 	/*********************************************************

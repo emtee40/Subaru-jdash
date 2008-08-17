@@ -34,17 +34,25 @@ package net.sourceforge.JDashLite.ecu.comm.ELM;
 public final class AllParameters
 {
 	
+	
+	/** Load **/
+	public static class PID extends ELMParameter
+	{
+		public PID() { super("PIDs", 1, 0x00, 4); }
+		public double getValue() { return 0; }
+	}
+	
 	/** Load **/
 	public static class Load extends ELMParameter
 	{
-		public Load() { super("Load", 1, 0x04, 1); }
+		public Load() { super("LOAD", 1, 0x04, 1); }
 		public double getValue() { return getResponseDouble(0) * 100.0 / 255.0; }
 	}
 	
 	/** Coolant **/
 	public static class Coolant extends ELMParameter
 	{
-		public Coolant() { super("Coolant Temp", 1, 0x05, 1); }
+		public Coolant() { super("COOLANT_TEMP_C", 1, 0x05, 1); }
 		public double getValue() { return getResponseDouble(0) - 40.0; }
 	}
 	

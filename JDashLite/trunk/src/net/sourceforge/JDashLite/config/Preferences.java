@@ -71,29 +71,21 @@ public class Preferences
 	
 	
 	/********************************************************
-	 * returns the number of profiles in the options 
+	 * returns the number of profiles in the options .  This method
+	 * fetches and counts at EACH call,  So, to maximize performance,
+	 * call this method, and retain it's value.
 	 * @return
 	 ********************************************************/
 	public int getProfileCount()
 	{
-		int count = 0;
-		
-		Vector keys = this.appOptions_.getKeys();
-		
-		for (int index = 0; index < keys.size(); index++)
-		{
-			String key = (String)keys.items[index];
-			if (key.startsWith(KEY_PROFILE_PREFIX))
-			{
-				count++;
-			}
-		}
-		
-		return count;
+		return getProfileKeys().size();
 	}
 	
 	
 	/*******************************************************
+	 * This method fetches, sorts and returns the list of keys
+	 * at each call.  So, to maximize performance, call this method and
+	 * retain it's value.
 	 * @return
 	 ********************************************************/
 	public Vector getProfileKeys()
@@ -112,10 +104,15 @@ public class Preferences
 			}
 		}
 		
+		/* Sort the profile keys */
+		profileKeys.qsort();
+		
 		return profileKeys;
 	}
+
 	
 	/*******************************************************
+	 * 
 	 * @param index
 	 * @return
 	 ********************************************************/
@@ -130,6 +127,21 @@ public class Preferences
 	}
 	
 	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	public void deleteAllProfiles()
+	{
+		Vector keys = getProfileKeys();
+		
+		/* Delete all existing profiles in the prefs object */
+		for (int index = 0; index < keys.size(); index++)
+		{
+			this.appOptions_.remove((String)keys.items[index]);
+		}
+	}
+	
+	
 	/********************************************************
 	 * Add the profile to the options
 	 * @param profile
@@ -138,54 +150,21 @@ public class Preferences
 	{
 		
 		Vector keys = getProfileKeys();
-		int[] keyIds = new int[keys.size()];
 		String key = null;
+		int highestKey = 0;
 		
 		/* Create an array of key IDs */
 		for (int index = 0; index < keys.size(); index++)
 		{
 			key = (String)keys.items[index];
-			key = key.substring(key.lastIndexOf('.'), key.length());
-			keyIds[index] = Convert.toInt(key);
+			key = key.substring(key.lastIndexOf('.') + 1, key.length());
+			highestKey = Math.max(highestKey, Convert.toInt(key));
 		}
 		
-		
-		/* Now, we can't know the order they keys are presented to us. so
-		 * since the number of profiles should be quite small, we'll use the brute force
-		 * method to find an available  ID */
-		int freeId = -1;
-		
-		/* We'll look at each int from 0 - 999 */
-		for (int index = 0; index < 999; index++)
-		{
-			freeId = index;
-			
-			/* See if any key yet is using this Id */
-			for (int idIndex = 0; idIndex < keyIds.length; idIndex++)
-			{
-				if (keyIds[idIndex] == index)
-				{
-					freeId = -1;
-					break;
-				}
-			}
-			
-			/* If the freeId is -1, then the proposed ID is in use, keep going */
-			if (freeId != -1)
-			{
-				break;
-			}
-		}
-		
-		
-		/* We SHOULD now have a free ID to use */
-		if (freeId == -1)
-		{
-			throw new Exception("Could not add profile, unable to generate a unique storagfe ID");
-		}
 		
 		/* Save the profile */
-		setString(KEY_PROFILE_PREFIX + freeId, profile);
+		key = KEY_PROFILE_PREFIX + (highestKey + 1);
+		setString(key, profile);
 		
 	}
 	
@@ -226,6 +205,28 @@ public class Preferences
 		
 		setString((String)keys.items[index], profile);
 		
+	}
+	
+	
+	/********************************************************
+	 * Swap the positions of the provided profile indexes
+	 * @param index1
+	 * @param index2
+	 ********************************************************/
+	public void swapProfiles(int index1, int index2)
+	{
+		String profile1 = getProfile(index1);
+		String profile2 = getProfile(index2);
+		updateProfile(index1, profile2);
+		updateProfile(index2, profile1);
+	}
+	
+	/*******************************************************
+	 * @param key
+	 ********************************************************/
+	public void remove(String key)
+	{
+		this.appOptions_.remove(key);
 	}
 	
 	/******************************************************
@@ -350,6 +351,14 @@ public class Preferences
 		if (v instanceof Properties.Boolean)
 		{
 			return ((Properties.Boolean)v).value;
+		}
+		else if (v instanceof Properties.Int)
+		{
+			return ((Properties.Int)v).value == 1;
+		}
+		else if (v instanceof Properties.Str)
+		{
+			return "true".equalsIgnoreCase(((Properties.Str)v).value);
 		}
 		else
 		{

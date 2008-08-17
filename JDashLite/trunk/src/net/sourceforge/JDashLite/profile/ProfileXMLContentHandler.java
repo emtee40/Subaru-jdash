@@ -24,7 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.profile;
 
+import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
 import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
+import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
 import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
 import superwaba.ext.xplat.xml.AttributeList;
 import superwaba.ext.xplat.xml.ContentHandler;
@@ -50,8 +52,14 @@ public class ProfileXMLContentHandler implements ContentHandler
 	public static final String ATTR_PARAM			= "param";
 	public static final String ATTR_HEIGHT			= "height";
 	public static final String ATTR_WIDTH			= "width";
+	public static final String ATTR_PRECISION		= "precision";
+	public static final String ATTR_LABEL			= "label";
+	public static final String ATTR_RANGE_START		= "range-start";
+	public static final String ATTR_RANGE_END		= "range-end";
 	
 	public static final String VALUE_DIGITAL		= "digital";
+	public static final String VALUE_LINE_GRAPH		= "line-graph";
+	public static final String VALUE_ANALOG			= "analog";
 	
 	private static int TAG_PROFILE 	= 0;
 	private static int TAG_PAGE 	= 0;
@@ -85,6 +93,7 @@ public class ProfileXMLContentHandler implements ContentHandler
 			TAG_GAUGE = xmlReader.getTagCode(NODE_GAUGE);
 		}
 		
+//		ErrorLog.debug("Loading Profile\n" + xmlString);
 		xmlReader.parse(xmlString.getBytes(), 0, xmlString.length());
 	}
 	
@@ -165,14 +174,29 @@ public class ProfileXMLContentHandler implements ContentHandler
 	private ProfileGauge createGauge(AttributeList atts)
 	{
 		String type = atts.getAttributeValue(ATTR_TYPE);
-		
 		ProfileGauge gauge = null;
+
 		
 		if (VALUE_DIGITAL.equals(type))
 		{
 			gauge = createDigitalGauge(atts);
 		}
-
+		else if (VALUE_LINE_GRAPH.equals(type))
+		{
+			gauge = createLineGraphGauge(atts);
+		}
+		else if (VALUE_ANALOG.equals(type))
+		{
+			gauge = createAnalogGauge(atts);
+		}
+		else
+		{
+			throw new RuntimeException("Invalid Gauge Type " + type);
+		}
+		
+		/* All gauges have a parameter name */
+		gauge.setParameterName(atts.getAttributeValue(ATTR_PARAM));
+		
 		/* Set the width */
 		if (gauge != null)
 		{
@@ -182,6 +206,9 @@ public class ProfileXMLContentHandler implements ContentHandler
 				gauge.setWidthPercent(Convert.toDouble(height));
 			}
 		}
+		
+		/* Not all gauges have a label, but it's supported in the base ProfileGauge class */
+		gauge.setLabel(atts.getAttributeValue(ATTR_LABEL));
 		
 		return gauge;
 	}
@@ -195,7 +222,48 @@ public class ProfileXMLContentHandler implements ContentHandler
 	{
 		
 		DigitalGauge gauge = new DigitalGauge();
-		gauge.setParameterName(atts.getAttributeValue(ATTR_PARAM));
+		String prec = atts.getAttributeValue(ATTR_PRECISION);
+
+		if ((prec != null && prec.length() > 0))
+		{
+			gauge.setDecimalPrecision(Convert.toInt(prec));
+		}
+
+		return gauge;
+	}
+	
+	
+	/*******************************************************
+	 * @param atts
+	 * @return
+	 ********************************************************/
+	private AnalogGauge createAnalogGauge(AttributeList atts)
+	{
+		AnalogGauge gauge = new AnalogGauge();
+		
+		String prec = atts.getAttributeValue(ATTR_PRECISION);
+		String rangeStart = atts.getAttributeValue(ATTR_RANGE_START);
+		String rangeEnd = atts.getAttributeValue(ATTR_RANGE_END);
+
+		if ((prec != null && prec.length() > 0))
+		{
+			gauge.setDecimalPrecision(Convert.toInt(prec));
+		}
+		
+		gauge.setRangeStart(Convert.toDouble(rangeStart));
+		gauge.setRangeEnd(Convert.toDouble(rangeEnd));
+		
+		return gauge;
+	}
+	
+	/*******************************************************
+	 * @param atts
+	 * @return
+	 ********************************************************/
+	private LineGraphGauge createLineGraphGauge(AttributeList atts)
+	{
+		
+		LineGraphGauge gauge = new LineGraphGauge();
 		return gauge;
 	}
 	
@@ -334,10 +402,28 @@ public class ProfileXMLContentHandler implements ContentHandler
 	{
 		addOpenTag(sb, NODE_GAUGE);
 		
-		/* Add the type attr */
+		/* Digital */
 		if (gauge instanceof DigitalGauge)
 		{
+			DigitalGauge g = (DigitalGauge)gauge;
 			addTagAttribute(sb, ATTR_TYPE, VALUE_DIGITAL);
+			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
+		}
+		
+		/* Line Graph */
+		if (gauge instanceof LineGraphGauge)
+		{
+			addTagAttribute(sb, ATTR_TYPE, VALUE_LINE_GRAPH);
+		}
+		
+		/* Analog */
+		if (gauge instanceof AnalogGauge)
+		{
+			AnalogGauge g = (AnalogGauge)gauge;
+			addTagAttribute(sb, ATTR_TYPE, VALUE_ANALOG);
+			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
+			addTagAttribute(sb, ATTR_RANGE_START, Convert.toString(g.getRangeStart()));
+			addTagAttribute(sb, ATTR_RANGE_END, Convert.toString(g.getRangeEnd()));
 		}
 		
 		/* Width */
@@ -348,6 +434,9 @@ public class ProfileXMLContentHandler implements ContentHandler
 		
 		/* Param */
 		addTagAttribute(sb, ATTR_PARAM, gauge.getParameterName());
+		
+		/* Label */
+		addTagAttribute(sb, ATTR_LABEL, gauge.getLabel());
 		
 		closeOpenTag(sb);
 		addCloseTag(sb, NODE_GAUGE);

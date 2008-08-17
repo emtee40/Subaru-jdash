@@ -135,7 +135,6 @@ public class AnalogGauge extends ProfileGauge
 		
 		if (r.equals(this.lastRect_) == false)
 		{
-			System.out.println("Generate Static " + p.getName());
 			this.staticContent_ = new Image(r.width, r.height);
 			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), p, cm);
 			this.lastRect_ = r;

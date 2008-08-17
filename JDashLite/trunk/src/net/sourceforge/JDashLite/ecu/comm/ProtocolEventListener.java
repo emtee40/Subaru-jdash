@@ -56,6 +56,12 @@ public interface ProtocolEventListener
 	/*******************************************************
 	 * When a protocol is going through it's init phase, it will
 	 * fire off a sequence of message through this method.
+	 * Any message sent through here will be rendered to the
+	 * user in the middle of the screen.  The message will
+	 * remain until this method is called wit a null value.
+	 * This method can also be used any time during the normal
+	 * procesisng to simply display a message.  Just remember
+	 * to turn it off when your done!!
 	 * 
 	 * @param statusMessage
 	 ********************************************************/

@@ -45,7 +45,7 @@ public class ProfilePage
 		return (ProfileRow)this.rows_.items[index];
 	}
 	
-
+	
 	/*******************************************************
 	 * @param row
 	 ********************************************************/

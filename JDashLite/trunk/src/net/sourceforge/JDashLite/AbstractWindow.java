@@ -41,6 +41,9 @@ public class AbstractWindow extends Window
 	public static final int TYPE_OK_CANCEL = 0;
 	public static final int TYPE_OK = 1;
 	
+	public static final int BUTTON_OK = 0;
+	public static final int BUTTON_CANCEL = 1;
+	
 	public static final int CONTROL_SPACE = 6;
 
 	private int type_ = -1;
@@ -48,6 +51,7 @@ public class AbstractWindow extends Window
 	private Button okButton_ = null;
 	private Button cancelButton_ = null;
 
+	private int buttonPressedCode_ = -1;
 	
 	/********************************************************
 	 * 
@@ -101,12 +105,13 @@ public class AbstractWindow extends Window
 			case ControlEvent.PRESSED:
 				if (event.target == this.okButton_)
 				{
-					//new MessageBox("Ok", "Pressed").popupModal();
+					this.buttonPressedCode_ = BUTTON_OK;
 					this.okPressed();
 				}
 				
 				if (event.target == this.cancelButton_)
 				{
+					this.buttonPressedCode_ = BUTTON_CANCEL;
 					this.cancelPressed();
 				}
 			break;
@@ -114,41 +119,6 @@ public class AbstractWindow extends Window
 		}
 	}
 
-	
-//	/*********************************************************
-//	 * (non-Javadoc)
-//	 * @see waba.ui.Window#getClientRect()
-//	 ********************************************************/
-//	public Rect getClientRect()
-//	{
-//		Rect r = super.getClientRect();
-//		r.height = getButtonRect().y - r.y - CONTROL_SPACE;
-//		return r;
-//	}
-//	
-//	/********************************************************
-//	 * This method will return the rect of the buttons added. 
-//	 * This is used to calculate screen placements for components.
-//	 * @return
-//	 ********************************************************/
-//	private Rect getButtonRect()
-//	{
-//		Rect r = null;
-//		switch(this.type_)
-//		{
-//			case TYPE_OK_CANCEL:
-//				r = this.okButton_.getRect();
-//				r.width = this.cancelButton_.getRect().x + this.cancelButton_.getRect().width;
-//				return r;
-//			
-//			case TYPE_OK:
-//				return okButton_.getRect();
-//			
-//			default:
-//				return null;
-//		}
-//	}
-	
 	
 	/*******************************************************
 	 * This method does nothing, but you will need to override it to
@@ -164,5 +134,12 @@ public class AbstractWindow extends Window
 	public void cancelPressed() {}
 	
 	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public int getButtonPressedCode()
+	{
+		return this.buttonPressedCode_;
+	}
 
 }

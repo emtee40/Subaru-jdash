@@ -26,12 +26,11 @@ package net.sourceforge.JDashLite.ecu.comm.ELM;
 
 import net.sourceforge.JDashLite.ecu.comm.AbstractProtocol;
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
+import net.sourceforge.JDashLite.ecu.comm.InvalidStageModeException;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
-import waba.io.DataStream;
 import waba.io.SerialPort;
 import waba.sys.Convert;
-import waba.sys.Vm;
 
 
 /*********************************************************
@@ -49,26 +48,35 @@ import waba.sys.Vm;
  >
  
  </pre>
+
+// TODO
+ - 2-3 retries in PID mode
+ - 2-3 re-connect tries for init mode
+ - tweak status messages to indicated 1-3 attempts
+ - Move Serial POrt into profile, and use in here.
   
  *
  *********************************************************/
 public class ELMProtocol extends AbstractProtocol
 {
-	
-	private static final int STAGE_RESET 			= 10;
-	private static final int STAGE_2ND_RESET 		= 15;
+
+	private static final int STAGE_STOP				= 0;
+	private static final int STAGE_OPEN_PORT		= 10;
+	private static final int STAGE_RESET 			= 20;
+	private static final int STAGE_2ND_RESET 		= 25;
 	private static final int STAGE_ECHO_OFF 		= 30;
 	private static final int STAGE_LINEFEED_OFF		= 40;
 	private static final int STAGE_GET_PIDS 		= 50;
-	private static final int STAGE_OBD_REQ			= 60;
+	private static final int STAGE_PID_REQ			= 60;
 	
+	private static final int MODE_READY			= 0;
 	private static final int MODE_TX			= 1;
 	private static final int MODE_RX			= 2;
 	
 	
 	private static final int COM_READ_TIME_IN_MS = 25;
 	private static final int INIT_TIMEOUT_MS = 10000;
-	private static final int HARD_TIMEOUT_MS = 2000;
+	private static final int READ_WRITE_TIMEOUT_MS = 2000;
 	
 	public static final String ELM_NEWLINE = "\r";
 	
@@ -78,6 +86,7 @@ public class ELMProtocol extends AbstractProtocol
 	
 	public static final String AT_RESPONSE_OK = "OK";
 	public static final String AT_RESPONSE_ELM = "ELM";
+	public static final String CMD_RESPONSE_READY = ">";
 	
 	public static final String ERROR_BUS_BUSY = "BUS BUSY";
 	public static final String ERROR_FB_ERROR = "FB ERROR";
@@ -93,24 +102,32 @@ public class ELMProtocol extends AbstractProtocol
 	public static final int ELM_PARITY = SerialPort.PARITY_NONE;
 	public static final int ELM_STOP_BITS = 1;
 	
+	/* Used to fetch the available PIDs */
+	private ELMParameter PIDParam_ = new AllParameters.PID();
 	
 	/* The supported parametes list */
 	private static final ELMParameter[] SUPPORTD_PARAMS = new ELMParameter[]
 	{
 		new AllParameters.RPM(),
 		new AllParameters.STFT1(),
-		new AllParameters.LTFT1()
+		new AllParameters.LTFT1(),
+		new AllParameters.Coolant(),
+		new AllParameters.Load()
 	};
 	
 	
-	private int readTimeoutMs_ = INIT_TIMEOUT_MS;
+	/* The index of the currently being fetched parameter */
+	private int currentParameterIndex_ = 0;
 	
+	/* The read timeout */
+	private int readTimeoutMs_ = INIT_TIMEOUT_MS;
 	
 	/* The response buffer offset pointer */
 	private int responseBufferOffset_ = 0;
 	
 	/* The reusable array of response bytes.  For max performance */
 	private byte[] responseBuffer_ = new byte[512];
+	
 	
 	/********************************************************
 	 * 
@@ -126,38 +143,40 @@ public class ELMProtocol extends AbstractProtocol
 	 ********************************************************/
 	public boolean connect()
 	{
-		
-		boolean initSuccess = false;
-		
-		/* Open the serial port */
-		setSerialPort(new SerialPort(getSerialPortId(), ELM_BAUD, ELM_DATA_BITS, ELM_PARITY, ELM_STOP_BITS));
-		if (getSerialPort().isOpen() == false)
-		{
-			throw new RuntimeException("Serial Error [" + getSerialPort().lastErrorStr + "]");
-		}
-		
-		/* Tweak the serial port */
-		getSerialPort().setFlowControl(true);
-		getSerialPort().setReadTimeout(COM_READ_TIME_IN_MS);
-		getSerialPort().stopWriteCheckOnTimeout = true;
-		getSerialPort().writeTimeout = HARD_TIMEOUT_MS;
-
-		initSuccess = reInitElmInterface();
-		
-		/* Try again */
-		if (!initSuccess)
-		{
-			ErrorLog.error("Init failed, trying again.");
-			initSuccess = reInitElmInterface();
-		}
-		
-		if (!initSuccess)
-		{
-			ErrorLog.error("Protocol Init Failure");
-			return false;
-		}
-		
+		setStage(STAGE_OPEN_PORT);
+		setMode(MODE_READY);
 		return true;
+//		boolean initSuccess = false;
+//		
+//		/* Open the serial port */
+//		setSerialPort(new SerialPort(getSerialPortId(), ELM_BAUD, ELM_DATA_BITS, ELM_PARITY, ELM_STOP_BITS));
+//		if (getSerialPort().isOpen() == false)
+//		{
+//			throw new RuntimeException("Serial Error [" + getSerialPort().lastErrorStr + "]");
+//		}
+//		
+//		/* Tweak the serial port */
+//		getSerialPort().setFlowControl(true);
+//		getSerialPort().setReadTimeout(COM_READ_TIME_IN_MS);
+//		getSerialPort().stopWriteCheckOnTimeout = true;
+//		getSerialPort().writeTimeout = HARD_TIMEOUT_MS;
+//
+//		initSuccess = reInitElmInterface();
+//		
+//		/* Try again */
+//		if (!initSuccess)
+//		{
+//			ErrorLog.error("Init failed, trying again.");
+//			initSuccess = reInitElmInterface();
+//		}
+//		
+//		if (!initSuccess)
+//		{
+//			ErrorLog.error("Protocol Init Failure");
+//			return false;
+//		}
+//		
+//		return true;
 		
 	}
 	
@@ -172,66 +191,74 @@ public class ELMProtocol extends AbstractProtocol
 	}
 	
 
-	/*******************************************************
-	 *  init or re-init the ELM interface. 
-	 *  Return true if the init succeeded, false if it failed.
-	 ********************************************************/
-	private boolean reInitElmInterface()
-	{
-		try
-		{
-			this.readTimeoutMs_ = INIT_TIMEOUT_MS;
-			
-			
-			/* Initialize the interface */
-			sendELMCommand(AT_CMD_RESET);
-			if (checkBufferForString(AT_RESPONSE_ELM) == false)		
-			{
-				throw new Exception("ELM interface not recognized");
-			}
-
-			/* Yes, twice. for some reason it's necessary alot of the time.  And it doesn't hurt either */
-			sendELMCommand(AT_CMD_RESET);
-			if (checkBufferForString(AT_RESPONSE_ELM) == false)		
-			{
-				throw new Exception("ELM interface not recognized");
-			}
-
-			/* Disable Echo */
-			//buffer = fetchString("ATE0");
-			sendELMCommand(AT_CMD_ECHO_OFF);
-			if (checkBufferForString(AT_RESPONSE_OK) == false)
-			{
-				throw new Exception("Command Error\n[ATE0][" + responseToString() + "]");
-			}
-			
-			/* Turn of the LineFeed */
-			sendELMCommand(AT_CMD_LINEFEED_OFF);
-			if (checkBufferForString(AT_RESPONSE_OK) == false)
-			{
-				throw new Exception("Command Error\n[ATL0][" + responseToString() + "]");
-			}
-			
-			
-			/* Ask for the supported PIDs as an init call.  We need to extend the timeout for a moment */
-			this.readTimeoutMs_ = INIT_TIMEOUT_MS;
-			PIDParameter pids = new PIDParameter();
-			if ((sendELMCommand(pids.getFullCommand()) == false) || (checkBufferForErrorString()))
-			{
-				throw new Exception("Error requesting PIDs");
-			}
-			
-			this.readTimeoutMs_ = HARD_TIMEOUT_MS;
-			
-		}
-		catch(Exception e)
-		{
-			ErrorLog.error("Unable to init ELMProtocol", e);
-			return false;
-		}
-		
-		return true;
-	}
+//	/*******************************************************
+//	 *  init or re-init the ELM interface. 
+//	 *  Return true if the init succeeded, false if it failed.
+//	 ********************************************************/
+//	private boolean reInitElmInterface()
+//	{
+//		try
+//		{
+//			this.readTimeoutMs_ = INIT_TIMEOUT_MS;
+//			fireInitStartedEvent();
+//			
+//			/* Initialize the interface */
+//			fireInitStatusEvent("Init.    ");
+//			sendELMCommand(AT_CMD_RESET);
+//			if (checkBufferForString(AT_RESPONSE_ELM) == false)		
+//			{
+//				throw new Exception("ELM interface not recognized");
+//			}
+//
+//			/* Yes, twice. for some reason it's necessary alot of the time.  And it doesn't hurt either */
+//			fireInitStatusEvent("Init..   ");
+//			sendELMCommand(AT_CMD_RESET);
+//			if (checkBufferForString(AT_RESPONSE_ELM) == false)		
+//			{
+//				throw new Exception("ELM interface not recognized");
+//			}
+//
+//			/* Disable Echo */
+//			//buffer = fetchString("ATE0");
+//			sendELMCommand(AT_CMD_ECHO_OFF);
+//			fireInitStatusEvent("Init...  ");
+//			if (checkBufferForString(AT_RESPONSE_OK) == false)
+//			{
+//				throw new Exception("Command Error\n[ATE0][" + responseToString() + "]");
+//			}
+//			
+//			/* Turn of the LineFeed */
+//			sendELMCommand(AT_CMD_LINEFEED_OFF);
+//			fireInitStatusEvent("Init.... ");
+//			if (checkBufferForString(AT_RESPONSE_OK) == false)
+//			{
+//				throw new Exception("Command Error\n[ATL0][" + responseToString() + "]");
+//			}
+//			
+//			
+//			/* Ask for the supported PIDs as an init call.  We need to extend the timeout for a moment */
+//			this.readTimeoutMs_ = INIT_TIMEOUT_MS;
+//			fireInitStatusEvent("Init.....");
+//			PID pids = new PID();
+//			if ((sendELMCommand(pids.getFullCommand()) == false) || (checkBufferForErrorString()))
+//			{
+//				throw new Exception("Error requesting PIDs");
+//			}
+//			
+//			fireInitFinishedEvent();
+//			this.readTimeoutMs_ = HARD_TIMEOUT_MS;
+//			
+//		}
+//		catch(Exception e)
+//		{
+//			ErrorLog.error("Unable to init ELMProtocol", e);
+//			return false;
+//		}
+//		
+//		return true;
+//	}
+//	
+	
 	
 	
 	/*********************************************************
@@ -241,64 +268,527 @@ public class ELMProtocol extends AbstractProtocol
 	public void doTask()
 	{
 		
-		
-		/* If the serial port is lost, then pause this thread */
-		if (getSerialPort() != null && getSerialPort().isOpen() == false)
+		try
 		{
-			return;
+			/* We only support 3 modes */
+			if ((getMode() != MODE_READY) && (getMode() != MODE_TX) && (getMode() != MODE_RX))
+			{
+				throw new InvalidStageModeException(getStage(), getMode());
+			}
+			
+			/* fire the mode event */
+			switch(getMode())
+			{
+				case MODE_READY:
+					fireCommReady();
+				break;
+				
+				case MODE_TX:
+					fireCommTXEvent();
+				break;
+				
+				case MODE_RX:
+					fireCommRXEvent();
+				break;
+			}
+			
+			/* Process the deisred stage */
+			switch(getStage())
+			{
+				case STAGE_STOP:
+					setMode(MODE_READY);
+				break;
+					
+				case STAGE_OPEN_PORT:
+					doOpenPortTask();
+				break;
+				
+				case STAGE_RESET:
+					doResetTask(STAGE_RESET);
+				break;
+				
+				case STAGE_2ND_RESET:
+					doResetTask(STAGE_2ND_RESET);
+				break;
+				
+				case STAGE_ECHO_OFF:
+					doEchoOffTask();
+				break;
+				
+				case STAGE_LINEFEED_OFF:
+					doLineFeedOffTask();
+				break;
+				
+				case STAGE_GET_PIDS:
+					doGetPIDTask();
+				break;
+				
+				case STAGE_PID_REQ:
+					doParameterFetchTask();
+				break;
+				
+				default:
+					ErrorLog.error("Invalid Stage [" + getStage() + "] in toTask()");
+				break;
+			}
+		}
+		catch(InvalidStageModeException ie)
+		{
+			setStageAndMode(STAGE_STOP,MODE_READY);
+			ErrorLog.fatal("Invalid Stage/Mode [" + ie.stage_ + "/" + ie.mode_ + "]");
+		}
+		catch(Exception e)
+		{
+			setStageAndMode(STAGE_STOP, MODE_READY);
+			fireStoppedEvent();
+			fireInitStatusEvent(null);
+			ErrorLog.fatal("Unexpected Error", e);
+			ErrorDialog.showError("Unexpected Error", e);
+		}
+		
+	}
+	
+	/******************************************************
+	 * 
+	 ********************************************************/
+	private void doOpenPortTask() throws InvalidStageModeException
+	{
+		switch(getMode())
+		{
+			case MODE_READY:
+				fireInitStartedEvent();
+				fireInitStatusEvent("Opening Serial Port");
+				setMode(MODE_TX);
+			break;
+			
+			case MODE_TX:
+				
+				setSerialPort(new SerialPort(getSerialPortId(), ELM_BAUD, ELM_DATA_BITS, ELM_PARITY, ELM_STOP_BITS));
+				if (getSerialPort().isOpen() == false)
+				{
+					throw new RuntimeException("Serial Error [" + getSerialPort().lastErrorStr + "]");
+				}
+				
+				/* Tweak the serial port */
+				getSerialPort().setFlowControl(true);
+				getSerialPort().setReadTimeout(COM_READ_TIME_IN_MS);
+				getSerialPort().stopWriteCheckOnTimeout = true;
+				getSerialPort().writeTimeout = READ_WRITE_TIMEOUT_MS;
+			
+				/* Next stage */
+				setStageAndMode(STAGE_RESET, MODE_READY);
+			break;
+			
+//			case MODE_RX:
+//			break;
+			
+			default:
+				throw new InvalidStageModeException(getStage(), getMode());
 		}
 		
 		
-		/* If the port is open and ready, then go */
-		if (getSerialPort() != null && getSerialPort().isOpen())
-		{
-			
-			fireBeginParameterBatchEvent(1);
+	}
 	
-			/* try to do the fetch.  An error will cause a re-init */
-			try
-			{
-				for (int index = 0; index < SUPPORTD_PARAMS.length; index++)
+	/*******************************************************
+	 * @param stage
+	 ********************************************************/
+	private void doResetTask(int stage) throws InvalidStageModeException
+	{
+		switch(getMode())
+		{
+			case MODE_READY:
+				fireInitStatusEvent("Resetting ELM" + (stage == STAGE_2ND_RESET?"..":"."));
+				setMode(MODE_TX);
+			break;
+			
+			case MODE_TX:
+				resetReadBuffer();
+				sendELMCommand(AT_CMD_RESET);
+				setMode(MODE_RX);
+				setOperationTimer(INIT_TIMEOUT_MS);
+			break;
+			
+			case MODE_RX:
+				readSeralData();
+				
+				/* Timeout ? */
+				if (isOperationTimerExpired())
 				{
-		
-					/* Get the parameter */
-					ELMParameter p = SUPPORTD_PARAMS[index];
-		
-					
-					/* Process the desired parameter */
-					boolean success = sendELMCommand(p.getFullCommand());
-					
-					if (!success)
+					setStage(getStage()==STAGE_RESET?STAGE_2ND_RESET:STAGE_STOP);
+					setMode(MODE_READY);
+					fireInitFinishedEvent();
+					ErrorLog.info("ELM reset timed out.");
+					if (stage == STAGE_2ND_RESET)
 					{
-						throw new Exception("Error Requesting " + p.getName());
+						throw new RuntimeException("Init Failure");
+					}
+				}
+				
+				/* Look for the ready char */
+				if (checkBufferForString(">") == true)
+				{
+					cleanUnwantedCharsFromBuffer();
+					ErrorLog.debug("RX: [" + responseToString() + "]");
+					
+					if (checkBufferForString(AT_RESPONSE_ELM) == false)
+					{
+						ErrorLog.warn("ELM Interface Not Recognized");
 					}
 					
+					/* If this is the first reset, then set to do the 2nd reset */
+					if (stage == STAGE_RESET)
+					{
+						setStage(STAGE_2ND_RESET);
+					}
+					else
+					{
+						setStage(STAGE_ECHO_OFF);
+					}
+					
+					setMode(MODE_READY);
+				}
+				
+			break;
+			
+			default:
+				throw new InvalidStageModeException(getStage(), getMode());
+		}
+		
+	}
+	
+	/******************************************************
+	 * 
+	 ********************************************************/
+	private void doEchoOffTask() throws InvalidStageModeException
+	{
+		switch(getMode())
+		{
+			case MODE_READY:
+				fireInitStatusEvent("ELM Echo Off");
+				setMode(MODE_TX);
+			break;
+			
+			case MODE_TX:
+				resetReadBuffer();
+				sendELMCommand(AT_CMD_ECHO_OFF);
+				setMode(MODE_RX);
+				setOperationTimer(READ_WRITE_TIMEOUT_MS);
+			break;
+			
+			case MODE_RX:
+				readSeralData();
+				
+				/* Timeout ? */
+				if (isOperationTimerExpired())
+				{
+					fireInitFinishedEvent();
+					throw new RuntimeException("Init Failure");
+				}
+				
+				/* Look for the ready char */
+				if (checkBufferForString(CMD_RESPONSE_READY) == true)
+				{
+					cleanUnwantedCharsFromBuffer();
+					ErrorLog.debug("RX: [" + responseToString() + "]");
+					
+					if (checkBufferForString(AT_RESPONSE_OK) == false)
+					{
+						throw new RuntimeException("Command Error\n[" + AT_CMD_ECHO_OFF + "][" + responseToString() + "]");
+					}
+					
+					setStageAndMode(STAGE_LINEFEED_OFF, MODE_READY);
+				}
+				
+			break;
+			
+			default:
+				throw new InvalidStageModeException(getStage(), getMode());
+		}
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doLineFeedOffTask() throws InvalidStageModeException
+	{
+		switch(getMode())
+		{
+			case MODE_READY:
+				fireInitStatusEvent("ELM LineFeed Off");
+				setMode(MODE_TX);
+			break;
+			
+			case MODE_TX:
+				resetReadBuffer();
+				sendELMCommand(AT_CMD_LINEFEED_OFF);
+				setMode(MODE_RX);
+				setOperationTimer(READ_WRITE_TIMEOUT_MS);
+			break;
+			
+			case MODE_RX:
+				readSeralData();
+				
+				/* Timeout ? */
+				if (isOperationTimerExpired())
+				{
+					fireInitFinishedEvent();
+					throw new RuntimeException("Init Failure");
+				}
+				
+				/* Look for the ready char */
+				if (checkBufferForString(CMD_RESPONSE_READY) == true)
+				{
+					cleanUnwantedCharsFromBuffer();
+					ErrorLog.debug("RX: [" + responseToString() + "]");
+					
+					if (checkBufferForString(AT_RESPONSE_OK) == false)
+					{
+						throw new RuntimeException("Command Error\n[" + AT_CMD_LINEFEED_OFF + "][" + responseToString() + "]");
+					}
+					
+					setStageAndMode(STAGE_GET_PIDS, MODE_READY);
+				}
+				
+			break;
+			
+			default:
+				throw new InvalidStageModeException(getStage(), getMode());
+		}
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doGetPIDTask() throws InvalidStageModeException
+	{
+		switch(getMode())
+		{
+			case MODE_READY:
+				fireInitStatusEvent("Querying ECU");
+				setMode(MODE_TX);
+			break;
+			
+			case MODE_TX:
+				resetReadBuffer();
+				sendELMCommand(this.PIDParam_.getFullCommand());
+				setMode(MODE_RX);
+				setOperationTimer(INIT_TIMEOUT_MS);
+			break;
+			
+			case MODE_RX:
+				readSeralData();
+				
+				/* Timeout ? */
+				if (isOperationTimerExpired())
+				{
+					fireInitFinishedEvent();
+					throw new RuntimeException("Init Failure");
+				}
+				
+				/* Look for the ready char */
+				if (checkBufferForString(CMD_RESPONSE_READY) == true)
+				{
+					cleanUnwantedCharsFromBuffer();
+					
+					/* Check the buffer for known error strings */
+					boolean hasError = checkBufferForErrorString();
+					ErrorLog.debug("RX: [" + responseToString() + "]");
+					
+					if (hasError)
+					{
+						throw new RuntimeException("Invalid response from ELM");
+					}
+					
+					/* Try to extract the desired values.  An error will cause an attempted reset */
+					// TODO Compensate for the SEARCHING... string.  We can do this by looking for the first instance of 4100
+//					try
+//					{
+//						extractResponseBytes(this.PIDParam_);
+//					}
+//					catch(Exception e2)
+//					{
+//						/* An exception here is not normal, nor expected.  If it happens, we'll do a re-init */
+//						ErrorLog.error("Parameter Fetch Exception, do reset.", e2);
+//						setStageAndMode(STAGE_RESET, MODE_READY);
+//						return;
+//					}
+					
+					setStageAndMode(STAGE_PID_REQ, MODE_READY);
+					fireInitFinishedEvent();
+				}
+				
+			break;
+			
+			default:
+				throw new InvalidStageModeException(getStage(), getMode());
+		}
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doParameterFetchTask() throws InvalidStageModeException
+	{
+		switch(getMode())
+		{
+			case MODE_READY:
+				fireBeginParameterBatchEvent(1);
+				setMode(MODE_TX);
+			break;
+			
+			case MODE_TX:
 
+				/* Move the index to the next parameter */
+				this.currentParameterIndex_++;
+				if (this.currentParameterIndex_ >= SUPPORTD_PARAMS.length)
+				{
+					this.currentParameterIndex_ = 0;
+				}
+				
+				/* If the current param is not enabled, then return to try the next one */
+				if (SUPPORTD_PARAMS[this.currentParameterIndex_].isEnabled() == false)
+				{
+					ErrorLog.debug("Skipping " + SUPPORTD_PARAMS[this.currentParameterIndex_].getName());
+					return;
+				}
+				
+				/* Send the elm request */
+				resetReadBuffer();
+				sendELMCommand(SUPPORTD_PARAMS[this.currentParameterIndex_].getFullCommand());
+				
+				/* Go to RX mode */
+				setMode(MODE_RX);
+				setOperationTimer(READ_WRITE_TIMEOUT_MS);
+			break;
+			
+			case MODE_RX:
+				readSeralData();
+				
+				/* Timeout ? */
+				if (isOperationTimerExpired())
+				{
+					ErrorLog.error("Timeout Fetching Parameter");
+					setStageAndMode(STAGE_RESET, MODE_READY);
+					return;
+				}
+				
+				/* Look for the ready char, this means we got something back */
+				if (checkBufferForString(CMD_RESPONSE_READY) == true)
+				{
+					cleanUnwantedCharsFromBuffer();
+					
+					/* Check the buffer for known error strings */
+					boolean hasError = checkBufferForErrorString();
+					
+					/* Debug out put the RX buffer.  To prevent having to create a new string every time, we'll check the log level */
+					if (ErrorLog.LOG_LEVEL_DEBUG.equals(ErrorLog.getCurrentLevel()))
+					{
+						ErrorLog.debug("RX: [" + responseToString() + "]");
+					}
+					
+					/* If an error is in the string, then attempt a reset */
+					if (hasError)
+					{
+						ErrorLog.error("Unexpected Response");
+						setStageAndMode(STAGE_RESET, MODE_READY);
+						return;
+					}
+					
+					/* Try to extract the desired values.  An error will cause an attempted reset */
 					try
 					{
-						extractResponseBytes(p);
+						extractResponseBytes(SUPPORTD_PARAMS[this.currentParameterIndex_]);
 					}
 					catch(Exception e2)
 					{
 						/* An exception here is not normal, nor expected.  If it happens, we'll do a re-init */
 						ErrorLog.error("Parameter Fetch Exception, do reset.", e2);
-						reInitElmInterface();
+						setStageAndMode(STAGE_RESET, MODE_READY);
+						return;
 					}
 					
-					
+					setStageAndMode(STAGE_PID_REQ, MODE_READY);
+					fireParemeterFetchedEvent(SUPPORTD_PARAMS[this.currentParameterIndex_]);
 				}
-			}
-			catch(Exception e)
-			{
-				ErrorLog.error("Getting ECU Value", e);
-	// TODO:  will this work?
-				reInitElmInterface();
-			}
+				
+			break;
 			
-			fireEndParameterBatchEvent();
+			default:
+				throw new InvalidStageModeException(getStage(), getMode());
 		}
-		
 	}
+//	
+//	/*********************************************************
+//	 * (non-Javadoc)
+//	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#doTask()
+//	 ********************************************************/
+//	public void olddoTask()
+//	{
+//		
+//		
+//		/* If the serial port is lost, then pause this thread */
+//		if (getSerialPort() != null && getSerialPort().isOpen() == false)
+//		{
+//			return;
+//		}
+//		
+//		
+//		/* If the port is open and ready, then go */
+//		if (getSerialPort() != null && getSerialPort().isOpen())
+//		{
+//			
+//			fireBeginParameterBatchEvent(1);
+//	
+//			/* try to do the fetch.  An error will cause a re-init */
+//			try
+//			{
+//				for (int index = 0; index < SUPPORTD_PARAMS.length; index++)
+//				{
+//		
+//					/* Get the parameter */
+//					ELMParameter p = SUPPORTD_PARAMS[index];
+//					
+//					/* Only fetch enabled parameters */
+//					if (p.isEnabled() == false)
+//					{
+//						continue;
+//					}
+//		
+//					
+//					/* Process the desired parameter */
+//					boolean success = sendELMCommand(p.getFullCommand());
+//					
+//					if (!success)
+//					{
+//						throw new Exception("Error Requesting " + p.getName());
+//					}
+//					
+//
+//					try
+//					{
+//						extractResponseBytes(p);
+//					}
+//					catch(Exception e2)
+//					{
+//						/* An exception here is not normal, nor expected.  If it happens, we'll do a re-init */
+//						ErrorLog.error("Parameter Fetch Exception, do reset.", e2);
+//						reInitElmInterface();
+//					}
+//					
+//					
+//				}
+//			}
+//			catch(Exception e)
+//			{
+//				ErrorLog.error("Getting ECU Value", e);
+//	// TODO:  will this work?
+//				reInitElmInterface();
+//			}
+//			
+//			fireEndParameterBatchEvent();
+//		}
+//		
+//	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
@@ -316,93 +806,161 @@ public class ELMProtocol extends AbstractProtocol
 		
 	}
 	
-//
-//	/********************************************************
-//	 * Send the command code to the ECU, retreive it's response
-//	 * and set the response value into the parameter.
-//	 * @param p
-//	 * @return
-//	 ********************************************************/
-//	private boolean process(ELMParameter p) throws Exception
-//	{
-//		boolean success = false;
-//		
-//		success = sendELMCommand(p.getFullCommand());
-//		
-//		if (!success)
-//		{
-//			throw new Exception("Error Requesting " + p.getName());
-//		}
-//		
-//		extractResponseBytes(p);
-//		
-//		
-//		return true;
-//	}
-	
-	
+
 	/********************************************************
-	 * Send the provided ELM command string, filling the
-	 * response byte[] with the ... result!!  The
-	 * return value from this method is the offset
-	 * value within the response buffer that makes up the 
-	 * response.  eg.. if the return is 11, then bytes 0-11
-	 * in the response buffer are the response bytes.
-	 * 
-	 * @param str
-	 * @return true of the command returned without an exception.  False if there was a fatal error.
+	 * This method, every time it's called, will simply check
+	 * if there is any data ready for read.  And if there is, 
+	 * copy it into the readBuffer at the current offset location.
 	 ********************************************************/
-	private boolean sendELMCommand(String cmd) throws Exception
+	private void readSeralData()
 	{
-		int hardTimer = Vm.getTimeStamp();
 		int bytesRead = 0;
 		
-		/* reset the response buffer */
-		this.responseBufferOffset_ = 0;
+		if (getSerialPort().readCheck() <= 0)
+		{
+			return;
+		}
+		
+		/* Read the bytes that are ready */
+		bytesRead = getSerialPort().readBytes(this.responseBuffer_, this.responseBufferOffset_, getSerialPort().readCheck());
+		this.responseBufferOffset_ += Math.max(bytesRead, 0);
+
+	}
+	
+	
+	/*******************************************************
+	 * @param cmd
+	 ********************************************************/
+	private void sendELMCommand(String cmd)
+	{
+		/* To prevent a whole lot of new String object, pre-check the log level */
+		if (ErrorLog.LOG_LEVEL_DEBUG.equals(ErrorLog.getCurrentLevel()))
+		{
+			ErrorLog.debug("TX: [" + cmd + "]");
+		}
 		
 		if (cmd.endsWith(ELM_NEWLINE) == false)
 		{
 			cmd = cmd + ELM_NEWLINE;
 		}
-	
-		
-		bytesRead = getSerialPort().readBytes(this.responseBuffer_, 0, getSerialPort().readCheck());
-//		ErrorLog.info("Clearing Buffer: " + bytesRead + "\n" + responseToString());
-		ErrorLog.debug("TX: [" + cmd + "]");
-
 		
 		/* Send the data bytes */
 		getSerialPort().writeBytes(cmd.getBytes(), 0, cmd.length());
-		
-		/* Read the response */
-		while(true)
+	}
+	
+//	/********************************************************
+//	 * Send the provided ELM command string, filling the
+//	 * response byte[] with the ... result!!  The
+//	 * return value from this method is the offset
+//	 * value within the response buffer that makes up the 
+//	 * response.  eg.. if the return is 11, then bytes 0-11
+//	 * in the response buffer are the response bytes.
+//	 * 
+//	 * @param str
+//	 * @return true of the command returned without an exception.  False if there was a fatal error.
+//	 ********************************************************/
+//	private boolean oldsendELMCommand(String cmd) throws Exception
+//	{
+//		int hardTimer = Vm.getTimeStamp();
+//		int bytesRead = 0;
+//		
+//		/* reset the response buffer */
+//		this.responseBufferOffset_ = 0;
+//		
+//		if (cmd.endsWith(ELM_NEWLINE) == false)
+//		{
+//			cmd = cmd + ELM_NEWLINE;
+//		}
+//	
+//		
+//		bytesRead = getSerialPort().readBytes(this.responseBuffer_, 0, getSerialPort().readCheck());
+////		ErrorLog.info("Clearing Buffer: " + bytesRead + "\n" + responseToString());
+//		ErrorLog.debug("TX: [" + cmd + "]");
+//
+//		
+//		/* Send the data bytes */
+//		getSerialPort().writeBytes(cmd.getBytes(), 0, cmd.length());
+//		
+//		/* Read the response */
+//		while(true)
+//		{
+//			/* Watch the hard timer value */
+//			if (Vm.getTimeStamp() > (hardTimer + this.readTimeoutMs_))
+//			{
+//				ErrorLog.info("hard timeout exceeded");
+//				return false;
+//			}
+//			
+//			if (getSerialPort().readCheck() <= 0)
+//			{
+//				Vm.sleep(10);
+//				continue;
+//			}
+//			
+//			/* Read the bytes that are ready */
+//			bytesRead = getSerialPort().readBytes(this.responseBuffer_, this.responseBufferOffset_, getSerialPort().readCheck());
+//			this.responseBufferOffset_ += Math.max(bytesRead, 0);
+//
+//			/* Look for the ">" character indicating the command has completed */
+//			//if (elmResponse.indexOf('>') >= 0)
+//			if (checkBufferForString(">") == true)
+//			{
+//				break;
+//			}
+//			
+//		}
+//		
+//		/* clear any non-desireable characters */
+//		for (int index = 0; index < this.responseBufferOffset_; index++)
+//		{
+//			boolean clear = false;
+//			
+//			if (this.responseBuffer_[index] == '\n')
+//				clear = true;
+//			
+//			if (this.responseBuffer_[index] == '\r')
+//				clear = true;
+//			
+//			if (this.responseBuffer_[index] == -1)
+//				clear = true;
+//				
+//			if (this.responseBuffer_[index] == '>')
+//				clear = true;
+//			
+//			if (clear)
+//			{
+//				this.responseBuffer_[index] = ' ';
+//			}
+//		}
+//		
+//		
+//		/* Check the buffer for known error strings */
+//		boolean hasError = checkBufferForErrorString();
+//		
+//		ErrorLog.debug("RX: [" + responseToString() + "]");
+//			
+//		return true;
+//	}
+//	
+	
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void resetReadBuffer()
+	{
+		this.responseBufferOffset_ = 0;
+		for (int index = 0; index < 48; index++)
 		{
-			/* Watch the hard timer value */
-			if (Vm.getTimeStamp() > (hardTimer + this.readTimeoutMs_))
-			{
-				ErrorLog.info("hard timeout exceeded");
-				return false;
-			}
-			
-			if (getSerialPort().readCheck() <= 0)
-			{
-				Vm.sleep(10);
-				continue;
-			}
-			
-			/* Read the bytes that are ready */
-			bytesRead = getSerialPort().readBytes(this.responseBuffer_, this.responseBufferOffset_, getSerialPort().readCheck());
-			this.responseBufferOffset_ += Math.max(bytesRead, 0);
-
-			/* Look for the ">" character indicating the command has completed */
-			//if (elmResponse.indexOf('>') >= 0)
-			if (checkBufferForString(">") == true)
-			{
-				break;
-			}
-			
+			this.responseBuffer_[index] = '0';
 		}
-		
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void cleanUnwantedCharsFromBuffer()
+	{
 		/* clear any non-desireable characters */
 		for (int index = 0; index < this.responseBufferOffset_; index++)
 		{
@@ -425,16 +983,7 @@ public class ELMProtocol extends AbstractProtocol
 				this.responseBuffer_[index] = ' ';
 			}
 		}
-		
-		
-		/* Check the buffer for known error strings */
-		boolean hasError = checkBufferForErrorString();
-		
-		ErrorLog.debug("RX: [" + responseToString() + "]");
-			
-		return true;
 	}
-	
 	
 	/*******************************************************
 	 * This method will assume the response buffer contains
@@ -511,7 +1060,7 @@ public class ELMProtocol extends AbstractProtocol
 		/* Check the buffer lenght. It should be a 2x the length of the dest array + 4 (2 for the mode and 2 for the command response) */
 		if (this.responseBufferOffset_ != ((p.getResponseBytes().length * 2) + 4))
 		{
-			throw new Exception("Response Not Formatted Correctly\nTX: " + p.getFullCommand() + "\nRX: " + responseToString());
+			throw new Exception("Response Not Formatted Correctly\nTX: [" + p.getFullCommand() + "]\nRX: [" + responseToString() + "]\nExpecing " + ((p.getResponseBytes().length * 2) + 4) + " chars");
 		}
 		
 		int rMode = -1;

@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.profile;
 
+import net.sourceforge.JDashLite.profile.color.ColorModel;
 import waba.fx.Graphics;
 import waba.fx.Rect;
 
@@ -35,5 +36,5 @@ import waba.fx.Rect;
 public interface RenderableProfileComponent
 {
 
-	public void render(Graphics g, Rect r) throws Exception;
+	public void render(Graphics g, Rect r, ColorModel cm) throws Exception;
 }

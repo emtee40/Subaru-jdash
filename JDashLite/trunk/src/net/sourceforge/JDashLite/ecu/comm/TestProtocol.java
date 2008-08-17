@@ -91,7 +91,7 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	{
 		
 		
-		if (Vm.getTimeStamp() - 400 < this.prevEventTS_)
+		if (Vm.getTimeStamp() - 150 < this.prevEventTS_)
 		{
 			return;
 		}
@@ -139,20 +139,23 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 			
 			/* Param Fetch Mode */
 			case 6:
+				fireCommTXEvent();
 				fireBeginParameterBatchEvent(getSupportedParameters().length);
 				this.initMode_++;
 			break;
 				
 			case 7:
+				fireCommRXEvent();
 				for (int index = 0; index < getSupportedParameters().length; index++)
 				{
-					this.stubbedParameters_[index].value_ += 15.3;
+					this.stubbedParameters_[index].value_ += 5.1;
 					fireParemeterFetchedEvent(this.stubbedParameters_[index]);
 				}
 				this.initMode_++;
 			break;
-				
+			
 			case 8:
+				fireCommReady();
 				fireEndParameterBatchEvent();
 				this.initMode_ = 6;
 			break;

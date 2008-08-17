@@ -26,7 +26,9 @@ package net.sourceforge.JDashLite.profile;
 
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener;
+import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter;
+import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
 import waba.fx.Color;
 import waba.fx.Font;
@@ -35,6 +37,7 @@ import waba.fx.Image;
 import waba.fx.Rect;
 import waba.sys.Convert;
 import waba.util.Hashtable;
+import waba.util.Vector;
 
 /*********************************************************
  * This is the container that does the heavy lifting of
@@ -42,15 +45,15 @@ import waba.util.Hashtable;
  * profile object. 
  *
  *********************************************************/
-public class ProfileRenderer implements RenderableProfileComponent
+public class ProfileRenderer 
 {
 	
-	public static final Color COLOR_LT_GRAY 	= Color.getColor(0xbb, 0xbb, 0xbb);
-	public static final Color COLOR_GRAY 		= Color.getColor(0x88, 0x88, 0x88);
-	public static final Color COLOR_DK_GRAY 	= Color.getColor(0x55, 0x55, 0x55);
+//	public static final Color COLOR_LT_GRAY 	= Color.getColor(0xbb, 0xbb, 0xbb);
+//	public static final Color COLOR_GRAY 		= Color.getColor(0x88, 0x88, 0x88);
+//	public static final Color COLOR_DK_GRAY 	= Color.getColor(0x55, 0x55, 0x55);
 	
-	public static final Color COLOR_BACKGROUND	= Color.WHITE;
-	public static final Color COLOR_BORDER		= Color.BLACK;
+//	public static final Color COLOR_BACKGROUND	= Color.WHITE;
+//	public static final Color COLOR_BORDER		= Color.BLACK;
 
 	/* This is an array of decreasing sized fonts available to all renderers */
 	public static final Font[] AVAILABLE_FONTS = 
@@ -67,9 +70,10 @@ public class ProfileRenderer implements RenderableProfileComponent
 
 	/* The percentage of the bottom of the screen that the status bar should take up */
 	private static final double STATUS_BAR_HEIGHT_PERCENT = 0.06;
-
+	
 	/* Flag indicating that new ECU data is available */
-	private boolean newDataReady_ = true;
+	private boolean refreshGauges_ = true;
+	private boolean refreshStatusBar_ = true;
 	
 	/* The profile this renderer is to render */
 	private Profile profile_ = null;
@@ -98,18 +102,21 @@ public class ProfileRenderer implements RenderableProfileComponent
 	/* The Double buffer static image.  As in, there are parts of the page that do NOT change
 	 * as parameters are read.  These values do NOT need to be re-drawn and re-computed each time.
 	 * This image is rendered to the screen, then the dynamic values are drawn on top. */
-	private Image dblBufferdStaticImage_ = null;
+	//private Image dblBufferdStaticImage_ = null;
 	
 	
 	/** If there is a status messgae to be displayed, put it here */
 	private String statusMessage_ = null;
 	
+	private boolean fetchVisibleOnly_ = false;
+	
 	/********************************************************
 	 * 
 	 *******************************************************/
-	public ProfileRenderer(Profile profile)
+	public ProfileRenderer(Profile profile, ProtocolHandler protocol)
 	{
 		this.profile_ = profile;
+		setParameters(protocol.getSupportedParameters());
 		this.statusBar_.setPageCount(profile.getPageCount());
 	}
 	
@@ -117,13 +124,19 @@ public class ProfileRenderer implements RenderableProfileComponent
 	/*******************************************************
 	 * @param parameters
 	 ********************************************************/
-	public void setParameters(ECUParameter[] parameters)
+	private void setParameters(ECUParameter[] parameters)
 	{
 		this.parameters_.clear();
 		for (int index = 0; index < parameters.length; index++)
 		{
 			this.parameters_.put(parameters[index].getName(), parameters[index]);
-		}
+			
+		} /* end parameter loop */
+		
+		
+		/* Turn on ONLY the params that are at least part of this profile */
+		enableDisableParameters(false);
+		
 	}
 	
 	/********************************************************
@@ -133,26 +146,7 @@ public class ProfileRenderer implements RenderableProfileComponent
 	{
 		return this.eventAdapter_;
 	}
-	
-//	/********************************************************
-//	 * @return the newDataReady
-//	 ********************************************************/
-//	public boolean isNewDataReady()
-//	{
-//		return this.newDataReady_;
-//	}
-//	
-//	
-//	/********************************************************
-//	 * @param newDataReady the newDataReady to set
-//	 ********************************************************/
-//	public void setNewDataReady(boolean newDataReady)
-//	{
-//		this.newDataReady_ = newDataReady;
-//	}
-	
-	
-	
+
 	
 	
 	/*******************************************************
@@ -167,13 +161,14 @@ public class ProfileRenderer implements RenderableProfileComponent
 		for (int index = 0; index < ProfileRenderer.AVAILABLE_FONTS.length; index++)
 		{
 			f = ProfileRenderer.AVAILABLE_FONTS[index];
-			if (ProfileRenderer.AVAILABLE_FONTS[index].fm.height < height)
+			if (ProfileRenderer.AVAILABLE_FONTS[index].fm.height <= height)
 			{
 				break;
 			}
 		}
 		return f;
 	}
+	
 	
 	
 	/********************************************************
@@ -202,11 +197,84 @@ public class ProfileRenderer implements RenderableProfileComponent
 		}
 		
 		this.activePage_ = activePage;
-		this.newDataReady_ = true;
-		this.dblBufferdStaticImage_ = null;
+		this.refreshGauges_ = true;
+		this.refreshStatusBar_ = true;
+//		this.dblBufferdStaticImage_ = null;
 		this.statusBar_.setActivePage(this.activePage_);
+		
+		/* enable or disable the desired parameters */
+		enableDisableParameters(this.fetchVisibleOnly_);
+			
+			
 	}
 	
+
+	/*******************************************************
+	 * @param visibleOnly
+	 ********************************************************/
+	public void enableDisableParameters(boolean visibleOnly)
+	{
+		this.fetchVisibleOnly_ = visibleOnly;
+		
+		Vector paramKeys = this.parameters_.getKeys();
+		
+		for (int index = 0; index < paramKeys.size(); index++)
+		{
+			String key = (String)paramKeys.items[index];
+			ECUParameter param = (ECUParameter)this.parameters_.get(key);
+			param.setEnabled(false);
+			
+			/* By default, enable ONLY the parameters that are found in a gauge in the profile */
+			for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
+			{
+				
+				/*  Here is where we cheat with the visible only flag.  If it's true, then we 
+				 * only need to check the active page. */
+				if (visibleOnly)
+				{
+					pageIndex = this.activePage_;
+				}
+				
+				ProfilePage page = this.profile_.getPage(pageIndex);
+				for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
+				{
+					ProfileRow row = page.getRow(rowIndex);
+					for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
+					{
+						ProfileGauge gauge = row.getGauge(gaugeIndex);
+						
+						if (param.getName().equals(gauge.getParameterName()))
+						{
+							param.setEnabled(true);
+							break;
+						}
+						
+					} /* end gauge loop */
+					
+					
+					if (param.isEnabled())
+					{
+						break;
+					}
+	
+				} /* end row loop */
+				
+				
+				if (param.isEnabled())
+				{
+					break;
+				}
+	
+				/* Visible only?  Stop the loop */
+				if (visibleOnly)
+				{
+					pageIndex = this.profile_.getPageCount();
+				}
+				
+			} /* end page loop */
+
+		} /* end key loop */
+	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
@@ -236,35 +304,44 @@ public class ProfileRenderer implements RenderableProfileComponent
 		
 		/* Render any pending status message */
 		renderStatusMessage(g, r.width, r.height / 2);
-		
-		/* If no data has been indicated as being ready, then don't draw the dynamic gauge bits */
-		if (!this.newDataReady_)
-		{
-			return;
-		}
 
-				
-		/* Set the new data flag back to false, since we're about to render it anyway */
-		this.newDataReady_ = false;
+		
+//		/* If no data has been indicated as being ready, then don't draw the dynamic gauge bits */
+//		if (!this.newDataReady_)
+//		{
+//			return;
+//		}
+//
+//				
+//		/* Set the new data flag back to false, since we're about to render it anyway */
+//		this.newDataReady_ = false;
 
-		/* Start with a clean screen */
-		g.clearScreen();
 		
-		
-		/* Draw the static content */
-		if (this.dblBufferdStaticImage_ == null)
-		{
-			this.dblBufferdStaticImage_ = new Image(r.width, r.height);
-			renderActivePage(this.dblBufferdStaticImage_.getGraphics(), true);
-		}
+//		/* Draw the static content into the buffer image */
+//		if (this.dblBufferdStaticImage_ == null)
+//		{
+//			this.dblBufferdStaticImage_ = new Image(r.width, r.height);
+//			renderActivePage(this.dblBufferdStaticImage_.getGraphics(), true);
+//		}
  
 
-		/* Render the active page */
-		g.drawImage(this.dblBufferdStaticImage_, r.x, r.y);
-		renderActivePage(g, false);
-		
+		/* Render the active page  */
+		if (this.refreshGauges_ == true)
+		{
+			this.refreshStatusBar_ = true;
+//			g.drawImage(this.dblBufferdStaticImage_, r.x, r.y);
+			renderActivePage(g);
+			this.refreshGauges_ = false;
+		}
+
 		/* Draw the status bar */
-		this.statusBar_.render(g, (Rect)this.rectCache_.get(this.statusBar_));
+		if (refreshStatusBar_)
+		{
+			this.statusBar_.render(g, (Rect)this.rectCache_.get(this.statusBar_), this.profile_.getColorModel());
+			this.refreshStatusBar_ = false;
+		}
+
+
 
 	}
 	
@@ -277,9 +354,14 @@ public class ProfileRenderer implements RenderableProfileComponent
 	 * 			need to be called twice.
 	 * @throws Exception
 	 ********************************************************/
-	private void renderActivePage(Graphics g, boolean staticContentOnly) throws Exception
+	private void renderActivePage(Graphics g) throws Exception
 	{
 		
+		/* No Pages? */
+		if (this.profile_.getPageCount() == 0)
+		{
+			return;
+		}
 	
 		/* Get the page */
 		ProfilePage page = this.profile_.getPage(this.activePage_);
@@ -314,7 +396,7 @@ public class ProfileRenderer implements RenderableProfileComponent
 				}
 
 				/* Render this gauge */
-				renderGauge(g, gauge, gaugeRect, staticContentOnly);
+				renderGauge(g, gaugeRect, gauge);
 		
 			}
 		}
@@ -524,20 +606,20 @@ public class ProfileRenderer implements RenderableProfileComponent
 	 * @param rect
 	 * @throws Exception
 	 ********************************************************/
-	private void renderGauge(Graphics g, ProfileGauge gauge, Rect rect, boolean staticContentOnly) throws Exception
+	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge) throws Exception
 	{
 	
 		/* Draw a simple borer around the rect with a filled BG  */
-		g.setForeColor(COLOR_BORDER);
-		g.setBackColor(COLOR_BACKGROUND);
-		Font f = ProfileRenderer.findFontBestFitHeight(rect.height / 8);
+		g.setForeColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BORDER));
+		g.setBackColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BACKGROUND));
+		Font f = ProfileRenderer.findFontBestFitHeight((int)(rect.height * 0.8));
 		g.setFont(f);
 		
-		if (staticContentOnly)
-		{
-			g.fillRect(rect.x, rect.y, rect.width, rect.height);
-			g.drawRect(rect.x, rect.y, rect.width, rect.height);
-		}
+//		if (staticContentOnly)
+//		{
+//			g.fillRect(rect.x, rect.y, rect.width, rect.height);
+//			g.drawRect(rect.x, rect.y, rect.width, rect.height);
+//		}
 		
 		/* Get the parameter for this gauge */
 		ECUParameter p = (ECUParameter)this.parameters_.get(gauge.getParameterName());
@@ -545,15 +627,7 @@ public class ProfileRenderer implements RenderableProfileComponent
 		/* No Param? */
 		if (p != null)
 		{
-			
-			if (staticContentOnly)
-			{
-				g.drawText(p.getName(), rect.x + 2, rect.y + 2);
-			}
-			else
-			{
-				g.drawText(Convert.toString(p.getValue(), 2), rect.x + 2, rect.y + rect.height - (rect.height / 2));
-			}
+			gauge.render(g, rect, p, this.profile_.getColorModel());
 		}
 		
 	}
@@ -578,7 +652,7 @@ public class ProfileRenderer implements RenderableProfileComponent
 			/* Draw a window box */
 			g.setBackColor(Color.CYAN);
 			g.fillRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
-			g.setForeColor(COLOR_BORDER);
+			g.setForeColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BORDER));
 			g.drawRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
 			
 			/* Draw the text */
@@ -601,6 +675,8 @@ public class ProfileRenderer implements RenderableProfileComponent
 		 ********************************************************/
 		public void initStarted()
 		{
+			statusMessage_ = null;
+			refreshGauges_ = true;
 			//System.out.println("init started " + System.currentTimeMillis());
 		}
 		
@@ -611,6 +687,7 @@ public class ProfileRenderer implements RenderableProfileComponent
 		public void initFinished()
 		{
 			statusMessage_ = null;
+			refreshGauges_ = true;
 			//System.out.println("init finished "  + System.currentTimeMillis());
 		}
 		
@@ -627,12 +704,53 @@ public class ProfileRenderer implements RenderableProfileComponent
 		
 		/*********************************************************
 		 * (non-Javadoc)
+		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#parameterFetched(net.sourceforge.JDashLite.ecu.comm.ECUParameter)
+		 ********************************************************/
+		public void parameterFetched(ECUParameter p)
+		{
+			refreshGauges_ = true;
+		}
+		
+		/*********************************************************
+		 * (non-Javadoc)
 		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#endParameterBatch()
 		 ********************************************************/
 		public void endParameterBatch()
 		{
 			//System.out.println("end parameter batch " + System.currentTimeMillis());
-			newDataReady_  = true;
+			refreshGauges_  = true;
+		}
+		
+		/*********************************************************
+		 * (non-Javadoc)
+		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commReady()
+		 ********************************************************/
+		public void commReady()
+		{
+			statusBar_.setRXTXMode(StatusBar.RXTX_READY);
+			refreshStatusBar_  = true;
+		}
+		
+		
+		/*********************************************************
+		 * (non-Javadoc)
+		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commRX()
+		 ********************************************************/
+		public void commRX()
+		{
+			statusBar_.setRXTXMode(StatusBar.RXTX_RECEIVE);
+			refreshStatusBar_  = true;
+		}
+		
+		
+		/*********************************************************
+		 * (non-Javadoc)
+		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commTX()
+		 ********************************************************/
+		public void commTX()
+		{
+			statusBar_.setRXTXMode(StatusBar.RXTX_SEND);
+			refreshStatusBar_  = true;
 		}
 	}
 }

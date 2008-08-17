@@ -82,6 +82,14 @@ public class ErrorLog
 	}
 	
 	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public static String getCurrentLevel()
+	{
+		return ErrorLog.level_;
+	}
+	
+	/*******************************************************
 	 * @param message
 	 *******************************************************/
 	public static void info(String message)

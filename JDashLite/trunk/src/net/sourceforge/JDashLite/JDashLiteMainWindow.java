@@ -33,8 +33,11 @@ import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
+import net.sourceforge.JDashLite.util.AffineTransform;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
+import waba.fx.Color;
+import waba.fx.Coord;
 import waba.fx.Graphics;
 import waba.sys.Convert;
 import waba.sys.Vm;
@@ -600,12 +603,51 @@ public class JDashLiteMainWindow extends GameEngine
 	
 	}
 	
+	double theta = 0.0;
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see superwaba.ext.xplat.game.GameEngine#onPaint(waba.fx.Graphics)
 	 ********************************************************/
 	public void onPaint(Graphics g)
 	{
+
+		AffineTransform t0 = AffineTransform.translateInstance(-15, -60);
+		t0.addRotate(Math.toRadians(theta));
+		t0.addScale(4,4);
+		t0.addTranslate(100, 200);
+		Coord c1 = new Coord(10,50);
+		Coord c2 = new Coord(20, 80);
+		t0.apply(c1);
+		t0.apply(c2);
+		
+		g.setForeColor(Color.BLACK);
+		g.drawLine(c1.x, c1.y, c2.x, c2.y);
+//		
+		theta += 5;
+		if (theta >= 360) theta = 0;
+//		Matrix t0 = AffineTransform.createTranslateMatrix(-50, -80);
+//		Matrix t1 = AffineTransform.createRotateMatrix(Math.toRadians(theta));
+//		Matrix t2 = AffineTransform.createTranslateMatrix(50, 80);
+//		Matrix t3 = AffineTransform.createScaleMatrix(10, 2);
+//		t0 = AffineTransform.multiply(t1, t0);
+//		t0 = AffineTransform.multiply(t2, t0);
+//
+//
+//		net.sourceforge.JDashLite.util.AffineTransform.Vector v1 = AffineTransform.createVector(50, 50);
+//		net.sourceforge.JDashLite.util.AffineTransform.Vector v2 = AffineTransform.createVector(50, 80);
+//		
+//		g.setForeColor(Color.BLACK);
+//		g.drawLine(v1.m_[0], v1.m_[1], v2.m_[0], v2.m_[1]);
+//		
+//		v1 = AffineTransform.multiply(v1, t0);
+//		v2 = AffineTransform.multiply(v2, t0);
+////		System.out.println(v1);
+//		g.setForeColor(Color.RED);
+//		g.drawLine(v1.m_[0], v1.m_[1], v2.m_[0], v2.m_[1]);
+//		
+//
+		if (1==1) return;
+
 		
 		/* If no profile is yet set, then warn the user, and pop the preferences dialog */
 		if (this.activeProfile_ == null)

@@ -26,7 +26,6 @@ package net.sourceforge.JDashLite.profile.color;
 
 import waba.fx.Color;
 import waba.util.Hashtable;
-import waba.util.Vector;
 
 
 /*********************************************************
@@ -36,11 +35,9 @@ import waba.util.Vector;
 public class DefaultColorModel implements ColorModel
 {
 	
-	protected static final Color LT_GRAY 	= Color.getColor(0xbb, 0xbb, 0xbb);
-	protected static final Color GRAY 	= Color.getColor(0x88, 0x88, 0x88);
+	protected static final Color LT_GRAY 	= Color.getColor(0xcc, 0xcc, 0xcc);
+	protected static final Color GRAY 		= Color.getColor(0x88, 0x88, 0x88);
 	protected static final Color DK_GRAY 	= Color.getColor(0x55, 0x55, 0x55);
-
-
 
 	/* The hash of colors for this model */
 	private Hashtable colorHash_ = new Hashtable(50);
@@ -67,7 +64,7 @@ public class DefaultColorModel implements ColorModel
 		add(ANALOG_GAUGE_RING,				DK_GRAY);
 		add(ANALOG_GAUGE_FACE,				Color.BLACK);
 		add(ANALOG_GAUGE_TICK_MARK,			LT_GRAY);
-		add(ANALOG_GAUGE_NEEDLE,			Color.RED);
+		add(ANALOG_GAUGE_NEEDLE,			Color.getColor(0xFF,00,00));
 
 	}
 	

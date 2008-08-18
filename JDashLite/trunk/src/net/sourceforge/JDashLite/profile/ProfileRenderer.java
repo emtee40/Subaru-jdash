@@ -33,9 +33,7 @@ import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
 import waba.fx.Color;
 import waba.fx.Font;
 import waba.fx.Graphics;
-import waba.fx.Image;
 import waba.fx.Rect;
-import waba.sys.Convert;
 import waba.util.Hashtable;
 import waba.util.Vector;
 

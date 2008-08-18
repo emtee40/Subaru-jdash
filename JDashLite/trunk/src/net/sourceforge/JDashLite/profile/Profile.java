@@ -76,7 +76,7 @@ public class Profile
 "   <page> " +
 "     <row>" +
 "		<gauge type=\"line-graph\" param=\"RPM\" width=\"0.5\"/>" +
-"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"800\"/> " +
+"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"8000\"/> " +
 "     </row> " +
 "     <row> " +
 "		<gauge type=\"line-graph\" param=\"STFT\"/>" +
@@ -91,8 +91,7 @@ public class Profile
 "   </page> " +
 "	<page> " +
 "     <row> " +
-"       <gauge type=\"digital\" param=\"RPM\"/> " +
-"       <gauge type=\"digital\" param=\"RPM\"/> " +
+"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"7000\" /> " +
 "     </row> " +
 "   </page> " +
 " </profile> ";

@@ -148,7 +148,7 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 				fireCommRXEvent();
 				for (int index = 0; index < getSupportedParameters().length; index++)
 				{
-					this.stubbedParameters_[index].value_ += 5.1;
+					this.stubbedParameters_[index].value_ += 95.1;
 					fireParemeterFetchedEvent(this.stubbedParameters_[index]);
 				}
 				this.initMode_++;

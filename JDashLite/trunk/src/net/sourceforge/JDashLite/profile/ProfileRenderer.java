@@ -31,6 +31,7 @@ import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAda
 import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
 import waba.fx.Color;
+import waba.fx.Coord;
 import waba.fx.Font;
 import waba.fx.Graphics;
 import waba.fx.Rect;
@@ -46,13 +47,6 @@ import waba.util.Vector;
 public class ProfileRenderer 
 {
 	
-//	public static final Color COLOR_LT_GRAY 	= Color.getColor(0xbb, 0xbb, 0xbb);
-//	public static final Color COLOR_GRAY 		= Color.getColor(0x88, 0x88, 0x88);
-//	public static final Color COLOR_DK_GRAY 	= Color.getColor(0x55, 0x55, 0x55);
-	
-//	public static final Color COLOR_BACKGROUND	= Color.WHITE;
-//	public static final Color COLOR_BORDER		= Color.BLACK;
-
 	/* This is an array of decreasing sized fonts available to all renderers */
 	public static final Font[] AVAILABLE_FONTS = 
 	{
@@ -658,6 +652,45 @@ public class ProfileRenderer
 			
 		}
 	}
+	
+	
+	/*******************************************************
+	 * @param points
+	 ********************************************************/
+	public static int[] toXArray(Coord[] points)
+	{
+		int [] r = new int[points.length];
+		
+		for (int index = 0; index < r.length; index++)
+		{
+			r[index] = points[index].x;
+		}
+		
+		return r;
+	}
+	
+	
+	/******************************************************
+	 * @param points
+	 * @return
+	 ********************************************************/
+	public static int[] toYArray(Coord[] points)
+	{
+
+		int [] r = new int[points.length];
+		
+		for (int index = 0; index < r.length; index++)
+		{
+			r[index] = points[index].y;
+		}
+		
+		return r;
+
+	}
+	
+	
+	
+	
 	
 	
 	/********************************************************

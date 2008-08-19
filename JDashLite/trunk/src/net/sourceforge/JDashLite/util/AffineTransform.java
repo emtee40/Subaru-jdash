@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDashLite.util;
 
 import waba.fx.Coord;
+import waba.fx.Rect;
 import waba.sys.Convert;
 
 /*********************************************************
@@ -58,19 +59,51 @@ public class AffineTransform
 		return this.matrix_.toString();
 	}
 	
+	
+	/*******************************************************
+	 * @param r
+	 ********************************************************/
+	public void apply(Rect r)
+	{
+		PointVector v1 = new PointVector(r.x, r.y);
+		PointVector v2 = new PointVector(r.x + r.width, r.y + r.height);
+		System.out.println("=== a" + v1);
+		System.out.println("=== b" + v2);
+		v1 = multiply(v1, this.matrix_);
+		v2 = multiply(v2, this.matrix_);
+		System.out.println("=== c" + v1);
+		System.out.println("=== d" + v2);
+		r.x = v1.getX();
+		r.y = v1.getY();
+		r.width = v2.getX() - v1.getX();
+		r.height = v2.getY() - v1.getY();
+	}
+	
 	/*******************************************************
 	 * Apply this transform to the provided Coord object
 	 * @param c
 	 * @return
 	 ********************************************************/
-	public void apply(Coord c)
+	public void apply(Coord point)
 	{
-		Vector v = new Vector(c.x, c.y);
+		PointVector v = new PointVector(point.x, point.y);
 		v = multiply(v, this.matrix_);
-		c.x = v.m_[0];
-		c.y = v.m_[1];
+		point.x = v.getX();
+		point.y = v.getY();
 	}
 	
+	
+	/*******************************************************
+	 * Apply this transform to the array of points.
+	 * @param points
+	 ********************************************************/
+	public void apply(Coord[] points)
+	{
+		for (int index = 0; index < points.length; index++)
+		{
+			apply(points[index]);
+		}
+	}
 	
 	/*******************************************************
 	 * add to this transform, the provided translate values.
@@ -146,11 +179,11 @@ public class AffineTransform
 	 * @param v
 	 * @return
 	 ********************************************************/
-	private static Vector multiply(Vector v, Matrix m)
+	private static PointVector multiply(PointVector v, Matrix m)
 	{
-		Vector r = new Vector(0,0);
+		PointVector r = new PointVector(0,0);
 		
-		int ax; 	// accumulator for matrix multiplication
+		double ax; 	// accumulator for matrix multiplication
 		
 		
 		for (int rIndex = 0; rIndex < m.getSize(); rIndex++)
@@ -162,24 +195,13 @@ public class AffineTransform
 				ax += ((double)v.m_[vIndex]) * m.m_[rIndex][vIndex]; 
 			}
 			
-			r.m_[rIndex] = ax;
+			r.m_[rIndex] = (int)Math.round(ax);
 		}
 		
 		
 		return r;
 	}
 	
-	
-	/*******************************************************
-	 * @param x
-	 * @param y
-	 * @return
-	 ********************************************************/
-	private static Vector createVector(int x, int y)
-	{
-		Vector v = new Vector(x,y);
-		return v;
-	}
 	
 	
 	/*******************************************************
@@ -290,7 +312,7 @@ public class AffineTransform
 	 *********************************************************/
 	private static class Matrix 
 	{
-		public double[][] m_ = null;
+		protected double[][] m_ = null;
 		
 		/******************************************************
 		 * @param size
@@ -316,7 +338,7 @@ public class AffineTransform
 		public String toString()
 		{
 			StringBuffer sb = new StringBuffer();
-			
+			sb.append("\n");
 			for (int i = 0; i < getSize(); i++)
 			{
 				sb.append("|");
@@ -338,14 +360,14 @@ public class AffineTransform
 	 * 
 	 *
 	 *********************************************************/
-	private static class Vector
+	private static class PointVector
 	{
 		public int[] m_ = null;
 		
 		/********************************************************
 		 * @param size
 		 *******************************************************/
-		protected Vector(int x, int y)
+		protected PointVector(int x, int y)
 		{
 			this.m_ = new int[AFFINE_MATRIX_SIZE];
 			this.m_[0] = x;
@@ -361,6 +383,22 @@ public class AffineTransform
 			return this.m_.length;
 		}
 		
+		/********************************************************
+		 * @return
+		 ********************************************************/
+		public int getX()
+		{
+			return this.m_[0];
+		}
+		
+		/*******************************************************
+		 * @return
+		 ********************************************************/
+		public int getY()
+		{
+			return this.m_[1];
+		}
+		
 		/*********************************************************
 		 * (non-Javadoc)
 		 * @see java.lang.Object#toString()
@@ -368,7 +406,7 @@ public class AffineTransform
 		public String toString()
 		{
 			StringBuffer sb = new StringBuffer(15);
-			
+			sb.append("\n");
 			for (int i = 0; i < getSize(); i++)
 			{
 				sb.append("|");

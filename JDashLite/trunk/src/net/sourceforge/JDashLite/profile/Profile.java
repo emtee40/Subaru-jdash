@@ -75,23 +75,24 @@ public class Profile
 " <profile name=\"Sample Profile\" protocolClass=\"" + ELMProtocol.class.getName() +  "\"> " +
 "   <page> " +
 "     <row>" +
-"		<gauge type=\"line-graph\" param=\"RPM\" width=\"0.5\"/>" +
-"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"8000\"/> " +
+//"		<gauge type=\"line-graph\" param=\"RPM\" width=\"0.5\"/>" +
+"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"8000\" divisor=\"1000\"/> " +
+"       <gauge type=\"digital\" param=\"RPM\" precision=\"0\" label=\"RPM\"/> " +
 "     </row> " +
 "     <row> " +
-"		<gauge type=\"line-graph\" param=\"STFT\"/>" +
-"       <gauge type=\"analog\" param=\"STFT1\" label=\"STFT\" precision=\"2\" range-start=\"-30\" range-end=\"30\"/> " +
+//"		<gauge type=\"line-graph\" param=\"STFT\"/>" +
+"       <gauge type=\"analog\" param=\"STFT1\" label=\"STFT%\" precision=\"2\" range-start=\"-30\" range-end=\"30\" divisor=\"15\"/> " +
 "       <gauge type=\"digital\" param=\"STFT1\" precision=\"2\" label=\"STFT%\"/> " +
 "     </row> " +
 "     <row> " +
-"		<gauge type=\"line-graph\" param=\"LTFT\" width=\"0.3\" precision=\"2\"/>" +
-"       <gauge type=\"analog\" param=\"LTFT1\" width=\"0.4\" label=\"STFT\" precision=\"2\" range-start=\"-30\" range-end=\"30\"/> " +
+//"		<gauge type=\"line-graph\" param=\"LTFT\" width=\"0.3\" precision=\"2\"/>" +
+"       <gauge type=\"analog\" param=\"LTFT1\" width=\"0.4\" label=\"STFT%\" precision=\"2\" range-start=\"-30\" range-end=\"30\"  divisor=\"15\"/> " +
 "       <gauge type=\"digital\" param=\"LTFT1\" precision=\"2\" label=\"LTFT%\"/> " +
 "     </row> " +
 "   </page> " +
 "	<page> " +
 "     <row> " +
-"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"7000\" /> " +
+"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"7000\" divisor=\"1000\" /> " +
 "     </row> " +
 "   </page> " +
 " </profile> ";

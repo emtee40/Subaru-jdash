@@ -67,12 +67,8 @@ public class AffineTransform
 	{
 		PointVector v1 = new PointVector(r.x, r.y);
 		PointVector v2 = new PointVector(r.x + r.width, r.y + r.height);
-		System.out.println("=== a" + v1);
-		System.out.println("=== b" + v2);
 		v1 = multiply(v1, this.matrix_);
 		v2 = multiply(v2, this.matrix_);
-		System.out.println("=== c" + v1);
-		System.out.println("=== d" + v2);
 		r.x = v1.getX();
 		r.y = v1.getY();
 		r.width = v2.getX() - v1.getX();

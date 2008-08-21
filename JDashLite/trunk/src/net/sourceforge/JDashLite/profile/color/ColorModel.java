@@ -51,6 +51,31 @@ public interface ColorModel
 	public static final int ANALOG_GAUGE_FACE				= 301;
 	public static final int ANALOG_GAUGE_TICK_MARK			= 302;
 	public static final int ANALOG_GAUGE_NEEDLE				= 303;
+	
+	
+	public static final Color LT_GRAY 	= Color.getColor(0xcc, 0xcc, 0xcc);
+	public static final Color GRAY 		= Color.getColor(0x88, 0x88, 0x88);
+	public static final Color DK_GRAY 	= Color.getColor(0x55, 0x55, 0x55);
+	
+
+	
+	/* http://www.w3schools.com/html/html_colorsfull.asp */
+	public static final Color GRAY_1		= Color.getColor(0xf0, 0xf0, 0xf0);
+	public static final Color GRAY_2		= Color.getColor(0xe0, 0xe0, 0xe0);
+	public static final Color GRAY_3		= Color.getColor(0xd0, 0xd0, 0xd0);
+	public static final Color GRAY_4		= Color.getColor(0xc0, 0xc0, 0xc0);
+	public static final Color GRAY_5		= Color.getColor(0xb0, 0xb0, 0xb0);
+	public static final Color GRAY_6		= Color.getColor(0xa0, 0xa0, 0xa0);
+	public static final Color GRAY_7		= Color.getColor(0x90, 0x90, 0x90);
+	public static final Color GRAY_8		= Color.getColor(0x80, 0x80, 0x80);
+	public static final Color GRAY_9		= Color.getColor(0x70, 0x70, 0x70);
+	public static final Color GRAY_10	= Color.getColor(0x60, 0x60, 0x60);
+	public static final Color GRAY_11	= Color.getColor(0x50, 0x50, 0x50);
+	public static final Color GRAY_12	= Color.getColor(0x40, 0x40, 0x40);
+	public static final Color GRAY_13	= Color.getColor(0x30, 0x30, 0x30);
+	public static final Color GRAY_14	= Color.getColor(0x20, 0x20, 0x20);
+	public static final Color GRAY_15	= Color.getColor(0x10, 0x10, 0x10);
+
 
 
 	public static final ColorModel DEFAULT_COLOR_MODEL = new DefaultColorModel();

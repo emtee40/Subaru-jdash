@@ -47,29 +47,39 @@ public class AnalogGauge extends ProfileGauge
 	private static final double INNTER_POINT_RADIUS = 0.40;
 	private static final double NEEDLE_WIDTH = 0.045;
 	
-	private static final double MINIMUM_DEGREE = 45;
-	private static final double MAXIMUM_DEGREE = 360 - 45;
-//	private static final double TICK_SPACES = 7;  /* The number of gaps between ticks, NOT the number of ticks */
+	private static final double MINIMUM_DEGREE = 50;
+	private static final double MAXIMUM_DEGREE = 360 - 50;
 	
-	
-	private double TICK_HEIGHT = 0.1;
-	private double LABEL_HEIGHT = 0.2;
 
-	
+	/* The range starting value of the ecu value */
 	private double rangeStart_ = 0.0;
+	
+	/* The range ending value of the ecu value */
 	private double rangeEnd_ = 0.0;
 
 	/* The default number of decimal places to show */
 	private int decimalPrecision_ = 0;
 	
 	/* The tick marks / Numbers are defined by a divisor */
-	private double tickDivisor_ = -1;
+	private double tickCount_ = -1;
+	
+	/* Include the ticks at all? */
+	private boolean includeTicks_ = true;
+	
+	/* Include the nubmer label values */
+	private boolean includeTickLabels_ = true;
+	
+	/* Include the digital value readout ? */
+	private boolean includeDigitalValue_ = false;
 	
 	/* When the render method is called, we compare the previos rect to see if we need to re-generate the static content */
 	private Rect lastRect_ = null;
 	
 	/* The image for the static background stuff */
 	private Image staticContent_ = null;
+	
+	/* The current value font */
+	private Font currentValueFont_ = null;
 	
 	/********************************************************
 	 * 
@@ -130,20 +140,54 @@ public class AnalogGauge extends ProfileGauge
 	}
 
 	/********************************************************
-	 * @return the tickDivisor
+	 * @return the tickCount
 	 ********************************************************/
-	public double getTickDivisor()
+	public double getTickCount()
 	{
-		return this.tickDivisor_;
+		return this.tickCount_;
 	}
 	
 	
 	/********************************************************
-	 * @param tickDivisor the tickDivisor to set
+	 * @param tickCount the tickCount to set
 	 ********************************************************/
-	public void setTickDivisor(double tickDivisor)
+	public void setTickCount(double tickCount)
 	{
-		this.tickDivisor_ = tickDivisor;
+		this.tickCount_ = tickCount;
+	}
+	
+	
+	/********************************************************
+	 * @return the includeTickLabels
+	 ********************************************************/
+	public boolean getIncludeTickLabels()
+	{
+		return this.includeTickLabels_;
+	}
+	
+	/********************************************************
+	 * @param includeTickLabels the includeTickLabels to set
+	 ********************************************************/
+	public void setIncludeTickLabels(boolean includeTickLabels)
+	{
+		this.includeTickLabels_ = includeTickLabels;
+	}
+	
+	
+	/********************************************************
+	 * @return the includeTicks
+	 ********************************************************/
+	public boolean getIncludeTicks()
+	{
+		return this.includeTicks_;
+	}
+	
+	/********************************************************
+	 * @param includeTicks the includeTicks to set
+	 ********************************************************/
+	public void setIncludeTicks(boolean includeTicks)
+	{
+		this.includeTicks_ = includeTicks;
 	}
 	
 	/*********************************************************
@@ -153,15 +197,6 @@ public class AnalogGauge extends ProfileGauge
 	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm)
 	{
 		
-		if (r.equals(this.lastRect_) == false)
-		{
-			this.staticContent_ = new Image(r.width, r.height);
-			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), p, cm);
-			this.lastRect_ = r;
-		}
-
-		/* Draw the static image */
-		g.drawImage(this.staticContent_, r.x, r.y);
 		
 		
 		/* Calculate a few common needed values */
@@ -169,6 +204,18 @@ public class AnalogGauge extends ProfileGauge
 		int centerY = r.y + (r.height / 2);
 		int needleLength = (int)((Math.min(r.width, r.height) * OUTER_POINT_RADIUS) - (OUTER_POINT_RADIUS - INNTER_POINT_RADIUS));
 		int needleWidth = (int)(needleLength * NEEDLE_WIDTH);
+		needleWidth = Math.max(3, needleWidth);
+
+		if (r.equals(this.lastRect_) == false)
+		{
+			this.staticContent_ = new Image(r.width, r.height);
+			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), p, cm, (int)(needleWidth * 1.5));
+			this.lastRect_ = r;
+		}
+
+		/* Draw the static image */
+		g.drawImage(this.staticContent_, r.x, r.y);
+
 		
 		/* Draw the needle */
 		{
@@ -214,13 +261,18 @@ public class AnalogGauge extends ProfileGauge
 		}
 		
 		
-		/* Draw the current value */
-		Font f = null;
-		f = ProfileRenderer.findFontBestFitHeight((int)(r.height * LABEL_HEIGHT));
-		g.setFont(f);
-		g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-		String val = Convert.toString(p.getValue(), getDecimalPrecision());
-		g.drawText(val, r.x + ((r.width - f.fm.getTextWidth(val)) / 2), r.y + (r.height - f.fm.height) - (f.fm.height * 2));
+		/* Draw the current digital value */
+		if (this.includeDigitalValue_)
+		{
+	//		Font f = null;
+	//		f = ProfileRenderer.findFontBestFitHeight((int)(r.height * LABEL_HEIGHT), false);
+			int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
+			g.setFont(this.currentValueFont_);
+			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
+			String val = Convert.toString(p.getValue(), getDecimalPrecision());
+			g.drawText(val, centerX - (this.currentValueFont_.fm.getTextWidth(val) / 2), (centerY + (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent)));
+	//		g.drawText(val, centerX - (this.currentValueAndLabelFont_.fm.getTextWidth(val) / 2), centerY + needleWidth * 2);
+		}
 			
 	}
 	
@@ -232,7 +284,7 @@ public class AnalogGauge extends ProfileGauge
 	 * @param p
 	 * @param cm
 	 *******************************************************/
-	private void generateStaticImage(Graphics g, Rect r, ECUParameter p, ColorModel cm)
+	private void generateStaticImage(Graphics g, Rect r, ECUParameter p, ColorModel cm, int tickLength)
 	{
 		
 		/* Blank the gauge first */
@@ -243,13 +295,21 @@ public class AnalogGauge extends ProfileGauge
 		
 		
 		/* Calculate a few common needed values */
-		Font labelFont = ProfileRenderer.findFontBestFitHeight((int)(r.height * LABEL_HEIGHT));
-		Font tickFont = ProfileRenderer.findFontBestFitHeight((int)(r.height * TICK_HEIGHT));
+		Font tickFont = ProfileRenderer.findFontBestFitHeight(tickLength * 2, false);
 		int centerX = r.x + (r.width / 2);
 		int centerY = r.y + (r.height / 2);
 		int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
-		int tickRadius = mainRadius - (tickFont.fm.height / 4);
 		
+		/* setup the current value font.  It's the same as the label font. */
+		this.currentValueFont_ = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), Convert.toString(this.rangeEnd_, getDecimalPrecision()), false);
+//		Font labelFont = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), getLabel(), false);
+		
+		
+		/* Check the value font for max height too */
+		if (this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent > mainRadius / 3)
+		{
+			this.currentValueFont_ = ProfileRenderer.findFontBestFitHeight(mainRadius / 3, false); 
+		}
 		
 		/* Draw the outer circle */
 		g.setBackColor(cm.get(ColorModel.ANALOG_GAUGE_FACE));
@@ -258,66 +318,76 @@ public class AnalogGauge extends ProfileGauge
 		g.drawCircle(centerX, centerY, mainRadius);
 	
 		
-		/* Calculate the tick mark count, and the resulting spread */
-		int tickCount = this.tickDivisor_ > 0 ? (int)((this.rangeEnd_ - this.rangeStart_) / this.tickDivisor_) : 3;
-		int tickRange = (int)((this.rangeEnd_ - this.rangeStart_) / tickCount);
-		
-		/* Calculate the best tickRounding value */
-		int tickRounding = 1000000000;
-		String rTest = Convert.toString(tickRounding);
-		while (rTest.length() >= 1)
-		{
-			if (rTest.length() <= Convert.toString((int)this.tickDivisor_).length())
-			{
-				tickRounding = Convert.toInt(rTest);
-				break;
-			}
-			rTest = rTest.substring(0, rTest.length() - 1);
-		}
-
-		/* But.. if the divisor is NOT divisible by 10, then we'll add one more level of precision */
-		if (this.tickDivisor_ % 10 != 0)
-		{
-			tickRounding /= 10;
-		}
+		/* Calculate the tick mark range */
+		double tickRange = ((this.rangeEnd_ - this.rangeStart_) / (double)(getTickCount() - 1.0));
 		
 		
-		System.out.println(">>>>>" + tickRounding);
-
+		/* First, determine the normal length of the tick label values */
+		//TODO
+		
+		
+		
 		/* Draw each tick mark */
-		g.setFont(tickFont);
-		g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-		for (double index = 0; index <= tickCount; index+=0.5)
+		if (getIncludeTicks())
 		{
-			Coord tickPoint1 = new Coord(0, tickRadius);
-			Coord tickPoint2 = new Coord(0, tickRadius - (int)(tickFont.fm.height / 2));
-			Coord tickPoint3 = new Coord(0, tickPoint2.y - (int)(tickFont.fm.height / (2 + (index % 1))));
-			double tickAngle = MINIMUM_DEGREE + (((MAXIMUM_DEGREE - MINIMUM_DEGREE) / tickCount) * index);
-			AffineTransform tickTxfm = AffineTransform.rotateInstance(Math.toRadians(tickAngle));
-			tickTxfm.addTranslate(centerX, centerY);
-			tickTxfm.apply(tickPoint1);
-			tickTxfm.apply(tickPoint2);
-			tickTxfm.apply(tickPoint3);
-			String tickValue = Convert.toString((this.rangeStart_ + (index * tickRange)) / tickRounding, 0);
-			tickPoint3.x = tickPoint3.x - (tickFont.fm.getTextWidth(tickValue) / 2);
-			tickPoint3.y = tickPoint3.y - ((tickFont.fm.height - tickFont.fm.descent) / 2);
-			g.drawLine(tickPoint1.x, tickPoint1.y, tickPoint2.x, tickPoint2.y);
-			
-			/* Only draw the text on whole ticks */
-			if (index % 1 == 0)
+			g.setFont(tickFont);
+			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
+			for (double index = 0; index < getTickCount() - 0.5; index+=0.5)
 			{
-				g.drawText(tickValue, tickPoint3.x, tickPoint3.y);
+				Coord tickPoint1 = new Coord(0, mainRadius - (tickLength / 2));   /* outer tip of tick */
+				Coord tickPoint2 = new Coord(0, tickPoint1.y - tickLength);       /* inner tip of tick */
+				Coord tickPoint3 = new Coord(0, tickPoint2.y - (int)(tickLength * 1.5));  /* Center point of tick value */
+				
+				double tickAngle = MINIMUM_DEGREE + (((MAXIMUM_DEGREE - MINIMUM_DEGREE) / (double)(getTickCount() - 1.0)) * index);
+				
+				AffineTransform tickTxfm = AffineTransform.rotateInstance(Math.toRadians(tickAngle));
+				tickTxfm.addTranslate(centerX, centerY);
+				tickTxfm.apply(tickPoint1);
+				tickTxfm.apply(tickPoint2);
+				tickTxfm.apply(tickPoint3);
+
+				/* Draw the tick */
+				g.drawLine(tickPoint1.x, tickPoint1.y, tickPoint2.x, tickPoint2.y);
+				
+				/* Only draw the text on whole ticks */
+				if (getIncludeTickLabels() && index % 1 == 0)
+				{
+					String tickValue = Convert.toString(this.rangeStart_ + (index * tickRange), getDecimalPrecision());
+					
+					/* No need to analize zero */
+					if ((this.rangeStart_ + (index * tickRange)) == 0)
+					{
+						tickValue = "0";
+					}
+					else
+					{
+						
+						/* While the last character is NOT a zero or a cecimal, trim them off */
+						while ((tickValue.length() > 1) && (tickValue.charAt(tickValue.length() - 1) == '0') || ((tickValue.charAt(tickValue.length() - 1) == '.')))
+						{
+							tickValue = tickValue.substring(0, tickValue.length() - 1);
+						}
+					}
+
+					/* Where to place the tick value */
+					tickPoint3.x = tickPoint3.x - (tickFont.fm.getTextWidth(tickValue) / 2);
+					tickPoint3.y = tickPoint3.y - ((tickFont.fm.height - tickFont.fm.descent) / 2);
+
+					/* Draw it! */
+					g.drawText(tickValue, tickPoint3.x, tickPoint3.y);
+				}
+
 			}
-//			g.drawRect(tickPoint3.x, tickPoint3.y, tickFont.fm.getTextWidth(tickValue), tickFont.fm.height - tickFont.fm.descent);
 		}
 		
 
 		/* Draw the label */
-		g.setFont(labelFont);
+		g.setFont(this.currentValueFont_);
 		if (getLabel() != null)
 		{
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-			g.drawText(getLabel(), r.x + ((r.width - labelFont.fm.getTextWidth(getLabel())) / 2), r.y + (labelFont.fm.height * 2));
+			//g.drawText(getLabel(), centerX - (labelFont.fm.getTextWidth(getLabel()) / 2), centerY - tickLength - labelFont.fm.height);
+			g.drawText(getLabel(), centerX - (this.currentValueFont_.fm.getTextWidth(getLabel()) / 2), (centerY - (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent) / 3));
 		}
 
 	}

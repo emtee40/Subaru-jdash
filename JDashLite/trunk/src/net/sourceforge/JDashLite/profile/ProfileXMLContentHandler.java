@@ -56,7 +56,9 @@ public class ProfileXMLContentHandler implements ContentHandler
 	public static final String ATTR_LABEL			= "label";
 	public static final String ATTR_RANGE_START		= "range-start";
 	public static final String ATTR_RANGE_END		= "range-end";
-	public static final String ATTR_DIVISOR			= "divisor";
+	public static final String ATTR_TICK_COUNT		= "tick-count";
+	public static final String ATTR_SHOW_TICKS		= "show-ticks";
+	public static final String ATTR_SHOW_TICK_LABEL	= "tick_labels";
 	
 	public static final String VALUE_DIGITAL		= "digital";
 	public static final String VALUE_LINE_GRAPH		= "line-graph";
@@ -245,7 +247,9 @@ public class ProfileXMLContentHandler implements ContentHandler
 		String prec = atts.getAttributeValue(ATTR_PRECISION);
 		String rangeStart = atts.getAttributeValue(ATTR_RANGE_START);
 		String rangeEnd = atts.getAttributeValue(ATTR_RANGE_END);
-		String divisor = atts.getAttributeValue(ATTR_DIVISOR);
+		String tickCount = atts.getAttributeValue(ATTR_TICK_COUNT);
+		String tickLabels = atts.getAttributeValue(ATTR_SHOW_TICK_LABEL);
+		String showTicks = atts.getAttributeValue(ATTR_SHOW_TICKS);
 
 		if ((prec != null && prec.length() > 0))
 		{
@@ -254,7 +258,8 @@ public class ProfileXMLContentHandler implements ContentHandler
 		
 		gauge.setRangeStart(Convert.toDouble(rangeStart));
 		gauge.setRangeEnd(Convert.toDouble(rangeEnd));
-		gauge.setTickDivisor(Convert.toDouble(divisor));
+		gauge.setTickCount(Convert.toDouble(tickCount));
+		//gauge.setIncludeTickLabels(Convert.to)
 		
 		return gauge;
 	}
@@ -427,7 +432,9 @@ public class ProfileXMLContentHandler implements ContentHandler
 			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
 			addTagAttribute(sb, ATTR_RANGE_START, Convert.toString(g.getRangeStart()));
 			addTagAttribute(sb, ATTR_RANGE_END, Convert.toString(g.getRangeEnd()));
-			addTagAttribute(sb, ATTR_DIVISOR, Convert.toString(g.getTickDivisor()));
+			addTagAttribute(sb, ATTR_TICK_COUNT, Convert.toString(g.getTickCount()));
+			addTagAttribute(sb, ATTR_SHOW_TICKS, Convert.toString(g.getIncludeTicks()));
+			addTagAttribute(sb, ATTR_SHOW_TICK_LABEL, Convert.toString(g.getIncludeTickLabels()));
 		}
 		
 		/* Width */

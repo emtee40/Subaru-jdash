@@ -50,14 +50,37 @@ public class ProfileRenderer
 	/* This is an array of decreasing sized fonts available to all renderers */
 	public static final Font[] AVAILABLE_FONTS = 
 	{
-		Font.getFont("SW", true, Font.BIG_SIZE),  		// H=30
-		Font.getFont("SW", false, Font.BIG_SIZE), 		// H=28
-		Font.getFont("SW", true, Font.NORMAL_SIZE), 	// H=22
-		Font.getFont("SW", false, Font.NORMAL_SIZE),	// H=22
-		Font.getFont("LSW", true, Font.BIG_SIZE),		// H=15
-		Font.getFont("LSW", false, Font.BIG_SIZE),		// H=14
-		Font.getFont("LSW", true, Font.NORMAL_SIZE),	// H=11
-		Font.getFont("LSW", false, Font.NORMAL_SIZE),	// H=11
+//		Font.getFont("SW", true, Font.BIG_SIZE),  		// H=30
+//		Font.getFont("SW", false, Font.BIG_SIZE), 		// H=28
+//		Font.getFont("SW", true, Font.NORMAL_SIZE), 	// H=22
+//		Font.getFont("SW", false, Font.NORMAL_SIZE),	// H=22
+//		Font.getFont("LSW", true, Font.BIG_SIZE),		// H=15
+//		Font.getFont("LSW", false, Font.BIG_SIZE),		// H=14
+//		Font.getFont("LSW", true, Font.NORMAL_SIZE),	// H=11
+//		Font.getFont("LSW", false, Font.NORMAL_SIZE),	// H=11
+//		
+//		Font.getFont(Font.DEFAULT, 	true,  	Font.BIG_SIZE),  		// H=28
+//		Font.getFont("6SW", false, 28),  		// H=30
+//		Font.getFont("6SW", true,  22),  		// H=30
+//		Font.getFont("6SW", false, 20),  		// H=30
+//		Font.getFont("6SW", true,  18),  		// H=30
+//		Font.getFont("6SW", false, 16),  		// H=30
+//		Font.getFont("6SW", true,  14),  		// H=30
+//		Font.getFont("6SW", false, 10)  		// H=30
+//
+//	};
+	
+	
+	Font.getFont("SW", false, Font.BIG_SIZE), 				/* height = 28 */
+	Font.getFont("SW", false, Font.NORMAL_SIZE), 			/* height = 22 */
+//	Font.getFont("Tahoma", false, Font.BIG_SIZE),  			/* Height = 17 */
+	Font.getFont("Verdana", false, Font.BIG_SIZE), 			/* Height = 16 */
+//	Font.getFont("Tahoma", false, Font.NORMAL_SIZE),  		/* Height = 15 Same size as TinyLarge NORMAl but this has tails!! */
+//	Font.getFont("TinyLarge", false, Font.NORMAL_SIZE), 	/* height = 14 */
+	Font.getFont("Verdana", false, Font.NORMAL_SIZE), 		/* Height <= 14   Verdana also has tails */
+//	Font.getFont("Arial", false, Font.NORMAL_SIZE),  		/* Height = 13 */
+	Font.getFont("TinySmall", false, Font.NORMAL_SIZE)  	/* Height = 6 (ugly) */
+
 	};
 
 	/* The percentage of the bottom of the screen that the status bar should take up */
@@ -146,20 +169,52 @@ public class ProfileRenderer
 	 * @param height
 	 * @return
 	 ********************************************************/
-	public static Font findFontBestFitHeight(int height)
+	public static Font findFontBestFitHeight(int height, boolean bold)
 	{
 		/* Find the best fit font */
 		Font f = null;
 		for (int index = 0; index < ProfileRenderer.AVAILABLE_FONTS.length; index++)
 		{
 			f = ProfileRenderer.AVAILABLE_FONTS[index];
-			if (ProfileRenderer.AVAILABLE_FONTS[index].fm.height <= height)
+			
+			if (bold == true)
+			{
+				f = f.asBold();
+			}
+				
+			if ((f.fm.height - f.fm.descent) <= height)
 			{
 				break;
 			}
 		}
 		return f;
 	}
+	
+	
+	/*******************************************************
+	 * Given the provided height, find the best font to fit inside that height.
+	 * @param height
+	 * @return
+	 ********************************************************/
+	public static Font findFontBestFitWidth(int width, String s, boolean bold)
+	{
+		/* Find the best fit font */
+		Font f = null;
+		for (int index = 0; index < ProfileRenderer.AVAILABLE_FONTS.length; index++)
+		{
+			f = ProfileRenderer.AVAILABLE_FONTS[index];
+			if (bold == true)
+			{
+				f = f.asBold();
+			}
+			if (ProfileRenderer.AVAILABLE_FONTS[index].fm.getTextWidth(s) <= width)
+			{
+				break;
+			}
+		}
+		return f;
+	}
+	
 	
 	
 	
@@ -602,11 +657,11 @@ public class ProfileRenderer
 	{
 	
 		/* Draw a simple borer around the rect with a filled BG  */
-		g.setForeColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BORDER));
-		g.setBackColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BACKGROUND));
-		Font f = ProfileRenderer.findFontBestFitHeight((int)(rect.height * 0.8));
-		g.setFont(f);
-		
+//		g.setForeColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BORDER));
+//		g.setBackColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BACKGROUND));
+//		Font f = ProfileRenderer.findFontBestFitHeight((int)(rect.height * 0.8), false);
+//		g.setFont(f);
+//		
 //		if (staticContentOnly)
 //		{
 //			g.fillRect(rect.x, rect.y, rect.width, rect.height);
@@ -637,8 +692,8 @@ public class ProfileRenderer
 		{
 			
 			/* Calc positions */
-			Font f = Font.getFont("SW", true, Font.NORMAL_SIZE);
-			int textHeight = f.fm.height;
+			Font f = findFontBestFitWidth(width, this.statusMessage_, true);
+			int textHeight = f.fm.height - f.fm.descent;
 			int textWidth = f.fm.getTextWidth(this.statusMessage_);
 			
 			/* Draw a window box */
@@ -648,7 +703,7 @@ public class ProfileRenderer
 			g.drawRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
 			
 			/* Draw the text */
-			g.drawText(this.statusMessage_, (width - textWidth) / 2, yCenter - (textHeight / 2));
+			g.drawText(this.statusMessage_, (width / 2) - (textWidth / 2), yCenter - (textHeight / 2));
 			
 		}
 	}

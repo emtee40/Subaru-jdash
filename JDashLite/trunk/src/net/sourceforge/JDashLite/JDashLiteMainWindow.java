@@ -38,6 +38,7 @@ import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Color;
 import waba.fx.Coord;
+import waba.fx.Font;
 import waba.fx.Graphics;
 import waba.sys.Convert;
 import waba.sys.Vm;
@@ -646,6 +647,53 @@ public class JDashLiteMainWindow extends GameEngine
 //		g.drawLine(v1.m_[0], v1.m_[1], v2.m_[0], v2.m_[1]);
 //		
 //
+//
+//		g.clearScreen();
+//		
+//		int yOffset = -10;
+//		Font f = null;
+
+//		f = Font.getFont("SW", true, Font.BIG_SIZE); /* height = 30 */
+//		g.setFont(f);
+//		g.drawText("abcABC123 SW B+B " + f.fm.height, 10, yOffset += 20);
+//
+//		f = Font.getFont("SW", false, Font.BIG_SIZE); /* height = 28 */
+//		g.setFont(f);
+//		g.drawText("abcABC123 SW Big " + f.fm.height, 10, yOffset += 20);
+//
+//		f = Font.getFont("SW", false, Font.NORMAL_SIZE); /* height = 22 */
+//		g.setFont(f);
+//		g.drawText("abcABC123 SW Normal " + f.fm.height, 10, yOffset += 20);
+//
+//		f = Font.getFont("Tahoma", false, Font.BIG_SIZE);  /* Height = 17 */
+//		g.setFont(f);
+//		g.drawText("abcABC123 Tahoma Big " + f.fm.height, 10, yOffset += 20);
+//
+//		f = Font.getFont("Verdana", false, Font.BIG_SIZE); /* Height = 16 */
+//		g.setFont(f);
+//		g.drawText("abcABC123 Verdana " + f.fm.height, 10, yOffset += 20);
+//		
+//		f = Font.getFont("Tahoma", false, Font.NORMAL_SIZE);  /* Height = 15 Same size as TinyLarge NORMAl but this has tails!! */
+//		g.setFont(f);
+//		g.drawText("abcABC123 Tahoma " + f.fm.height, 10, yOffset += 20);
+//
+//		f = Font.getFont("TinyLarge", false, Font.NORMAL_SIZE); /* height = 14 */
+//		g.setFont(f);
+//		g.drawText("abcABC123 TinyLarge " + f.fm.height, 10, yOffset += 20);
+//
+//		f = Font.getFont("Verdana", false, Font.NORMAL_SIZE); /* Height <= 14   Verdana also has tails */
+//		g.setFont(f);
+//		g.drawText("abcABC123 Verdana " + f.fm.height, 10, yOffset += 20);
+//
+//		f = Font.getFont("Arial", false, Font.NORMAL_SIZE);  /* Height = 13 */
+//		g.setFont(f);
+//		g.drawText("abcABC123 Arial " + f.fm.height, 10, yOffset += 20);
+//		
+//		f = Font.getFont("TinySmall", false, Font.NORMAL_SIZE);  /* Height = 6 (ugly) */
+//		g.setFont(f);
+//		g.drawText("abcABC123 TinySmall " + f.fm.height, 10, yOffset += 20);
+//		
+		
 //		if (1==1) return;
 
 		

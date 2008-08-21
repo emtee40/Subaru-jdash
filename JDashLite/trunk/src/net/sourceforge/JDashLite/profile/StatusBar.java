@@ -122,7 +122,7 @@ public class StatusBar implements RenderableProfileComponent
 	{
 		
 		/* Find the best fit font */
-		Font f = ProfileRenderer.findFontBestFitHeight(r.height - 2);
+		Font f = ProfileRenderer.findFontBestFitHeight(r.height - 2, false);
 		g.setFont(f);
 		
 		/* Draw the inactive background color */

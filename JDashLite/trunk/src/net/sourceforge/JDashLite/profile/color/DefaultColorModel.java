@@ -35,10 +35,6 @@ import waba.util.Hashtable;
 public class DefaultColorModel implements ColorModel
 {
 	
-	protected static final Color LT_GRAY 	= Color.getColor(0xcc, 0xcc, 0xcc);
-	protected static final Color GRAY 		= Color.getColor(0x88, 0x88, 0x88);
-	protected static final Color DK_GRAY 	= Color.getColor(0x55, 0x55, 0x55);
-
 	/* The hash of colors for this model */
 	private Hashtable colorHash_ = new Hashtable(50);
 	
@@ -61,10 +57,10 @@ public class DefaultColorModel implements ColorModel
 		add(STATUS_RX_IDLE_COLOR,			Color.getColor(99,00,22)); /* dark red */
 		add(STATUS_TX_IDLE_COLOR,			Color.getColor(33,66,33)); /* dark green */
 		
-		add(ANALOG_GAUGE_RING,				DK_GRAY);
-		add(ANALOG_GAUGE_FACE,				Color.BLACK);
-		add(ANALOG_GAUGE_TICK_MARK,			Color.WHITE);
-		add(ANALOG_GAUGE_NEEDLE,			Color.getColor(0xFF,00,00));
+		add(ANALOG_GAUGE_RING,				Color.BLACK);
+		add(ANALOG_GAUGE_FACE,				GRAY_1);
+		add(ANALOG_GAUGE_TICK_MARK,			Color.BLACK);
+		add(ANALOG_GAUGE_NEEDLE,			Color.getColor(0xdd,00,00));
 
 	}
 	

@@ -32,6 +32,7 @@ import superwaba.ext.xplat.xml.AttributeList;
 import superwaba.ext.xplat.xml.ContentHandler;
 import superwaba.ext.xplat.xml.XmlReader;
 import waba.sys.Convert;
+import waba.util.Vector;
 
 /*********************************************************
  * 
@@ -49,16 +50,16 @@ public class ProfileXMLContentHandler implements ContentHandler
 	public static final String ATTR_NAME			= "name";
 	public static final String ATTR_PROTOCOL_CLASS 	= "protocolClass";
 	public static final String ATTR_TYPE			= "type";
-	public static final String ATTR_PARAM			= "param";
+//	public static final String ATTR_PARAM			= "param";
 	public static final String ATTR_HEIGHT			= "height";
-	public static final String ATTR_WIDTH			= "width";
-	public static final String ATTR_PRECISION		= "precision";
-	public static final String ATTR_LABEL			= "label";
-	public static final String ATTR_RANGE_START		= "range-start";
-	public static final String ATTR_RANGE_END		= "range-end";
-	public static final String ATTR_TICK_COUNT		= "tick-count";
-	public static final String ATTR_SHOW_TICKS		= "show-ticks";
-	public static final String ATTR_SHOW_TICK_LABEL	= "tick_labels";
+//	public static final String ATTR_WIDTH			= "width";
+//	public static final String ATTR_PRECISION		= "precision";
+//	public static final String ATTR_LABEL			= "label";
+//	public static final String ATTR_RANGE_START		= "range-start";
+//	public static final String ATTR_RANGE_END		= "range-end";
+//	public static final String ATTR_TICK_COUNT		= "tick-count";
+//	public static final String ATTR_SHOW_TICKS		= "show-ticks";
+//	public static final String ATTR_SHOW_TICK_LABEL	= "tick_labels";
 	
 	public static final String VALUE_DIGITAL		= "digital";
 	public static final String VALUE_LINE_GRAPH		= "line-graph";
@@ -182,98 +183,112 @@ public class ProfileXMLContentHandler implements ContentHandler
 		
 		if (VALUE_DIGITAL.equals(type))
 		{
-			gauge = createDigitalGauge(atts);
+			//gauge = createDigitalGauge(atts);
+			gauge = new DigitalGauge();
 		}
 		else if (VALUE_LINE_GRAPH.equals(type))
 		{
-			gauge = createLineGraphGauge(atts);
+			//gauge = createLineGraphGauge(atts);
+			gauge = new LineGraphGauge();
 		}
 		else if (VALUE_ANALOG.equals(type))
 		{
-			gauge = createAnalogGauge(atts);
+			//gauge = createAnalogGauge(atts);
+			gauge = new AnalogGauge();
 		}
 		else
 		{
 			throw new RuntimeException("Invalid Gauge Type " + type);
 		}
 		
-		/* All gauges have a parameter name */
-		gauge.setParameterName(atts.getAttributeValue(ATTR_PARAM));
 		
-		/* Set the width */
-		if (gauge != null)
+		/* Add the proprties to the gauge */
+		Vector keys = atts.getKeys();
+		for (int index = 0; index < keys.size(); index++)
 		{
-			String height = atts.getAttributeValue(ATTR_WIDTH);
-			if (height != null)
-			{
-				gauge.setWidthPercent(Convert.toDouble(height));
-			}
+			String key = (String)keys.items[index];
+			String value = atts.getAttributeValue(key);
+			gauge.setProperty(key, value);
 		}
 		
-		/* Not all gauges have a label, but it's supported in the base ProfileGauge class */
-		gauge.setLabel(atts.getAttributeValue(ATTR_LABEL));
+//		
+//		/* All gauges have a parameter name */
+//		gauge.setParameterName(atts.getAttributeValue(ATTR_PARAM));
+//		
+//		/* Set the width */
+//		if (gauge != null)
+//		{
+//			String height = atts.getAttributeValue(ATTR_WIDTH);
+//			if (height != null)
+//			{
+//				gauge.setWidthPercent(Convert.toDouble(height));
+//			}
+//		}
+//		
+//		/* Not all gauges have a label, but it's supported in the base ProfileGauge class */
+//		gauge.setLabel(atts.getAttributeValue(ATTR_LABEL));
 		
 		return gauge;
 	}
 	
 	
-	/*******************************************************
-	 * @param atts
-	 * @return
-	 ********************************************************/
-	private DigitalGauge createDigitalGauge(AttributeList atts)
-	{
-		
-		DigitalGauge gauge = new DigitalGauge();
-		String prec = atts.getAttributeValue(ATTR_PRECISION);
-
-		if ((prec != null && prec.length() > 0))
-		{
-			gauge.setDecimalPrecision(Convert.toInt(prec));
-		}
-
-		return gauge;
-	}
-	
-	
-	/*******************************************************
-	 * @param atts
-	 * @return
-	 ********************************************************/
-	private AnalogGauge createAnalogGauge(AttributeList atts)
-	{
-		AnalogGauge gauge = new AnalogGauge();
-		
-		String prec = atts.getAttributeValue(ATTR_PRECISION);
-		String rangeStart = atts.getAttributeValue(ATTR_RANGE_START);
-		String rangeEnd = atts.getAttributeValue(ATTR_RANGE_END);
-		String tickCount = atts.getAttributeValue(ATTR_TICK_COUNT);
-		String tickLabels = atts.getAttributeValue(ATTR_SHOW_TICK_LABEL);
-		String showTicks = atts.getAttributeValue(ATTR_SHOW_TICKS);
-
-		if ((prec != null && prec.length() > 0))
-		{
-			gauge.setDecimalPrecision(Convert.toInt(prec));
-		}
-		
-		gauge.setRangeStart(Convert.toDouble(rangeStart));
-		gauge.setRangeEnd(Convert.toDouble(rangeEnd));
-		gauge.setTickCount(Convert.toDouble(tickCount));
-		//gauge.setIncludeTickLabels(Convert.to)
-		
-		return gauge;
-	}
-	
-	/*******************************************************
-	 * @param atts
-	 * @return
-	 ********************************************************/
-	private LineGraphGauge createLineGraphGauge(AttributeList atts)
-	{
-		
-		LineGraphGauge gauge = new LineGraphGauge();
-		return gauge;
-	}
+//	/*******************************************************
+//	 * @param atts
+//	 * @return
+//	 ********************************************************/
+//	private DigitalGauge createDigitalGauge(AttributeList atts)
+//	{
+//		
+//		DigitalGauge gauge = new DigitalGauge();
+//		String prec = atts.getAttributeValue(ATTR_PRECISION);
+//
+//		if ((prec != null && prec.length() > 0))
+//		{
+//			gauge.setDecimalPrecision(Convert.toInt(prec));
+//		}
+//
+//		return gauge;
+//	}
+//	
+//	
+//	/*******************************************************
+//	 * @param atts
+//	 * @return
+//	 ********************************************************/
+//	private AnalogGauge createAnalogGauge(AttributeList atts)
+//	{
+//		AnalogGauge gauge = new AnalogGauge();
+//		
+//		String prec = atts.getAttributeValue(ATTR_PRECISION);
+//		String rangeStart = atts.getAttributeValue(ATTR_RANGE_START);
+//		String rangeEnd = atts.getAttributeValue(ATTR_RANGE_END);
+//		String tickCount = atts.getAttributeValue(ATTR_TICK_COUNT);
+//		String tickLabels = atts.getAttributeValue(ATTR_SHOW_TICK_LABEL);
+//		String showTicks = atts.getAttributeValue(ATTR_SHOW_TICKS);
+//
+//		if ((prec != null && prec.length() > 0))
+//		{
+//			gauge.setDecimalPrecision(Convert.toInt(prec));
+//		}
+//		
+//		gauge.setRangeStart(Convert.toDouble(rangeStart));
+//		gauge.setRangeEnd(Convert.toDouble(rangeEnd));
+//		gauge.setTickCount(Convert.toDouble(tickCount));
+//		//gauge.setIncludeTickLabels(Convert.to)
+//		
+//		return gauge;
+//	}
+//	
+//	/*******************************************************
+//	 * @param atts
+//	 * @return
+//	 ********************************************************/
+//	private LineGraphGauge createLineGraphGauge(AttributeList atts)
+//	{
+//		
+//		LineGraphGauge gauge = new LineGraphGauge();
+//		return gauge;
+//	}
 	
 	
 	/*******************************************************
@@ -415,7 +430,7 @@ public class ProfileXMLContentHandler implements ContentHandler
 		{
 			DigitalGauge g = (DigitalGauge)gauge;
 			addTagAttribute(sb, ATTR_TYPE, VALUE_DIGITAL);
-			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
+//			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
 		}
 		
 		/* Line Graph */
@@ -429,26 +444,35 @@ public class ProfileXMLContentHandler implements ContentHandler
 		{
 			AnalogGauge g = (AnalogGauge)gauge;
 			addTagAttribute(sb, ATTR_TYPE, VALUE_ANALOG);
-			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
-			addTagAttribute(sb, ATTR_RANGE_START, Convert.toString(g.getRangeStart()));
-			addTagAttribute(sb, ATTR_RANGE_END, Convert.toString(g.getRangeEnd()));
-			addTagAttribute(sb, ATTR_TICK_COUNT, Convert.toString(g.getTickCount()));
-			addTagAttribute(sb, ATTR_SHOW_TICKS, Convert.toString(g.getIncludeTicks()));
-			addTagAttribute(sb, ATTR_SHOW_TICK_LABEL, Convert.toString(g.getIncludeTickLabels()));
+//			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
+//			addTagAttribute(sb, ATTR_RANGE_START, Convert.toString(g.getRangeStart()));
+//			addTagAttribute(sb, ATTR_RANGE_END, Convert.toString(g.getRangeEnd()));
+//			addTagAttribute(sb, ATTR_TICK_COUNT, Convert.toString(g.getTickCount()));
+//			addTagAttribute(sb, ATTR_SHOW_TICKS, Convert.toString(g.getIncludeTicks()));
+//			addTagAttribute(sb, ATTR_SHOW_TICK_LABEL, Convert.toString(g.getIncludeTickLabels()));
 		}
 		
-		/* Width */
-		if (gauge.getWidthPercent() > 0)
+//		/* Width */
+//		if (gauge.getWidthPercent() > 0)
+//		{
+//			addTagAttribute(sb, ATTR_WIDTH, Convert.toString(gauge.getWidthPercent(), 4));
+//		}
+//		
+//		/* Param */
+//		addTagAttribute(sb, ATTR_PARAM, gauge.getParameterName());
+//		
+//		/* Label */
+//		addTagAttribute(sb, ATTR_LABEL, gauge.getLabel());
+//
+			
+		/* Add all the known proprties */
+		Vector keys = gauge.getPropertyKeys();
+		for (int index = 0; index < keys.size(); index++)
 		{
-			addTagAttribute(sb, ATTR_WIDTH, Convert.toString(gauge.getWidthPercent(), 4));
+			String key = (String)keys.items[index];
+			addTagAttribute(sb, key, gauge.getProperty(key));
 		}
-		
-		/* Param */
-		addTagAttribute(sb, ATTR_PARAM, gauge.getParameterName());
-		
-		/* Label */
-		addTagAttribute(sb, ATTR_LABEL, gauge.getLabel());
-		
+			
 		closeOpenTag(sb);
 		addCloseTag(sb, NODE_GAUGE);
 	}

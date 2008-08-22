@@ -41,6 +41,16 @@ import waba.sys.Convert;
  *********************************************************/
 public class AnalogGauge extends ProfileGauge
 {
+
+	
+	public static final String PROP_D_RANGE_START 			= "range-start";
+	public static final String PROP_D_RANGE_END				= "range-end";
+	public static final String PROP_I_TICK_COUNT 				= "tick-count";
+	public static final String PROP_B_INCLUDE_TICKS 			= "include-ticks";
+	public static final String PROP_B_INCLUDE_TICK_LABELS		= "include-tick-labels";
+	public static final String PROP_B_INCLUDE_DIGITAL_VALUE	= "include-digital-value";
+	public static final String PROP_I_PRECISION				= "precision";
+
 	
 	private static final double OUTER_RING_RADIUS = 0.48;
 	private static final double OUTER_POINT_RADIUS = 0.46;
@@ -59,16 +69,16 @@ public class AnalogGauge extends ProfileGauge
 
 	/* The default number of decimal places to show */
 	private int decimalPrecision_ = 0;
-	
-	/* The tick marks / Numbers are defined by a divisor */
-	private double tickCount_ = -1;
-	
-	/* Include the ticks at all? */
-	private boolean includeTicks_ = true;
-	
-	/* Include the nubmer label values */
-	private boolean includeTickLabels_ = true;
-	
+//	
+//	/* The tick marks / Numbers are defined by a divisor */
+//	private double tickCount_ = -1;
+//	
+//	/* Include the ticks at all? */
+//	private boolean includeTicks_ = true;
+//	
+//	/* Include the nubmer label values */
+//	private boolean includeTickLabels_ = true;
+//	
 	/* Include the digital value readout ? */
 	private boolean includeDigitalValue_ = false;
 	
@@ -86,109 +96,110 @@ public class AnalogGauge extends ProfileGauge
 	 *******************************************************/
 	public AnalogGauge()
 	{
-	}
-	
-	
-	/********************************************************
-	 * @return the rangeEnd
-	 ********************************************************/
-	public double getRangeEnd()
-	{
-		return this.rangeEnd_;
-	}
-	
-	
-	/********************************************************
-	 * @param rangeEnd the rangeEnd to set
-	 ********************************************************/
-	public void setRangeEnd(double rangeEnd)
-	{
-		this.rangeEnd_ = rangeEnd;
-	}
-	
-	/********************************************************
-	 * @return the rangeStart
-	 ********************************************************/
-	public double getRangeStart()
-	{
-		return this.rangeStart_;
-	}
-	
-	/********************************************************
-	 * @param rangeStart the rangeStart to set
-	 ********************************************************/
-	public void setRangeStart(double rangeStart)
-	{
-		this.rangeStart_ = rangeStart;
-	}
-	
-	/********************************************************
-	 * @return the decimalPlaces
-	 ********************************************************/
-	public int getDecimalPrecision()
-	{
-		return this.decimalPrecision_;
-	}
-	
-	
-	/********************************************************
-	 * @param decimalPlaces the decimalPlaces to set
-	 ********************************************************/
-	public void setDecimalPrecision(int decimalPrecision)
-	{
-		this.decimalPrecision_ = decimalPrecision;
-	}
 
-	/********************************************************
-	 * @return the tickCount
-	 ********************************************************/
-	public double getTickCount()
-	{
-		return this.tickCount_;
 	}
 	
 	
-	/********************************************************
-	 * @param tickCount the tickCount to set
-	 ********************************************************/
-	public void setTickCount(double tickCount)
-	{
-		this.tickCount_ = tickCount;
-	}
-	
-	
-	/********************************************************
-	 * @return the includeTickLabels
-	 ********************************************************/
-	public boolean getIncludeTickLabels()
-	{
-		return this.includeTickLabels_;
-	}
-	
-	/********************************************************
-	 * @param includeTickLabels the includeTickLabels to set
-	 ********************************************************/
-	public void setIncludeTickLabels(boolean includeTickLabels)
-	{
-		this.includeTickLabels_ = includeTickLabels;
-	}
-	
-	
-	/********************************************************
-	 * @return the includeTicks
-	 ********************************************************/
-	public boolean getIncludeTicks()
-	{
-		return this.includeTicks_;
-	}
-	
-	/********************************************************
-	 * @param includeTicks the includeTicks to set
-	 ********************************************************/
-	public void setIncludeTicks(boolean includeTicks)
-	{
-		this.includeTicks_ = includeTicks;
-	}
+//	/********************************************************
+//	 * @return the rangeEnd
+//	 ********************************************************/
+//	public double getRangeEnd()
+//	{
+//		return this.rangeEnd_;
+//	}
+//	
+//	
+//	/********************************************************
+//	 * @param rangeEnd the rangeEnd to set
+//	 ********************************************************/
+//	public void setRangeEnd(double rangeEnd)
+//	{
+//		this.rangeEnd_ = rangeEnd;
+//	}
+//	
+//	/********************************************************
+//	 * @return the rangeStart
+//	 ********************************************************/
+//	public double getRangeStart()
+//	{
+//		return this.rangeStart_;
+//	}
+//	
+//	/********************************************************
+//	 * @param rangeStart the rangeStart to set
+//	 ********************************************************/
+//	public void setRangeStart(double rangeStart)
+//	{
+//		this.rangeStart_ = rangeStart;
+//	}
+//	
+//	/********************************************************
+//	 * @return the decimalPlaces
+//	 ********************************************************/
+//	public int getDecimalPrecision()
+//	{
+//		return this.decimalPrecision_;
+//	}
+//	
+//	
+//	/********************************************************
+//	 * @param decimalPlaces the decimalPlaces to set
+//	 ********************************************************/
+//	public void setDecimalPrecision(int decimalPrecision)
+//	{
+//		this.decimalPrecision_ = decimalPrecision;
+//	}
+//
+//	/********************************************************
+//	 * @return the tickCount
+//	 ********************************************************/
+//	public double getTickCount()
+//	{
+//		return this.tickCount_;
+//	}
+//	
+//	
+//	/********************************************************
+//	 * @param tickCount the tickCount to set
+//	 ********************************************************/
+//	public void setTickCount(double tickCount)
+//	{
+//		this.tickCount_ = tickCount;
+//	}
+//	
+//	
+//	/********************************************************
+//	 * @return the includeTickLabels
+//	 ********************************************************/
+//	public boolean getIncludeTickLabels()
+//	{
+//		return this.includeTickLabels_;
+//	}
+//	
+//	/********************************************************
+//	 * @param includeTickLabels the includeTickLabels to set
+//	 ********************************************************/
+//	public void setIncludeTickLabels(boolean includeTickLabels)
+//	{
+//		this.includeTickLabels_ = includeTickLabels;
+//	}
+//	
+//	
+//	/********************************************************
+//	 * @return the includeTicks
+//	 ********************************************************/
+//	public boolean getIncludeTicks()
+//	{
+//		return this.includeTicks_;
+//	}
+//	
+//	/********************************************************
+//	 * @param includeTicks the includeTicks to set
+//	 ********************************************************/
+//	public void setIncludeTicks(boolean includeTicks)
+//	{
+//		this.includeTicks_ = includeTicks;
+//	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
@@ -269,7 +280,7 @@ public class AnalogGauge extends ProfileGauge
 			int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
 			g.setFont(this.currentValueFont_);
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-			String val = Convert.toString(p.getValue(), getDecimalPrecision());
+			String val = Convert.toString(p.getValue(), this.decimalPrecision_);
 			g.drawText(val, centerX - (this.currentValueFont_.fm.getTextWidth(val) / 2), (centerY + (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent)));
 	//		g.drawText(val, centerX - (this.currentValueAndLabelFont_.fm.getTextWidth(val) / 2), centerY + needleWidth * 2);
 		}
@@ -287,6 +298,12 @@ public class AnalogGauge extends ProfileGauge
 	private void generateStaticImage(Graphics g, Rect r, ECUParameter p, ColorModel cm, int tickLength)
 	{
 		
+		/* Pull out a few regularly needed values */
+		this.rangeStart_ = getDoubleProperty(PROP_D_RANGE_START, 0);
+		this.rangeEnd_   = getDoubleProperty(PROP_D_RANGE_END, 1);
+		this.decimalPrecision_ = getIntProperty(PROP_I_PRECISION, 0);
+		this.includeDigitalValue_ = getBooleanProperty(PROP_B_INCLUDE_DIGITAL_VALUE);
+		
 		/* Blank the gauge first */
 		g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
 		g.setBackColor(cm.get(ColorModel.DEFAULT_BACKGROUND));
@@ -301,7 +318,7 @@ public class AnalogGauge extends ProfileGauge
 		int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
 		
 		/* setup the current value font.  It's the same as the label font. */
-		this.currentValueFont_ = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), Convert.toString(this.rangeEnd_, getDecimalPrecision()), false);
+		this.currentValueFont_ = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), Convert.toString(this.rangeEnd_, this.decimalPrecision_), false);
 //		Font labelFont = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), getLabel(), false);
 		
 		
@@ -319,7 +336,7 @@ public class AnalogGauge extends ProfileGauge
 	
 		
 		/* Calculate the tick mark range */
-		double tickRange = ((this.rangeEnd_ - this.rangeStart_) / (double)(getTickCount() - 1.0));
+		double tickRange = ((this.rangeEnd_ - this.rangeStart_) / (double)(getIntProperty(PROP_I_TICK_COUNT, 2) - 1.0));
 		
 		
 		/* First, determine the normal length of the tick label values */
@@ -328,17 +345,17 @@ public class AnalogGauge extends ProfileGauge
 		
 		
 		/* Draw each tick mark */
-		if (getIncludeTicks())
+		if (getBooleanProperty(PROP_B_INCLUDE_TICKS))
 		{
 			g.setFont(tickFont);
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-			for (double index = 0; index < getTickCount() - 0.5; index+=0.5)
+			for (double index = 0; index < getIntProperty(PROP_I_TICK_COUNT, 2) - 0.5; index+=0.5)
 			{
 				Coord tickPoint1 = new Coord(0, mainRadius - (tickLength / 2));   /* outer tip of tick */
 				Coord tickPoint2 = new Coord(0, tickPoint1.y - tickLength);       /* inner tip of tick */
 				Coord tickPoint3 = new Coord(0, tickPoint2.y - (int)(tickLength * 1.5));  /* Center point of tick value */
 				
-				double tickAngle = MINIMUM_DEGREE + (((MAXIMUM_DEGREE - MINIMUM_DEGREE) / (double)(getTickCount() - 1.0)) * index);
+				double tickAngle = MINIMUM_DEGREE + (((MAXIMUM_DEGREE - MINIMUM_DEGREE) / (double)(getIntProperty(PROP_I_TICK_COUNT, 2) - 1.0)) * index);
 				
 				AffineTransform tickTxfm = AffineTransform.rotateInstance(Math.toRadians(tickAngle));
 				tickTxfm.addTranslate(centerX, centerY);
@@ -350,9 +367,9 @@ public class AnalogGauge extends ProfileGauge
 				g.drawLine(tickPoint1.x, tickPoint1.y, tickPoint2.x, tickPoint2.y);
 				
 				/* Only draw the text on whole ticks */
-				if (getIncludeTickLabels() && index % 1 == 0)
+				if (getBooleanProperty(PROP_B_INCLUDE_TICK_LABELS) && index % 1 == 0)
 				{
-					String tickValue = Convert.toString(this.rangeStart_ + (index * tickRange), getDecimalPrecision());
+					String tickValue = Convert.toString(this.rangeStart_ + (index * tickRange), this.decimalPrecision_);
 					
 					/* No need to analize zero */
 					if ((this.rangeStart_ + (index * tickRange)) == 0)
@@ -382,12 +399,13 @@ public class AnalogGauge extends ProfileGauge
 		
 
 		/* Draw the label */
+		String label = getProperty(PROP_STR_LABEL);
 		g.setFont(this.currentValueFont_);
-		if (getLabel() != null)
+		if (label != null)
 		{
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
 			//g.drawText(getLabel(), centerX - (labelFont.fm.getTextWidth(getLabel()) / 2), centerY - tickLength - labelFont.fm.height);
-			g.drawText(getLabel(), centerX - (this.currentValueFont_.fm.getTextWidth(getLabel()) / 2), (centerY - (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent) / 3));
+			g.drawText(label, centerX - (this.currentValueFont_.fm.getTextWidth(label) / 2), (centerY - (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent) / 3));
 		}
 
 	}

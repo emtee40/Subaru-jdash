@@ -28,71 +28,175 @@ import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
 import waba.fx.Graphics;
 import waba.fx.Rect;
+import waba.sys.Convert;
+import waba.util.Hashtable;
+import waba.util.Vector;
 
 
 /*********************************************************
- * 
+ * A profile gauge is an abstract class with methods used to 
+ * get and fetch properties that will describe how to 
+ * actually render a concrete version of this abstract class.
+ * It is VERY important to note that all properties are stored
+ * as a String.  They are converted to and from any native
+ * types (int, long, double) on the fly.  This is important because
+ * converstion can take up a lot more time than expected if used
+ * in tight loops.  Your wondering why?  Lazy!  Lazy in that a 
+ * ProfileGauge can now be easily inspected by the XML content handler
+ * for it's properties.  These properties can be now saved to and read
+ * from an XML file quiete easily.  Therefor, if you have a 
+ * member variable that you do NOT need saved, do NOT use the properties
+ * methods here.
  *
  *********************************************************/
 public abstract class ProfileGauge //implements RenderableProfileComponent
 {
+	
+	protected static final String BOOLEAN_TRUE				= "true";
+	protected static final String BOOLEAN_FALSE				= "false";
 
-	private String label_ = null;
-	private String parameterName_ = null;
-	private double widthPercent_ = -1;
+	public static final String PROP_STR_LABEL 				= "label";
+	public static final String PROP_STR_PARAMETER_NAME 		= "param";
+	public static final String PROP_D_WIDTH 				= "width";
 	
-	/********************************************************
-	 * @return the parameterName
+	
+	private Hashtable props_ = new Hashtable(3);
+	
+//	private String label_ = null;
+//	private String parameterName_ = null;
+//	private double widthPercent_ = -1;
+	
+	/*******************************************************
+	 * @param key
+	 * @return
 	 ********************************************************/
-	public String getParameterName()
+	public String getProperty(String key)
 	{
-		return this.parameterName_;
+		return (String)this.props_.get(key);
 	}
 	
-	
-	/********************************************************
-	 * @param parameterName the parameterName to set
+	/******************************************************
+	 * @param key
+	 * @param ifNull
+	 * @return
 	 ********************************************************/
-	public void setParameterName(String parameterName)
+	public String getProperty(String key, String ifNull)
 	{
-		this.parameterName_ = parameterName;
+		String str = getProperty(key);
+		if (str == null)
+		{
+			return ifNull;
+		}
+		else
+		{
+			return str;
+		}
 	}
 	
-	
-	/********************************************************
-	 * @return the widthPercent
+	/*******************************************************
+	 * @param key
+	 * @param value
 	 ********************************************************/
-	public double getWidthPercent()
+	public void setProperty(String key, String value)
 	{
-		return this.widthPercent_;
+		this.props_.put(key,value);
 	}
-	
-	
-	/********************************************************
-	 * @param widthPercent the widthPercent to set
-	 ********************************************************/
-	public void setWidthPercent(double widthPercent)
-	{
-		this.widthPercent_ = widthPercent;
-	}
-	
 	
 	/*******************************************************
 	 * @return
 	 ********************************************************/
-	public String getLabel()
+	public Vector getPropertyKeys()
 	{
-		return this.label_;
+		return this.props_.getKeys();
 	}
 	
-	/********************************************************
-	 * @param label the label to set
+	/*******************************************************
+	 * @param key IN - the key to return the value of.
+	 * @param ifNull IN - if the property is not found, return this value
+	 * @return
 	 ********************************************************/
-	public void setLabel(String label)
+	public int getIntProperty(String key, int ifNull)
 	{
-		this.label_ = label;
+		String str = getProperty(key);
+		if (str == null)
+		{
+			return ifNull;
+		}
+		else
+		{
+			return Convert.toInt(str);
+		}
 	}
 	
+	
+	/*******************************************************
+	 * @param key
+	 * @param value
+	 ********************************************************/
+	public void setIntProperty(String key, int value)
+	{
+		setProperty(key, Convert.toString(value));
+	}
+	
+	/*******************************************************
+	 * @param key IN - the key to return the value of.
+	 * @param ifNull IN - if the property is not found, return this value
+	 * @return
+	 ********************************************************/
+	public double getDoubleProperty(String key, double ifNull)
+	{
+		String str = getProperty(key);
+		if (str == null)
+		{
+			return ifNull;
+		}
+		else
+		{
+			return Convert.toDouble(str);
+		}
+	}
+	
+	
+	/*******************************************************
+	 * @param key
+	 * @param value
+	 ********************************************************/
+	public void setDoubleProperty(String key, double value)
+	{
+		setProperty(key, Convert.toString(value));
+	}
+
+	
+	/*******************************************************
+	 * Unlike the other native getters, a missing boolean is the 
+	 * same as a FALSE.
+	 * @param key IN - the key to return the value of.
+	 * @return
+	 ********************************************************/
+	public boolean getBooleanProperty(String key)
+	{
+		String str = getProperty(key);
+		return BOOLEAN_TRUE.equals(str);
+	}
+	
+	
+	/*******************************************************
+	 * @param key
+	 * @param value
+	 ********************************************************/
+	public void setBooleanProperty(String key, boolean value)
+	{
+		if (value)
+		{
+			setProperty(key, BOOLEAN_TRUE);
+		}
+		else
+		{
+			setProperty(key, BOOLEAN_FALSE);
+		}
+	}
+
+
 	/********************************************************
 	 * @param g
 	 * @param r

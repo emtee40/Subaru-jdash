@@ -33,12 +33,8 @@ import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
-import net.sourceforge.JDashLite.util.AffineTransform;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
-import waba.fx.Color;
-import waba.fx.Coord;
-import waba.fx.Font;
 import waba.fx.Graphics;
 import waba.sys.Convert;
 import waba.sys.Vm;
@@ -134,12 +130,12 @@ public class JDashLiteMainWindow extends GameEngine
 			waba.sys.Settings.setUIStyle((byte)getPreferences().getInt(Preferences.KEY_GUI_STYLE, waba.sys.Settings.WinCE));
 			
 			/* Initialize the Logger instance */
-			ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVEL_OFF));
+			ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVEL_DEBUG));
 
 			/* Make sure there is at least SOMETHING in the profile list */
 			if (getPreferences().getProfileCount() == 0)
 			{
-				getPreferences().addProfile(Profile.SAMPLE_PROFILE_XML);
+				getPreferences().addProfile(Profile.createSampleProfile().toXml());
 			}
 
 			/* Setup the protocol thread */
@@ -714,11 +710,11 @@ public class JDashLiteMainWindow extends GameEngine
 		}
 		catch(Exception e)
 		{
+			this.profileRenderer_ = null;
 			stop();
 			ErrorLog.fatal("onPaint", e);
 			ErrorDialog.showError("Fatal Error", e);
-			this.profileRenderer_ = null;
-			doExit();
+			//doExit();
 		}
 		
 

@@ -24,10 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.profile;
 
+import net.sourceforge.JDashLite.ecu.comm.ELM.AllParameters;
 import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
-import net.sourceforge.JDashLite.profile.color.DefaultColorModel;
-import waba.fx.Color;
+import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
+import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
+import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
 import waba.util.Vector;
 
 /*********************************************************
@@ -71,7 +73,7 @@ import waba.util.Vector;
 public class Profile
 {
 
-	public static final String SAMPLE_PROFILE_XML =
+	public static final String sSAMPLE_PROFILE_XML =
 " <profile name=\"Sample Profile\" protocolClass=\"" + ELMProtocol.class.getName() +  "\"> " +
 "   <page> " +
 "     <row>" +
@@ -123,6 +125,156 @@ public class Profile
 //		this.parameterNames_.addElement("STFT1");
 //		this.parameterNames_.addElement("LTFT1");
 		
+	}
+	
+	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public static Profile createSampleProfile()
+	{
+		Profile sampleProfile = new Profile();
+		sampleProfile.setName("Sample Profile");
+		sampleProfile.setProtocolClass(ELMProtocol.class.getName());
+		
+		ProfilePage page = null;
+		ProfileRow row = null;
+		AnalogGauge analogGauge = null;
+		DigitalGauge digitalGauge = null;
+		LineGraphGauge lineGraphGauge = null;
+		
+		/* Page 0 */
+		page = new ProfilePage();
+		sampleProfile.addPage(page);
+		
+		/* Page 0 row 0 */
+		row = new ProfileRow(); 
+		page.addRow(row);
+		
+		/* Page 0 row 0 gauge 0 */
+		analogGauge = new AnalogGauge();
+		row.addGauge(analogGauge);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, new AllParameters.RPM().getName());
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 0);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 8000);
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 9);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);
+		
+		/* Page 0 row 0 gauge 1 */
+		lineGraphGauge = new LineGraphGauge();
+		row.addGauge(lineGraphGauge);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, null);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME,  new AllParameters.RPM().getName());
+		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+
+		/* Page 0 row 0 gauge 2 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL, null);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  new AllParameters.RPM().getName());
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"RPM");
+
+		
+		
+		/* Page 0 row 1 */
+		row = new ProfileRow(); 
+		page.addRow(row);
+		row.setHeightPercent(0.4);		
+		
+		/* Page 0 row 1 gauge 0 */
+		analogGauge = new AnalogGauge();
+		row.addGauge(analogGauge);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, new AllParameters.STFT1().getName());
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 2);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);
+		
+		/* Page 0 row 1 gauge 1 */
+		lineGraphGauge = new LineGraphGauge();
+		row.addGauge(lineGraphGauge);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Short Term Fuel Trim %");
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, new AllParameters.STFT1().getName());
+		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+
+		/* Page 0 row 1 gauge 2 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL, null);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME, new AllParameters.STFT1().getName());
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"STFT%");
+
+		
+		/* Page 0 row 2 */
+		row = new ProfileRow(); 
+		page.addRow(row);
+		
+		
+		/* Page 0 row 2 gauge 0 */
+		analogGauge = new AnalogGauge();
+		row.addGauge(analogGauge);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, new AllParameters.LTFT1().getName());
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 2);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);
+		
+		/* Page 0 row 2 gauge 1 */
+		lineGraphGauge = new LineGraphGauge();
+		row.addGauge(lineGraphGauge);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Long Term Fuel Trim %");
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, new AllParameters.LTFT1().getName());
+		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+
+		/* Page 0 row 2 gauge 2 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL, null);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME, new AllParameters.LTFT1().getName());
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"LTFT%");
+		
+		
+		/* Page 1 */
+		page = new ProfilePage();
+		sampleProfile.addPage(page);
+
+		/* Page 1 Row 0 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		/* Page 1 row 0 gauge 0 */
+		analogGauge = new AnalogGauge();
+		row.addGauge(analogGauge);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 0);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 9000);
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);
+
+		
+		return sampleProfile;
 	}
 	
 	

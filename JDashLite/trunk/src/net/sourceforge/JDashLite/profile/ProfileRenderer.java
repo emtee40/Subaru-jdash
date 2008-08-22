@@ -28,6 +28,7 @@ import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter;
+import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
 import waba.fx.Color;
@@ -290,7 +291,7 @@ public class ProfileRenderer
 					{
 						ProfileGauge gauge = row.getGauge(gaugeIndex);
 						
-						if (param.getName().equals(gauge.getParameterName()))
+						if (param.getName().equals(gauge.getProperty(ProfileGauge.PROP_STR_LABEL)))
 						{
 							param.setEnabled(true);
 							break;
@@ -439,11 +440,18 @@ public class ProfileRenderer
 				
 				if (gaugeRect == null)
 				{
-					throw new Exception("Cannot render gauge: " + rowIndex + " on row " + rowIndex + " the RECT cache has no entry for it");
+					ErrorLog.error("Cannot render gauge: " + rowIndex + " on row " + rowIndex + " the RECT cache has no entry for it");
 				}
 
 				/* Render this gauge */
-				renderGauge(g, gaugeRect, gauge);
+				if (gauge != null)
+				{
+					renderGauge(g, gaugeRect, gauge);
+				}
+				else
+				{
+					ErrorLog.fatal("Row " + rowIndex + " returned a null gauge at " + gaugeIndex);
+				}
 		
 			}
 		}
@@ -588,9 +596,9 @@ public class ProfileRenderer
 					for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
 					{
 						/* If it's not -1, then calculate the percent */
-						if (row.getGauge(gaugeIndex).getWidthPercent() > 0)
+						if (row.getGauge(gaugeIndex).getDoubleProperty(ProfileGauge.PROP_D_WIDTH, -1) > 0)
 						{
-							gaugeWidths[gaugeIndex] = (int)(row.getGauge(gaugeIndex).getWidthPercent() * (double)rowRect.width);
+							gaugeWidths[gaugeIndex] = (int)(row.getGauge(gaugeIndex).getDoubleProperty(ProfileGauge.PROP_D_WIDTH, -1) * (double)rowRect.width);
 							widthOffset += gaugeWidths[gaugeIndex] ;
 						}
 						else
@@ -669,7 +677,12 @@ public class ProfileRenderer
 //		}
 		
 		/* Get the parameter for this gauge */
-		ECUParameter p = (ECUParameter)this.parameters_.get(gauge.getParameterName());
+		String parameteName = gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME);
+		if (parameteName == null)
+		{
+			ErrorLog.error("Gauge " + gauge + " does not have a parameter identified");
+		}
+		ECUParameter p = (ECUParameter)this.parameters_.get(gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME));
 		
 		/* No Param? */
 		if (p != null)

@@ -39,10 +39,13 @@ import waba.sys.Convert;
 public class DigitalGauge extends ProfileGauge
 {
 	
+
+	public static final String PROP_I_PRECISION			= "precision";
+
 	private double LABEL_HEIGHT = 0.2;
 
-	/* The default number of decimal places to show */
-	private int decimalPrecision_ = 0;
+//	/* The default number of decimal places to show */
+//	private int decimalPrecision_ = 0;
 	
 	/********************************************************
 	 * 
@@ -50,26 +53,26 @@ public class DigitalGauge extends ProfileGauge
 	public DigitalGauge()
 	{
 	}
-	
-	
-	/********************************************************
-	 * @return the decimalPlaces
-	 ********************************************************/
-	public int getDecimalPrecision()
-	{
-		return this.decimalPrecision_;
-	}
-	
-	
-	/********************************************************
-	 * @param decimalPlaces the decimalPlaces to set
-	 ********************************************************/
-	public void setDecimalPrecision(int decimalPrecision)
-	{
-		this.decimalPrecision_ = decimalPrecision;
-	}
-
-	
+//	
+//	
+//	/********************************************************
+//	 * @return the decimalPlaces
+//	 ********************************************************/
+//	public int getDecimalPrecision()
+//	{
+//		return this.decimalPrecision_;
+//	}
+//	
+//	
+//	/********************************************************
+//	 * @param decimalPlaces the decimalPlaces to set
+//	 ********************************************************/
+//	public void setDecimalPrecision(int decimalPrecision)
+//	{
+//		this.decimalPrecision_ = decimalPrecision;
+//	}
+//
+//	
 
 	
 	/*********************************************************
@@ -87,17 +90,18 @@ public class DigitalGauge extends ProfileGauge
 		
 		g.setForeColor(cm.get(ColorModel.DEFAULT_TEXT));
 		
+		String label = getProperty(PROP_STR_LABEL);
 		Font f = null;
-		if (getLabel() != null)
+		if (label != null)
 		{
-			f = ProfileRenderer.findFontBestFitWidth(r.width, getLabel(), false);
+			f = ProfileRenderer.findFontBestFitWidth(r.width, label, false);
 			g.setFont(f);
-			g.drawText(getLabel(), r.x + ((r.width - f.fm.getTextWidth(getLabel())) / 2), r.y + r.height - f.fm.height - 1);
+			g.drawText(label, r.x + ((r.width - f.fm.getTextWidth(label)) / 2), r.y + r.height - f.fm.height - 1);
 		}
 		
 		/* Draw the current value */
 		//f = ProfileRenderer.findFontBestFitHeight((int)(r.height - LABEL_HEIGHT), true);
-		String val = Convert.toString(p.getValue(), getDecimalPrecision());
+		String val = Convert.toString(p.getValue(), getIntProperty(PROP_I_PRECISION, 0));
 		f = ProfileRenderer.findFontBestFitWidth(r.width - 10, val, true);
 		g.setFont(f);
 		g.drawText(val, r.x + ((r.width - f.fm.getTextWidth(val)) / 2), r.y + ((r.height - f.fm.height) / 2));

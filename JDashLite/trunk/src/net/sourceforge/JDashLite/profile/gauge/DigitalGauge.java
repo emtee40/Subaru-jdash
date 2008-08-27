@@ -94,7 +94,7 @@ public class DigitalGauge extends ProfileGauge
 		Font f = null;
 		if (label != null)
 		{
-			f = ProfileRenderer.findFontBestFitWidth(r.width, label, false);
+			f = ProfileRenderer.findFontBestFitWidth(r.width - 6, label, false);
 			g.setFont(f);
 			g.drawText(label, r.x + ((r.width - f.fm.getTextWidth(label)) / 2), r.y + r.height - f.fm.height - 1);
 		}

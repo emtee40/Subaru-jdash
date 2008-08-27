@@ -52,13 +52,13 @@ public class AnalogGauge extends ProfileGauge
 	public static final String PROP_I_PRECISION				= "precision";
 
 	
-	private static final double OUTER_RING_RADIUS = 0.48;
+	protected static final double OUTER_RING_RADIUS = 0.48;
 	private static final double OUTER_POINT_RADIUS = 0.46;
 	private static final double INNTER_POINT_RADIUS = 0.40;
 	private static final double NEEDLE_WIDTH = 0.045;
 	
-	private static final double MINIMUM_DEGREE = 50;
-	private static final double MAXIMUM_DEGREE = 360 - 50;
+	protected static final double MINIMUM_DEGREE = 50;
+	protected static final double MAXIMUM_DEGREE = 360 - 50;
 	
 
 	/* The range starting value of the ecu value */
@@ -69,16 +69,7 @@ public class AnalogGauge extends ProfileGauge
 
 	/* The default number of decimal places to show */
 	private int decimalPrecision_ = 0;
-//	
-//	/* The tick marks / Numbers are defined by a divisor */
-//	private double tickCount_ = -1;
-//	
-//	/* Include the ticks at all? */
-//	private boolean includeTicks_ = true;
-//	
-//	/* Include the nubmer label values */
-//	private boolean includeTickLabels_ = true;
-//	
+
 	/* Include the digital value readout ? */
 	private boolean includeDigitalValue_ = false;
 	
@@ -98,109 +89,7 @@ public class AnalogGauge extends ProfileGauge
 	{
 
 	}
-	
-	
-//	/********************************************************
-//	 * @return the rangeEnd
-//	 ********************************************************/
-//	public double getRangeEnd()
-//	{
-//		return this.rangeEnd_;
-//	}
-//	
-//	
-//	/********************************************************
-//	 * @param rangeEnd the rangeEnd to set
-//	 ********************************************************/
-//	public void setRangeEnd(double rangeEnd)
-//	{
-//		this.rangeEnd_ = rangeEnd;
-//	}
-//	
-//	/********************************************************
-//	 * @return the rangeStart
-//	 ********************************************************/
-//	public double getRangeStart()
-//	{
-//		return this.rangeStart_;
-//	}
-//	
-//	/********************************************************
-//	 * @param rangeStart the rangeStart to set
-//	 ********************************************************/
-//	public void setRangeStart(double rangeStart)
-//	{
-//		this.rangeStart_ = rangeStart;
-//	}
-//	
-//	/********************************************************
-//	 * @return the decimalPlaces
-//	 ********************************************************/
-//	public int getDecimalPrecision()
-//	{
-//		return this.decimalPrecision_;
-//	}
-//	
-//	
-//	/********************************************************
-//	 * @param decimalPlaces the decimalPlaces to set
-//	 ********************************************************/
-//	public void setDecimalPrecision(int decimalPrecision)
-//	{
-//		this.decimalPrecision_ = decimalPrecision;
-//	}
-//
-//	/********************************************************
-//	 * @return the tickCount
-//	 ********************************************************/
-//	public double getTickCount()
-//	{
-//		return this.tickCount_;
-//	}
-//	
-//	
-//	/********************************************************
-//	 * @param tickCount the tickCount to set
-//	 ********************************************************/
-//	public void setTickCount(double tickCount)
-//	{
-//		this.tickCount_ = tickCount;
-//	}
-//	
-//	
-//	/********************************************************
-//	 * @return the includeTickLabels
-//	 ********************************************************/
-//	public boolean getIncludeTickLabels()
-//	{
-//		return this.includeTickLabels_;
-//	}
-//	
-//	/********************************************************
-//	 * @param includeTickLabels the includeTickLabels to set
-//	 ********************************************************/
-//	public void setIncludeTickLabels(boolean includeTickLabels)
-//	{
-//		this.includeTickLabels_ = includeTickLabels;
-//	}
-//	
-//	
-//	/********************************************************
-//	 * @return the includeTicks
-//	 ********************************************************/
-//	public boolean getIncludeTicks()
-//	{
-//		return this.includeTicks_;
-//	}
-//	
-//	/********************************************************
-//	 * @param includeTicks the includeTicks to set
-//	 ********************************************************/
-//	public void setIncludeTicks(boolean includeTicks)
-//	{
-//		this.includeTicks_ = includeTicks;
-//	}
-	
+
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
@@ -340,7 +229,29 @@ public class AnalogGauge extends ProfileGauge
 		
 		
 		/* First, determine the normal length of the tick label values */
-		//TODO
+		int tickLabelLen = 0;
+		for (double index = 0; index < getIntProperty(PROP_I_TICK_COUNT, 2); index++)
+		{
+			String tickValue = Convert.toString(Math.abs(this.rangeStart_ + (index * tickRange)), this.decimalPrecision_);
+			
+			/* No need to analize zero */
+			if ((this.rangeStart_ + (index * tickRange)) == 0)
+			{
+				tickValue = "0";
+			}
+			else
+			{
+				
+				/* While the last character is NOT a zero or a decimal, trim them off */
+				while ((tickValue.length() > 1) && (tickValue.charAt(tickValue.length() - 1) == '0') || ((tickValue.charAt(tickValue.length() - 1) == '.')))
+				{
+					tickValue = tickValue.substring(0, tickValue.length() - 1);
+				}
+				
+				tickLabelLen = Math.max(tickValue.length(), tickLabelLen);
+			}
+			
+		}
 		
 		
 		
@@ -370,20 +281,12 @@ public class AnalogGauge extends ProfileGauge
 				if (getBooleanProperty(PROP_B_INCLUDE_TICK_LABELS) && index % 1 == 0)
 				{
 					String tickValue = Convert.toString(this.rangeStart_ + (index * tickRange), this.decimalPrecision_);
+					tickValue = tickValue.substring(0, tickLabelLen + (tickValue.startsWith("-")?1:0));
 					
 					/* No need to analize zero */
 					if ((this.rangeStart_ + (index * tickRange)) == 0)
 					{
 						tickValue = "0";
-					}
-					else
-					{
-						
-						/* While the last character is NOT a zero or a cecimal, trim them off */
-						while ((tickValue.length() > 1) && (tickValue.charAt(tickValue.length() - 1) == '0') || ((tickValue.charAt(tickValue.length() - 1) == '.')))
-						{
-							tickValue = tickValue.substring(0, tickValue.length() - 1);
-						}
 					}
 
 					/* Where to place the tick value */

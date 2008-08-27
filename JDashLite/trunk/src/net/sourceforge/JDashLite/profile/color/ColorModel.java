@@ -52,10 +52,21 @@ public interface ColorModel
 	public static final int ANALOG_GAUGE_TICK_MARK			= 302;
 	public static final int ANALOG_GAUGE_NEEDLE				= 303;
 	
+	public static final int LED_GAUGE_RING					= 400;
+	public static final int LEG_GAUGE_FACE					= 401;
+	public static final int LED_GAUGE_LED_OFF				= 402;
+	public static final int LED_GAUGE_LED_ON				= 403;
+	
+	public static final int LINE_GRAPH_LINE					= 500;
+	public static final int LINE_GRAPH_BACKGROUND			= 501;
+	public static final int LINE_GRAPH_HIGH_LINE			= 502;
+	public static final int LINE_GRAPH_LOW_LINE				= 503;
+	
 	
 	public static final Color LT_GRAY 	= Color.getColor(0xcc, 0xcc, 0xcc);
 	public static final Color GRAY 		= Color.getColor(0x88, 0x88, 0x88);
 	public static final Color DK_GRAY 	= Color.getColor(0x55, 0x55, 0x55);
+	
 	
 
 	
@@ -77,6 +88,10 @@ public interface ColorModel
 	public static final Color GRAY_15	= Color.getColor(0x10, 0x10, 0x10);
 
 
+	public static final Color DK_RED		= Color.getColor(0x98, 0x00, 0x00);
+	public static final Color DK_GREEN		= Color.getColor(0x00, 0x98, 0x00);
+	public static final Color DK_BLUE		= Color.getColor(0x00, 0x00, 0x98);
+	
 
 	public static final ColorModel DEFAULT_COLOR_MODEL = new DefaultColorModel();
 

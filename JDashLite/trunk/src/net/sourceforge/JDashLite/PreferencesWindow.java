@@ -29,6 +29,7 @@ import net.sourceforge.JDashLite.config.Preferences;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import waba.io.SerialPort;
+import waba.ui.Check;
 import waba.ui.ComboBox;
 import waba.ui.Container;
 import waba.ui.Label;
@@ -59,19 +60,19 @@ public class PreferencesWindow extends AbstractWindow
 		new ListItem(SerialPort.IRCOMM,		"IR"),
 	};
 	
-	private static final ListItem[] YESNO_LIST = new ListItem[]
-	{
-		new ListItem(1, "Yes"),
-		new ListItem(0, "No")
-	};
+//	private static final ListItem[] YESNO_LIST = new ListItem[]
+//	{
+//		new ListItem(1, "Yes"),
+//		new ListItem(0, "No")
+//	};
 	
 	
 	private ComboBox guiStyleComboBox_ = null;
 	private ComboBox portComboBox_ = null;
-	private ComboBox autoConnectComboBox_ = null;
-	private ComboBox disableAutoOffComboBox_ = null;
-	private ComboBox scanDisplayedOnlyComboBox_ = null;
-	private ComboBox testModeComboBox_ = null;
+	private Check    autoConnectCheckBox_ = null;
+//	private Check    disableAutoOffCheckBox_ = null;
+	private Check    scanDisplayedOnlyCheckBox_ = null;
+	private Check    testModeCheckBox_ = null;
 	private ComboBox logLevel_ = null;
 	
 
@@ -132,31 +133,37 @@ public class PreferencesWindow extends AbstractWindow
 		settingsContainer.add(new Label("Com Port:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
-		/* Connect at start */
-		this.autoConnectComboBox_ = new ComboBox(YESNO_LIST);
+//		/* Connect at start */
+//		this.autoConnectCheckBox_ = new Check("");
+//		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+//		settingsContainer.add(this.autoConnectCheckBox_, AFTER, SAME);
+//		settingsContainer.add(new Label("Auto Connect:"), BEFORE - CONTROL_SPACE, SAME);
+
+		this.autoConnectCheckBox_ = new Check("");
 		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
-		settingsContainer.add(this.autoConnectComboBox_, AFTER, SAME);
+		settingsContainer.add(this.autoConnectCheckBox_, AFTER, SAME);
 		settingsContainer.add(new Label("Auto Connect:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
 		/* Scan displayed only */
-		this.scanDisplayedOnlyComboBox_ = new ComboBox(YESNO_LIST);
+		this.scanDisplayedOnlyCheckBox_ = new Check("");
 		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
-		settingsContainer.add(this.scanDisplayedOnlyComboBox_, AFTER, SAME);
+		settingsContainer.add(this.scanDisplayedOnlyCheckBox_, AFTER, SAME);
 		settingsContainer.add(new Label("Scan Only Visible:"), BEFORE - CONTROL_SPACE, SAME);
 		
-		
-		/* disable auto off */
-		this.disableAutoOffComboBox_ = new ComboBox(YESNO_LIST);
-		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
-		settingsContainer.add(this.disableAutoOffComboBox_, AFTER, SAME);
-		settingsContainer.add(new Label("Disable Auto Off:"), BEFORE - CONTROL_SPACE, SAME);
+
+		/* Buggy  */
+//		/* disable auto off */
+//		this.disableAutoOffComboBox_ = new ComboBox(YESNO_LIST);
+//		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+//		settingsContainer.add(this.disableAutoOffComboBox_, AFTER, SAME);
+//		settingsContainer.add(new Label("Disable Auto Off:"), BEFORE - CONTROL_SPACE, SAME);
 		
 		
 		/* Test Mode */
-		this.testModeComboBox_ = new ComboBox(YESNO_LIST);
+		this.testModeCheckBox_ = new Check("");
 		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
-		settingsContainer.add(this.testModeComboBox_, AFTER, SAME);
+		settingsContainer.add(this.testModeCheckBox_, AFTER, SAME);
 		settingsContainer.add(new Label("Test Mode:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
@@ -175,10 +182,10 @@ public class PreferencesWindow extends AbstractWindow
 		/* Select the current prefs */
 		this.guiStyleComboBox_.select(ListItem.findItem(GUI_LIST, this.prefs_.getInt(Preferences.KEY_GUI_STYLE, GUI_LIST[0].getId())));
 		this.portComboBox_.select(ListItem.findItem(PORT_LIST, this.prefs_.getInt(Preferences.KEY_COM_PORT, PORT_LIST[0].getId())));
-		this.autoConnectComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_AUTO_CONNET, YESNO_LIST[0].getId())));
-		this.scanDisplayedOnlyComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_DISPLAYED_SENSORS, YESNO_LIST[0].getId())));
-		this.disableAutoOffComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, YESNO_LIST[1].getId())));
-		this.testModeComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_TEST_MODE, YESNO_LIST[0].getId())));
+		this.autoConnectCheckBox_.setChecked(this.prefs_.getBoolean(Preferences.KEY_AUTO_CONNET, false));
+		this.scanDisplayedOnlyCheckBox_.setChecked(this.prefs_.getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
+//		this.disableAutoOffComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, YESNO_LIST[1].getId())));
+		this.testModeCheckBox_.setChecked(this.prefs_.getBoolean(Preferences.KEY_TEST_MODE, false));
 		this.logLevel_.select(this.prefs_.getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVELS[0]));
 		
 	}
@@ -195,7 +202,7 @@ public class PreferencesWindow extends AbstractWindow
 	
 			/* Check if a restart is needed to affect a settings chagne */
 			if ((this.prefs_.getInt(Preferences.KEY_GUI_STYLE, -1) != ((ListItem)this.guiStyleComboBox_.getSelectedItem()).getId()) ||
-				(this.prefs_.getInt(Preferences.KEY_TEST_MODE, -1) != ((ListItem)this.testModeComboBox_.getSelectedItem()).getId()))
+				(this.prefs_.getBoolean(Preferences.KEY_TEST_MODE, false) != this.testModeCheckBox_.getChecked()))
 			{
 				requireRestart = true;
 			}
@@ -203,10 +210,10 @@ public class PreferencesWindow extends AbstractWindow
 			/* Pull in all the editable settings */
 			this.prefs_.setInt(Preferences.KEY_GUI_STYLE, ((ListItem)this.guiStyleComboBox_.getSelectedItem()).getId());
 			this.prefs_.setInt(Preferences.KEY_COM_PORT, ((ListItem)this.portComboBox_.getSelectedItem()).getId());
-			this.prefs_.setInt(Preferences.KEY_AUTO_CONNET, ((ListItem)this.autoConnectComboBox_.getSelectedItem()).getId());
-			this.prefs_.setInt(Preferences.KEY_DISPLAYED_SENSORS, ((ListItem)this.scanDisplayedOnlyComboBox_.getSelectedItem()).getId());
-			this.prefs_.setInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, ((ListItem)this.disableAutoOffComboBox_.getSelectedItem()).getId());
-			this.prefs_.setInt(Preferences.KEY_TEST_MODE, ((ListItem)this.testModeComboBox_.getSelectedItem()).getId());
+			this.prefs_.setBoolean(Preferences.KEY_AUTO_CONNET, this.autoConnectCheckBox_.getChecked());
+			this.prefs_.setBoolean(Preferences.KEY_DISPLAYED_SENSORS, this.scanDisplayedOnlyCheckBox_.getChecked());
+//			this.prefs_.setInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, ((ListItem)this.disableAutoOffComboBox_.getSelectedItem()).getId());
+			this.prefs_.setBoolean(Preferences.KEY_TEST_MODE, this.testModeCheckBox_.getChecked());
 			this.prefs_.setString(Preferences.KEY_LOG_LEVEL, this.logLevel_.getSelectedItem().toString());
 			
 			/* Tell the profiles container to save it's changes */

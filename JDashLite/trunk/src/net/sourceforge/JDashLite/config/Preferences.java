@@ -44,7 +44,7 @@ public class Preferences
 	public static final String KEY_ACTIVE_PROFILE				= "active.profile";
 	public static final String KEY_TEST_MODE 					= "test.mode";
 	public static final String KEY_LOG_LEVEL					= "log.level";
-	public static final String KEY_DISABLE_AUTO_SCREEN_OFF		= "disable.auto.off";
+//	public static final String KEY_DISABLE_AUTO_SCREEN_OFF		= "disable.auto.off";
 
 	public static final String KEY_PROFILE_PREFIX				= "profile.";
 	
@@ -351,14 +351,6 @@ public class Preferences
 		if (v instanceof Properties.Boolean)
 		{
 			return ((Properties.Boolean)v).value;
-		}
-		else if (v instanceof Properties.Int)
-		{
-			return ((Properties.Int)v).value == 1;
-		}
-		else if (v instanceof Properties.Str)
-		{
-			return "true".equalsIgnoreCase(((Properties.Str)v).value);
 		}
 		else
 		{

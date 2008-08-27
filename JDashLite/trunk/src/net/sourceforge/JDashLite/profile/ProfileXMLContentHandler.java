@@ -26,6 +26,7 @@ package net.sourceforge.JDashLite.profile;
 
 import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
 import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
+import net.sourceforge.JDashLite.profile.gauge.LEDGauge;
 import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
 import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
 import superwaba.ext.xplat.xml.AttributeList;
@@ -64,6 +65,7 @@ public class ProfileXMLContentHandler implements ContentHandler
 	public static final String VALUE_DIGITAL		= "digital";
 	public static final String VALUE_LINE_GRAPH		= "line-graph";
 	public static final String VALUE_ANALOG			= "analog";
+	public static final String VALUE_LED			= "led";
 	
 	private static int TAG_PROFILE 	= 0;
 	private static int TAG_PAGE 	= 0;
@@ -195,6 +197,10 @@ public class ProfileXMLContentHandler implements ContentHandler
 		{
 			//gauge = createAnalogGauge(atts);
 			gauge = new AnalogGauge();
+		}
+		else if (VALUE_LED.equals(type))
+		{
+			gauge = new LEDGauge();
 		}
 		else
 		{
@@ -428,9 +434,7 @@ public class ProfileXMLContentHandler implements ContentHandler
 		/* Digital */
 		if (gauge instanceof DigitalGauge)
 		{
-			DigitalGauge g = (DigitalGauge)gauge;
 			addTagAttribute(sb, ATTR_TYPE, VALUE_DIGITAL);
-//			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
 		}
 		
 		/* Line Graph */
@@ -442,28 +446,14 @@ public class ProfileXMLContentHandler implements ContentHandler
 		/* Analog */
 		if (gauge instanceof AnalogGauge)
 		{
-			AnalogGauge g = (AnalogGauge)gauge;
 			addTagAttribute(sb, ATTR_TYPE, VALUE_ANALOG);
-//			addTagAttribute(sb, ATTR_PRECISION, Convert.toString(g.getDecimalPrecision()));
-//			addTagAttribute(sb, ATTR_RANGE_START, Convert.toString(g.getRangeStart()));
-//			addTagAttribute(sb, ATTR_RANGE_END, Convert.toString(g.getRangeEnd()));
-//			addTagAttribute(sb, ATTR_TICK_COUNT, Convert.toString(g.getTickCount()));
-//			addTagAttribute(sb, ATTR_SHOW_TICKS, Convert.toString(g.getIncludeTicks()));
-//			addTagAttribute(sb, ATTR_SHOW_TICK_LABEL, Convert.toString(g.getIncludeTickLabels()));
 		}
 		
-//		/* Width */
-//		if (gauge.getWidthPercent() > 0)
-//		{
-//			addTagAttribute(sb, ATTR_WIDTH, Convert.toString(gauge.getWidthPercent(), 4));
-//		}
-//		
-//		/* Param */
-//		addTagAttribute(sb, ATTR_PARAM, gauge.getParameterName());
-//		
-//		/* Label */
-//		addTagAttribute(sb, ATTR_LABEL, gauge.getLabel());
-//
+		/* LED */
+		if (gauge instanceof LEDGauge)
+		{
+			addTagAttribute(sb, ATTR_TYPE, VALUE_LED);
+		}
 			
 		/* Add all the known proprties */
 		Vector keys = gauge.getPropertyKeys();

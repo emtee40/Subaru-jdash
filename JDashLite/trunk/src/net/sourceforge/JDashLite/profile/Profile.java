@@ -29,6 +29,7 @@ import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
 import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
+import net.sourceforge.JDashLite.profile.gauge.LEDGauge;
 import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
 import waba.util.Vector;
 
@@ -73,32 +74,7 @@ import waba.util.Vector;
 public class Profile
 {
 
-	public static final String sSAMPLE_PROFILE_XML =
-" <profile name=\"Sample Profile\" protocolClass=\"" + ELMProtocol.class.getName() +  "\"> " +
-"   <page> " +
-"     <row>" +
-"       <gauge type=\"analog\" param=\"RPM\" width=\"0.25\" range-start=\"0\" range-end=\"8000\" tick-count=\"9\"/> " +
-"		<gauge type=\"line-graph\" param=\"RPM\" width=\"0.55\"/>" +
-"       <gauge type=\"digital\" param=\"RPM\" precision=\"0\" label=\"RPM\"/> " +
-"     </row> " +
-"     <row> " +
-"       <gauge type=\"analog\" width=\"0.25\" param=\"STFT1\"precision=\"0\" range-start=\"-30\" range-end=\"30\" tick-count=\"5\"/> " +
-"		<gauge type=\"line-graph\" param=\"STFT1\" width=\"0.55\"/>" +
-"       <gauge type=\"digital\" param=\"STFT1\" precision=\"2\" label=\"STFT%\"/> " +
-"     </row> " +
-"     <row> " +
-"       <gauge type=\"analog\" width=\"0.25\" param=\"LTFT1\" precision=\"0\" range-start=\"-30\" range-end=\"30\"  tick-count=\"5\"/> " +
-"		<gauge type=\"line-graph\" param=\"LTFT1\" width=\"0.55\"/>" +
-"       <gauge type=\"digital\" param=\"LTFT1\" precision=\"2\" label=\"LTFT%\"/> " +
-"     </row> " +
-"   </page> " +
-"	<page> " +
-"     <row> " +
-"       <gauge type=\"analog\" param=\"RPM\" label=\"RPM\" range-start=\"0\" range-end=\"7000\" tick-count=\"8\" /> " +
-"     </row> " +
-"   </page> " +
-" </profile> ";
-		
+	
 
 	/* The unique name of this profile */
 	private String name_ = null;
@@ -142,6 +118,7 @@ public class Profile
 		AnalogGauge analogGauge = null;
 		DigitalGauge digitalGauge = null;
 		LineGraphGauge lineGraphGauge = null;
+		LEDGauge ledGauge = null;
 		
 		/* Page 0 */
 		page = new ProfilePage();
@@ -150,6 +127,8 @@ public class Profile
 		/* Page 0 row 0 */
 		row = new ProfileRow(); 
 		page.addRow(row);
+		row.setHeightPercent(0.4);		
+
 		
 		/* Page 0 row 0 gauge 0 */
 		analogGauge = new AnalogGauge();
@@ -168,9 +147,13 @@ public class Profile
 		/* Page 0 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
-		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, null);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "RPM");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME,  new AllParameters.RPM().getName());
 		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
+		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 8000);
+		
+
 
 		/* Page 0 row 0 gauge 2 */
 		digitalGauge = new DigitalGauge();
@@ -185,12 +168,11 @@ public class Profile
 		/* Page 0 row 1 */
 		row = new ProfileRow(); 
 		page.addRow(row);
-		row.setHeightPercent(0.4);		
 		
 		/* Page 0 row 1 gauge 0 */
 		analogGauge = new AnalogGauge();
 		row.addGauge(analogGauge);
-		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, "STFT");
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, new AllParameters.STFT1().getName());
 		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 2);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
@@ -204,9 +186,11 @@ public class Profile
 		/* Page 0 row 1 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
-		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Short Term Fuel Trim %");
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "ST Fuel Trim %");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, new AllParameters.STFT1().getName());
 		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
+		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
 
 		/* Page 0 row 1 gauge 2 */
 		digitalGauge = new DigitalGauge();
@@ -239,9 +223,11 @@ public class Profile
 		/* Page 0 row 2 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
-		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Long Term Fuel Trim %");
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "LT Fuel Trim %");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, new AllParameters.LTFT1().getName());
 		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
+		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
 
 		/* Page 0 row 2 gauge 2 */
 		digitalGauge = new DigitalGauge();
@@ -267,8 +253,8 @@ public class Profile
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
 		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 0);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 9000);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 8000);
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 9);
 		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
 		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
 		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);

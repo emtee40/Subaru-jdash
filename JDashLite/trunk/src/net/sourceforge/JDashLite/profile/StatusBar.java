@@ -48,8 +48,6 @@ public class StatusBar implements RenderableProfileComponent
 //	private static final Color ACTIVE_PAGE_FG_COLOR = Color.WHITE;
 //	private static final Color INACTIVE_PAGE_FG_COLOR = Color.BLACK;
 	
-	private static final double RXTX_INDICATOR_WIDTH_PERCENT = 0.1;
-	
 	private int pageCount_ = 0;
 	private int activePage_ = 0;
 	
@@ -129,7 +127,7 @@ public class StatusBar implements RenderableProfileComponent
 		g.setBackColor(cm.get(ColorModel.STATUS_PAGE_INACTIVE_BG));
 		g.fillRect(r.x, r.y, r.width, r.height);
 
-		int rxtxAreaWidth = (int)(r.width * RXTX_INDICATOR_WIDTH_PERCENT);
+		int rxtxAreaWidth = r.height * 2;//(int)(r.width * RXTX_INDICATOR_WIDTH_PERCENT);
 		int pageAreaWidth = r.width - rxtxAreaWidth;
 
 		/* Draw the pages, if any */
@@ -167,13 +165,20 @@ public class StatusBar implements RenderableProfileComponent
 			/* Draw the RXTX lights */
 			g.setForeColor(Color.BLACK);
 			
+//			int txX = rxtxAreaWidth / 4;
+//			int rxX = rxtxAreaWidth / 4;
+			
+			int indicatorRadius = r.height / 2 - 2;
+			int txX = r.x + r.width - rxtxAreaWidth + (rxtxAreaWidth / 3) - 1;
+			int rxX = r.x + r.width - (rxtxAreaWidth / 3) + 1;
+			
 			g.setBackColor(this.rxtxMode_==RXTX_SEND?cm.get(ColorModel.STATUS_TX_COLOR):cm.get(ColorModel.STATUS_TX_IDLE_COLOR));
-			g.fillCircle(r.width - rxtxAreaWidth + (int)(rxtxAreaWidth / 3.5), r.y + (r.height / 2), r.height / 3);
-			g.drawCircle(r.width - rxtxAreaWidth + (int)(rxtxAreaWidth / 3.5), r.y + (r.height / 2), r.height / 3);
+			g.fillCircle(txX, r.y + (r.height / 2), indicatorRadius);
+			g.drawCircle(txX, r.y + (r.height / 2), indicatorRadius);
 			
 			g.setBackColor(this.rxtxMode_==RXTX_RECEIVE?cm.get(ColorModel.STATUS_RX_COLOR):cm.get(ColorModel.STATUS_RX_IDLE_COLOR));
-			g.fillCircle(r.width - (int)(rxtxAreaWidth / 3.5), r.y + (r.height / 2), r.height / 3);
-			g.drawCircle(r.width - (int)(rxtxAreaWidth / 3.5), r.y + (r.height / 2), r.height / 3);
+			g.fillCircle(rxX, r.y + (r.height / 2), indicatorRadius);
+			g.drawCircle(rxX, r.y + (r.height / 2), indicatorRadius);
 		
 			/* Draw the page separator lines */
 			g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));

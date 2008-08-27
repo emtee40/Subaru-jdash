@@ -33,6 +33,7 @@ import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
+import net.sourceforge.JDashLite.util.CircularIndex;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Graphics;
@@ -120,11 +121,11 @@ public class JDashLiteMainWindow extends GameEngine
 		
 		try
 		{
-			/* Turn off the auto off? */
-			if (getPreferences().getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, 0) == 1)
-			{
-				this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
-			}
+//			/* Turn off the auto off? */
+//			if (getPreferences().getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, 0) == 1)
+//			{
+//				this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
+//			}
 			
 			/* Setup the look and feel */
 			waba.sys.Settings.setUIStyle((byte)getPreferences().getInt(Preferences.KEY_GUI_STYLE, waba.sys.Settings.WinCE));
@@ -158,7 +159,7 @@ public class JDashLiteMainWindow extends GameEngine
 //				doSetActiveProfile(this.activeProfile_);
 
 				/* Auto Connect? */
-				if (getPreferences().getInt(Preferences.KEY_AUTO_CONNET, 0) == 1)
+				if (getPreferences().getBoolean(Preferences.KEY_AUTO_CONNET, false))
 				{
 					doConnect();
 				}
@@ -516,12 +517,12 @@ public class JDashLiteMainWindow extends GameEngine
 		/* Re-Initialize the Logger instance */
 		ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL,  ErrorLog.LOG_LEVEL_OFF));
 
-		/* Set the auto off */
-		if (getPreferences().getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, 0) == 1)
-		{
-			this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
-		}
-
+//		/* Set the auto off */
+//		if (getPreferences().getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, 0) == 1)
+//		{
+//			this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
+//		}
+//
 		
 		/* re-enable/disable active params */
 		this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
@@ -577,7 +578,7 @@ public class JDashLiteMainWindow extends GameEngine
 			this.protocolHandler_ = ((ProtocolHandler)Class.forName(this.activeProfile_.getProtocolClass()).newInstance());
 
 			/* But.. is this TEST mode? */
-			if (getPreferences().getInt(Preferences.KEY_TEST_MODE, 0) == 1)
+			if (getPreferences().getBoolean(Preferences.KEY_TEST_MODE, false))
 			{
 				this.protocolHandler_ = new TestProtocol(this.protocolHandler_);
 			}

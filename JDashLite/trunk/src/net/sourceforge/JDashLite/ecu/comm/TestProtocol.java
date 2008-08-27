@@ -57,6 +57,8 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	
 	private int prevEventTS_ = 0;
 	
+	private int parameterIndex_ = 0;
+	
 	/********************************************************
 	 * 
 	 *******************************************************/
@@ -91,12 +93,12 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	{
 		
 		
-		if (Vm.getTimeStamp() - 150 < this.prevEventTS_)
-		{
-			return;
-		}
-		
-		this.prevEventTS_ = Vm.getTimeStamp();
+//		if (Vm.getTimeStamp() - 50 < this.prevEventTS_)
+//		{
+//			return;
+//		}
+//		
+//		this.prevEventTS_ = Vm.getTimeStamp();
 		
 		switch(this.initMode_)
 		{
@@ -139,19 +141,42 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 			
 			/* Param Fetch Mode */
 			case 6:
-				fireCommTXEvent();
 				fireBeginParameterBatchEvent(getSupportedParameters().length);
 				this.initMode_++;
+				this.parameterIndex_ = 0;
+				this.prevEventTS_ = Vm.getTimeStamp();
 			break;
 				
 			case 7:
-				fireCommRXEvent();
-				for (int index = 0; index < getSupportedParameters().length; index++)
+				fireCommTXEvent();
+				
+				
+				if (this.stubbedParameters_[this.parameterIndex_].isEnabled())
 				{
-					this.stubbedParameters_[index].value_ += 95.1;
-					fireParemeterFetchedEvent(this.stubbedParameters_[index]);
+					/* Wait for at least 50 ms.  If 50ms has not yet passed, just return to try again */
+					if (Vm.getTimeStamp() - 200 < this.prevEventTS_)
+					{
+						return;
+					}
+					
+					this.prevEventTS_ = Vm.getTimeStamp();
+
+					this.stubbedParameters_[this.parameterIndex_].value_ += 95.1;
+					this.stubbedParameters_[this.parameterIndex_].markTimeStamp();
+					fireParemeterFetchedEvent(this.stubbedParameters_[this.parameterIndex_]);
+					fireCommRXEvent();
+
 				}
-				this.initMode_++;
+
+				/* Next param */
+				this.parameterIndex_++;
+				
+				/* Last one?  finished the batch */
+				if (this.parameterIndex_ >= this.stubbedParameters_.length)
+				{
+					this.initMode_++;
+				}
+
 			break;
 			
 			case 8:

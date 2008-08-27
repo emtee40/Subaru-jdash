@@ -172,7 +172,7 @@ public class ErrorLog
 			{
 				e.printStackTrace();
 			}
-			Vm.debug(level + ": " + message);
+			Vm.debug(level + " " + message);
 		}
 	}
 }

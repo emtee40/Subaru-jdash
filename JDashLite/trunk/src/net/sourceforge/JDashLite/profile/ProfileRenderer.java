@@ -266,13 +266,14 @@ public class ProfileRenderer
 		
 		Vector paramKeys = this.parameters_.getKeys();
 		
+		/* Check each available parameter */
 		for (int index = 0; index < paramKeys.size(); index++)
 		{
 			String key = (String)paramKeys.items[index];
 			ECUParameter param = (ECUParameter)this.parameters_.get(key);
 			param.setEnabled(false);
 			
-			/* By default, enable ONLY the parameters that are found in a gauge in the profile */
+			/* By default, enable ONLY the parameters that are found in any gauge in the profile */
 			for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
 			{
 				
@@ -282,6 +283,7 @@ public class ProfileRenderer
 				{
 					pageIndex = this.activePage_;
 				}
+
 				
 				ProfilePage page = this.profile_.getPage(pageIndex);
 				for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
@@ -291,7 +293,7 @@ public class ProfileRenderer
 					{
 						ProfileGauge gauge = row.getGauge(gaugeIndex);
 						
-						if (param.getName().equals(gauge.getProperty(ProfileGauge.PROP_STR_LABEL)))
+						if (param.getName().equals(gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME)))
 						{
 							param.setEnabled(true);
 							break;

@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.ecu.comm;
 
+import waba.sys.Vm;
+
 /*********************************************************
  * The base class of all parameters.  By default
  * Parameters handled by JDash deal in double values.
@@ -38,6 +40,8 @@ public abstract class ECUParameter
 	private boolean isEnabled_ = true;
 	
 	private String name_ = null;
+	
+	private int timeStamp_ = 0;
 	
 	/********************************************************
 	 *  A parameter is identified by it's name.  The name of
@@ -79,6 +83,23 @@ public abstract class ECUParameter
 		return this.name_;
 	}
 
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public int getTimeStamp()
+	{
+		return this.timeStamp_;
+	}
+	
+	
+	/*******************************************************
+	 * Set the current timestamp. 
+	 ********************************************************/
+	public void markTimeStamp()
+	{
+		this.timeStamp_ = Vm.getTimeStamp();
+	}
+	
 	/********************************************************
 	 * Return the adjusted, calculated and formatted value
 	 * this parameter represents

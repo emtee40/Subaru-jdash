@@ -1081,6 +1081,7 @@ public class ELMProtocol extends AbstractProtocol
 			offset += 2;
 		}
 		
+		p.markTimeStamp();
 	}
 	
 	

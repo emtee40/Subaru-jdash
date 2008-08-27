@@ -62,6 +62,17 @@ public class DefaultColorModel implements ColorModel
 		add(ANALOG_GAUGE_TICK_MARK,			Color.BLACK);
 		add(ANALOG_GAUGE_NEEDLE,			Color.getColor(0xdd,00,00));
 
+		
+		add(LED_GAUGE_RING,					get(ANALOG_GAUGE_RING));
+		add(LEG_GAUGE_FACE,					get(ANALOG_GAUGE_FACE));
+		add(LED_GAUGE_LED_OFF,				GRAY_7);
+		add(LED_GAUGE_LED_ON,				Color.BLUE);
+		
+		
+		add(LINE_GRAPH_BACKGROUND,			Color.WHITE);
+		add(LINE_GRAPH_LINE,				DK_BLUE);
+		add(LINE_GRAPH_HIGH_LINE,			DK_RED);
+		add(LINE_GRAPH_LOW_LINE,			Color.GREEN);
 	}
 	
 	/*******************************************************

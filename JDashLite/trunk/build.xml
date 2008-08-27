@@ -156,9 +156,25 @@
 	
 	<target name="applet2" depends="compile">
 		<java classpath="${outputDir}:${SuperWabaJar}" classname="waba.applet.Applet" fork="true" dir="${rteDir}" failonerror="true">
+			<arg line="/w 160 /h 320 /bpp 2 /dataPath ${rteDir} net.sourceforge.JDashLite.JDashLiteMainWindow"/>
+		</java>
+	</target>
+		
+	
+	<target name="applet-jmp" depends="compile">
+		<java classpath="${outputDir}:${SuperWabaJar}" classname="waba.applet.Applet" fork="true" dir="${rteDir}" failonerror="true">
+			<jvmarg line="-Xrunjmp"/>
+			<jvmarg line="-Xmx128M"/>
 			<arg line="/w 160 /h 160 /bpp 16 /dataPath ${rteDir} net.sourceforge.JDashLite.JDashLiteMainWindow"/>
 		</java>
 	</target>
 	
+	<!-- Launch the SuperWaba applet version -->
+	<target name="vm" depends="compile">
+		<exec executable="superwaba" dir="${rteDir}">
+			<arg line=" /16 /H 320 /W 320 net/sourceforge/JDashLite/JDashLiteMainWindow ${outputDir}" />
+		</exec>
+	</target>
+		
 	
 </project>

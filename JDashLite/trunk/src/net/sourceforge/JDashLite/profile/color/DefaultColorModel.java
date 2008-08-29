@@ -69,10 +69,15 @@ public class DefaultColorModel implements ColorModel
 		add(LED_GAUGE_LED_ON,				Color.BLUE);
 		
 		
+//		add(LINE_GRAPH_BACKGROUND,			Color.WHITE);
+//		add(LINE_GRAPH_LINE,				DK_BLUE);
+//		add(LINE_GRAPH_HIGH_LINE,			DK_RED);
+//		add(LINE_GRAPH_LOW_LINE,			Color.GREEN);
 		add(LINE_GRAPH_BACKGROUND,			Color.WHITE);
-		add(LINE_GRAPH_LINE,				DK_BLUE);
+		add(LINE_GRAPH_LINE,				Color.GREEN);
 		add(LINE_GRAPH_HIGH_LINE,			DK_RED);
-		add(LINE_GRAPH_LOW_LINE,			Color.GREEN);
+		add(LINE_GRAPH_LOW_LINE,			DK_BLUE);
+
 	}
 	
 	/*******************************************************

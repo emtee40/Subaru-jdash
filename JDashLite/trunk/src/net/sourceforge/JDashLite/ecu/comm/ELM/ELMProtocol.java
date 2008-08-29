@@ -103,16 +103,34 @@ public class ELMProtocol extends AbstractProtocol
 	public static final int ELM_STOP_BITS = 1;
 	
 	/* Used to fetch the available PIDs */
-	private ELMParameter PIDParam_ = new AllParameters.PID();
+	private ELMParameter PIDParam_ = new ELMParameter("PID", 1, 0x00, 4)
+	{
+		public double getValue() { return 0.0; }  
+	};
 	
 	/* The supported parametes list */
 	private static final ELMParameter[] SUPPORTD_PARAMS = new ELMParameter[]
 	{
-		new AllParameters.RPM(),
-		new AllParameters.STFT1(),
-		new AllParameters.LTFT1(),
-		new AllParameters.Coolant(),
-		new AllParameters.Load()
+		new ELMParameter("RPM", 1, 0x0c, 2)
+		{
+			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
+		},
+		new ELMParameter("STFT1", 1, 0x06, 1) 	
+		{
+			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }
+		},
+		new ELMParameter("LTFT1", 1, 0x07, 1) 		
+		{ 
+			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }  
+		},
+		new ELMParameter("COOLANT_TEMP_C", 1, 0x05, 1) 		
+		{ 
+			public double getValue() { return getResponseDouble(0) - 40.0; }  
+		},
+		new ELMParameter("LOAD", 1, 0x04, 1) 		
+		{ 
+			public double getValue() { return getResponseDouble(0) * 100.0 / 255.0; }  
+		}
 	};
 	
 	

@@ -60,7 +60,7 @@ public class JDashLiteMainWindow extends GameEngine
 	public static final String JDASH_TITLE = "JDashLite";
 	public static final String JDASH_CREATOR_ID = waba.sys.Settings.onDevice ? waba.sys.Settings.appCreatorId:JDASH_TITLE.substring(0,4);
 	public static final int JDASH_VERSION_MAJOR = 0;
-	public static final int JDASH_VERSION_MINOR = 1;
+	public static final int JDASH_VERSION_MINOR = 2;
 
 
 

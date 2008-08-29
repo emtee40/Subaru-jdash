@@ -93,12 +93,12 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	{
 		
 		
-//		if (Vm.getTimeStamp() - 50 < this.prevEventTS_)
-//		{
-//			return;
-//		}
-//		
-//		this.prevEventTS_ = Vm.getTimeStamp();
+		if (Vm.getTimeStamp() - 150 < this.prevEventTS_)
+		{
+			return;
+		}
+		
+		this.prevEventTS_ = Vm.getTimeStamp();
 		
 		switch(this.initMode_)
 		{
@@ -153,13 +153,13 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 				
 				if (this.stubbedParameters_[this.parameterIndex_].isEnabled())
 				{
-					/* Wait for at least 50 ms.  If 50ms has not yet passed, just return to try again */
-					if (Vm.getTimeStamp() - 200 < this.prevEventTS_)
-					{
-						return;
-					}
-					
-					this.prevEventTS_ = Vm.getTimeStamp();
+//					/* Wait for at least 50 ms.  If 50ms has not yet passed, just return to try again */
+//					if (Vm.getTimeStamp() - 50 < this.prevEventTS_)
+//					{
+//						return;
+//					}
+//					
+//					this.prevEventTS_ = Vm.getTimeStamp();
 
 					this.stubbedParameters_[this.parameterIndex_].value_ += 95.1;
 					this.stubbedParameters_[this.parameterIndex_].markTimeStamp();

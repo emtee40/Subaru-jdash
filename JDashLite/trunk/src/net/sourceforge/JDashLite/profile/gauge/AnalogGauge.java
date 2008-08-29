@@ -94,7 +94,7 @@ public class AnalogGauge extends ProfileGauge
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm)
+	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm, boolean redrawAll)
 	{
 		
 		
@@ -260,7 +260,8 @@ public class AnalogGauge extends ProfileGauge
 		{
 			g.setFont(tickFont);
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-			for (double index = 0; index < getIntProperty(PROP_I_TICK_COUNT, 2) - 0.5; index+=0.5)
+			double ticInc = getBooleanProperty(PROP_B_INCLUDE_TICK_LABELS)?0.5:1;
+			for (double index = 0; index < getIntProperty(PROP_I_TICK_COUNT, 2) - 0.5; index+=(ticInc))
 			{
 				Coord tickPoint1 = new Coord(0, mainRadius - (tickLength / 2));   /* outer tip of tick */
 				Coord tickPoint2 = new Coord(0, tickPoint1.y - tickLength);       /* inner tip of tick */

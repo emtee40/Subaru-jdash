@@ -83,7 +83,7 @@ public class LineGraphGauge extends ProfileGauge
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm)
+	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm, boolean redrawAll)
 	{
 
 		/* New Rect? New static image */
@@ -132,12 +132,12 @@ public class LineGraphGauge extends ProfileGauge
 			hv = this.valueHistory_[this.historyIndex_.getIndex()];
 			
 			/* Outside our range?  Nothign to draw */
-			if(hv.getValue() > NULL_DOUBLE)
+			if((hv.getValue() > NULL_DOUBLE) && (hv.getTimestamp() > 0))
 			{
 				
-				/* calc the pixel Y value */
-				int pxlY = (int)((double)r.height * ((hv.getValue() - this.rangeStart_) / this.range_));
-				pxlY = r.y + r.height - pxlY;
+				/* calc the pixel Y value, but stay under our range */
+				int pxlY = (int)((double)r.height * ((Math.min(hv.getValue(), this.rangeEnd_) - this.rangeStart_) / this.range_));
+				pxlY = r.y + r.height - pxlY + 1; /* + 1 to STAY under the top of the rect */
 
 				/* Track the min and max values */
 				highValueY = Math.min(highValueY, pxlY);
@@ -147,7 +147,8 @@ public class LineGraphGauge extends ProfileGauge
 				
 				
 				/* If the HV value is within our range, then draw it. */
-				if (hv.getValue() >= this.rangeStart_ && hv.getValue() <= this.rangeEnd_)
+				//if (hv.getValue() >= this.rangeStart_ && hv.getValue() <= this.rangeEnd_)
+				if (pxlY > r.y && pxlY < r.y + r.height)
 				{
 					g.drawLine(r.x + r.width - index, pxlY, r.x + r.width - index, r.y + r.height);
 				}
@@ -179,7 +180,6 @@ public class LineGraphGauge extends ProfileGauge
 			g.drawLine(r.x, lowValueY - 1, r.x + r.width, lowValueY - 1);
 		}
 		g.drawText(Convert.toString(lowValue, 0), r.x + 5, r.y + r.height - 5 - this.labelFont_.fm.height + this.labelFont_.fm.descent);
-
 	
 	}
 

@@ -689,7 +689,7 @@ public class ProfileRenderer
 		/* No Param? */
 		if (p != null)
 		{
-			gauge.render(g, rect, p, this.profile_.getColorModel());
+			gauge.render(g, rect, p, this.profile_.getColorModel(), false);
 		}
 		
 	}

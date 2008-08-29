@@ -164,7 +164,7 @@ public class PreferencesWindow extends AbstractWindow
 		this.testModeCheckBox_ = new Check("");
 		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
 		settingsContainer.add(this.testModeCheckBox_, AFTER, SAME);
-		settingsContainer.add(new Label("Test Mode:"), BEFORE - CONTROL_SPACE, SAME);
+		settingsContainer.add(new Label("Demo Mode:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
 		/* Log Level */

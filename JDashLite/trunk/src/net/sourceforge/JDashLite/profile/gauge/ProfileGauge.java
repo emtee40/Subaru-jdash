@@ -202,7 +202,8 @@ public abstract class ProfileGauge //implements RenderableProfileComponent
 	 * @param r
 	 * @param p
 	 * @param cm
+	 * @param redrawAll IN - force a redraw and re-calc of ALL elements.
 	 * @param staticContent
 	 ********************************************************/
-	public abstract void render(Graphics g, Rect r, ECUParameter p, ColorModel cm);
+	public abstract void render(Graphics g, Rect r, ECUParameter p, ColorModel cm, boolean redrawAll);
 }

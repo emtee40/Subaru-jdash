@@ -93,7 +93,6 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	 ********************************************************/
 	public void onValueChanged()
 	{
-		System.out.println("Value Changed for " + getECUParameter().getName());
 		
 		/* If the history array isn't initialized yet, then we don't care what the value is */
 		if (this.valueHistory_ == null)
@@ -141,20 +140,6 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 			this.lastRect_ = r;
 		}
 
-		
-		
-//		/* If the history value at the current head is older than the TS indicates in the parameter, then move the head, and add the new value */
-//		if (this.valueHistory_[this.historyIndex_.getHead()].getTimestamp() < getECUParameter().getTimeStamp())
-//		{
-//
-//			/* Move the head pointer */
-//			this.historyIndex_.decrementHead();
-//
-//			/* Set the current parameter vlaue into the history */
-//			this.valueHistory_[this.historyIndex_.getHead()].setValue(getECUParameter().getValue());
-//			this.valueHistory_[this.historyIndex_.getHead()].setTimestamp(getECUParameter().getTimeStamp());
-//		}
-		
 		
 		double highValue = this.rangeStart_;
 		double lowValue = this.rangeEnd_;

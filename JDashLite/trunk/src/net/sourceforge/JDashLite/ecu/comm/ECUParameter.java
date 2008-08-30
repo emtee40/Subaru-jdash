@@ -73,7 +73,6 @@ public abstract class ECUParameter
 	 ********************************************************/
 	public void setEnabled(boolean isEnabled)
 	{
-		System.out.println("Enable " + getName() + "  " + isEnabled);
 		this.isEnabled_ = isEnabled;
 	}
 	

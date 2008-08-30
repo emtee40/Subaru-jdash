@@ -78,7 +78,6 @@ public class MenuUtil
 			return;
 		}
 		
-		String label = null;
 		int col = 0;
 		int row = 1;
 		

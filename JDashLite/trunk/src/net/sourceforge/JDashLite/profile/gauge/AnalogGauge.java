@@ -94,7 +94,7 @@ public class AnalogGauge extends ProfileGauge
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm, boolean redrawAll)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
 	{
 		
 		
@@ -109,7 +109,7 @@ public class AnalogGauge extends ProfileGauge
 		if (r.equals(this.lastRect_) == false)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
-			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), p, cm, (int)(needleWidth * 1.5));
+			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm, (int)(needleWidth * 1.5));
 			this.lastRect_ = r;
 		}
 
@@ -121,13 +121,13 @@ public class AnalogGauge extends ProfileGauge
 		{
 
 			/* Start with the ecu value, but watch for over/under values */
-			double valueAngle = p.getValue();
+			double valueAngle = getECUParameter().getValue();
 
-			if (p.getValue() >= this.rangeEnd_)
+			if (valueAngle >= this.rangeEnd_)
 			{
 				valueAngle = this.rangeEnd_;
 			}
-			else if (p.getValue() <= this.rangeStart_)
+			else if (valueAngle <= this.rangeStart_)
 			{
 				valueAngle = this.rangeStart_;			
 			}
@@ -169,7 +169,7 @@ public class AnalogGauge extends ProfileGauge
 			int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
 			g.setFont(this.currentValueFont_);
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-			String val = Convert.toString(p.getValue(), this.decimalPrecision_);
+			String val = Convert.toString(getECUParameter().getValue(), this.decimalPrecision_);
 			g.drawText(val, centerX - (this.currentValueFont_.fm.getTextWidth(val) / 2), (centerY + (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent)));
 	//		g.drawText(val, centerX - (this.currentValueAndLabelFont_.fm.getTextWidth(val) / 2), centerY + needleWidth * 2);
 		}
@@ -184,7 +184,7 @@ public class AnalogGauge extends ProfileGauge
 	 * @param p
 	 * @param cm
 	 *******************************************************/
-	private void generateStaticImage(Graphics g, Rect r, ECUParameter p, ColorModel cm, int tickLength)
+	private void generateStaticImage(Graphics g, Rect r, ColorModel cm, int tickLength)
 	{
 		
 		/* Pull out a few regularly needed values */
@@ -282,7 +282,7 @@ public class AnalogGauge extends ProfileGauge
 				if (getBooleanProperty(PROP_B_INCLUDE_TICK_LABELS) && index % 1 == 0)
 				{
 					String tickValue = Convert.toString(this.rangeStart_ + (index * tickRange), this.decimalPrecision_);
-					tickValue = tickValue.substring(0, tickLabelLen + (tickValue.startsWith("-")?1:0));
+					tickValue = tickValue.substring(0, Math.min(tickLabelLen, tickValue.length()) + (tickValue.startsWith("-")?1:0));
 					
 					/* No need to analize zero */
 					if ((this.rangeStart_ + (index * tickRange)) == 0)

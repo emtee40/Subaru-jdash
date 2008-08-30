@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDashLite.ecu.comm;
 
 import waba.sys.Vm;
+import waba.util.Vector;
 
 /*********************************************************
  * The base class of all parameters.  By default
@@ -35,13 +36,13 @@ public abstract class ECUParameter
 {
 	public static final String RATE = "RATE";
 	
-	public static final RateSpecialParameter SPECIAL_PARAM_RATE = new RateSpecialParameter();
-	
 	private boolean isEnabled_ = true;
 	
 	private String name_ = null;
 	
 	private int timeStamp_ = 0;
+	
+	private Vector valueChangedListeners_ = new Vector(1);
 	
 	/********************************************************
 	 *  A parameter is identified by it's name.  The name of
@@ -72,6 +73,7 @@ public abstract class ECUParameter
 	 ********************************************************/
 	public void setEnabled(boolean isEnabled)
 	{
+		System.out.println("Enable " + getName() + "  " + isEnabled);
 		this.isEnabled_ = isEnabled;
 	}
 	
@@ -95,9 +97,29 @@ public abstract class ECUParameter
 	/*******************************************************
 	 * Set the current timestamp. 
 	 ********************************************************/
-	public void markTimeStamp()
+	public void notifyValueChanged()
 	{
 		this.timeStamp_ = Vm.getTimeStamp();
+		for (int index = 0; index < this.valueChangedListeners_.size(); index++)
+		{
+			((ValueChangedListener)this.valueChangedListeners_.items[index]).onValueChanged();
+		}
+	}
+	
+	/*******************************************************
+	 * @param l
+	 ********************************************************/
+	public void addValueChangedListener(ValueChangedListener l)
+	{
+		this.valueChangedListeners_.addElement(l);
+	}
+	
+	/*******************************************************
+	 * @param l
+	 ********************************************************/
+	public void removeValueChangedListener(ValueChangedListener l)
+	{
+		this.valueChangedListeners_.removeElement(l);
 	}
 	
 	/********************************************************
@@ -106,5 +128,14 @@ public abstract class ECUParameter
 	 * @return
 	 ********************************************************/
 	public abstract double getValue();
+	
+	
+	/*******************************************************
+	 * This method is called by the Test/Demo mode protocol
+	 * handler.  It's the job of the parameter to know how to 
+	 * put itself into a demo mode, and adjust it's value to 
+	 * simulate ECU values.
+	 ********************************************************/
+	public abstract void setDemoValue();
 	
 }

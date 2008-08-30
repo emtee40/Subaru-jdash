@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.ecu.comm;
 
-import net.sourceforge.JDashLite.profile.Profile;
 import waba.io.SerialPort;
 
 /*********************************************************

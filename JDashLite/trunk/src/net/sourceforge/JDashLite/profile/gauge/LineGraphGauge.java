@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDashLite.profile.gauge;
 
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
+import net.sourceforge.JDashLite.ecu.comm.ValueChangedListener;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.util.CircularIndex;
@@ -33,13 +34,12 @@ import waba.fx.Graphics;
 import waba.fx.Image;
 import waba.fx.Rect;
 import waba.sys.Convert;
-import waba.util.Vector;
 
 /*********************************************************
  * 
  *
  *********************************************************/
-public class LineGraphGauge extends ProfileGauge
+public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 {
 	
 	
@@ -78,35 +78,82 @@ public class LineGraphGauge extends ProfileGauge
 
 	}
 	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see java.lang.Object#finalize()
+	 ********************************************************/
+	protected void finalize() throws Throwable
+	{
+		getECUParameter().removeValueChangedListener(this);
+	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
-	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
+	 * @see net.sourceforge.JDashLite.ecu.comm.ValueChangedListener#onValueChanged()
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm, boolean redrawAll)
+	public void onValueChanged()
 	{
-
-		/* New Rect? New static image */
-		if (r.equals(this.lastRect_) == false)
-		{
-			this.staticContent_ = new Image(r.width, r.height);
-			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), p, cm);
-			this.lastRect_ = r;
-		}
-
+		System.out.println("Value Changed for " + getECUParameter().getName());
 		
+		/* If the history array isn't initialized yet, then we don't care what the value is */
+		if (this.valueHistory_ == null)
+		{
+			return;
+		}
 		
 		/* If the history value at the current head is older than the TS indicates in the parameter, then move the head, and add the new value */
-		if (this.valueHistory_[this.historyIndex_.getHead()].getTimestamp() < p.getTimeStamp())
+		if (this.valueHistory_[this.historyIndex_.getHead()].getTimestamp() < getECUParameter().getTimeStamp())
 		{
 
 			/* Move the head pointer */
 			this.historyIndex_.decrementHead();
 
 			/* Set the current parameter vlaue into the history */
-			this.valueHistory_[this.historyIndex_.getHead()].setValue(p.getValue());
-			this.valueHistory_[this.historyIndex_.getHead()].setTimestamp(p.getTimeStamp());
+			this.valueHistory_[this.historyIndex_.getHead()].setValue(getECUParameter().getValue());
+			this.valueHistory_[this.historyIndex_.getHead()].setTimestamp(getECUParameter().getTimeStamp());
 		}
+		
+	}
+	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#setECUParameter(net.sourceforge.JDashLite.ecu.comm.ECUParameter)
+	 ********************************************************/
+	public void setECUParameter(ECUParameter param)
+	{
+		super.setECUParameter(param);
+		param.addValueChangedListener(this);
+	}
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
+	 ********************************************************/
+	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
+	{
+
+		/* New Rect? New static image */
+		if (r.equals(this.lastRect_) == false)
+		{
+			this.staticContent_ = new Image(r.width, r.height);
+			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm);
+			this.lastRect_ = r;
+		}
+
+		
+		
+//		/* If the history value at the current head is older than the TS indicates in the parameter, then move the head, and add the new value */
+//		if (this.valueHistory_[this.historyIndex_.getHead()].getTimestamp() < getECUParameter().getTimeStamp())
+//		{
+//
+//			/* Move the head pointer */
+//			this.historyIndex_.decrementHead();
+//
+//			/* Set the current parameter vlaue into the history */
+//			this.valueHistory_[this.historyIndex_.getHead()].setValue(getECUParameter().getValue());
+//			this.valueHistory_[this.historyIndex_.getHead()].setTimestamp(getECUParameter().getTimeStamp());
+//		}
 		
 		
 		double highValue = this.rangeStart_;
@@ -190,7 +237,7 @@ public class LineGraphGauge extends ProfileGauge
 	 * @param p
 	 * @param cm
 	 ********************************************************/
-	private void generateStaticImage(Graphics g, Rect r, ECUParameter p, ColorModel cm)
+	private void generateStaticImage(Graphics g, Rect r, ColorModel cm)
 	{
 		
 		/* Remember the lable font cuz we'll need it for the digital values */

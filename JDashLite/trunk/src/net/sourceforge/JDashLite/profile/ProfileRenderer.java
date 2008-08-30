@@ -95,14 +95,14 @@ public class ProfileRenderer
 	private Profile profile_ = null;
 	
 	/* The list of parameters that are available for ECU values */
-	private Hashtable parameters_ = new Hashtable(25);
+//	private Hashtable parameters_ = new Hashtable(25);
 	
 	/* The bottom of the page status bar */
 	private StatusBar statusBar_ = new StatusBar();
 	
 
 	/* The active page */
-	private int activePage_ = 0;
+	private int currentlyActivePage_ = 0;
 	
 	
 	/* The previous rect used during the render process */
@@ -126,34 +126,57 @@ public class ProfileRenderer
 	
 	private boolean fetchVisibleOnly_ = false;
 	
+	
+	/* The FIRST render call needs to render EVERYBODY at least once.. first. */
+	private boolean firstTimeRender_ = true;
+	
 	/********************************************************
 	 * 
 	 *******************************************************/
 	public ProfileRenderer(Profile profile, ProtocolHandler protocol)
 	{
 		this.profile_ = profile;
-		setParameters(protocol.getSupportedParameters());
-		this.statusBar_.setPageCount(profile.getPageCount());
-	}
-	
-	
-	/*******************************************************
-	 * @param parameters
-	 ********************************************************/
-	private void setParameters(ECUParameter[] parameters)
-	{
-		this.parameters_.clear();
-		for (int index = 0; index < parameters.length; index++)
+		
+		/* for quick access and simplicity */
+		Hashtable pHash = new Hashtable(protocol.getSupportedParameters().length);
+		for (int index = 0; index < protocol.getSupportedParameters().length; index++)
 		{
-			this.parameters_.put(parameters[index].getName(), parameters[index]);
+			pHash.put(protocol.getSupportedParameters()[index].getName(), protocol.getSupportedParameters()[index]);
+			
+			/* While we're here, disable ALL parameters to start off */
+			protocol.getSupportedParameters()[index].setEnabled(false);
 			
 		} /* end parameter loop */
 		
 		
-		/* Turn on ONLY the params that are at least part of this profile */
-		enableDisableParameters(false);
+		/* Walk through each page/row/gauge, and hand out the ecu parameter needed to each of them */
+		for (int pageIndex = 0; pageIndex < profile.getPageCount(); pageIndex++)
+		{
+			ProfilePage page = profile.getPage(pageIndex);
+			for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
+			{
+				ProfileRow row = page.getRow(rowIndex);
+				for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
+				{
+					ProfileGauge gauge = row.getGauge(gaugeIndex);
+					ECUParameter ecuParam = (ECUParameter)pHash.get(gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME));
+					if (ecuParam == null)
+					{
+						throw new RuntimeException("A Gauge is configured to display an unknown parameter [" + gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME) + "]");
+					}
+					gauge.setECUParameter(ecuParam);
+				}
+			}
+		}
 		
+		
+		/* Turn on ONLY the params that are at least part of this profile */
+//		enableDisableParameters(false);
+		
+		this.statusBar_.setPageCount(profile.getPageCount());
 	}
+	
+	
 	
 	/********************************************************
 	 * @return the eventAdapter
@@ -224,7 +247,7 @@ public class ProfileRenderer
 	 ********************************************************/
 	public int getActivePage()
 	{
-		return this.activePage_;
+		return this.currentlyActivePage_;
 	}
 	
 	/********************************************************
@@ -244,11 +267,11 @@ public class ProfileRenderer
 			return;
 		}
 		
-		this.activePage_ = activePage;
+		this.currentlyActivePage_ = activePage;
 		this.refreshGauges_ = true;
 		this.refreshStatusBar_ = true;
 //		this.dblBufferdStaticImage_ = null;
-		this.statusBar_.setActivePage(this.activePage_);
+		this.statusBar_.setActivePage(this.currentlyActivePage_);
 		
 		/* enable or disable the desired parameters */
 		enableDisableParameters(this.fetchVisibleOnly_);
@@ -264,66 +287,58 @@ public class ProfileRenderer
 	{
 		this.fetchVisibleOnly_ = visibleOnly;
 		
-		Vector paramKeys = this.parameters_.getKeys();
 		
-		/* Check each available parameter */
-		for (int index = 0; index < paramKeys.size(); index++)
+		/* Since a gauge can be on multiple pages, we need to simply cache the ones to be enabled,
+		 * all the while disabling all of them.  The, turn back on the ones we want */
+		Vector toEnableParams = new Vector(5);
+		
+		
+		/* By default, enable ONLY the parameters that are found in any gauge in the profile */
+		for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
 		{
-			String key = (String)paramKeys.items[index];
-			ECUParameter param = (ECUParameter)this.parameters_.get(key);
-			param.setEnabled(false);
 			
-			/* By default, enable ONLY the parameters that are found in any gauge in the profile */
-			for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
+
+			ProfilePage page = this.profile_.getPage(pageIndex);
+			for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
 			{
-				
-				/*  Here is where we cheat with the visible only flag.  If it's true, then we 
-				 * only need to check the active page. */
-				if (visibleOnly)
+				ProfileRow row = page.getRow(rowIndex);
+				for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
 				{
-					pageIndex = this.activePage_;
-				}
+					ProfileGauge gauge = row.getGauge(gaugeIndex);
+					
+					/* The default, is to disable */
+					gauge.getECUParameter().setEnabled(false);
 
-				
-				ProfilePage page = this.profile_.getPage(pageIndex);
-				for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
-				{
-					ProfileRow row = page.getRow(rowIndex);
-					for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
+					/* If we want visable only, then we need to check the active page id */
+					if (this.fetchVisibleOnly_)
 					{
-						ProfileGauge gauge = row.getGauge(gaugeIndex);
-						
-						if (param.getName().equals(gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME)))
+						if (pageIndex == this.currentlyActivePage_)
 						{
-							param.setEnabled(true);
-							break;
+							if (toEnableParams.indexOf(gauge.getECUParameter()) < 0)
+							{
+								toEnableParams.addElement(gauge.getECUParameter());
+							}
 						}
-						
-					} /* end gauge loop */
-					
-					
-					if (param.isEnabled())
-					{
-						break;
 					}
-	
-				} /* end row loop */
+					else
+					{
+						gauge.getECUParameter().setEnabled(true);
+					}
+					
+				} /* end gauge loop */
 				
-				
-				if (param.isEnabled())
-				{
-					break;
-				}
-	
-				/* Visible only?  Stop the loop */
-				if (visibleOnly)
-				{
-					pageIndex = this.profile_.getPageCount();
-				}
-				
-			} /* end page loop */
 
-		} /* end key loop */
+			} /* end row loop */
+			
+			
+		} /* end page loop */
+
+		
+		for (int index = 0; index < toEnableParams.size(); index++)
+		{
+			ECUParameter p = (ECUParameter)toEnableParams.items[index];
+			p.setEnabled(true);
+		}
 	}
 	
 	/*********************************************************
@@ -333,20 +348,12 @@ public class ProfileRenderer
 	public void render(Graphics g, Rect r) throws Exception
 	{
 		
-		
 		/* Not having a profile configured is a fatal exception */
 		if (this.profile_ == null)
 		{
 			throw new Exception("No Profile Provided");
 		}
 
-
-		/* No parameters?  NO point! */
-		if (this.parameters_ == null)
-		{
-			return;
-		}
-	
 
 		/* Pre calculate ALL the drawable rects */
 		calculateRects(g, r);
@@ -356,31 +363,28 @@ public class ProfileRenderer
 		renderStatusMessage(g, r.width, r.height / 2);
 
 		
-//		/* If no data has been indicated as being ready, then don't draw the dynamic gauge bits */
-//		if (!this.newDataReady_)
-//		{
-//			return;
-//		}
-//
-//				
-//		/* Set the new data flag back to false, since we're about to render it anyway */
-//		this.newDataReady_ = false;
-
-		
-//		/* Draw the static content into the buffer image */
-//		if (this.dblBufferdStaticImage_ == null)
-//		{
-//			this.dblBufferdStaticImage_ = new Image(r.width, r.height);
-//			renderActivePage(this.dblBufferdStaticImage_.getGraphics(), true);
-//		}
  
 
 		/* Render the active page  */
 		if (this.refreshGauges_ == true)
 		{
 			this.refreshStatusBar_ = true;
-//			g.drawImage(this.dblBufferdStaticImage_, r.x, r.y);
-			renderActivePage(g);
+
+			/* If this is the firstTiemRender, then we need to pre-render EVERY page.  Why? Some gauges need the
+			 * RECT and Graphic data before even any ecu values come through. Becuase gauges like line graphs are dependant
+			 * on ECU Value change evnets to get their data, but the size of the value history buffer is dependant on the
+			 * rect of the gauge area */
+			if (this.firstTimeRender_)
+			{
+				for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
+				{
+					renderPage(g, pageIndex);
+				}
+			}
+			else
+			{
+				renderPage(g, this.currentlyActivePage_);
+			}
 			this.refreshGauges_ = false;
 		}
 
@@ -391,6 +395,14 @@ public class ProfileRenderer
 			this.refreshStatusBar_ = false;
 		}
 
+
+		/* turn the first time off, and go again */
+		if (this.firstTimeRender_)
+		{
+			this.firstTimeRender_ = false;
+			render(g,r);
+		}
+		
 
 
 	}
@@ -404,7 +416,7 @@ public class ProfileRenderer
 	 * 			need to be called twice.
 	 * @throws Exception
 	 ********************************************************/
-	private void renderActivePage(Graphics g) throws Exception
+	private void renderPage(Graphics g, int pageIndex) throws Exception
 	{
 		
 		/* No Pages? */
@@ -414,11 +426,11 @@ public class ProfileRenderer
 		}
 	
 		/* Get the page */
-		ProfilePage page = this.profile_.getPage(this.activePage_);
+		ProfilePage page = this.profile_.getPage(pageIndex);
 		Rect pageRect = (Rect)this.rectCache_.get(page);
 		if (pageRect == null)
 		{
-			throw new Exception("Cannot render page: " + this.activePage_ + " the RECT cache has no entry for it");
+			throw new Exception("Cannot render page: " + pageIndex + " the RECT cache has no entry for it");
 		}
 
 		
@@ -684,12 +696,13 @@ public class ProfileRenderer
 		{
 			ErrorLog.error("Gauge " + gauge + " does not have a parameter identified");
 		}
-		ECUParameter p = (ECUParameter)this.parameters_.get(gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME));
+		//ECUParameter p = (ECUParameter)this.parameters_.get(gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME));
 		
 		/* No Param? */
-		if (p != null)
+//		if (p != null)
 		{
-			gauge.render(g, rect, p, this.profile_.getColorModel(), false);
+			//gauge.render(g, rect, p, this.profile_.getColorModel(), false);
+			gauge.render(g, rect, this.profile_.getColorModel(), false);
 		}
 		
 	}
@@ -707,7 +720,8 @@ public class ProfileRenderer
 		{
 			
 			/* Calc positions */
-			Font f = findFontBestFitWidth(width, this.statusMessage_, true);
+			//Font f = findFontBestFitWidth(width, this.statusMessage_, true);
+			Font f = Font.getFont(Font.DEFAULT, false, Font.NORMAL_SIZE);
 			int textHeight = f.fm.height - f.fm.descent;
 			int textWidth = f.fm.getTextWidth(this.statusMessage_);
 			

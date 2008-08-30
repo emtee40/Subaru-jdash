@@ -48,12 +48,9 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	 */
 	private int initMode_ = 0;
 	
-	/* 0 = ready, 1 = TX, 2 = RS */
-	private int RxTxMode_ = 0; 
 	
-	
-	
-	private StubbedParameter[] stubbedParameters_ = null;
+//	private StubbedParameter[] stubbedParameters_ = null;
+	private ProtocolHandler primaryHandler_ = null;
 	
 	private int prevEventTS_ = 0;
 	
@@ -64,14 +61,15 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	 *******************************************************/
 	public TestProtocol(ProtocolHandler primaryHandler)
 	{
-		
-		this.stubbedParameters_ = new StubbedParameter[primaryHandler.getSupportedParameters().length];
-		
-		/* Setup our stubbed parameters */
-		for (int index = 0; index < primaryHandler.getSupportedParameters().length; index++)
-		{
-			this.stubbedParameters_[index] = new StubbedParameter(primaryHandler.getSupportedParameters()[index]);
-		}
+
+		this.primaryHandler_ = primaryHandler;
+//		this.stubbedParameters_ = new StubbedParameter[primaryHandler.getSupportedParameters().length];
+//		
+//		/* Setup our stubbed parameters */
+//		for (int index = 0; index < primaryHandler.getSupportedParameters().length; index++)
+//		{
+//			this.stubbedParameters_[index] = new StubbedParameter(primaryHandler.getSupportedParameters()[index]);
+//		}
 	}
 	
 
@@ -81,7 +79,8 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	 ********************************************************/
 	public ECUParameter[] getSupportedParameters()
 	{
-		return this.stubbedParameters_;
+		return this.primaryHandler_.getSupportedParameters();
+		//return this.stubbedParameters_;
 	}
 	
 	
@@ -150,20 +149,25 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 			case 7:
 				fireCommTXEvent();
 				
+				ECUParameter p = this.primaryHandler_.getSupportedParameters()[this.parameterIndex_];
 				
-				if (this.stubbedParameters_[this.parameterIndex_].isEnabled())
+				//if (this.stubbedParameters_[this.parameterIndex_].isEnabled())
+				//if (p.isEnabled())
 				{
-//					/* Wait for at least 50 ms.  If 50ms has not yet passed, just return to try again */
-//					if (Vm.getTimeStamp() - 50 < this.prevEventTS_)
-//					{
-//						return;
-//					}
-//					
-//					this.prevEventTS_ = Vm.getTimeStamp();
 
-					this.stubbedParameters_[this.parameterIndex_].value_ += 95.1;
-					this.stubbedParameters_[this.parameterIndex_].markTimeStamp();
-					fireParemeterFetchedEvent(this.stubbedParameters_[this.parameterIndex_]);
+//					this.stubbedParameters_[this.parameterIndex_].value_ += 95.1;
+//					this.stubbedParameters_[this.parameterIndex_].markTimeStamp();
+//					fireParemeterFetchedEvent(this.stubbedParameters_[this.parameterIndex_]);
+					
+					p.setDemoValue();
+					
+					/* To fool the gauges.  The value changes, but they don't know it? */
+					if (p.isEnabled())
+					{
+						p.notifyValueChanged();
+						fireParemeterFetchedEvent(p);
+					}
+					
 					fireCommRXEvent();
 
 				}
@@ -172,7 +176,8 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 				this.parameterIndex_++;
 				
 				/* Last one?  finished the batch */
-				if (this.parameterIndex_ >= this.stubbedParameters_.length)
+				//if (this.parameterIndex_ >= this.stubbedParameters_.length)
+				if (this.parameterIndex_ >= this.primaryHandler_.getSupportedParameters().length)
 				{
 					this.initMode_++;
 				}
@@ -203,31 +208,31 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	
 	
 
-	/********************************************************
-	 * 
-	 *
-	 *********************************************************/
-	private static class StubbedParameter extends ECUParameter
-	{
-		public double value_ = 1.0;
-		
-		/********************************************************
-		 * 
-		 *******************************************************/
-		public StubbedParameter(ECUParameter p)
-		{
-			super(p.getName());
-		}
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ECUParameter#getValue()
-		 ********************************************************/
-		public double getValue()
-		{
-			return this.value_;
-		}
-	}
-	
+//	/********************************************************
+//	 * 
+//	 *
+//	 *********************************************************/
+//	private static class StubbedParameter extends ECUParameter
+//	{
+//		public double value_ = 1.0;
+//		
+//		/********************************************************
+//		 * 
+//		 *******************************************************/
+//		public StubbedParameter(ECUParameter p)
+//		{
+//			super(p.getName());
+//		}
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ECUParameter#getValue()
+//		 ********************************************************/
+//		public double getValue()
+//		{
+//			return this.value_;
+//		}
+//	}
+//	
 }
 

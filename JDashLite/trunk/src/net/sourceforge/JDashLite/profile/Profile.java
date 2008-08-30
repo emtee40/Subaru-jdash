@@ -117,7 +117,7 @@ public class Profile
 		AnalogGauge analogGauge = null;
 		DigitalGauge digitalGauge = null;
 		LineGraphGauge lineGraphGauge = null;
-		LEDGauge ledGauge = null;
+//		LEDGauge ledGauge = null;
 		
 		/* Page 0 */
 		page = new ProfilePage();
@@ -290,9 +290,9 @@ public class Profile
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.4);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 220);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 11);
+		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 6);
 		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, false);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
 		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, true);
 		
 		/* Page 0 row 0 gauge 1 */
@@ -321,7 +321,7 @@ public class Profile
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 100);
 		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
 		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, false);
+		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
 		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, true);
 		
 		/* Page 0 row 0 gauge 1 */

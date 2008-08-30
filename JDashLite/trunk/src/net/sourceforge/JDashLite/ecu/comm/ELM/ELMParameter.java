@@ -118,4 +118,21 @@ public abstract class ELMParameter extends ECUParameter
 	{
 		return (double)getResponseByte(index);
 	}
+	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.ecu.comm.ECUParameter#setDemoValue()
+	 ********************************************************/
+	public void setDemoValue()
+	{
+		/* Increment each value in the int */
+		for (int index = 0 ;index < this.responseBytes_.length; index++)
+		{
+			byte b = (byte)this.responseBytes_[index];
+			b+=2;
+			this.responseBytes_[index] = b;
+		}
+		
+	}
 }

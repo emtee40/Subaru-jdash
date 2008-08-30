@@ -104,7 +104,7 @@ public class LEDGauge extends ProfileGauge
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ECUParameter p, ColorModel cm, boolean redrawAll)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
 	{
 		
 		
@@ -119,7 +119,7 @@ public class LEDGauge extends ProfileGauge
 		if (r.equals(this.lastRect_) == false)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
-			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), p, cm);
+			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm);
 			this.lastRect_ = r;
 		}
 
@@ -194,7 +194,7 @@ public class LEDGauge extends ProfileGauge
 	 * @param p
 	 * @param cm
 	 *******************************************************/
-	private void generateStaticImage(Graphics g, Rect r, ECUParameter p, ColorModel cm)
+	private void generateStaticImage(Graphics g, Rect r, ColorModel cm)
 	{
 		
 		/* Pull out a few regularly needed values */

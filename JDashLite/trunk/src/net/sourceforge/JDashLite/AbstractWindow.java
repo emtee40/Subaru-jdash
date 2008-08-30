@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite;
 
-import waba.fx.Rect;
 import waba.ui.Button;
 import waba.ui.ControlEvent;
 import waba.ui.Event;

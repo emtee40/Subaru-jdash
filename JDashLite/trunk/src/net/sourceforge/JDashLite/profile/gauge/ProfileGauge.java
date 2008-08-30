@@ -61,10 +61,33 @@ public abstract class ProfileGauge //implements RenderableProfileComponent
 	
 	
 	private Hashtable props_ = new Hashtable(3);
+
 	
-//	private String label_ = null;
-//	private String parameterName_ = null;
-//	private double widthPercent_ = -1;
+	private ECUParameter param_ = null;
+	
+	/********************************************************
+	 * 
+	 *******************************************************/
+	public ProfileGauge()
+	{
+	}
+	
+	
+	/********************************************************
+	 * @param param
+	 ********************************************************/
+	public void setECUParameter(ECUParameter param)
+	{
+		this.param_ = param;
+	}
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public ECUParameter getECUParameter()
+	{
+		return this.param_;
+	}
 	
 	/*******************************************************
 	 * @param key
@@ -205,5 +228,5 @@ public abstract class ProfileGauge //implements RenderableProfileComponent
 	 * @param redrawAll IN - force a redraw and re-calc of ALL elements.
 	 * @param staticContent
 	 ********************************************************/
-	public abstract void render(Graphics g, Rect r, ECUParameter p, ColorModel cm, boolean redrawAll);
+	public abstract void render(Graphics g, Rect r, /*ECUParameter p,*/ ColorModel cm, boolean redrawAll);
 }

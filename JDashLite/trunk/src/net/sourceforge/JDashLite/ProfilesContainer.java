@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite;
 
-import net.sourceforge.JDashLite.config.ListItem;
 import net.sourceforge.JDashLite.config.Preferences;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
@@ -35,7 +34,6 @@ import waba.ui.Container;
 import waba.ui.ControlEvent;
 import waba.ui.Event;
 import waba.ui.ListBox;
-import waba.util.Vector;
 
 /*********************************************************
  * 
@@ -43,8 +41,6 @@ import waba.util.Vector;
  *********************************************************/
 public class ProfilesContainer extends Container
 {
-	
-	private static final String PAGE_PREFIX = "Page ";
 
 	private static final int CONTROL_SPACE = AbstractWindow.CONTROL_SPACE;
 	

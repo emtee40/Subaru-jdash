@@ -33,7 +33,6 @@ import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
-import net.sourceforge.JDashLite.util.CircularIndex;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Graphics;
@@ -204,26 +203,26 @@ public class JDashLiteMainWindow extends GameEngine
 	}
 	
 	
-	/*******************************************************
-	 * 
-	 ********************************************************/
-	private void populateProfileMenu()
-	{
-		
-		int profileCount = getPreferences().getProfileCount();
-		
-		for (int index = 0; index < profileCount; index++)
-		{
-			Profile p = new Profile();
-			try
-			{
-				p.loadFromXml(getPreferences().getProfile(index));
-			}
-			catch(Exception e)
-			{
-				ErrorLog.error("Can't add profile to menu", e);
-			}
-		}
+//	/*******************************************************
+//	 * 
+//	 ********************************************************/
+//	private void populateProfileMenu()
+//	{
+//		
+//		int profileCount = getPreferences().getProfileCount();
+//		
+//		for (int index = 0; index < profileCount; index++)
+//		{
+//			Profile p = new Profile();
+//			try
+//			{
+//				p.loadFromXml(getPreferences().getProfile(index));
+//			}
+//			catch(Exception e)
+//			{
+//				ErrorLog.error("Can't add profile to menu", e);
+//			}
+//		}
 		
 		
 //		helpMenu[++menuIndex] = new ListeningMenuItem("About");
@@ -235,7 +234,7 @@ public class JDashLiteMainWindow extends GameEngine
 //			}
 //		});
 		
-	}
+//	}
 
 	
 	/*********************************************************

@@ -100,9 +100,7 @@ public class PreferencesWindow extends AbstractWindow
 	protected void onPopup()
 	{
 		this.highResPrepared = true;
-//
-		/* Add the main buttons now */
- 		int buttonTop = this.addMainButtons();
+		this.addMainButtons();
 
 		/* The settings tabs */
 		TabPanel tabPanel = new TabPanel(new String[] {"Settings", "Profiles"});

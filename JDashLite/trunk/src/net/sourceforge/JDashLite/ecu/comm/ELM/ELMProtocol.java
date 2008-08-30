@@ -137,9 +137,6 @@ public class ELMProtocol extends AbstractProtocol
 	/* The index of the currently being fetched parameter */
 	private int currentParameterIndex_ = 0;
 	
-	/* The read timeout */
-	private int readTimeoutMs_ = INIT_TIMEOUT_MS;
-	
 	/* The response buffer offset pointer */
 	private int responseBufferOffset_ = 0;
 	
@@ -851,7 +848,7 @@ public class ELMProtocol extends AbstractProtocol
 			offset += 2;
 		}
 		
-		p.markTimeStamp();
+		p.notifyValueChanged();
 	}
 	
 	

@@ -51,36 +51,16 @@ public class ProfileRenderer
 	/* This is an array of decreasing sized fonts available to all renderers */
 	public static final Font[] AVAILABLE_FONTS = 
 	{
-//		Font.getFont("SW", true, Font.BIG_SIZE),  		// H=30
-//		Font.getFont("SW", false, Font.BIG_SIZE), 		// H=28
-//		Font.getFont("SW", true, Font.NORMAL_SIZE), 	// H=22
-//		Font.getFont("SW", false, Font.NORMAL_SIZE),	// H=22
-//		Font.getFont("LSW", true, Font.BIG_SIZE),		// H=15
-//		Font.getFont("LSW", false, Font.BIG_SIZE),		// H=14
-//		Font.getFont("LSW", true, Font.NORMAL_SIZE),	// H=11
-//		Font.getFont("LSW", false, Font.NORMAL_SIZE),	// H=11
-//		
-//		Font.getFont(Font.DEFAULT, 	true,  	Font.BIG_SIZE),  		// H=28
-//		Font.getFont("6SW", false, 28),  		// H=30
-//		Font.getFont("6SW", true,  22),  		// H=30
-//		Font.getFont("6SW", false, 20),  		// H=30
-//		Font.getFont("6SW", true,  18),  		// H=30
-//		Font.getFont("6SW", false, 16),  		// H=30
-//		Font.getFont("6SW", true,  14),  		// H=30
-//		Font.getFont("6SW", false, 10)  		// H=30
-//
-//	};
 	
-	
-	Font.getFont("SW", false, Font.BIG_SIZE), 				/* height = 28 */
-	Font.getFont("SW", false, Font.NORMAL_SIZE), 			/* height = 22 */
-//	Font.getFont("Tahoma", false, Font.BIG_SIZE),  			/* Height = 17 */
-	Font.getFont("Verdana", false, Font.BIG_SIZE), 			/* Height = 16 */
-//	Font.getFont("Tahoma", false, Font.NORMAL_SIZE),  		/* Height = 15 Same size as TinyLarge NORMAl but this has tails!! */
-//	Font.getFont("TinyLarge", false, Font.NORMAL_SIZE), 	/* height = 14 */
-	Font.getFont("Verdana", false, Font.NORMAL_SIZE), 		/* Height <= 14   Verdana also has tails */
-//	Font.getFont("Arial", false, Font.NORMAL_SIZE),  		/* Height = 13 */
-	Font.getFont("TinySmall", false, Font.NORMAL_SIZE)  	/* Height = 6 (ugly) */
+		Font.getFont("SW", false, Font.BIG_SIZE), 				/* height = 28 */
+		Font.getFont("SW", false, Font.NORMAL_SIZE), 			/* height = 22 */
+	//	Font.getFont("Tahoma", false, Font.BIG_SIZE),  			/* Height = 17 */
+		Font.getFont("Verdana", false, Font.BIG_SIZE), 			/* Height = 16 */
+	//	Font.getFont("Tahoma", false, Font.NORMAL_SIZE),  		/* Height = 15 Same size as TinyLarge NORMAl but this has tails!! */
+	//	Font.getFont("TinyLarge", false, Font.NORMAL_SIZE), 	/* height = 14 */
+		Font.getFont("Verdana", false, Font.NORMAL_SIZE), 		/* Height <= 14   Verdana also has tails */
+	//	Font.getFont("Arial", false, Font.NORMAL_SIZE),  		/* Height = 13 */
+		Font.getFont("TinySmall", false, Font.NORMAL_SIZE)  	/* Height = 6 (ugly) */
 
 	};
 
@@ -376,14 +356,20 @@ public class ProfileRenderer
 			 * rect of the gauge area */
 			if (this.firstTimeRender_)
 			{
+				/* Render each page */
 				for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
 				{
-					renderPage(g, pageIndex);
+					if (pageIndex != this.currentlyActivePage_)
+					{
+						renderPage(g, pageIndex, true);
+					}
 				}
+				/* Now, force the current page last */
+				renderPage(g, this.currentlyActivePage_, true);
 			}
 			else
 			{
-				renderPage(g, this.currentlyActivePage_);
+				renderPage(g, this.currentlyActivePage_, false);
 			}
 			this.refreshGauges_ = false;
 		}
@@ -416,7 +402,7 @@ public class ProfileRenderer
 	 * 			need to be called twice.
 	 * @throws Exception
 	 ********************************************************/
-	private void renderPage(Graphics g, int pageIndex) throws Exception
+	private void renderPage(Graphics g, int pageIndex, boolean forceRedraw) throws Exception
 	{
 		
 		/* No Pages? */
@@ -460,7 +446,7 @@ public class ProfileRenderer
 				/* Render this gauge */
 				if (gauge != null)
 				{
-					renderGauge(g, gaugeRect, gauge);
+					renderGauge(g, gaugeRect, gauge, forceRedraw);
 				}
 				else
 				{
@@ -675,20 +661,9 @@ public class ProfileRenderer
 	 * @param rect
 	 * @throws Exception
 	 ********************************************************/
-	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge) throws Exception
+	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, boolean forceRedraw) throws Exception
 	{
 	
-		/* Draw a simple borer around the rect with a filled BG  */
-//		g.setForeColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BORDER));
-//		g.setBackColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BACKGROUND));
-//		Font f = ProfileRenderer.findFontBestFitHeight((int)(rect.height * 0.8), false);
-//		g.setFont(f);
-//		
-//		if (staticContentOnly)
-//		{
-//			g.fillRect(rect.x, rect.y, rect.width, rect.height);
-//			g.drawRect(rect.x, rect.y, rect.width, rect.height);
-//		}
 		
 		/* Get the parameter for this gauge */
 		String parameteName = gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME);
@@ -696,14 +671,8 @@ public class ProfileRenderer
 		{
 			ErrorLog.error("Gauge " + gauge + " does not have a parameter identified");
 		}
-		//ECUParameter p = (ECUParameter)this.parameters_.get(gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME));
 		
-		/* No Param? */
-//		if (p != null)
-		{
-			//gauge.render(g, rect, p, this.profile_.getColorModel(), false);
-			gauge.render(g, rect, this.profile_.getColorModel(), false);
-		}
+		gauge.render(g, rect, this.profile_.getColorModel(), forceRedraw);
 		
 	}
 	

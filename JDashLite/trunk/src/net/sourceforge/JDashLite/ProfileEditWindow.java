@@ -29,9 +29,12 @@ import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.ecu.comm.SSM.SSMProtocol;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.profile.Profile;
+import net.sourceforge.JDashLite.profile.ProfilePage;
 import waba.ui.Button;
 import waba.ui.ComboBox;
+import waba.ui.ControlEvent;
 import waba.ui.Edit;
+import waba.ui.Event;
 import waba.ui.Label;
 import waba.ui.ListBox;
 import waba.ui.MainWindow;
@@ -143,6 +146,50 @@ public class ProfileEditWindow extends AbstractWindow
 		
 	}
 
+	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see waba.ui.Control#onEvent(waba.ui.Event)
+	 ********************************************************/
+	public void onEvent(Event event)
+	{
+		super.onEvent(event);
+		
+		switch (event.type)
+		{
+			case ControlEvent.PRESSED:
+				if (event.target == this.newButton_)
+				{
+					doNewPage();
+				}
+				
+				if (event.target == this.editButton_)
+				{
+					doEditPage();
+				}
+				
+				if (event.target == this.deleteButton_)
+				{
+					doDeletePage();
+				}
+				
+				if (event.target == this.upButton_)
+				{
+					doMovePageUp();
+				}
+				
+				if (event.target == this.downButton_)
+				{
+					doMovePageDown();
+				}
+				
+			break;
+				
+		}
+	}
+	
+	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.AbstractWindow#okPressed()
@@ -178,6 +225,119 @@ public class ProfileEditWindow extends AbstractWindow
 		unpop();
 	}
 	
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doNewPage()
+	{
+		
+//		/* Create a new profile */
+//		Profile newProfile = new Profile();
+//		
+//		/* Pop up the edit profile dialog */
+//		ProfileEditWindow editWindow = new ProfileEditWindow(newProfile);
+//		editWindow.popupBlockingModal();
+//		
+//		if (editWindow.getButtonPressedCode() == ProfileEditWindow.BUTTON_OK)
+//		{
+//			this.profilesListBox_.add(newProfile);
+//			this.profilesListBox_.repaint();
+//		}
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doEditPage()
+	{
+		int selectedIndex = this.pagesListBox_.getSelectedIndex();
+		if (selectedIndex < 0)
+		{
+			return;
+		}
+		
+		ProfilePage page = (ProfilePage)this.pagesListBox_.getItemAt(selectedIndex);
+
+//		/* Pop up the edit profile dialog */
+//		ProfileEditWindow editWindow = new ProfileEditWindow(profile);
+//		editWindow.popupBlockingModal();
+//
+//		if (editWindow.getButtonPressedCode() == ProfileEditWindow.BUTTON_OK)
+//		{
+//			this.profilesListBox_.setItemAt(selectedIndex, profile);
+//		}
+//		else
+//		{
+//			// TODO
+////			System.out.println("Discard and re-load profile");
+//		}
+		
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doDeletePage()
+	{
+		
+		int selectedIndex = this.pagesListBox_.getSelectedIndex();
+		if (selectedIndex >= 0)
+		{
+			this.pagesListBox_.remove(selectedIndex);
+		}
+		
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doMovePageUp()
+	{
+		int selectedIndex = this.pagesListBox_.getSelectedIndex();
+		
+		if (selectedIndex <= 0)
+		{
+			return;
+		}
+		
+		if (this.pagesListBox_.size() < 2)
+		{
+			return;
+		}
+		
+		Object selectedObject = this.pagesListBox_.getItemAt(selectedIndex);
+		this.pagesListBox_.remove(selectedIndex);
+		this.pagesListBox_.insert(selectedObject, selectedIndex-1);
+
+	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doMovePageDown()
+	{
+		int selectedIndex = this.pagesListBox_.getSelectedIndex();
+		
+		if (selectedIndex == -1)
+		{
+			return;
+		}
+		
+		if (this.pagesListBox_.size() < 2)
+		{
+			return;
+		}
+		
+		if (selectedIndex >= this.pagesListBox_.size())
+		{
+			return;
+		}
+		
+		Object selectedObject = this.pagesListBox_.getItemAt(selectedIndex);
+		this.pagesListBox_.remove(selectedIndex);
+		this.pagesListBox_.insert(selectedObject, selectedIndex+1);
+	}
 	
 }
 

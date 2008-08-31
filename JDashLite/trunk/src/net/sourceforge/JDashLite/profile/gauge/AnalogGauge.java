@@ -81,6 +81,9 @@ public class AnalogGauge extends ProfileGauge
 	/* The current value font */
 	private Font currentValueFont_ = null;
 	
+	/* We remember the previous value to detect when a redraw is needed */
+	private double previousValue_ = -1.1;
+	
 	/********************************************************
 	 * 
 	 *******************************************************/
@@ -89,14 +92,41 @@ public class AnalogGauge extends ProfileGauge
 
 	}
 
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
+	 ********************************************************/
+	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
+	{
+
+		/* Generate the static image */
+		if (redrawAll || r.equals(this.lastRect_) == false)
+		{
+			this.staticContent_ = new Image(r.width, r.height);
+			generateStaticImage(cm, (int)(Math.min(r.width, r.height) * 0.04));
+		}
+		
+		/* Now, the dynamic image */
+		if (this.previousValue_ != getECUParameter().getValue() || redrawAll || r.equals(this.lastRect_) == false)
+		{
+			g.drawImage(this.staticContent_, r.x, r.y);
+			renderDynamic(g, r, cm);
+		}
+
+
+		/* Remember the rect */
+		this.lastRect_ = r;
+		
+	}
+	
+	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
+	public void renderDynamic(Graphics g, Rect r, ColorModel cm)
 	{
-		
-		
 		
 		/* Calculate a few common needed values */
 		int centerX = r.x + (r.width / 2);
@@ -105,13 +135,13 @@ public class AnalogGauge extends ProfileGauge
 		int needleWidth = (int)(needleLength * NEEDLE_WIDTH);
 		needleWidth = Math.max(3, needleWidth);
 
-		if (r.equals(this.lastRect_) == false)
-		{
-			this.staticContent_ = new Image(r.width, r.height);
-			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm, (int)(needleWidth * 1.5));
-			this.lastRect_ = r;
-		}
-
+//		if (r.equals(this.lastRect_) == false)
+//		{
+//			this.staticContent_ = new Image(r.width, r.height);
+//			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm, (int)(needleWidth * 1.5));
+//			this.lastRect_ = r;
+//		}
+//
 		/* Draw the static image */
 		g.drawImage(this.staticContent_, r.x, r.y);
 
@@ -183,8 +213,16 @@ public class AnalogGauge extends ProfileGauge
 	 * @param p
 	 * @param cm
 	 *******************************************************/
-	private void generateStaticImage(Graphics g, Rect r, ColorModel cm, int tickLength)
+	private void generateStaticImage(ColorModel cm, int tickLength)
 	{
+//		/* Create the static image first */
+//		if (this.staticContent_ == null)
+//		{
+//			this.staticContent_ = new Image(r.width, r.height);
+//		}
+		
+		Graphics g = this.staticContent_.getGraphics();
+		Rect r = new Rect(0, 0, this.staticContent_.getWidth(), this.staticContent_.getHeight());
 		
 		/* Pull out a few regularly needed values */
 		this.rangeStart_ = getDoubleProperty(PROP_D_RANGE_START, 0);

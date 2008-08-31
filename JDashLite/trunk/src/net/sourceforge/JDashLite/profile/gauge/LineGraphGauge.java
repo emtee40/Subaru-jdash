@@ -69,6 +69,8 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	
 	private static final double NULL_DOUBLE = -9999999999999999999.9;
 	
+	private boolean doNextRender_ = true;
+	
 	/********************************************************
 	 * 
 	 *******************************************************/
@@ -112,6 +114,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 			this.valueHistory_[this.historyIndex_.getHead()].setTimestamp(getECUParameter().getTimeStamp());
 		}
 		
+		this.doNextRender_ = true;
 	}
 	
 	
@@ -125,20 +128,63 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		param.addValueChangedListener(this);
 	}
 	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
+	 ********************************************************/
+	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
+	{
+		if (redrawAll) System.out.println("Forcing Redraw of " + getECUParameter().getName() + " " + getProperty(ProfileGauge.PROP_STR_LABEL));
+
+		/* Create the value history array */
+		if ((this.valueHistory_ == null) || (r.width != this.valueHistory_.length))
+		{
+			this.valueHistory_ = new HistoryValue[r.width];
+			this.historyIndex_ = new CircularIndex(this.valueHistory_.length);
+		}
+
+		
+		/* Static Content */
+		if (redrawAll || r.equals(this.lastRect_) == false)
+		{
+			this.staticContent_ = new Image(r.width, r.height);
+			generateStaticImage(cm);
+		}
+
+		
+		/* Now, the dynamic image */
+		if (doNextRender_ || redrawAll || r.equals(this.lastRect_) == false)
+		{
+			g.drawImage(this.staticContent_, r.x, r.y);
+			renderDynamic(g, r, cm);
+		}
+
+
+		/* Remember the rect */
+		this.lastRect_ = r;
+		
+		/* turn off the next render */
+		this.doNextRender_ = false;
+		
+	}
+	
+	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
+	public void renderDynamic(Graphics g, Rect r, ColorModel cm)
 	{
+		
 
-		/* New Rect? New static image */
-		if (r.equals(this.lastRect_) == false)
-		{
-			this.staticContent_ = new Image(r.width, r.height);
-			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm);
-			this.lastRect_ = r;
-		}
+//		/* New Rect? New static image */
+//		if (r.equals(this.lastRect_) == false)
+//		{
+//			this.staticContent_ = new Image(r.width, r.height);
+//			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm);
+//			this.lastRect_ = r;
+//		}
 
 		
 		double highValue = this.rangeStart_;
@@ -222,8 +268,11 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	 * @param p
 	 * @param cm
 	 ********************************************************/
-	private void generateStaticImage(Graphics g, Rect r, ColorModel cm)
+	private void generateStaticImage(ColorModel cm)
 	{
+		
+		Graphics g = this.staticContent_.getGraphics();
+		Rect r = new Rect(0, 0, this.staticContent_.getWidth(), this.staticContent_.getHeight());
 		
 		/* Remember the lable font cuz we'll need it for the digital values */
 		this.labelFont_ = ProfileRenderer.findFontBestFitHeight((int)(r.height * 0.15), false);
@@ -250,12 +299,12 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		g.drawRect(r.x, r.y, r.width, r.height);
 
 		
-		/* Create the value history array */
-		if ((this.valueHistory_ == null) || (r.width != this.valueHistory_.length))
-		{
-			this.valueHistory_ = new HistoryValue[r.width];
-			this.historyIndex_ = new CircularIndex(this.valueHistory_.length);
-		}
+//		/* Create the value history array */
+//		if ((this.valueHistory_ == null) || (r.width != this.valueHistory_.length))
+//		{
+//			this.valueHistory_ = new HistoryValue[r.width];
+//			this.historyIndex_ = new CircularIndex(this.valueHistory_.length);
+//		}
 		
 		
 		/* Pre-pop the value array */

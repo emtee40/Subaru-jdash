@@ -36,6 +36,7 @@ import waba.fx.Coord;
 import waba.fx.Font;
 import waba.fx.Graphics;
 import waba.fx.Rect;
+import waba.ui.PenEvent;
 import waba.util.Hashtable;
 import waba.util.Vector;
 
@@ -220,6 +221,22 @@ public class ProfileRenderer
 	}
 	
 	
+	/*******************************************************
+	 * When the main window gets a pen event, it will forward
+	 * it to the renderer.
+	 * @param evt
+	 ********************************************************/
+	public void onPenDown(PenEvent evt)
+	{
+		
+		/* Check for, and respond to page clicks */
+		int pageButtonClicked = this.statusBar_.getPageIndex(evt.x, evt.y);
+		if (pageButtonClicked > -1)
+		{
+			setActivePage(pageButtonClicked);
+		}
+		
+	}
 	
 	
 	/********************************************************
@@ -229,6 +246,7 @@ public class ProfileRenderer
 	{
 		return this.currentlyActivePage_;
 	}
+	
 	
 	/********************************************************
 	 * @param activePage the activePage to set
@@ -319,6 +337,47 @@ public class ProfileRenderer
 			ECUParameter p = (ECUParameter)toEnableParams.items[index];
 			p.setEnabled(true);
 		}
+	}
+	
+	
+	/*******************************************************
+	 * If any part of a visible gauge is located at the given
+	 * x,y, then return it's index.
+	 * @param pageIndex IN - the page to inspect.  -1 will inspect the currently visible page.
+	 * @param x
+	 * @param y
+	 * @return the gauge index within the row, -1 for no gauge.
+	 ********************************************************/
+	public int getGaugeAt(int pageIndex, int x, int y)
+	{
+		
+		return -1;
+	}
+	
+	
+	/*******************************************************
+	 * If any part of a row is located at the given index, then return its index.
+	 * @param pageIndex IN - the page to inspect.  -1 will inspect the currently visible page.
+	 * @param x
+	 * @param y
+	 * @return the row index on the page. -1 for no row.
+	 ********************************************************/
+	public int getRowAt(int pageIndex, int x, int y)
+	{
+		
+		return -1;
+	}
+	
+	/********************************************************
+	 * If any of the page button is located in the given x,y, then return it's index.
+	 * @param pageIndex IN - the page to inspect.  -1 will inspect the currently visible page.
+	 * @param x
+	 * @param y
+	 * @return the page button index, -1 if no page was there.
+	 ********************************************************/
+	public int getPageButton(int x, int y)
+	{
+		return -1;
 	}
 	
 	/*********************************************************

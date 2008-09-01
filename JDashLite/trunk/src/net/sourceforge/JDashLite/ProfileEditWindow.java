@@ -25,13 +25,16 @@ package net.sourceforge.JDashLite;
 
 
 import net.sourceforge.JDashLite.config.ListItem;
+import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;
 import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.ecu.comm.SSM.SSMProtocol;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfilePage;
+import waba.fx.Rect;
 import waba.ui.Button;
 import waba.ui.ComboBox;
+import waba.ui.Container;
 import waba.ui.ControlEvent;
 import waba.ui.Edit;
 import waba.ui.Event;
@@ -58,13 +61,8 @@ public class ProfileEditWindow extends AbstractWindow
 	
 	private Edit profileNameEditBox_ = null;
 	private ComboBox protocolHandlerComboBox_ = null;
-	private ListBox pagesListBox_ = null;
-	
-	private Button newButton_ = null;
-	private Button editButton_ = null;
-	private Button deleteButton_ = null;
-	private Button upButton_ = null;
-	private Button downButton_ = null;
+
+	private ProfileEditControl profileEdit_ = null;
 	
 	/*******************************************************
 	 * Override
@@ -105,44 +103,35 @@ public class ProfileEditWindow extends AbstractWindow
 		add(this.protocolHandlerComboBox_, AFTER + CONTROL_SPACE, SAME);
 		
 		
-		/* Add the pages list box */
-		add(new Label("Pages:"), LEFT + CONTROL_SPACE, AFTER + CONTROL_SPACE);
-		this.pagesListBox_ = new ListBox();
-		add(this.pagesListBox_);
-		this.pagesListBox_.setRect(AFTER + CONTROL_SPACE, 
-								SAME, 
-								(getClientRect().width / 4) * 2, 40);
-		this.pagesListBox_.setRect(this.pagesListBox_.getRect().x,
-								this.pagesListBox_.getRect().y,
-								this.pagesListBox_.getRect().width,
-								buttonTop - CONTROL_SPACE - this.pagesListBox_.getRect().y);		
 
-		/* Create the buttons */
-		this.newButton_ = new Button("New");
-		this.editButton_ = new Button("Edit");
-		this.deleteButton_ = new Button("Delete");
-		this.upButton_ = new Button("Up");
-		this.downButton_ = new Button("Down");
-		
-		/* Add them to the right */
-		add(this.newButton_, AFTER + CONTROL_SPACE, SAME + CONTROL_SPACE);
-		add(this.editButton_, SAME, AFTER + CONTROL_SPACE);
-		add(this.deleteButton_, SAME, AFTER + CONTROL_SPACE);
-		add(this.upButton_, SAME, AFTER + CONTROL_SPACE);
-		add(this.downButton_, SAME, AFTER + CONTROL_SPACE);
-		
-		
-		
-		
 		/* Set the current profile values */
 		this.profileNameEditBox_.setText(this.profile_.getName() == null?"New Profile":this.profile_.getName());
 		this.protocolHandlerComboBox_.select(ListItem.findItem(PROTOCOL_LIST, this.profile_.getProtocolClass()));
+
 		
-		for (int index = 0; index < this.profile_.getPageCount(); index++)
+		
+		/* Add Profile Edit Control.  We'll manually calculate it's rect */
+		Rect lastCompRect = this.protocolHandlerComboBox_.getRect();
+		this.profileEdit_ = new ProfileEditControl(this.profile_); 
+		this.profileEdit_.setRect(getClientRect().x + CONTROL_SPACE, 
+								lastCompRect.y + lastCompRect.height + CONTROL_SPACE, 
+								getClientRect().width - (CONTROL_SPACE * 2), 
+								(buttonTop - CONTROL_SPACE) - (lastCompRect.x + lastCompRect.height));
+		add(this.profileEdit_);
+
+		
+		ProtocolHandler ph = null;
+		try
 		{
-			this.pagesListBox_.add(new ListItem(index, "Page " + (index + 1)));
+			ph = (ProtocolHandler)Class.forName(this.profile_.getProtocolClass()).newInstance();
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
 		}
 		
+		
+		this.profileEdit_.setProtocolHandler(ph);
 		
 	}
 
@@ -156,37 +145,6 @@ public class ProfileEditWindow extends AbstractWindow
 	{
 		super.onEvent(event);
 		
-		switch (event.type)
-		{
-			case ControlEvent.PRESSED:
-				if (event.target == this.newButton_)
-				{
-					doNewPage();
-				}
-				
-				if (event.target == this.editButton_)
-				{
-					doEditPage();
-				}
-				
-				if (event.target == this.deleteButton_)
-				{
-					doDeletePage();
-				}
-				
-				if (event.target == this.upButton_)
-				{
-					doMovePageUp();
-				}
-				
-				if (event.target == this.downButton_)
-				{
-					doMovePageDown();
-				}
-				
-			break;
-				
-		}
 	}
 	
 	
@@ -226,118 +184,6 @@ public class ProfileEditWindow extends AbstractWindow
 	}
 	
 	
-	/*******************************************************
-	 * 
-	 ********************************************************/
-	private void doNewPage()
-	{
-		
-//		/* Create a new profile */
-//		Profile newProfile = new Profile();
-//		
-//		/* Pop up the edit profile dialog */
-//		ProfileEditWindow editWindow = new ProfileEditWindow(newProfile);
-//		editWindow.popupBlockingModal();
-//		
-//		if (editWindow.getButtonPressedCode() == ProfileEditWindow.BUTTON_OK)
-//		{
-//			this.profilesListBox_.add(newProfile);
-//			this.profilesListBox_.repaint();
-//		}
-	}
-	
-	/*******************************************************
-	 * 
-	 ********************************************************/
-	private void doEditPage()
-	{
-		int selectedIndex = this.pagesListBox_.getSelectedIndex();
-		if (selectedIndex < 0)
-		{
-			return;
-		}
-		
-		ProfilePage page = (ProfilePage)this.pagesListBox_.getItemAt(selectedIndex);
-
-//		/* Pop up the edit profile dialog */
-//		ProfileEditWindow editWindow = new ProfileEditWindow(profile);
-//		editWindow.popupBlockingModal();
-//
-//		if (editWindow.getButtonPressedCode() == ProfileEditWindow.BUTTON_OK)
-//		{
-//			this.profilesListBox_.setItemAt(selectedIndex, profile);
-//		}
-//		else
-//		{
-//			// TODO
-////			System.out.println("Discard and re-load profile");
-//		}
-		
-	}
-	
-	/*******************************************************
-	 * 
-	 ********************************************************/
-	private void doDeletePage()
-	{
-		
-		int selectedIndex = this.pagesListBox_.getSelectedIndex();
-		if (selectedIndex >= 0)
-		{
-			this.pagesListBox_.remove(selectedIndex);
-		}
-		
-	}
-	
-	/*******************************************************
-	 * 
-	 ********************************************************/
-	private void doMovePageUp()
-	{
-		int selectedIndex = this.pagesListBox_.getSelectedIndex();
-		
-		if (selectedIndex <= 0)
-		{
-			return;
-		}
-		
-		if (this.pagesListBox_.size() < 2)
-		{
-			return;
-		}
-		
-		Object selectedObject = this.pagesListBox_.getItemAt(selectedIndex);
-		this.pagesListBox_.remove(selectedIndex);
-		this.pagesListBox_.insert(selectedObject, selectedIndex-1);
-
-	}
-	
-	/*******************************************************
-	 * 
-	 ********************************************************/
-	private void doMovePageDown()
-	{
-		int selectedIndex = this.pagesListBox_.getSelectedIndex();
-		
-		if (selectedIndex == -1)
-		{
-			return;
-		}
-		
-		if (this.pagesListBox_.size() < 2)
-		{
-			return;
-		}
-		
-		if (selectedIndex >= this.pagesListBox_.size())
-		{
-			return;
-		}
-		
-		Object selectedObject = this.pagesListBox_.getItemAt(selectedIndex);
-		this.pagesListBox_.remove(selectedIndex);
-		this.pagesListBox_.insert(selectedObject, selectedIndex+1);
-	}
 	
 }
 

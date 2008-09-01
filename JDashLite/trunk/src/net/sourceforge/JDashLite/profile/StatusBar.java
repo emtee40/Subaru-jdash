@@ -41,13 +41,11 @@ public class StatusBar implements RenderableProfileComponent
 	public static final int RXTX_SEND = 1;
 	public static final int RXTX_RECEIVE = 2;
 	
-//	private static final Color ACTIVE_PAGE_BG_COLOR = ProfileRenderer.COLOR_DK_GRAY;
-//	private static final Color INACTIVE_PAGE_BG_COLOR = ProfileRenderer.COLOR_LT_GRAY;;
-//	private static final Color ACTIVE_PAGE_FG_COLOR = Color.WHITE;
-//	private static final Color INACTIVE_PAGE_FG_COLOR = Color.BLACK;
-	
 	private int pageCount_ = 0;
 	private int activePage_ = 0;
+	
+	private Rect currentRect_ = null;
+	private int pageAreaTotalWidth_ = 0;
 	
 	private String[] pageLabels_ = null;
 	
@@ -110,12 +108,44 @@ public class StatusBar implements RenderableProfileComponent
 		this.rxtxMode_ = mode;
 	}
 	
+	
+	/********************************************************
+	 * If the X and Y values are in a page button, return the 
+	 * index of that page
+	 * @param x
+	 * @param y
+	 * @return
+	 ********************************************************/
+	public int getPageIndex(int x, int y)
+	{
+		if ((x >= this.currentRect_.x) && 
+			(x <= this.currentRect_.x + this.pageAreaTotalWidth_) &&
+			(y >= this.currentRect_.y) &&
+			(y <= this.currentRect_.y + this.currentRect_.height))
+		{
+			int pageWidth = this.pageAreaTotalWidth_ / this.pageCount_;
+			
+			for (int index = 1; index <= this.pageCount_; index++)
+			{
+				if (x <= this.currentRect_.x + (index * pageWidth))
+				{
+					return index - 1;
+				}
+			}
+			
+		}
+		
+		return -1;
+	}
+	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.RenderableProfileComponent#render(waba.fx.Graphics, waba.fx.Rect)
 	 ********************************************************/
 	public void render(Graphics g, Rect r, ColorModel cm) throws Exception
 	{
+		
+		this.currentRect_ = r;
 		
 		/* Find the best fit font */
 		Font f = ProfileRenderer.findFontBestFitHeight(r.height - 2, false);
@@ -126,14 +156,14 @@ public class StatusBar implements RenderableProfileComponent
 		g.fillRect(r.x, r.y, r.width, r.height);
 
 		int rxtxAreaWidth = r.height * 2;//(int)(r.width * RXTX_INDICATOR_WIDTH_PERCENT);
-		int pageAreaWidth = r.width - rxtxAreaWidth;
+		this.pageAreaTotalWidth_ = r.width - rxtxAreaWidth;
 
 		/* Draw the pages, if any */
 		if (this.pageCount_ > 0)
 		{
 			
 			/* Calculate the page widths, and the RXTX indicator width */
-			int pageWidth = pageAreaWidth / this.pageCount_;
+			int pageWidth = this.pageAreaTotalWidth_ / this.pageCount_;
 			
 			/* Draw the page lines */
 			for (int index = 0; index < this.pageCount_; index++)
@@ -163,8 +193,6 @@ public class StatusBar implements RenderableProfileComponent
 			/* Draw the RXTX lights */
 			g.setForeColor(Color.BLACK);
 			
-//			int txX = rxtxAreaWidth / 4;
-//			int rxX = rxtxAreaWidth / 4;
 			
 			int indicatorRadius = r.height / 2 - 2;
 			int txX = r.x + r.width - rxtxAreaWidth + (rxtxAreaWidth / 3) - 1;

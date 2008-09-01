@@ -43,6 +43,7 @@ import waba.ui.Event;
 import waba.ui.IKeys;
 import waba.ui.KeyEvent;
 import waba.ui.MenuBar;
+import waba.ui.PenEvent;
 
 
 /*********************************************************
@@ -405,12 +406,24 @@ public class JDashLiteMainWindow extends GameEngine
 				}
 			break;
 			
+			
 		}
 //		super.onEvent(event);
 	
 	}
 
-	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see superwaba.ext.xplat.game.GameEngine#onPenDown(waba.ui.PenEvent)
+	 ********************************************************/
+	public void onPenDown(PenEvent evt)
+	{
+		this.profileRenderer_.onPenDown(evt);
+//		/* Was a gauge clicked? */
+//		if (this.profileRenderer_.)
+		
+		super.onPenDown(evt);
+	}
 	
 	/*********************************************************
 	 * (non-Javadoc)

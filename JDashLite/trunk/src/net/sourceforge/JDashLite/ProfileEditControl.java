@@ -28,11 +28,11 @@ import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
+import net.sourceforge.JDashLite.profile.color.ColorModel;
 import waba.fx.Color;
 import waba.fx.Graphics;
 import waba.fx.Rect;
 import waba.ui.Control;
-import waba.ui.ControlEvent;
 import waba.ui.Event;
 import waba.ui.PenEvent;
 
@@ -65,6 +65,7 @@ public class ProfileEditControl extends Control
 		this.profileRenderer_ = new ProfileRenderer(this.profile_, this.protocol_);
 	}
 	
+	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see waba.ui.Control#onEvent(waba.ui.Event)
@@ -88,7 +89,9 @@ public class ProfileEditControl extends Control
 			
 		}
 		
-		super.onEvent(event);
+		//super.onEvent(event);
+		
+		repaint();
 	}
 	
 	/*********************************************************
@@ -108,7 +111,9 @@ public class ProfileEditControl extends Control
 		
 		try
 		{
-			this.profileRenderer_.render(g, drawRect);
+			/* We need to re-set the active page each time to force a redraw of the elements */
+			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage());
+			this.profileRenderer_.render(g, drawRect, ColorModel.DEFAULT_COLOR_MODEL);
 		}
 		catch(Exception e)
 		{

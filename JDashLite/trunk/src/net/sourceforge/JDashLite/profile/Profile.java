@@ -25,10 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDashLite.profile;
 
 import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
-import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
 import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
-import net.sourceforge.JDashLite.profile.gauge.LEDGauge;
 import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
 import waba.util.Vector;
 
@@ -87,18 +85,12 @@ public class Profile
 	/* The list of parameters added to this profile */
 	private Vector parameterNames_ = new Vector(4);
 	
-	/* The rendering color model */
-	private ColorModel colorModel_ = ColorModel.DEFAULT_COLOR_MODEL;
 	
 	/********************************************************
 	 * Create a new, empty profile.
 	 *******************************************************/
 	public Profile()
 	{
-//	// TODO
-//		this.parameterNames_.addElement("RPM");
-//		this.parameterNames_.addElement("STFT1");
-//		this.parameterNames_.addElement("LTFT1");
 		
 	}
 	
@@ -475,15 +467,5 @@ public class Profile
 		return (String)this.parameterNames_.items[index];
 	}
 	
-	
-	/********************************************************
-	 * Given one of the CLR_xxx codes, this method will
-	 * return the color associated with it.
-	 * @param colorCode
-	 * @return
-	 ********************************************************/
-	public ColorModel getColorModel()
-	{
-		return this.colorModel_;
-	}
+
 }

@@ -33,6 +33,7 @@ import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
+import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Graphics;
@@ -717,7 +718,7 @@ public class JDashLiteMainWindow extends GameEngine
 			/* The renderer is setup, so let it draw */
 			if (this.profileRenderer_ != null)
 			{
-				this.profileRenderer_.render(g, getClientRect());
+				this.profileRenderer_.render(g, getClientRect(), ColorModel.DEFAULT_COLOR_MODEL);
 			}
 			
 		}

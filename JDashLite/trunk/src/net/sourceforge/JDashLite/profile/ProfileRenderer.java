@@ -384,7 +384,7 @@ public class ProfileRenderer
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.RenderableProfileComponent#render(waba.fx.Graphics, waba.fx.Rect)
 	 ********************************************************/
-	public void render(Graphics g, Rect r) throws Exception
+	public void render(Graphics g, Rect r, ColorModel cm) throws Exception
 	{
 		
 		/* Not having a profile configured is a fatal exception */
@@ -399,7 +399,7 @@ public class ProfileRenderer
 
 		
 		/* Render any pending status message */
-		renderStatusMessage(g, r.width, r.height / 2);
+		renderStatusMessage(g, cm, r.width, r.height / 2);
 
 		
  
@@ -420,15 +420,15 @@ public class ProfileRenderer
 				{
 					if (pageIndex != this.currentlyActivePage_)
 					{
-						renderPage(g, pageIndex, true);
+						renderPage(g, cm, pageIndex, true);
 					}
 				}
 				/* Now, force the current page last */
-				renderPage(g, this.currentlyActivePage_, true);
+				renderPage(g, cm, this.currentlyActivePage_, true);
 			}
 			else
 			{
-				renderPage(g, this.currentlyActivePage_, false);
+				renderPage(g, cm, this.currentlyActivePage_, false);
 			}
 			this.refreshGauges_ = false;
 		}
@@ -436,7 +436,7 @@ public class ProfileRenderer
 		/* Draw the status bar */
 		if (refreshStatusBar_)
 		{
-			this.statusBar_.render(g, (Rect)this.rectCache_.get(this.statusBar_), this.profile_.getColorModel());
+			this.statusBar_.render(g, (Rect)this.rectCache_.get(this.statusBar_), cm);
 			this.refreshStatusBar_ = false;
 		}
 
@@ -445,7 +445,7 @@ public class ProfileRenderer
 		if (this.firstTimeRender_)
 		{
 			this.firstTimeRender_ = false;
-			render(g,r);
+			render(g,r, cm);
 		}
 		
 
@@ -461,9 +461,9 @@ public class ProfileRenderer
 	 * 			need to be called twice.
 	 * @throws Exception
 	 ********************************************************/
-	private void renderPage(Graphics g, int pageIndex, boolean forceRedraw) throws Exception
+	private void renderPage(Graphics g, ColorModel cm, int pageIndex, boolean forceRedraw) throws Exception
 	{
-		
+
 		/* No Pages? */
 		if (this.profile_.getPageCount() == 0)
 		{
@@ -505,7 +505,7 @@ public class ProfileRenderer
 				/* Render this gauge */
 				if (gauge != null)
 				{
-					renderGauge(g, gaugeRect, gauge, forceRedraw);
+					renderGauge(g, gaugeRect, gauge, cm, forceRedraw);
 				}
 				else
 				{
@@ -720,7 +720,7 @@ public class ProfileRenderer
 	 * @param rect
 	 * @throws Exception
 	 ********************************************************/
-	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, boolean forceRedraw) throws Exception
+	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, ColorModel cm, boolean forceRedraw) throws Exception
 	{
 	
 		
@@ -731,7 +731,7 @@ public class ProfileRenderer
 			ErrorLog.error("Gauge " + gauge + " does not have a parameter identified");
 		}
 		
-		gauge.render(g, rect, this.profile_.getColorModel(), forceRedraw);
+		gauge.render(g, rect, cm, forceRedraw);
 		
 	}
 	
@@ -742,7 +742,7 @@ public class ProfileRenderer
 	 * and in the middle of everything.
 	 * @param msg
 	 ********************************************************/
-	private void renderStatusMessage(Graphics g, int width, int yCenter)
+	private void renderStatusMessage(Graphics g, ColorModel cm, int width, int yCenter)
 	{
 		if (this.statusMessage_ != null)
 		{
@@ -756,7 +756,7 @@ public class ProfileRenderer
 			/* Draw a window box */
 			g.setBackColor(Color.CYAN);
 			g.fillRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
-			g.setForeColor(this.profile_.getColorModel().get(ColorModel.DEFAULT_BORDER));
+			g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
 			g.drawRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
 			
 			/* Draw the text */

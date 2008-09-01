@@ -30,16 +30,11 @@ import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.ecu.comm.SSM.SSMProtocol;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.profile.Profile;
-import net.sourceforge.JDashLite.profile.ProfilePage;
 import waba.fx.Rect;
-import waba.ui.Button;
 import waba.ui.ComboBox;
-import waba.ui.Container;
-import waba.ui.ControlEvent;
 import waba.ui.Edit;
 import waba.ui.Event;
 import waba.ui.Label;
-import waba.ui.ListBox;
 import waba.ui.MainWindow;
 
 

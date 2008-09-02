@@ -105,13 +105,16 @@ public class ProfileEditWindow extends AbstractWindow
 
 		
 		
-		/* Add Profile Edit Control.  We'll manually calculate it's rect */
-		Rect lastCompRect = this.protocolHandlerComboBox_.getRect();
+		/* Add Profile Edit Control.  We'll manually calculate it's rect, and make it square and 2/3 the width */
+		Rect profileEditRect = new Rect(getClientRect().x + CONTROL_SPACE, 
+										this.protocolHandlerComboBox_.getRect().y + this.protocolHandlerComboBox_.getRect().height + CONTROL_SPACE, 
+										(getClientRect().width - (CONTROL_SPACE * 2)) / 3 * 2, 
+										(getClientRect().width - (CONTROL_SPACE * 2)) / 3 * 2);
+		//profileEditRect.width = Math.min(profileEditRect.width, profileEditRect.height);
+		//profileEditRect.height = profileEditRect.width;
+		profileEditRect.height = Math.min(profileEditRect.height, (buttonTop - CONTROL_SPACE) - (this.protocolHandlerComboBox_.getRect().x + this.protocolHandlerComboBox_.getRect().height));
 		this.profileEdit_ = new ProfileEditControl(this.profile_); 
-		this.profileEdit_.setRect(getClientRect().x + CONTROL_SPACE, 
-								lastCompRect.y + lastCompRect.height + CONTROL_SPACE, 
-								getClientRect().width - (CONTROL_SPACE * 2), 
-								(buttonTop - CONTROL_SPACE) - (lastCompRect.x + lastCompRect.height));
+		this.profileEdit_.setRect(profileEditRect);
 		add(this.profileEdit_);
 
 		

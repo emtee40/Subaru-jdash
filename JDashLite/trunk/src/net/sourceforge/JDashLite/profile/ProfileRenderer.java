@@ -71,6 +71,7 @@ public class ProfileRenderer
 	/* Flag indicating that new ECU data is available */
 	private boolean refreshGauges_ = true;
 	private boolean refreshStatusBar_ = true;
+	private boolean forceGaugeCompleteRefresh_ = true;
 	
 	/* The profile this renderer is to render */
 	private Profile profile_ = null;
@@ -230,7 +231,7 @@ public class ProfileRenderer
 	{
 		
 		/* Check for, and respond to page clicks */
-		int pageButtonClicked = this.statusBar_.getPageIndex(evt.x, evt.y);
+		int pageButtonClicked = getPageButtonAt(evt.x, evt.y);
 		if (pageButtonClicked > -1)
 		{
 			setActivePage(pageButtonClicked);
@@ -267,6 +268,7 @@ public class ProfileRenderer
 		
 		this.currentlyActivePage_ = activePage;
 		this.refreshGauges_ = true;
+		this.forceGaugeCompleteRefresh_ = true;
 		this.refreshStatusBar_ = true;
 //		this.dblBufferdStaticImage_ = null;
 		this.statusBar_.setActivePage(this.currentlyActivePage_);
@@ -340,6 +342,21 @@ public class ProfileRenderer
 	}
 	
 	
+	/********************************************************
+	 * @param pageIndex
+	 * @param rowIndex
+	 * @param gaugeIndex
+	 * @return
+	 ********************************************************/
+	public Rect getGaugeRect(int pageIndex, int rowIndex, int gaugeIndex)
+	{
+		ProfilePage page = this.profile_.getPage(pageIndex);
+		ProfileRow row = page.getRow(rowIndex);
+		ProfileGauge gauge = row.getGauge(gaugeIndex);
+		return (Rect)this.rectCache_.get(gauge);
+	}
+	
+	
 	/*******************************************************
 	 * If any part of a visible gauge is located at the given
 	 * x,y, then return it's index.
@@ -350,6 +367,27 @@ public class ProfileRenderer
 	 ********************************************************/
 	public int getGaugeAt(int pageIndex, int x, int y)
 	{
+		
+		int rowIndex = getRowAt(pageIndex, x, y);
+		if (rowIndex == -1)
+		{
+			return -1;
+		}
+		
+		
+		ProfilePage page = this.profile_.getPage(pageIndex);		
+		ProfileRow row = page.getRow(rowIndex);
+		
+		for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
+		{
+			ProfileGauge gauge = row.getGauge(gaugeIndex);
+			Rect gaugeRect = (Rect)this.rectCache_.get(gauge);
+
+			if (gaugeRect.contains(x, y))
+			{
+				return gaugeIndex;
+			}
+		}
 		
 		return -1;
 	}
@@ -365,7 +403,23 @@ public class ProfileRenderer
 	public int getRowAt(int pageIndex, int x, int y)
 	{
 		
+		/* Walk through each gauge, an get it's rect.  If the x+y fall inside the rect, this is it! */
+		ProfilePage page = this.profile_.getPage(pageIndex);
+		
+		for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
+		{
+			ProfileRow row = page.getRow(rowIndex);
+			Rect rowRect = (Rect)this.rectCache_.get(row);
+			
+			if (rowRect.contains(x, y))
+			{
+				return rowIndex;
+			}
+			
+		}
+
 		return -1;
+
 	}
 	
 	/********************************************************
@@ -375,16 +429,16 @@ public class ProfileRenderer
 	 * @param y
 	 * @return the page button index, -1 if no page was there.
 	 ********************************************************/
-	public int getPageButton(int x, int y)
+	public int getPageButtonAt(int x, int y)
 	{
-		return -1;
+		return this.statusBar_.getPageIndex(x, y);
 	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.RenderableProfileComponent#render(waba.fx.Graphics, waba.fx.Rect)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm) throws Exception
+	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRedrawAll, boolean includingStaticContent) throws Exception
 	{
 		
 		/* Not having a profile configured is a fatal exception */
@@ -394,45 +448,45 @@ public class ProfileRenderer
 		}
 
 
+		
+		
 		/* Pre calculate ALL the drawable rects */
 		calculateRects(g, r);
 
 		
-		/* Render any pending status message */
-		renderStatusMessage(g, cm, r.width, r.height / 2);
-
-		
- 
 
 		/* Render the active page  */
-		if (this.refreshGauges_ == true)
+		if (this.refreshGauges_ || forceRedrawAll)
 		{
 			this.refreshStatusBar_ = true;
 
 			/* If this is the firstTiemRender, then we need to pre-render EVERY page.  Why? Some gauges need the
 			 * RECT and Graphic data before even any ecu values come through. Becuase gauges like line graphs are dependant
 			 * on ECU Value change evnets to get their data, but the size of the value history buffer is dependant on the
-			 * rect of the gauge area */
+			 * rect of the gauge area.  I know, not ideal, but it's only at the first run of this renderer. */
 			if (this.firstTimeRender_)
 			{
+				
 				/* Render each page */
 				for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
 				{
 					if (pageIndex != this.currentlyActivePage_)
 					{
-						renderPage(g, cm, pageIndex, true);
+						renderPage(g, cm, pageIndex, true, true);
 					}
 				}
 				/* Now, force the current page last */
-				renderPage(g, cm, this.currentlyActivePage_, true);
+				renderPage(g, cm, this.currentlyActivePage_, true, true);
 			}
 			else
 			{
-				renderPage(g, cm, this.currentlyActivePage_, false);
+				renderPage(g, cm, this.currentlyActivePage_, forceRedrawAll || this.forceGaugeCompleteRefresh_, includingStaticContent);
 			}
+			
 			this.refreshGauges_ = false;
 		}
 
+		
 		/* Draw the status bar */
 		if (refreshStatusBar_)
 		{
@@ -441,14 +495,22 @@ public class ProfileRenderer
 		}
 
 
+
 		/* turn the first time off, and go again */
 		if (this.firstTimeRender_)
 		{
+			
 			this.firstTimeRender_ = false;
-			render(g,r, cm);
+			render(g,r, cm, forceRedrawAll, includingStaticContent);
 		}
-		
 
+		
+		/* Render any pending status message */
+		renderStatusMessage(g, cm, r.width, r.height / 2);
+
+
+		/* Always switch this flag back to off */
+		this.forceGaugeCompleteRefresh_ = false;
 
 	}
 	
@@ -461,7 +523,7 @@ public class ProfileRenderer
 	 * 			need to be called twice.
 	 * @throws Exception
 	 ********************************************************/
-	private void renderPage(Graphics g, ColorModel cm, int pageIndex, boolean forceRedraw) throws Exception
+	private void renderPage(Graphics g, ColorModel cm, int pageIndex, boolean forceRedrawAll, boolean includingStaticContent) throws Exception
 	{
 
 		/* No Pages? */
@@ -505,7 +567,7 @@ public class ProfileRenderer
 				/* Render this gauge */
 				if (gauge != null)
 				{
-					renderGauge(g, gaugeRect, gauge, cm, forceRedraw);
+					renderGauge(g, gaugeRect, gauge, cm, forceRedrawAll, includingStaticContent);
 				}
 				else
 				{
@@ -535,6 +597,7 @@ public class ProfileRenderer
 		this.previousRect_ = clientRect;
 		this.rectCache_.clear();
 		
+
 		
 		/* Calculate the page and status heights */
 		int pageHeight = clientRect.height - (int)((double)clientRect.height * STATUS_BAR_HEIGHT_PERCENT);
@@ -720,7 +783,7 @@ public class ProfileRenderer
 	 * @param rect
 	 * @throws Exception
 	 ********************************************************/
-	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, ColorModel cm, boolean forceRedraw) throws Exception
+	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, ColorModel cm, boolean forceRedrawAll, boolean includingStaticContent) throws Exception
 	{
 	
 		
@@ -731,7 +794,7 @@ public class ProfileRenderer
 			ErrorLog.error("Gauge " + gauge + " does not have a parameter identified");
 		}
 		
-		gauge.render(g, rect, cm, forceRedraw);
+		gauge.render(g, rect, cm, forceRedrawAll, includingStaticContent);
 		
 	}
 	

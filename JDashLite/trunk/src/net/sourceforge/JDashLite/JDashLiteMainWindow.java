@@ -24,8 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDashLite;
 
 
-import superwaba.ext.xplat.game.GameEngine;
 import net.sourceforge.JDashLite.config.Preferences;
+import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
+import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandlerThread;
 import net.sourceforge.JDashLite.ecu.comm.TestProtocol;
@@ -38,11 +39,13 @@ import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Graphics;
 import waba.sys.Convert;
+import waba.sys.Settings;
 import waba.sys.Vm;
 import waba.ui.ControlEvent;
 import waba.ui.Event;
 import waba.ui.IKeys;
 import waba.ui.KeyEvent;
+import waba.ui.MainWindow;
 import waba.ui.MenuBar;
 import waba.ui.PenEvent;
 
@@ -51,7 +54,7 @@ import waba.ui.PenEvent;
  * 
  *
  ********************************************************X*/
-public class JDashLiteMainWindow extends GameEngine
+public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements ProtocolEventListener
 {
 	
 	
@@ -86,6 +89,10 @@ public class JDashLiteMainWindow extends GameEngine
 	/* Remember the previous system off time */
 	private int originalSystemOffTime_ = 0;
 	
+	
+	private boolean forceRedraw_ = false;
+	private boolean forceStaticRedraw_ = false;
+	
 	/*******************************************************
 	 * Override
 	 * @see waba.ui.MainWindow#onStart()
@@ -95,17 +102,20 @@ public class JDashLiteMainWindow extends GameEngine
 		super();  /* No Title and No Border */
 		
 		this.highResPrepared = true;
-		waba.sys.Settings.keyboardFocusTraversable = true;
+		this.flicker = false;
+		
+		/* I don't yet know why, but setting this to true prevents the left and right keys from working to change pages */
+		waba.sys.Settings.keyboardFocusTraversable = false;
 		
 		/* Setup the game options */
-		this.gameName = JDASH_TITLE;
-		this.gameCreatorID = JDASH_CREATOR_ID;
-		this.gameVersion = JDASH_VERSION_MAJOR;
-		//this.gameRefreshPeriod = NO_AUTO_REFRESH;
-		this.gameRefreshPeriod = 50;  /* 75 = 13fps, 50 = 20fps, 40=25fps */
-		this.gameIsDoubleBuffered = false;
-		this.gameDoClearScreen = false;
-		this.gameHasUI = false;
+//		this.gameName = JDASH_TITLE;
+//		this.gameCreatorID = JDASH_CREATOR_ID;
+//		this.gameVersion = JDASH_VERSION_MAJOR;
+//		this.gameRefreshPeriod = NO_AUTO_REFRESH;  /* Auto refresh is WAY hard on CPU resources!! */
+		//this.gameRefreshPeriod = 50;  /* 75 = 13fps, 50 = 20fps, 40=25fps */
+//		this.gameIsDoubleBuffered = false;
+//		this.gameDoClearScreen = false;
+//		this.gameHasUI = false;
 		
 		/* For debugging, lets set a default active profile now */
 		this.activeProfile_ = null;
@@ -113,11 +123,14 @@ public class JDashLiteMainWindow extends GameEngine
 		
 	}
 
+	
+	
+	
 	/*******************************************************
 	 * Override
 	 * @see waba.ui.MainWindow#onStart()
 	 *******************************************************/
-	public void onGameInit()
+	public void onStart()
 	{
 		
 		try
@@ -167,7 +180,9 @@ public class JDashLiteMainWindow extends GameEngine
 				
 				
 				/* Start the game engine */
-				start();
+//				start();
+//				refresh();
+				repaint(true, true);
 
 			}
 			catch(Exception e)
@@ -185,11 +200,13 @@ public class JDashLiteMainWindow extends GameEngine
 		}
 	}
 	
+	
+	
 	/*******************************************************
 	 * Override
 	 * @see waba.ui.MainWindow#onExit()
 	 *******************************************************/
-	public void onGameExit()
+	public void onExit()
 	{
 		/* restore the system off time */
 		if (this.originalSystemOffTime_ > 0)
@@ -197,47 +214,13 @@ public class JDashLiteMainWindow extends GameEngine
 			Vm.setDeviceAutoOff(this.originalSystemOffTime_);
 		}
 		
-		stop();
+//		stop();
 		doDisconnect();
 		killThreads();
 		removeThread(this.protocolHandlerThread_);
-		super.onGameExit();
+//		super.onGameExit();
 	}
 	
-	
-//	/*******************************************************
-//	 * 
-//	 ********************************************************/
-//	private void populateProfileMenu()
-//	{
-//		
-//		int profileCount = getPreferences().getProfileCount();
-//		
-//		for (int index = 0; index < profileCount; index++)
-//		{
-//			Profile p = new Profile();
-//			try
-//			{
-//				p.loadFromXml(getPreferences().getProfile(index));
-//			}
-//			catch(Exception e)
-//			{
-//				ErrorLog.error("Can't add profile to menu", e);
-//			}
-//		}
-		
-		
-//		helpMenu[++menuIndex] = new ListeningMenuItem("About");
-//		helpMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
-//		{
-//			public void actionPerformed()
-//			{
-//				doAbout();
-//			}
-//		});
-		
-//	}
-
 	
 	/*********************************************************
 	 * Overidden to ensure the same options catalog is returned
@@ -250,7 +233,9 @@ public class JDashLiteMainWindow extends GameEngine
 		
 		if (this.jdashOptions_ == null)
 		{
-			this.jdashOptions_ = new Preferences(super.getOptions());
+			this.jdashOptions_ = new Preferences("JDashLite", Settings.appCreatorId);
+			//this.jdashOptions_ = new Preferences(super.getOptions());
+//			this.jdashOptions_ = new Preferences();
 		}
 		
 		return this.jdashOptions_;
@@ -372,32 +357,38 @@ public class JDashLiteMainWindow extends GameEngine
 	 ********************************************************/
 	protected void popupMenuBar()
 	{
-		stop();
+//		stop();
 		
 		if (this.protocolHandler_ != null)
 		{
 			this.protocolHandlerThread_.setEnabled(false);
 		}
 		
+		waba.sys.Settings.keyboardFocusTraversable = true;
 		super.popupMenuBar();
+		repaint(true);
 	}
 	
 	
-	
+
 	
 	/*******************************************************
 	 * Respond to window events.
 	 *******************************************************/
-	public void onOtherEvent(Event event)
+	public void onEvent(Event event)
 	{
+
+		System.out.println("EVENT");
+		
 		switch(event.type)
 		{
 			/* Window Close, like the menu bar */
 			case ControlEvent.WINDOW_CLOSED:
 				if (event.target == this.menubar)
 				{
+					waba.sys.Settings.keyboardFocusTraversable = false;
 					MenuUtil.dispatchMenuAction(this.menuItems_, this.menuBar_.getSelectedMenuItem());
-					start();
+//					start();
 					
 					if (this.protocolHandler_ != null)
 					{
@@ -408,10 +399,24 @@ public class JDashLiteMainWindow extends GameEngine
 			break;
 			
 			
+			case PenEvent.PEN_DOWN:
+				onPenDown((PenEvent)event);
+			break;
+			
+			case KeyEvent.KEY_PRESS:
+				onKey((KeyEvent)event);
+			break;
+			
 		}
-//		super.onEvent(event);
+
+//		refresh();
+//		System.out.println("Other Event");
+		repaint(true);
+		
 	
 	}
+	
+	
 
 	/*********************************************************
 	 * (non-Javadoc)
@@ -420,10 +425,6 @@ public class JDashLiteMainWindow extends GameEngine
 	public void onPenDown(PenEvent evt)
 	{
 		this.profileRenderer_.onPenDown(evt);
-//		/* Was a gauge clicked? */
-//		if (this.profileRenderer_.)
-		
-		super.onPenDown(evt);
 	}
 	
 	/*********************************************************
@@ -432,6 +433,7 @@ public class JDashLiteMainWindow extends GameEngine
 	 ********************************************************/
 	public void onKey(KeyEvent ke)
 	{
+		
 		/* Respond to the nav keys */
 		if (ke.key == IKeys.LEFT)
 		{
@@ -442,6 +444,8 @@ public class JDashLiteMainWindow extends GameEngine
 		{
 			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage()+1);
 		}
+		
+		repaint(true);
 		
 	}
 	
@@ -517,7 +521,9 @@ public class JDashLiteMainWindow extends GameEngine
 	private void doPreferences()
 	{
 		PreferencesWindow prefs = new PreferencesWindow(getPreferences());
+		waba.sys.Settings.keyboardFocusTraversable = true;
 		prefs.popupBlockingModal();
+		waba.sys.Settings.keyboardFocusTraversable = false;
 		
 		/* Rebuild the preferences menu */
 		if (prefs.getButtonPressedCode() == PreferencesWindow.BUTTON_OK)
@@ -530,12 +536,6 @@ public class JDashLiteMainWindow extends GameEngine
 		/* Re-Initialize the Logger instance */
 		ErrorLog.setLevel(getPreferences().getString(Preferences.KEY_LOG_LEVEL,  ErrorLog.LOG_LEVEL_OFF));
 
-//		/* Set the auto off */
-//		if (getPreferences().getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, 0) == 1)
-//		{
-//			this.originalSystemOffTime_ = Vm.setDeviceAutoOff(0);
-//		}
-//
 		
 		/* re-enable/disable active params */
 		this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
@@ -603,6 +603,7 @@ public class JDashLiteMainWindow extends GameEngine
 			
 			/* Add the profile render event listener.  This forces refreshes when the protocol handler fetches a batch */
 			this.protocolHandler_.addProtocolEventListener(this.profileRenderer_.getEventAdapter());
+			this.protocolHandler_.addProtocolEventListener(this);
 			
 			
 		}
@@ -614,7 +615,27 @@ public class JDashLiteMainWindow extends GameEngine
 	
 	}
 	
-//	double theta = 0.0;
+	
+	/*******************************************************
+	 * @param force
+	 ********************************************************/
+	private void repaint(boolean force)
+	{
+		repaint(force, false);
+	}
+	
+	/*******************************************************
+	 * @param force
+	 * @param includeStatic
+	 ********************************************************/
+	private void repaint(boolean force, boolean includeStatic)
+	{
+		this.forceRedraw_ = force;
+		this.forceStaticRedraw_ = includeStatic;
+		repaint();
+	}
+	
+
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see superwaba.ext.xplat.game.GameEngine#onPaint(waba.fx.Graphics)
@@ -622,90 +643,8 @@ public class JDashLiteMainWindow extends GameEngine
 	public void onPaint(Graphics g)
 	{
 
-//		AffineTransform t0 = AffineTransform.translateInstance(-15, -60);
-//		t0.addRotate(Math.toRadians(theta));
-//		t0.addScale(4,4);
-//		t0.addTranslate(100, 200);
-//		Coord c1 = new Coord(10,50);
-//		Coord c2 = new Coord(20, 80);
-//		t0.apply(c1);
-//		t0.apply(c2);
-//		
-//		g.setForeColor(Color.BLACK);
-//		g.drawLine(c1.x, c1.y, c2.x, c2.y);
-////		
-//		theta += 5;
-//		if (theta >= 360) theta = 0;
-//		Matrix t0 = AffineTransform.createTranslateMatrix(-50, -80);
-//		Matrix t1 = AffineTransform.createRotateMatrix(Math.toRadians(theta));
-//		Matrix t2 = AffineTransform.createTranslateMatrix(50, 80);
-//		Matrix t3 = AffineTransform.createScaleMatrix(10, 2);
-//		t0 = AffineTransform.multiply(t1, t0);
-//		t0 = AffineTransform.multiply(t2, t0);
-//
-//
-//		net.sourceforge.JDashLite.util.AffineTransform.Vector v1 = AffineTransform.createVector(50, 50);
-//		net.sourceforge.JDashLite.util.AffineTransform.Vector v2 = AffineTransform.createVector(50, 80);
-//		
-//		g.setForeColor(Color.BLACK);
-//		g.drawLine(v1.m_[0], v1.m_[1], v2.m_[0], v2.m_[1]);
-//		
-//		v1 = AffineTransform.multiply(v1, t0);
-//		v2 = AffineTransform.multiply(v2, t0);
-////		System.out.println(v1);
-//		g.setForeColor(Color.RED);
-//		g.drawLine(v1.m_[0], v1.m_[1], v2.m_[0], v2.m_[1]);
-//		
-//
-//
-//		g.clearScreen();
-//		
-//		int yOffset = -10;
-//		Font f = null;
-
-//		f = Font.getFont("SW", true, Font.BIG_SIZE); /* height = 30 */
-//		g.setFont(f);
-//		g.drawText("abcABC123 SW B+B " + f.fm.height, 10, yOffset += 20);
-//
-//		f = Font.getFont("SW", false, Font.BIG_SIZE); /* height = 28 */
-//		g.setFont(f);
-//		g.drawText("abcABC123 SW Big " + f.fm.height, 10, yOffset += 20);
-//
-//		f = Font.getFont("SW", false, Font.NORMAL_SIZE); /* height = 22 */
-//		g.setFont(f);
-//		g.drawText("abcABC123 SW Normal " + f.fm.height, 10, yOffset += 20);
-//
-//		f = Font.getFont("Tahoma", false, Font.BIG_SIZE);  /* Height = 17 */
-//		g.setFont(f);
-//		g.drawText("abcABC123 Tahoma Big " + f.fm.height, 10, yOffset += 20);
-//
-//		f = Font.getFont("Verdana", false, Font.BIG_SIZE); /* Height = 16 */
-//		g.setFont(f);
-//		g.drawText("abcABC123 Verdana " + f.fm.height, 10, yOffset += 20);
-//		
-//		f = Font.getFont("Tahoma", false, Font.NORMAL_SIZE);  /* Height = 15 Same size as TinyLarge NORMAl but this has tails!! */
-//		g.setFont(f);
-//		g.drawText("abcABC123 Tahoma " + f.fm.height, 10, yOffset += 20);
-//
-//		f = Font.getFont("TinyLarge", false, Font.NORMAL_SIZE); /* height = 14 */
-//		g.setFont(f);
-//		g.drawText("abcABC123 TinyLarge " + f.fm.height, 10, yOffset += 20);
-//
-//		f = Font.getFont("Verdana", false, Font.NORMAL_SIZE); /* Height <= 14   Verdana also has tails */
-//		g.setFont(f);
-//		g.drawText("abcABC123 Verdana " + f.fm.height, 10, yOffset += 20);
-//
-//		f = Font.getFont("Arial", false, Font.NORMAL_SIZE);  /* Height = 13 */
-//		g.setFont(f);
-//		g.drawText("abcABC123 Arial " + f.fm.height, 10, yOffset += 20);
-//		
-//		f = Font.getFont("TinySmall", false, Font.NORMAL_SIZE);  /* Height = 6 (ugly) */
-//		g.setFont(f);
-//		g.drawText("abcABC123 TinySmall " + f.fm.height, 10, yOffset += 20);
-//		
+		this.forceRedraw_ = true;
 		
-//		if (1==1) return;
-
 		
 		/* If no profile is yet set, then warn the user, and pop the preferences dialog */
 		if (this.activeProfile_ == null)
@@ -718,14 +657,16 @@ public class JDashLiteMainWindow extends GameEngine
 			/* The renderer is setup, so let it draw */
 			if (this.profileRenderer_ != null)
 			{
-				this.profileRenderer_.render(g, getClientRect(), ColorModel.DEFAULT_COLOR_MODEL);
+				this.profileRenderer_.render(g, getClientRect(), ColorModel.DEFAULT_COLOR_MODEL, this.forceRedraw_, this.forceStaticRedraw_);
+				this.forceRedraw_ = false;
+				this.forceStaticRedraw_ = false;
 			}
 			
 		}
 		catch(Exception e)
 		{
 			this.profileRenderer_ = null;
-			stop();
+//			stop();
 			ErrorLog.fatal("onPaint", e);
 			ErrorDialog.showError("Fatal Error", e);
 			//doExit();
@@ -735,5 +676,18 @@ public class JDashLiteMainWindow extends GameEngine
 	}
 
 	
-}
+	
+		public void protocolStarted() {repaint();};
+		public void protocolStopped() {repaint();};
+		public void initStarted() {repaint();};
+		public void initFinished() {repaint();};
+		public void initStatus(String statusMessage) {repaint();};
+		public void beginParameterBatch(int count) {repaint();};
+		public void parameterFetched(ECUParameter p) {repaint();};
+		public void endParameterBatch() {repaint();};
+		public void commTX() {repaint();};
+		public void commRX() {repaint();};
+		public void commReady() {repaint();};
+	
 
+}

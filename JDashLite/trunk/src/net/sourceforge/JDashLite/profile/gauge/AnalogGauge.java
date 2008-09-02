@@ -97,11 +97,11 @@ public class AnalogGauge extends ProfileGauge
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll, boolean includingStaticContent)
 	{
 
 		/* Generate the static image */
-		if (redrawAll || r.equals(this.lastRect_) == false)
+		if ((redrawAll && includingStaticContent) || r.equals(this.lastRect_) == false)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
 			generateStaticImage(cm, (int)(Math.min(r.width, r.height) * 0.04));

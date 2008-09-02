@@ -24,9 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.config;
 
-import superwaba.ext.xplat.game.Options;
+import net.sourceforge.JDashLite.util.Options;
 import superwaba.ext.xplat.util.props.Properties;
+import waba.io.Catalog;
 import waba.sys.Convert;
+import waba.ui.MainWindow;
 import waba.util.Vector;
 
 /*********************************************************
@@ -51,14 +53,25 @@ public class Preferences
 	private Options appOptions_ = null;
 	
 	
+	
+	//private Catalog catalog_ = null;
+
+	
+//	/********************************************************
+//	 * 
+//	 *******************************************************/
+//	public Preferences(Options appOptions)
+//	{
+//		this.appOptions_ = appOptions;
+//	}
+	
 	/********************************************************
 	 * 
 	 *******************************************************/
-	public Preferences(Options appOptions)
+	public Preferences(String prefix, String creatorID)
 	{
-		this.appOptions_ = appOptions;
+		this.appOptions_ = new Options(prefix, creatorID);
 	}
-	
 	
 	/********************************************************
 	 * Save the options to the PDB file.

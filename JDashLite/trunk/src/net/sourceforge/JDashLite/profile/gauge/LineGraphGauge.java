@@ -133,9 +133,9 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll, boolean includingStaticContent)
 	{
-		if (redrawAll) System.out.println("Forcing Redraw of " + getECUParameter().getName() + " " + getProperty(ProfileGauge.PROP_STR_LABEL));
+//		if (redrawAll) System.out.println("Forcing Redraw of " + getECUParameter().getName() + " " + getProperty(ProfileGauge.PROP_STR_LABEL));
 
 		/* Create the value history array */
 		if ((this.valueHistory_ == null) || (r.width != this.valueHistory_.length))
@@ -146,7 +146,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 
 		
 		/* Static Content */
-		if (redrawAll || r.equals(this.lastRect_) == false)
+		if ((redrawAll && includingStaticContent) || r.equals(this.lastRect_) == false)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
 			generateStaticImage(cm);

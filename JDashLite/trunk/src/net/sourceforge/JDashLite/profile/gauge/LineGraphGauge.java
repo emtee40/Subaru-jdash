@@ -133,7 +133,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll, boolean includingStaticContent)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRedrawAll, boolean includingStaticContent)
 	{
 //		if (redrawAll) System.out.println("Forcing Redraw of " + getECUParameter().getName() + " " + getProperty(ProfileGauge.PROP_STR_LABEL));
 
@@ -142,11 +142,18 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		{
 			this.valueHistory_ = new HistoryValue[r.width];
 			this.historyIndex_ = new CircularIndex(this.valueHistory_.length);
+			this.historyIndex_.resetIndex();
+			for (int index = 0; index < this.historyIndex_.getSize(); index++)
+			{
+				this.valueHistory_[this.historyIndex_.getIndex()] = new HistoryValue(NULL_DOUBLE, -1);
+				this.historyIndex_.incrementIndex();
+			}
+
 		}
 
 		
 		/* Static Content */
-		if ((redrawAll && includingStaticContent) || r.equals(this.lastRect_) == false)
+		if ((forceRedrawAll && includingStaticContent) || r.equals(this.lastRect_) == false)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
 			generateStaticImage(cm);
@@ -154,7 +161,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 
 		
 		/* Now, the dynamic image */
-		if (doNextRender_ || redrawAll || r.equals(this.lastRect_) == false)
+		if (doNextRender_ || forceRedrawAll || r.equals(this.lastRect_) == false)
 		{
 			g.drawImage(this.staticContent_, r.x, r.y);
 			renderDynamic(g, r, cm);
@@ -209,6 +216,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		HistoryValue hv = null;
 		for (int index = 0; index < this.historyIndex_.getSize(); index++)
 		{
+				
 			hv = this.valueHistory_[this.historyIndex_.getIndex()];
 			
 			/* Outside our range?  Nothign to draw */
@@ -245,24 +253,25 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		
 		/* Draw the high line */
 		g.setFont(this.labelFont_);
-		g.setForeColor(cm.get(ColorModel.DEFAULT_TEXT));
+		g.setForeColor(cm.get(ColorModel.LINE_GRAPH_HIGH_LINE));
 		if (highValueY < r.y + r.height && highValueY > r.y)
 		{
 			g.drawLine(r.x, highValueY, r.x + r.width, highValueY);
 			g.drawLine(r.x, highValueY + 1, r.x + r.width, highValueY + 1);
 		}
-		g.drawText(Convert.toString(highValue, 0), r.x + 5, r.y + 5);
 
 		
-		/* Draw the average */
-		g.drawText(Convert.toString(valueAverage / ((double)valueCount), 0), r.x + 5, r.y + (r.height / 2) - (this.labelFont_.fm.height / 2) + this.labelFont_.fm.descent);
-		
 		/* Low value */
+		g.setForeColor(cm.get(ColorModel.LINE_GRAPH_LOW_LINE));
 		if (lowValueY < r.y + r.height && lowValueY > r.y)
 		{
 			g.drawLine(r.x, lowValueY, r.x + r.width, lowValueY);
 			g.drawLine(r.x, lowValueY - 1, r.x + r.width, lowValueY - 1);
 		}
+
+		g.setForeColor(cm.get(ColorModel.DEFAULT_TEXT));
+		g.drawText(Convert.toString(highValue, 0), r.x + 5, r.y + 5);
+		g.drawText(Convert.toString(valueAverage / ((double)valueCount), 0), r.x + 5, r.y + (r.height / 2) - (this.labelFont_.fm.height / 2) + this.labelFont_.fm.descent);
 		g.drawText(Convert.toString(lowValue, 0), r.x + 5, r.y + r.height - 5 - this.labelFont_.fm.height + this.labelFont_.fm.descent);
 	
 	}
@@ -305,22 +314,22 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		g.drawRect(r.x, r.y, r.width, r.height);
 
 		
-//		/* Create the value history array */
-//		if ((this.valueHistory_ == null) || (r.width != this.valueHistory_.length))
+////		/* Create the value history array */
+////		if ((this.valueHistory_ == null) || (r.width != this.valueHistory_.length))
+////		{
+////			this.valueHistory_ = new HistoryValue[r.width];
+////			this.historyIndex_ = new CircularIndex(this.valueHistory_.length);
+////		}
+//		
+//		
+//		/* Pre-pop the value array */
+//		this.historyIndex_.resetIndex();
+//		for (int index = 0; index < this.historyIndex_.getSize(); index++)
 //		{
-//			this.valueHistory_ = new HistoryValue[r.width];
-//			this.historyIndex_ = new CircularIndex(this.valueHistory_.length);
+//			this.valueHistory_[this.historyIndex_.getIndex()] = new HistoryValue(NULL_DOUBLE, -1);
+//			this.historyIndex_.incrementIndex();
 //		}
-		
-		
-		/* Pre-pop the value array */
-		this.historyIndex_.resetIndex();
-		for (int index = 0; index < this.historyIndex_.getSize(); index++)
-		{
-			this.valueHistory_[this.historyIndex_.getIndex()] = new HistoryValue(NULL_DOUBLE, -1);
-			this.historyIndex_.incrementIndex();
-		}
-		
+//		
 		 /* Just for debugging, start all the way to the end */
 		this.historyIndex_.decrementHead();
 

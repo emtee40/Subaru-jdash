@@ -93,7 +93,9 @@ public interface ColorModel
 	public static final Color DK_BLUE		= Color.getColor(0x00, 0x00, 0x98);
 	
 
-	public static final ColorModel DEFAULT_COLOR_MODEL = new DefaultColorModel();
+	//public static final ColorModel DEFAULT_COLOR_MODEL = new DefaultColorModel();
+	public static final ColorModel DEFAULT_MODEL 		= new DefaultColorModel();
+	public static final ColorModel NIGHT_MODEL 		= new NightColorModel();
 
 	
 	/*  Get the desired color from the ID */

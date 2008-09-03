@@ -472,7 +472,7 @@ public class ProfileRenderer
 			 * RECT and Graphic data before even any ecu values come through. Becuase gauges like line graphs are dependant
 			 * on ECU Value change evnets to get their data, but the size of the value history buffer is dependant on the
 			 * rect of the gauge area.  I know, not ideal, but it's only at the first run of this renderer. */
-			if (this.firstTimeRender_)
+			if (this.firstTimeRender_ || includingStaticContent)
 			{
 				
 				/* Render each page */

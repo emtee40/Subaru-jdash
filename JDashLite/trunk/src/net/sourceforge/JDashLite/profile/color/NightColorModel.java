@@ -32,7 +32,7 @@ import waba.util.Hashtable;
  * 
  *
  *********************************************************/
-public class DefaultColorModel implements ColorModel
+public class NightColorModel implements ColorModel
 {
 	
 	/* The hash of colors for this model */
@@ -42,34 +42,33 @@ public class DefaultColorModel implements ColorModel
 	/********************************************************
 	 * 
 	 *******************************************************/
-	protected DefaultColorModel()
+	protected NightColorModel()
 	{
-		add(DEFAULT_BACKGROUND,				Color.WHITE);
-		add(DEFAULT_BORDER,					Color.BLACK);
-		add(DEFAULT_TEXT,					Color.BLACK);
+		add(DEFAULT_BACKGROUND,				Color.BLACK);
+		add(DEFAULT_BORDER,					GRAY_8);
+		add(DEFAULT_TEXT,					GRAY_2);
 		
 		add(STATUS_PAGE_ACTIVE_BG, 			DK_GRAY);
 		add(STATUS_PAGE_INACTIVE_BG,		LT_GRAY);
-		add(STATUS_PAGE_ACTIVE_FG,			Color.WHITE);
+		add(STATUS_PAGE_ACTIVE_FG,			GRAY_2);
 		add(STATUS_PAGE_INACTIVE_FG,		Color.BLACK);
 		add(STATUS_RX_COLOR,				Color.RED);
 		add(STATUS_TX_COLOR,				Color.GREEN);
 		add(STATUS_RX_IDLE_COLOR,			Color.getColor(99,00,22)); /* dark red */
 		add(STATUS_TX_IDLE_COLOR,			Color.getColor(33,66,33)); /* dark green */
 		
-		add(ANALOG_GAUGE_RING,				Color.BLACK);
-		add(ANALOG_GAUGE_FACE,				GRAY_1);
-		add(ANALOG_GAUGE_TICK_MARK,			Color.BLACK);
+		add(ANALOG_GAUGE_RING,				GRAY_8);
+		add(ANALOG_GAUGE_FACE,				Color.BLACK);
+		add(ANALOG_GAUGE_TICK_MARK,			GRAY_2);
 		add(ANALOG_GAUGE_NEEDLE,			Color.getColor(0xdd,00,00));
 
-		
 		add(LED_GAUGE_RING,					get(ANALOG_GAUGE_RING));
 		add(LEG_GAUGE_FACE,					get(ANALOG_GAUGE_FACE));
 		add(LED_GAUGE_LED_OFF,				GRAY_7);
 		add(LED_GAUGE_LED_ON,				Color.BLUE);
 		
-		add(LINE_GRAPH_BACKGROUND,			Color.WHITE);
-		add(LINE_GRAPH_LINE,				Color.GREEN);
+		add(LINE_GRAPH_BACKGROUND,			Color.BLACK);
+		add(LINE_GRAPH_LINE,				DK_GREEN);
 		add(LINE_GRAPH_HIGH_LINE,			DK_RED);
 		add(LINE_GRAPH_LOW_LINE,			DK_BLUE);
 

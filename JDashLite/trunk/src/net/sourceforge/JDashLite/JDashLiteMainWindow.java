@@ -36,6 +36,8 @@ import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
 import net.sourceforge.JDashLite.profile.StatusBar;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
+import net.sourceforge.JDashLite.profile.color.DefaultColorModel;
+import net.sourceforge.JDashLite.profile.color.NightColorModel;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Color;
@@ -89,6 +91,9 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	/* The handler thread */
 	private ProtocolHandlerThread protocolHandlerThread_ = null;
 
+	/* The active color model */
+	private ColorModel colorModel_ = ColorModel.DEFAULT_MODEL;
+	
 	/* Remember the previous system off time */
 	private int originalSystemOffTime_ = 0;
 	
@@ -194,7 +199,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				/* Start the game engine */
 //				start();
 //				refresh();
-				repaint(true, true);
+				forcedRepaintWithStatic();
 
 			}
 			catch(Exception e)
@@ -262,6 +267,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		int profileCount = getPreferences().getProfileCount();
 		ListeningMenuItem[] mainMenu = new ListeningMenuItem[5];
 		ListeningMenuItem[] profileMenu = new ListeningMenuItem[profileCount + 1];
+		ListeningMenuItem[] colorMenu = new ListeningMenuItem[3];
 		ListeningMenuItem[] helpMenu = new ListeningMenuItem[2];
 		
 
@@ -340,6 +346,31 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			
 		}
 		
+		
+		/* Color Menu */
+		{
+			menuIndex = -1;
+			colorMenu[++menuIndex] = new ListeningMenuItem("Color");
+			
+			colorMenu[++menuIndex] = new ListeningMenuItem("Default");
+			colorMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			{
+				public void actionPerformed(Object ref)
+				{
+					doSetColorModel(ColorModel.DEFAULT_MODEL);
+				}
+			});
+			
+			colorMenu[++menuIndex] = new ListeningMenuItem("Night");
+			colorMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			{
+				public void actionPerformed(Object ref)
+				{
+					doSetColorModel(ColorModel.NIGHT_MODEL);
+				}
+			});
+		}
+		
 
 		/* Help Menu */
 		{
@@ -358,7 +389,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 
 		
 		/* Return the new menu itmes array */
-		return 	new ListeningMenuItem[][] {mainMenu, profileMenu, helpMenu};
+		return 	new ListeningMenuItem[][] {mainMenu, profileMenu, colorMenu, helpMenu};
 
 	}
 	
@@ -379,7 +410,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		
 		waba.sys.Settings.keyboardFocusTraversable = true;
 		super.popupMenuBar();
-		repaint(true);
+//		forcedRepaint();
 	}
 	
 	
@@ -400,9 +431,8 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				if (event.target == this.menubar)
 				{
 					waba.sys.Settings.keyboardFocusTraversable = false;
-					MenuUtil.dispatchMenuAction(this.menuItems_, this.menuBar_.getSelectedMenuItem());
 					setPausePaint(false);
-//					start();
+					MenuUtil.dispatchMenuAction(this.menuItems_, this.menuBar_.getSelectedMenuItem());
 					
 					if (this.protocolHandler_ != null)
 					{
@@ -425,7 +455,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 
 //		refresh();
 //		System.out.println("Other Event");
-		repaint(true);
+		forcedRepaint();
 		
 	
 	}
@@ -459,7 +489,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage()+1);
 		}
 		
-		repaint(true);
+		forcedRepaint();
 		
 	}
 	
@@ -630,6 +660,15 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	}
 	
 	
+	/********************************************************
+	 * @param cm
+	 ********************************************************/
+	private void doSetColorModel(ColorModel cm)
+	{
+		this.colorModel_ = cm;
+		forcedRepaintWithStatic();
+	}
+	
 //	
 //	/*******************************************************
 //	 * Draw the status message, if there is one, on top of
@@ -671,16 +710,17 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	/*******************************************************
 	 * @param force
 	 ********************************************************/
-	private void repaint(boolean force)
+	private void forcedRepaint()
 	{
-		repaint(force, false);
+		this.forceRedraw_ = true;
+		repaintNow();
 	}
 	
 	/*******************************************************
 	 * @param force
 	 * @param includeStatic
 	 ********************************************************/
-	private void repaint(boolean force, boolean includeStatic)
+	private void forcedRepaintWithStatic()
 	{
 		/* Pause?  Don't redraw!! */
 		if (this.pausePainting_)
@@ -688,8 +728,8 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			return;
 		}
 		
-		this.forceRedraw_ = force;
-		this.forceStaticRedraw_ = includeStatic;
+		this.forceRedraw_ = true;
+		this.forceStaticRedraw_ = true;
 		repaintNow();
 	}
 	
@@ -715,7 +755,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			/* The renderer is setup, so let it draw */
 			if (this.profileRenderer_ != null)
 			{
-				this.profileRenderer_.render(g, getClientRect(), ColorModel.DEFAULT_COLOR_MODEL, this.forceRedraw_, this.forceStaticRedraw_);
+				this.profileRenderer_.render(g, getClientRect(), this.colorModel_, this.forceRedraw_, this.forceStaticRedraw_);
 				this.forceRedraw_ = false;
 				this.forceStaticRedraw_ = false;
 			}
@@ -735,7 +775,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				/* Draw a window box */
 				g.setBackColor(Color.CYAN);
 				g.fillRect(10, yCenter - (textHeight / 2) - 10, getClientRect().width - 20, textHeight + 20);
-				g.setForeColor(ColorModel.DEFAULT_COLOR_MODEL.get(ColorModel.DEFAULT_BORDER));
+				g.setForeColor(this.colorModel_.get(ColorModel.DEFAULT_BORDER));
 				g.drawRect(10, yCenter - (textHeight / 2) - 10, getClientRect().width - 20, textHeight + 20);
 				
 				/* Draw the text */
@@ -753,23 +793,28 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			ErrorDialog.showError("Fatal Error", e);
 			//doExit();
 		}
-		
+		finally
+		{
+			/* Always turn off the force flags */
+			this.forceRedraw_ = false;
+			this.forceStaticRedraw_ = false;
+		}
 
 	}
 
 	
 	
-		public void protocolStarted() {repaint(false);};
-		public void protocolStopped() {repaint(false);};
-		public void initStarted() {repaint(false);};
-		public void initFinished() {this.statusMessage_ = null; repaint(false);};
-		public void initStatus(String statusMessage) {this.statusMessage_ = statusMessage; repaint(false);};
-		public void beginParameterBatch(int count) {repaint(false);};
-		public void parameterFetched(ECUParameter p) {repaint(false);};
-		public void endParameterBatch() {repaint(false);};
-		public void commTX() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_SEND); repaint(false);};
-		public void commRX() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_RECEIVE); repaint(false);};
-		public void commReady() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_READY); repaint(false);};
+		public void protocolStarted() {repaintNow();};
+		public void protocolStopped() {repaintNow();};
+		public void initStarted() {repaintNow();};
+		public void initFinished() {this.statusMessage_ = null; repaintNow();};
+		public void initStatus(String statusMessage) {this.statusMessage_ = statusMessage; repaintNow();};
+		public void beginParameterBatch(int count) {repaintNow();};
+		public void parameterFetched(ECUParameter p) {repaintNow();};
+		public void endParameterBatch() {repaintNow();};
+		public void commTX() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_SEND); repaintNow();};
+		public void commRX() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_RECEIVE); repaintNow();};
+		public void commReady() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_READY); repaintNow();};
 	
 
 }

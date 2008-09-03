@@ -224,6 +224,40 @@ public abstract class AbstractProtocol implements ProtocolHandler
 		return (ProtocolEventListener)this.eventListeners_.items[index];
 	}
 	
+	
+	/*******************************************************
+	 * A utility method to get the index of the next enabled
+	 * parameter.
+	 * @return
+	 ********************************************************/
+	public int getNextEnabledParamIndex(int currentIndex)
+	{
+		int nextIndex = currentIndex;
+		
+		do
+		{
+			nextIndex++;
+			
+			/* Back to 0 */
+			if (nextIndex >= getSupportedParameters().length)
+			{
+				nextIndex = 0;
+			}
+			
+			/* Full circle witout a match? */
+			if (nextIndex == currentIndex)
+			{
+				return currentIndex;
+			}
+			
+		}
+		while(getSupportedParameters()[nextIndex].isEnabled() == false);
+	
+		return nextIndex;
+		
+	}
+		
+	
 
 	/********************************************************
 	 * 

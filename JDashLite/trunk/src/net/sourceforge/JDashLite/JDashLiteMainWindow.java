@@ -34,9 +34,12 @@ import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
+import net.sourceforge.JDashLite.profile.StatusBar;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
+import waba.fx.Color;
+import waba.fx.Font;
 import waba.fx.Graphics;
 import waba.sys.Convert;
 import waba.sys.Settings;
@@ -89,9 +92,18 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	/* Remember the previous system off time */
 	private int originalSystemOffTime_ = 0;
 	
-	
+	/* force a redraw of the gauges dynamic data regardless of if a new EcU value has been detected.  It's an override */
 	private boolean forceRedraw_ = false;
+	
+	/* Force a re-generate and draw of the static content of the gague also */
 	private boolean forceStaticRedraw_ = false;
+	
+	/* Pause any redraws. Usually due to a menu request */
+	private boolean pausePainting_ = false;
+	
+	/** If there is a status messgae to be displayed, put it here */
+	private String statusMessage_ = null;
+
 	
 	/*******************************************************
 	 * Override
@@ -358,6 +370,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	protected void popupMenuBar()
 	{
 //		stop();
+		setPausePaint(true);
 		
 		if (this.protocolHandler_ != null)
 		{
@@ -378,7 +391,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	public void onEvent(Event event)
 	{
 
-		System.out.println("EVENT");
+//		System.out.println("EVENT");
 		
 		switch(event.type)
 		{
@@ -388,6 +401,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				{
 					waba.sys.Settings.keyboardFocusTraversable = false;
 					MenuUtil.dispatchMenuAction(this.menuItems_, this.menuBar_.getSelectedMenuItem());
+					setPausePaint(false);
 //					start();
 					
 					if (this.protocolHandler_ != null)
@@ -602,7 +616,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
 			
 			/* Add the profile render event listener.  This forces refreshes when the protocol handler fetches a batch */
-			this.protocolHandler_.addProtocolEventListener(this.profileRenderer_.getEventAdapter());
+//				this.protocolHandler_.addProtocolEventListener(this.profileRenderer_.getEventAdapter());
 			this.protocolHandler_.addProtocolEventListener(this);
 			
 			
@@ -613,6 +627,44 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			ErrorDialog.showError("Unexpected Error", e);
 		}
 	
+	}
+	
+	
+//	
+//	/*******************************************************
+//	 * Draw the status message, if there is one, on top of
+//	 * and in the middle of everything.
+//	 * @param msg
+//	 ********************************************************/
+//	private void renderStatusMessage(Graphics g, ColorModel cm, int width, int yCenter)
+//	{
+//		if (this.statusMessage_ != null)
+//		{
+//			
+//			/* Calc positions */
+//			//Font f = findFontBestFitWidth(width, this.statusMessage_, true);
+//			Font f = Font.getFont(Font.DEFAULT, false, Font.NORMAL_SIZE);
+//			int textHeight = f.fm.height - f.fm.descent;
+//			int textWidth = f.fm.getTextWidth(this.statusMessage_);
+//			
+//			/* Draw a window box */
+//			g.setBackColor(Color.CYAN);
+//			g.fillRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
+//			g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
+//			g.drawRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
+//			
+//			/* Draw the text */
+//			g.drawText(this.statusMessage_, (width / 2) - (textWidth / 2), yCenter - (textHeight / 2));
+//			
+//		}
+//	}
+	
+	/********************************************************
+	 * @param pause
+	 ********************************************************/
+	protected void setPausePaint(boolean pause)
+	{
+		this.pausePainting_ = pause;
 	}
 	
 	
@@ -630,9 +682,15 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	 ********************************************************/
 	private void repaint(boolean force, boolean includeStatic)
 	{
+		/* Pause?  Don't redraw!! */
+		if (this.pausePainting_)
+		{
+			return;
+		}
+		
 		this.forceRedraw_ = force;
 		this.forceStaticRedraw_ = includeStatic;
-		repaint();
+		repaintNow();
 	}
 	
 
@@ -643,8 +701,8 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	public void onPaint(Graphics g)
 	{
 
-		this.forceRedraw_ = true;
-		
+//		this.forceRedraw_ = true;
+//	ErrorLog.info("on Paint");	
 		
 		/* If no profile is yet set, then warn the user, and pop the preferences dialog */
 		if (this.activeProfile_ == null)
@@ -662,11 +720,35 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				this.forceStaticRedraw_ = false;
 			}
 			
+			
+			/* If there is a status message pending, then render it */
+			if (this.statusMessage_ != null)
+			{
+				
+				/* Calc positions */
+				//Font f = findFontBestFitWidth(width, this.statusMessage_, true);
+				Font f = Font.getFont(Font.DEFAULT, false, Font.NORMAL_SIZE);
+				int textHeight = f.fm.height - f.fm.descent;
+				int textWidth = f.fm.getTextWidth(this.statusMessage_);
+				int yCenter = getClientRect().height / 2;
+				
+				/* Draw a window box */
+				g.setBackColor(Color.CYAN);
+				g.fillRect(10, yCenter - (textHeight / 2) - 10, getClientRect().width - 20, textHeight + 20);
+				g.setForeColor(ColorModel.DEFAULT_COLOR_MODEL.get(ColorModel.DEFAULT_BORDER));
+				g.drawRect(10, yCenter - (textHeight / 2) - 10, getClientRect().width - 20, textHeight + 20);
+				
+				/* Draw the text */
+				g.drawText(this.statusMessage_, (width / 2) - (textWidth / 2), yCenter - (textHeight / 2));
+				
+			}
+			
 		}
 		catch(Exception e)
 		{
 			this.profileRenderer_ = null;
 //			stop();
+			setPausePaint(true);
 			ErrorLog.fatal("onPaint", e);
 			ErrorDialog.showError("Fatal Error", e);
 			//doExit();
@@ -677,17 +759,17 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 
 	
 	
-		public void protocolStarted() {repaint();};
-		public void protocolStopped() {repaint();};
-		public void initStarted() {repaint();};
-		public void initFinished() {repaint();};
-		public void initStatus(String statusMessage) {repaint();};
-		public void beginParameterBatch(int count) {repaint();};
-		public void parameterFetched(ECUParameter p) {repaint();};
-		public void endParameterBatch() {repaint();};
-		public void commTX() {repaint();};
-		public void commRX() {repaint();};
-		public void commReady() {repaint();};
+		public void protocolStarted() {repaint(false);};
+		public void protocolStopped() {repaint(false);};
+		public void initStarted() {repaint(false);};
+		public void initFinished() {this.statusMessage_ = null; repaint(false);};
+		public void initStatus(String statusMessage) {this.statusMessage_ = statusMessage; repaint(false);};
+		public void beginParameterBatch(int count) {repaint(false);};
+		public void parameterFetched(ECUParameter p) {repaint(false);};
+		public void endParameterBatch() {repaint(false);};
+		public void commTX() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_SEND); repaint(false);};
+		public void commRX() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_RECEIVE); repaint(false);};
+		public void commReady() {this.profileRenderer_.getStatusBar().setRXTXMode(StatusBar.RXTX_READY); repaint(false);};
 	
 
 }

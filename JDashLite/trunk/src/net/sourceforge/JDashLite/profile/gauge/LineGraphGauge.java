@@ -191,6 +191,8 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		double lowValue = this.rangeEnd_;
 		int highValueY = r.y + r.height + 1;
 		int lowValueY = r.y - 1;
+		int valueCount = 0;
+		double valueAverage = 0;
 		
 		
 		/* Draw the static image */
@@ -212,6 +214,9 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 			/* Outside our range?  Nothign to draw */
 			if((hv.getValue() > NULL_DOUBLE) && (hv.getTimestamp() > 0))
 			{
+				/* For the average */
+				valueCount++;
+				valueAverage += hv.getValue();
 				
 				/* calc the pixel Y value, but stay under our range */
 				int pxlY = (int)((double)r.height * ((Math.min(hv.getValue(), this.rangeEnd_) - this.rangeStart_) / this.range_));
@@ -240,7 +245,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		
 		/* Draw the high line */
 		g.setFont(this.labelFont_);
-		g.setForeColor(cm.get(ColorModel.LINE_GRAPH_HIGH_LINE));
+		g.setForeColor(cm.get(ColorModel.DEFAULT_TEXT));
 		if (highValueY < r.y + r.height && highValueY > r.y)
 		{
 			g.drawLine(r.x, highValueY, r.x + r.width, highValueY);
@@ -249,9 +254,10 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		g.drawText(Convert.toString(highValue, 0), r.x + 5, r.y + 5);
 
 		
+		/* Draw the average */
+		g.drawText(Convert.toString(valueAverage / ((double)valueCount), 0), r.x + 5, r.y + (r.height / 2) - (this.labelFont_.fm.height / 2) + this.labelFont_.fm.descent);
 		
 		/* Low value */
-		g.setForeColor(cm.get(ColorModel.LINE_GRAPH_LOW_LINE));
 		if (lowValueY < r.y + r.height && lowValueY > r.y)
 		{
 			g.drawLine(r.x, lowValueY, r.x + r.width, lowValueY);

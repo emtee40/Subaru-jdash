@@ -69,9 +69,9 @@ public class ProfileRenderer
 	private static final double STATUS_BAR_HEIGHT_PERCENT = 0.06;
 	
 	/* Flag indicating that new ECU data is available */
-	private boolean refreshGauges_ = true;
-	private boolean refreshStatusBar_ = true;
-	private boolean forceGaugeCompleteRefresh_ = true;
+//	private boolean refreshGauges_ = true;
+//	private boolean refreshStatusBar_ = true;
+//	private boolean forceGaugeCompleteRefresh_ = true;
 	
 	/* The profile this renderer is to render */
 	private Profile profile_ = null;
@@ -94,7 +94,7 @@ public class ProfileRenderer
 	private Hashtable rectCache_ = new Hashtable(4);
 	
 	/* The event adapter used internaly */
-	private ProtocolEventListener eventAdapter_ = new RenderingProtocolEventAdapter();
+//	private ProtocolEventListener eventAdapter_ = new RenderingProtocolEventAdapter();
 	
 	
 	/* The Double buffer static image.  As in, there are parts of the page that do NOT change
@@ -103,8 +103,8 @@ public class ProfileRenderer
 	//private Image dblBufferdStaticImage_ = null;
 	
 	
-	/** If there is a status messgae to be displayed, put it here */
-	private String statusMessage_ = null;
+//	/** If there is a status messgae to be displayed, put it here */
+//	private String statusMessage_ = null;
 	
 	private boolean fetchVisibleOnly_ = false;
 	
@@ -160,13 +160,13 @@ public class ProfileRenderer
 	
 	
 	
-	/********************************************************
-	 * @return the eventAdapter
-	 ********************************************************/
-	public ProtocolEventListener getEventAdapter()
-	{
-		return this.eventAdapter_;
-	}
+//	/********************************************************
+//	 * @return the eventAdapter
+//	 ********************************************************/
+//	public ProtocolEventListener getEventAdapter()
+//	{
+//		return this.eventAdapter_;
+//	}
 
 	
 	
@@ -222,6 +222,14 @@ public class ProfileRenderer
 	}
 	
 	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public StatusBar getStatusBar()
+	{
+		return this.statusBar_;
+	}
+	
 	/*******************************************************
 	 * When the main window gets a pen event, it will forward
 	 * it to the renderer.
@@ -267,9 +275,9 @@ public class ProfileRenderer
 		}
 		
 		this.currentlyActivePage_ = activePage;
-		this.refreshGauges_ = true;
-		this.forceGaugeCompleteRefresh_ = true;
-		this.refreshStatusBar_ = true;
+//		this.refreshGauges_ = true;
+//		this.forceGaugeCompleteRefresh_ = true;
+//		this.refreshStatusBar_ = true;
 //		this.dblBufferdStaticImage_ = null;
 		this.statusBar_.setActivePage(this.currentlyActivePage_);
 		
@@ -456,9 +464,9 @@ public class ProfileRenderer
 		
 
 		/* Render the active page  */
-		if (this.refreshGauges_ || forceRedrawAll)
+		//if (this.refreshGauges_  forceRedrawAll)
 		{
-			this.refreshStatusBar_ = true;
+//			this.refreshStatusBar_ = true;
 
 			/* If this is the firstTiemRender, then we need to pre-render EVERY page.  Why? Some gauges need the
 			 * RECT and Graphic data before even any ecu values come through. Becuase gauges like line graphs are dependant
@@ -480,22 +488,13 @@ public class ProfileRenderer
 			}
 			else
 			{
-				renderPage(g, cm, this.currentlyActivePage_, forceRedrawAll || this.forceGaugeCompleteRefresh_, includingStaticContent);
+				renderPage(g, cm, this.currentlyActivePage_, forceRedrawAll /*|| this.forceGaugeCompleteRefresh_*/, includingStaticContent);
 			}
 			
-			this.refreshGauges_ = false;
+//			this.refreshGauges_ = false;
 		}
 
 		
-		/* Draw the status bar */
-		if (refreshStatusBar_)
-		{
-			this.statusBar_.render(g, (Rect)this.rectCache_.get(this.statusBar_), cm);
-			this.refreshStatusBar_ = false;
-		}
-
-
-
 		/* turn the first time off, and go again */
 		if (this.firstTimeRender_)
 		{
@@ -505,12 +504,20 @@ public class ProfileRenderer
 		}
 
 		
-		/* Render any pending status message */
-		renderStatusMessage(g, cm, r.width, r.height / 2);
+		/* Draw the status bar */
+//		if (refreshStatusBar_)
+		{
+			this.statusBar_.render(g, (Rect)this.rectCache_.get(this.statusBar_), cm);
+//			this.refreshStatusBar_ = false;
+		}
+
+
+//		/* Render any pending status message */
+//		renderStatusMessage(g, cm, r.width, r.height / 2);
 
 
 		/* Always switch this flag back to off */
-		this.forceGaugeCompleteRefresh_ = false;
+//		this.forceGaugeCompleteRefresh_ = false;
 
 	}
 	
@@ -800,33 +807,33 @@ public class ProfileRenderer
 	
 	
 	
-	/*******************************************************
-	 * Draw the status message, if there is one, on top of
-	 * and in the middle of everything.
-	 * @param msg
-	 ********************************************************/
-	private void renderStatusMessage(Graphics g, ColorModel cm, int width, int yCenter)
-	{
-		if (this.statusMessage_ != null)
-		{
-			
-			/* Calc positions */
-			//Font f = findFontBestFitWidth(width, this.statusMessage_, true);
-			Font f = Font.getFont(Font.DEFAULT, false, Font.NORMAL_SIZE);
-			int textHeight = f.fm.height - f.fm.descent;
-			int textWidth = f.fm.getTextWidth(this.statusMessage_);
-			
-			/* Draw a window box */
-			g.setBackColor(Color.CYAN);
-			g.fillRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
-			g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
-			g.drawRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
-			
-			/* Draw the text */
-			g.drawText(this.statusMessage_, (width / 2) - (textWidth / 2), yCenter - (textHeight / 2));
-			
-		}
-	}
+//	/*******************************************************
+//	 * Draw the status message, if there is one, on top of
+//	 * and in the middle of everything.
+//	 * @param msg
+//	 ********************************************************/
+//	private void renderStatusMessage(Graphics g, ColorModel cm, int width, int yCenter)
+//	{
+//		if (this.statusMessage_ != null)
+//		{
+//			
+//			/* Calc positions */
+//			//Font f = findFontBestFitWidth(width, this.statusMessage_, true);
+//			Font f = Font.getFont(Font.DEFAULT, false, Font.NORMAL_SIZE);
+//			int textHeight = f.fm.height - f.fm.descent;
+//			int textWidth = f.fm.getTextWidth(this.statusMessage_);
+//			
+//			/* Draw a window box */
+//			g.setBackColor(Color.CYAN);
+//			g.fillRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
+//			g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
+//			g.drawRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
+//			
+//			/* Draw the text */
+//			g.drawText(this.statusMessage_, (width / 2) - (textWidth / 2), yCenter - (textHeight / 2));
+//			
+//		}
+//	}
 	
 	
 	/*******************************************************
@@ -866,97 +873,97 @@ public class ProfileRenderer
 	
 	
 	
-	
-	
-	/********************************************************
-	 * Not a static class, this event adapter acts on the messages
-	 * to adjust what is displayed.
-	 *
-	 *********************************************************/
-	private class RenderingProtocolEventAdapter extends ProtocolEventAdapter
-	{
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#initStarted()
-		 ********************************************************/
-		public void initStarted()
-		{
-			statusMessage_ = null;
-			refreshGauges_ = true;
-			//System.out.println("init started " + System.currentTimeMillis());
-		}
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#initFinished()
-		 ********************************************************/
-		public void initFinished()
-		{
-			statusMessage_ = null;
-			refreshGauges_ = true;
-			//System.out.println("init finished "  + System.currentTimeMillis());
-		}
-		
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#initStatus(java.lang.String)
-		 ********************************************************/
-		public void initStatus(String statusMessage)
-		{
-			statusMessage_ = statusMessage;
-		}
-		
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#parameterFetched(net.sourceforge.JDashLite.ecu.comm.ECUParameter)
-		 ********************************************************/
-		public void parameterFetched(ECUParameter p)
-		{
-			refreshGauges_ = true;
-		}
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#endParameterBatch()
-		 ********************************************************/
-		public void endParameterBatch()
-		{
-			//System.out.println("end parameter batch " + System.currentTimeMillis());
-			refreshGauges_  = true;
-		}
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commReady()
-		 ********************************************************/
-		public void commReady()
-		{
-			statusBar_.setRXTXMode(StatusBar.RXTX_READY);
-			refreshStatusBar_  = true;
-		}
-		
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commRX()
-		 ********************************************************/
-		public void commRX()
-		{
-			statusBar_.setRXTXMode(StatusBar.RXTX_RECEIVE);
-			refreshStatusBar_  = true;
-		}
-		
-		
-		/*********************************************************
-		 * (non-Javadoc)
-		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commTX()
-		 ********************************************************/
-		public void commTX()
-		{
-			statusBar_.setRXTXMode(StatusBar.RXTX_SEND);
-			refreshStatusBar_  = true;
-		}
-	}
+//	
+//	
+//	/********************************************************
+//	 * Not a static class, this event adapter acts on the messages
+//	 * to adjust what is displayed.
+//	 *
+//	 *********************************************************/
+//	private class RenderingProtocolEventAdapter extends ProtocolEventAdapter
+//	{
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#initStarted()
+//		 ********************************************************/
+//		public void initStarted()
+//		{
+//			statusMessage_ = null;
+//			refreshGauges_ = true;
+//			//System.out.println("init started " + System.currentTimeMillis());
+//		}
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#initFinished()
+//		 ********************************************************/
+//		public void initFinished()
+//		{
+//			statusMessage_ = null;
+//			refreshGauges_ = true;
+//			//System.out.println("init finished "  + System.currentTimeMillis());
+//		}
+//		
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#initStatus(java.lang.String)
+//		 ********************************************************/
+//		public void initStatus(String statusMessage)
+//		{
+//			statusMessage_ = statusMessage;
+//		}
+//		
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#parameterFetched(net.sourceforge.JDashLite.ecu.comm.ECUParameter)
+//		 ********************************************************/
+//		public void parameterFetched(ECUParameter p)
+//		{
+//			refreshGauges_ = true;
+//		}
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#endParameterBatch()
+//		 ********************************************************/
+//		public void endParameterBatch()
+//		{
+//			//System.out.println("end parameter batch " + System.currentTimeMillis());
+//			refreshGauges_  = true;
+//		}
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commReady()
+//		 ********************************************************/
+//		public void commReady()
+//		{
+//			statusBar_.setRXTXMode(StatusBar.RXTX_READY);
+//			refreshStatusBar_  = true;
+//		}
+//		
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commRX()
+//		 ********************************************************/
+//		public void commRX()
+//		{
+//			statusBar_.setRXTXMode(StatusBar.RXTX_RECEIVE);
+//			refreshStatusBar_  = true;
+//		}
+//		
+//		
+//		/*********************************************************
+//		 * (non-Javadoc)
+//		 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener.ProtocolEventAdapter#commTX()
+//		 ********************************************************/
+//		public void commTX()
+//		{
+//			statusBar_.setRXTXMode(StatusBar.RXTX_SEND);
+//			refreshStatusBar_  = true;
+//		}
+//	}
 }

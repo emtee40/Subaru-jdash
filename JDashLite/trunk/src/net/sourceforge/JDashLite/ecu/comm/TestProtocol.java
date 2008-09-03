@@ -92,7 +92,7 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	{
 		
 		
-		if (Vm.getTimeStamp() - 150 < this.prevEventTS_)
+		if (Vm.getTimeStamp() - 50 < this.prevEventTS_)
 		{
 			return;
 		}
@@ -173,14 +173,15 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 				}
 
 				/* Next param */
-				this.parameterIndex_++;
-				
+				int nextIndex = getNextEnabledParamIndex(this.parameterIndex_);
+					
 				/* Last one?  finished the batch */
-				//if (this.parameterIndex_ >= this.stubbedParameters_.length)
-				if (this.parameterIndex_ >= this.primaryHandler_.getSupportedParameters().length)
+				if (this.parameterIndex_ > nextIndex)
 				{
 					this.initMode_++;
 				}
+
+				this.parameterIndex_ = nextIndex;
 
 			break;
 			
@@ -208,31 +209,35 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	
 	
 
-//	/********************************************************
-//	 * 
-//	 *
-//	 *********************************************************/
-//	private static class StubbedParameter extends ECUParameter
+//	/*******************************************************
+//	 * @return
+//	 ********************************************************/
+//	private int getNextEnabledParamIndex()
 //	{
-//		public double value_ = 1.0;
+//		int nextIndex = this.parameterIndex_;
 //		
-//		/********************************************************
-//		 * 
-//		 *******************************************************/
-//		public StubbedParameter(ECUParameter p)
+//		do
 //		{
-//			super(p.getName());
+//			nextIndex++;
+//			
+//			/* Back to 0 */
+//			if (nextIndex >= this.primaryHandler_.getSupportedParameters().length)
+//			{
+//				nextIndex = 0;
+//			}
+//			
+//			/* Full circle witout a match? */
+//			if (nextIndex == this.parameterIndex_)
+//			{
+//				return this.parameterIndex_;
+//			}
+//			
 //		}
+//		while(this.primaryHandler_.getSupportedParameters()[nextIndex].isEnabled() == false);
 //		
-//		/*********************************************************
-//		 * (non-Javadoc)
-//		 * @see net.sourceforge.JDashLite.ecu.comm.ECUParameter#getValue()
-//		 ********************************************************/
-//		public double getValue()
-//		{
-//			return this.value_;
-//		}
+//		
+//		return nextIndex;
 //	}
-//	
+	 
 }
 

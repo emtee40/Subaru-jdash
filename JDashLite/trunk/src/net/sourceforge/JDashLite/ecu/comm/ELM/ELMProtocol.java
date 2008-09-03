@@ -554,26 +554,14 @@ public class ELMProtocol extends AbstractProtocol
 		switch(getMode())
 		{
 			case MODE_READY:
-				fireBeginParameterBatchEvent(1);
 				setMode(MODE_TX);
 			break;
 			
 			case MODE_TX:
 
-				/* Move the index to the next parameter */
-				this.currentParameterIndex_++;
-				if (this.currentParameterIndex_ >= SUPPORTD_PARAMS.length)
-				{
-					this.currentParameterIndex_ = 0;
-				}
-				
-				/* If the current param is not enabled, then return to try the next one */
-				if (SUPPORTD_PARAMS[this.currentParameterIndex_].isEnabled() == false)
-				{
-					ErrorLog.debug("Skipping " + SUPPORTD_PARAMS[this.currentParameterIndex_].getName());
-					return;
-				}
-				
+				/* Next param */
+				this.currentParameterIndex_ = getNextEnabledParamIndex(this.currentParameterIndex_);
+					
 				/* Send the elm request */
 				resetReadBuffer();
 				sendELMCommand(SUPPORTD_PARAMS[this.currentParameterIndex_].getFullCommand());
@@ -641,6 +629,7 @@ public class ELMProtocol extends AbstractProtocol
 					
 					setStageAndMode(STAGE_PID_REQ, MODE_READY);
 					fireParemeterFetchedEvent(SUPPORTD_PARAMS[this.currentParameterIndex_]);
+					fireEndParameterBatchEvent();
 				}
 				
 			break;

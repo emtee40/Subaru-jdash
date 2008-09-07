@@ -36,8 +36,6 @@ import net.sourceforge.JDashLite.profile.Profile;
 import net.sourceforge.JDashLite.profile.ProfileRenderer;
 import net.sourceforge.JDashLite.profile.StatusBar;
 import net.sourceforge.JDashLite.profile.color.ColorModel;
-import net.sourceforge.JDashLite.profile.color.DefaultColorModel;
-import net.sourceforge.JDashLite.profile.color.NightColorModel;
 import net.sourceforge.JDashLite.util.ListeningMenuItem;
 import net.sourceforge.JDashLite.util.MenuUtil;
 import waba.fx.Color;
@@ -75,6 +73,11 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 
 	private ListeningMenuItem[][] menuItems_ = null;
 	private MenuBar menuBar_ = null;
+	private ListeningMenuItem[] mainMenu_ = null;
+	private ListeningMenuItem[] profileMenu_ = null;
+	private ListeningMenuItem[] colorMenu_ = null;
+//	ListeningMenuItem[] helpMenu = new ListeningMenuItem[2];
+
 	
 	/* Hang onto the reference to the options object */
 	private Preferences jdashOptions_ = null;
@@ -100,8 +103,6 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	/* force a redraw of the gauges dynamic data regardless of if a new EcU value has been detected.  It's an override */
 	private boolean forceRedraw_ = false;
 	
-	/* Force a re-generate and draw of the static content of the gague also */
-	private boolean forceStaticRedraw_ = false;
 	
 	/* Pause any redraws. Usually due to a menu request */
 	private boolean pausePainting_ = false;
@@ -177,18 +178,19 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			try
 			{
 				
-				/* Set the last active profile */
-				doSetActiveProfile(getPreferences().getInt(Preferences.KEY_ACTIVE_PROFILE, 0));
-				
 				/* Setup and Keep the menu bar reference for convinence */
 				this.menuItems_ = createMenuItems();
 				this.menuBar_ = new MenuBar(this.menuItems_);
 				setMenuBar(this.menuBar_);
-				
-// TODO
-//				/* Set the active profile.. to active!! */
-//				doSetActiveProfile(this.activeProfile_);
 
+				
+				/* Set the last active profile */
+				doSetActiveProfile(getPreferences().getInt(Preferences.KEY_ACTIVE_PROFILE, 0));
+
+				/* Set the last active color model */
+				doSetColorModel(ColorModel.DEFAULT_MODEL);
+
+				
 				/* Auto Connect? */
 				if (getPreferences().getBoolean(Preferences.KEY_AUTO_CONNET, false))
 				{
@@ -199,7 +201,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				/* Start the game engine */
 //				start();
 //				refresh();
-				forcedRepaintWithStatic();
+				forceRepaint();
 
 			}
 			catch(Exception e)
@@ -265,19 +267,19 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	{
 
 		int profileCount = getPreferences().getProfileCount();
-		ListeningMenuItem[] mainMenu = new ListeningMenuItem[5];
-		ListeningMenuItem[] profileMenu = new ListeningMenuItem[profileCount + 1];
-		ListeningMenuItem[] colorMenu = new ListeningMenuItem[3];
-		ListeningMenuItem[] helpMenu = new ListeningMenuItem[2];
+		this.mainMenu_ = new ListeningMenuItem[6];
+		this.profileMenu_ = new ListeningMenuItem[profileCount + 1];
+		this.colorMenu_ = new ListeningMenuItem[ColorModel.ALL_MODELS.length + 1];
+////		ListeningMenuItem[] helpMenu = new ListeningMenuItem[2];
 		
 
 		int menuIndex = -1;
 		
 		{
-			mainMenu[++menuIndex] = new ListeningMenuItem("JDash");
+			mainMenu_[++menuIndex] = new ListeningMenuItem("JDash");
 			
-			mainMenu[++menuIndex] = new ListeningMenuItem("Connect");
-			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			mainMenu_[++menuIndex] = new ListeningMenuItem("Connect");
+			mainMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
 				public void actionPerformed(Object ref)
 				{
@@ -285,8 +287,8 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				}
 			});
 			
-			mainMenu[++menuIndex] = new ListeningMenuItem("Disconnect");
-			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			mainMenu_[++menuIndex] = new ListeningMenuItem("Disconnect");
+			mainMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
 				public void actionPerformed(Object ref)
 				{
@@ -294,8 +296,8 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				}
 			});
 			
-			mainMenu[++menuIndex] = new ListeningMenuItem("Preferences");
-			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			mainMenu_[++menuIndex] = new ListeningMenuItem("Preferences");
+			mainMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
 				public void actionPerformed(Object ref)
 				{
@@ -303,8 +305,17 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				}
 			});
 			
-			mainMenu[++menuIndex] = new ListeningMenuItem("Exit");
-			mainMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			mainMenu_[++menuIndex] = new ListeningMenuItem("About");
+			mainMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			{
+				public void actionPerformed(Object ref)
+				{
+					doAbout();
+				}
+			});
+			
+			mainMenu_[++menuIndex] = new ListeningMenuItem("Exit");
+			mainMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
 			{
 				public void actionPerformed(Object ref)
 				{
@@ -319,7 +330,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		/* Profile Menu */
 		{
 			menuIndex = -1;
-			profileMenu[++menuIndex] = new ListeningMenuItem("Profile");
+			profileMenu_[++menuIndex] = new ListeningMenuItem("Profile");
 			
 			/* Add each profile */
 			for (int index = 0; index < profileCount; index++)
@@ -328,9 +339,9 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				try
 				{
 					p.loadFromXml(getPreferences().getProfile(index));
-					profileMenu[++menuIndex] = new ListeningMenuItem(p.getName(), getPreferences().getInt(Preferences.KEY_ACTIVE_PROFILE, -1) == index);
-					profileMenu[menuIndex].isChecked = false;
-					profileMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener(""+index)
+					profileMenu_[++menuIndex] = new ListeningMenuItem(p.getName(), getPreferences().getInt(Preferences.KEY_ACTIVE_PROFILE, -1) == index);
+					profileMenu_[menuIndex].isChecked = false;
+					profileMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener(""+index)
 					{
 						public void actionPerformed(Object profileId)
 						{
@@ -350,46 +361,37 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		/* Color Menu */
 		{
 			menuIndex = -1;
-			colorMenu[++menuIndex] = new ListeningMenuItem("Color");
+			colorMenu_[++menuIndex] = new ListeningMenuItem("Color");
 			
-			colorMenu[++menuIndex] = new ListeningMenuItem("Default");
-			colorMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
+			for (int index = 0; index < ColorModel.ALL_MODELS.length; index++)
 			{
-				public void actionPerformed(Object ref)
-				{
-					doSetColorModel(ColorModel.DEFAULT_MODEL);
-				}
-			});
 			
-			colorMenu[++menuIndex] = new ListeningMenuItem("Night");
-			colorMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
-			{
-				public void actionPerformed(Object ref)
+				ColorModel cm = ColorModel.ALL_MODELS[index];
+				
+				colorMenu_[++menuIndex] = new ListeningMenuItem(cm.getName(), false);
+				colorMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener(cm)
 				{
-					doSetColorModel(ColorModel.NIGHT_MODEL);
-				}
-			});
+					public void actionPerformed(Object ref)
+					{
+						doSetColorModel((ColorModel)ref);
+					}
+				});
+				
+			}
+			
+//			colorMenu_[++menuIndex] = new ListeningMenuItem("Night", false);
+//			colorMenu_[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener(ColorModel.NIGHT_MODEL)
+//			{
+//				public void actionPerformed(Object ref)
+//				{
+//					doSetColorModel((ColorModel)ref);
+//				}
+//			});
 		}
 		
 
-		/* Help Menu */
-		{
-			menuIndex = -1;
-			helpMenu[++menuIndex] = new ListeningMenuItem("Help");
-			
-			helpMenu[++menuIndex] = new ListeningMenuItem("About");
-			helpMenu[menuIndex].setActionListener(new ListeningMenuItem.MenuActionListener()
-			{
-				public void actionPerformed(Object ref)
-				{
-					doAbout();
-				}
-			});
-		}
-
-		
 		/* Return the new menu itmes array */
-		return 	new ListeningMenuItem[][] {mainMenu, profileMenu, colorMenu, helpMenu};
+		return 	new ListeningMenuItem[][] {mainMenu_, profileMenu_, colorMenu_};
 
 	}
 	
@@ -455,7 +457,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 
 //		refresh();
 //		System.out.println("Other Event");
-		forcedRepaint();
+		forceRepaint();
 		
 	
 	}
@@ -482,15 +484,25 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		if (ke.key == IKeys.LEFT)
 		{
 			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage()-1);
+			forceRepaint();
 		}
 		
 		if (ke.key == IKeys.RIGHT)
 		{
 			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage()+1);
+			forceRepaint();
 		}
 		
-		forcedRepaint();
+		if (ke.key == IKeys.JOG_UP || ke.key == IKeys.UP  || ke.key == IKeys.JOG_PUSHUP ||  ke.key == IKeys.PAGE_UP)
+		{
+			doSetPreviousOrNextColorModel(true);
+		}
 		
+		if (ke.key == IKeys.JOG_DOWN || ke.key == IKeys.DOWN || ke.key == IKeys.JOG_PUSHDOWN ||  ke.key == IKeys.PAGE_DOWN)
+		{
+			doSetPreviousOrNextColorModel(false);
+		}
+
 	}
 	
 	
@@ -538,6 +550,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		{
 			ErrorLog.error("Connect Error", e);
 			doDisconnect();
+			setPausePaint(true);
 			ErrorDialog.showError("Unexpected Error", e);
 		}
 	}
@@ -548,6 +561,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	 ********************************************************/
 	private void doDisconnect()
 	{
+		setPausePaint(true);
 		/* Stop the current protocol handler */
 		if (this.protocolHandler_ != null)
 		{
@@ -653,6 +667,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		}
 		catch(Exception e)
 		{
+			setPausePaint(true);
 			ErrorLog.error("Error setting profle: " + profileIndex, e);
 			ErrorDialog.showError("Unexpected Error", e);
 		}
@@ -666,37 +681,61 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	private void doSetColorModel(ColorModel cm)
 	{
 		this.colorModel_ = cm;
-		forcedRepaintWithStatic();
+		
+		/* Find the current CM */
+		for (int index = 1; index < this.colorMenu_.length; index++)
+		{
+			cm = (ColorModel)this.colorMenu_[index].getActionListener().listenerReferenceObject_;
+			if (cm == this.colorModel_)
+			{
+				this.colorMenu_[index].isChecked = true;
+			}
+			else
+			{
+				this.colorMenu_[index].isChecked = false;
+			}
+		}
+		
+		forceRepaint();
 	}
 	
-//	
-//	/*******************************************************
-//	 * Draw the status message, if there is one, on top of
-//	 * and in the middle of everything.
-//	 * @param msg
-//	 ********************************************************/
-//	private void renderStatusMessage(Graphics g, ColorModel cm, int width, int yCenter)
-//	{
-//		if (this.statusMessage_ != null)
-//		{
-//			
-//			/* Calc positions */
-//			//Font f = findFontBestFitWidth(width, this.statusMessage_, true);
-//			Font f = Font.getFont(Font.DEFAULT, false, Font.NORMAL_SIZE);
-//			int textHeight = f.fm.height - f.fm.descent;
-//			int textWidth = f.fm.getTextWidth(this.statusMessage_);
-//			
-//			/* Draw a window box */
-//			g.setBackColor(Color.CYAN);
-//			g.fillRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
-//			g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
-//			g.drawRect(10, yCenter - (textHeight / 2) - 10, width - 20, textHeight + 20);
-//			
-//			/* Draw the text */
-//			g.drawText(this.statusMessage_, (width / 2) - (textWidth / 2), yCenter - (textHeight / 2));
-//			
-//		}
-//	}
+	
+	/*******************************************************
+	 * 
+	 ********************************************************/
+	private void doSetPreviousOrNextColorModel(boolean previous)
+	{
+		int currentColorModelIndex = -1;
+		
+		/* Find the current CM */
+		for (int index = 1; index < this.colorMenu_.length; index++)
+		{
+			ColorModel cm = (ColorModel)this.colorMenu_[index].getActionListener().listenerReferenceObject_;
+			if (cm == this.colorModel_)
+			{
+				currentColorModelIndex = index;
+			}
+		}
+		
+		/* Which Direction */
+		if (previous)
+		{
+			currentColorModelIndex--;
+		}
+		else
+		{
+			currentColorModelIndex++;
+		}
+		
+		/* Set it */
+		if ((currentColorModelIndex >= 1) && (currentColorModelIndex < this.colorMenu_.length))
+		{
+			doSetColorModel((ColorModel)this.colorMenu_[currentColorModelIndex].getActionListener().listenerReferenceObject_);
+		}
+	}
+	
+	
+	
 	
 	/********************************************************
 	 * @param pause
@@ -707,31 +746,17 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	}
 	
 	
-	/*******************************************************
-	 * @param force
-	 ********************************************************/
-	private void forcedRepaint()
-	{
-		this.forceRedraw_ = true;
-		repaintNow();
-	}
 	
 	/*******************************************************
 	 * @param force
-	 * @param includeStatic
 	 ********************************************************/
-	private void forcedRepaintWithStatic()
+	private void forceRepaint()
 	{
-		/* Pause?  Don't redraw!! */
-		if (this.pausePainting_)
-		{
-			return;
-		}
-		
 		this.forceRedraw_ = true;
-		this.forceStaticRedraw_ = true;
+		setPausePaint(false);
 		repaintNow();
 	}
+	
 	
 
 	/*********************************************************
@@ -740,6 +765,15 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	 ********************************************************/
 	public void onPaint(Graphics g)
 	{
+		
+		
+		/* Pause?  Don't redraw!! */
+		if (this.pausePainting_)
+		{
+			return;
+		}
+		
+		
 
 //		this.forceRedraw_ = true;
 //	ErrorLog.info("on Paint");	
@@ -755,9 +789,8 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			/* The renderer is setup, so let it draw */
 			if (this.profileRenderer_ != null)
 			{
-				this.profileRenderer_.render(g, getClientRect(), this.colorModel_, this.forceRedraw_, this.forceStaticRedraw_);
+				this.profileRenderer_.render(g, getClientRect(), this.colorModel_, this.forceRedraw_);
 				this.forceRedraw_ = false;
-				this.forceStaticRedraw_ = false;
 			}
 			
 			
@@ -767,7 +800,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 				
 				/* Calc positions */
 				//Font f = findFontBestFitWidth(width, this.statusMessage_, true);
-				Font f = Font.getFont(Font.DEFAULT, false, Font.NORMAL_SIZE);
+				Font f = Font.getFont(Font.DEFAULT, true, Font.NORMAL_SIZE);
 				int textHeight = f.fm.height - f.fm.descent;
 				int textWidth = f.fm.getTextWidth(this.statusMessage_);
 				int yCenter = getClientRect().height / 2;
@@ -797,7 +830,6 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		{
 			/* Always turn off the force flags */
 			this.forceRedraw_ = false;
-			this.forceStaticRedraw_ = false;
 		}
 
 	}

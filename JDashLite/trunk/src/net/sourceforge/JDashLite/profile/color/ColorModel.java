@@ -80,12 +80,12 @@ public interface ColorModel
 	public static final Color GRAY_7		= Color.getColor(0x90, 0x90, 0x90);
 	public static final Color GRAY_8		= Color.getColor(0x80, 0x80, 0x80);
 	public static final Color GRAY_9		= Color.getColor(0x70, 0x70, 0x70);
-	public static final Color GRAY_10	= Color.getColor(0x60, 0x60, 0x60);
-	public static final Color GRAY_11	= Color.getColor(0x50, 0x50, 0x50);
-	public static final Color GRAY_12	= Color.getColor(0x40, 0x40, 0x40);
-	public static final Color GRAY_13	= Color.getColor(0x30, 0x30, 0x30);
-	public static final Color GRAY_14	= Color.getColor(0x20, 0x20, 0x20);
-	public static final Color GRAY_15	= Color.getColor(0x10, 0x10, 0x10);
+	public static final Color GRAY_10		= Color.getColor(0x60, 0x60, 0x60);
+	public static final Color GRAY_11		= Color.getColor(0x50, 0x50, 0x50);
+	public static final Color GRAY_12		= Color.getColor(0x40, 0x40, 0x40);
+	public static final Color GRAY_13		= Color.getColor(0x30, 0x30, 0x30);
+	public static final Color GRAY_14		= Color.getColor(0x20, 0x20, 0x20);
+	public static final Color GRAY_15		= Color.getColor(0x10, 0x10, 0x10);
 
 
 	public static final Color DK_RED		= Color.getColor(0x98, 0x00, 0x00);
@@ -94,11 +94,38 @@ public interface ColorModel
 	
 
 	//public static final ColorModel DEFAULT_COLOR_MODEL = new DefaultColorModel();
-	public static final ColorModel DEFAULT_MODEL 		= new DefaultColorModel();
+	public static final ColorModel DEFAULT_MODEL 	= new DefaultColorModel();
 	public static final ColorModel NIGHT_MODEL 		= new NightColorModel();
+	public static final ColorModel BLUE_MODEL		= new BlueColorModel();
 
+
+	public static final ColorModel[] ALL_MODELS = {DEFAULT_MODEL, NIGHT_MODEL, BLUE_MODEL};
 	
-	/*  Get the desired color from the ID */
+	/*******************************************************
+	 * Get the desired color from the ID 
+	 * @param colorId
+	 * @return
+	 ********************************************************/
 	public Color get(int colorId);
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public String getName();
+	
+	
+	/********************************************************
+	 * 
+	 *
+	 *********************************************************/
+	public static final class IntWrapper
+	{
+		public int id_ = -1;
+		public IntWrapper(int id) 	{ this.id_ = id; }
+		public int hashCode() 		{ return this.id_; }
+		public String toString()	{ return this.id_ + ""; }
+		public boolean equals(Object obj) { return obj.hashCode() == this.id_; }
+		
+	}
 	
 }

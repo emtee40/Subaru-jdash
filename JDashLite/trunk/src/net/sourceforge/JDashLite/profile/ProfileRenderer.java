@@ -446,7 +446,7 @@ public class ProfileRenderer
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.RenderableProfileComponent#render(waba.fx.Graphics, waba.fx.Rect)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRedrawAll, boolean includingStaticContent) throws Exception
+	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRepaint) throws Exception
 	{
 		
 		/* Not having a profile configured is a fatal exception */
@@ -472,36 +472,40 @@ public class ProfileRenderer
 			 * RECT and Graphic data before even any ecu values come through. Becuase gauges like line graphs are dependant
 			 * on ECU Value change evnets to get their data, but the size of the value history buffer is dependant on the
 			 * rect of the gauge area.  I know, not ideal, but it's only at the first run of this renderer. */
-			if (this.firstTimeRender_ || includingStaticContent)
+			if (this.firstTimeRender_)
 			{
 				
-				/* Render each page */
+				/* PreRender each page once */
 				for (int pageIndex = 0; pageIndex < this.profile_.getPageCount(); pageIndex++)
 				{
+					/* Except the current page */
 					if (pageIndex != this.currentlyActivePage_)
 					{
-						renderPage(g, cm, pageIndex, true, true);
+						renderPage(g, cm, pageIndex, true);
 					}
 				}
 				/* Now, force the current page last */
-				renderPage(g, cm, this.currentlyActivePage_, true, true);
+				renderPage(g, cm, this.currentlyActivePage_, true);
+				
+				/* Disable the first-render flag */
+				this.firstTimeRender_ = false;
 			}
 			else
 			{
-				renderPage(g, cm, this.currentlyActivePage_, forceRedrawAll /*|| this.forceGaugeCompleteRefresh_*/, includingStaticContent);
+				renderPage(g, cm, this.currentlyActivePage_, forceRepaint /*|| this.forceGaugeCompleteRefresh_*/);
 			}
 			
 //			this.refreshGauges_ = false;
 		}
 
-		
-		/* turn the first time off, and go again */
-		if (this.firstTimeRender_)
-		{
-			
-			this.firstTimeRender_ = false;
-			render(g,r, cm, forceRedrawAll, includingStaticContent);
-		}
+//		
+//		/* turn the first time off, and go again */
+//		if (this.firstTimeRender_)
+//		{
+//			
+//			this.firstTimeRender_ = false;
+//			render(g,r, cm, forceRepaint);
+//		}
 
 		
 		/* Draw the status bar */
@@ -530,7 +534,7 @@ public class ProfileRenderer
 	 * 			need to be called twice.
 	 * @throws Exception
 	 ********************************************************/
-	private void renderPage(Graphics g, ColorModel cm, int pageIndex, boolean forceRedrawAll, boolean includingStaticContent) throws Exception
+	private void renderPage(Graphics g, ColorModel cm, int pageIndex, boolean forceRepaint) throws Exception
 	{
 
 		/* No Pages? */
@@ -574,7 +578,7 @@ public class ProfileRenderer
 				/* Render this gauge */
 				if (gauge != null)
 				{
-					renderGauge(g, gaugeRect, gauge, cm, forceRedrawAll, includingStaticContent);
+					renderGauge(g, gaugeRect, gauge, cm, forceRepaint);
 				}
 				else
 				{
@@ -790,7 +794,7 @@ public class ProfileRenderer
 	 * @param rect
 	 * @throws Exception
 	 ********************************************************/
-	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, ColorModel cm, boolean forceRedrawAll, boolean includingStaticContent) throws Exception
+	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, ColorModel cm, boolean forceRepaint) throws Exception
 	{
 	
 		
@@ -801,7 +805,7 @@ public class ProfileRenderer
 			ErrorLog.error("Gauge " + gauge + " does not have a parameter identified");
 		}
 		
-		gauge.render(g, rect, cm, forceRedrawAll, includingStaticContent);
+		gauge.render(g, rect, cm, forceRepaint);
 		
 	}
 	

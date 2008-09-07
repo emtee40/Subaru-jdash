@@ -62,8 +62,19 @@ public abstract class ProfileGauge //implements RenderableProfileComponent
 	
 	private Hashtable props_ = new Hashtable(3);
 
+	/* Some gauges need to be able to detect a null double. But, we dont' have Double objects, only
+	 * double literals.  So, this value, is very very unlikely to ever appear in a ECU value, so it 
+	 * can be used "carefully" as a null value */
+	protected static final double NULL_DOUBLE = -9999999999999999999.9;
 	
 	private ECUParameter param_ = null;
+	
+	
+	/* Just for convience */
+	protected Rect currentRect_ = null;
+	
+	/* Just for convience */
+	protected ColorModel currentColorModel_ = null;
 	
 	/********************************************************
 	 * 
@@ -228,5 +239,5 @@ public abstract class ProfileGauge //implements RenderableProfileComponent
 	 * @param forceRedrawAll IN - force a redraw and re-calc of ALL elements.
 	 * @param staticContent
 	 ********************************************************/
-	public abstract void render(Graphics g, Rect r, ColorModel cm, boolean forceRedraw, boolean includingStaticContent);
+	public abstract void render(Graphics g, Rect r, ColorModel cm, boolean forceRepaint);
 }

@@ -43,8 +43,8 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 {
 	
 	
-	public static final String PROP_D_RANGE_START 			= "range-start";
-	public static final String PROP_D_RANGE_END				= "range-end";
+	private static final String PROP_D_RANGE_START 				= "range-start";
+	private static final String PROP_D_RANGE_END				= "range-end";
 
 	/* When the render method is called, we compare the previos rect to see if we need to re-generate the static content */
 	private Rect lastRect_ = null;
@@ -60,14 +60,12 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	/* The history array pointer */
 	private CircularIndex historyIndex_ = null;
 	
-
-	private double rangeStart_ = 0.0;
-	private double rangeEnd_ = 0.0;
-	private double range_ = 0.0;
+//
+//	private double rangeStart_ = 0.0;
+//	private double rangeEnd_ = 0.0;
+//	private double range_ = 0.0;
 	
 	private Font labelFont_ = null;
-	
-	private static final double NULL_DOUBLE = -9999999999999999999.9;
 	
 	private boolean doNextRender_ = true;
 	
@@ -76,8 +74,38 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	 *******************************************************/
 	public LineGraphGauge()
 	{
-		
+	}
+	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public double getRangeStart()
+	{
+		return getDoubleProperty(PROP_D_RANGE_START, NULL_DOUBLE);
+	}
+	
+	/********************************************************
+	 * @param r
+	 ********************************************************/
+	public void setRangeStart(double r)
+	{
+		setDoubleProperty(PROP_D_RANGE_START, r);
+	}
 
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public double getRangeEnd()
+	{
+		return getDoubleProperty(PROP_D_RANGE_END, NULL_DOUBLE);
+	}
+	
+	/********************************************************
+	 * @param r
+	 ********************************************************/
+	public void setRangeEnd(double r)
+	{
+		setDoubleProperty(PROP_D_RANGE_END, r);
 	}
 	
 	/*********************************************************
@@ -133,7 +161,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRedrawAll, boolean includingStaticContent)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRepaint)
 	{
 //		if (redrawAll) System.out.println("Forcing Redraw of " + getECUParameter().getName() + " " + getProperty(ProfileGauge.PROP_STR_LABEL));
 
@@ -153,15 +181,15 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 
 		
 		/* Static Content */
-		if ((forceRedrawAll && includingStaticContent) || r.equals(this.lastRect_) == false)
+		if (r.equals(this.lastRect_) == false || cm != this.currentColorModel_)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
 			generateStaticImage(cm);
 		}
 
-		
+
 		/* Now, the dynamic image */
-		if (doNextRender_ || forceRedrawAll || r.equals(this.lastRect_) == false)
+		if (forceRepaint || doNextRender_ || r.equals(this.lastRect_) == false || cm != this.currentColorModel_)
 		{
 			g.drawImage(this.staticContent_, r.x, r.y);
 			renderDynamic(g, r, cm);
@@ -170,6 +198,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 
 		/* Remember the rect */
 		this.lastRect_ = r;
+		this.currentColorModel_ = cm;
 		
 		/* turn off the next render */
 		this.doNextRender_ = false;
@@ -194,8 +223,8 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 //		}
 
 		
-		double highValue = this.rangeStart_;
-		double lowValue = this.rangeEnd_;
+		double highValue = getRangeStart();
+		double lowValue = getRangeEnd();
 		int highValueY = r.y + r.height + 1;
 		int lowValueY = r.y - 1;
 		int valueCount = 0;
@@ -227,7 +256,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 				valueAverage += hv.getValue();
 				
 				/* calc the pixel Y value, but stay under our range */
-				int pxlY = (int)((double)r.height * ((Math.min(hv.getValue(), this.rangeEnd_) - this.rangeStart_) / this.range_));
+				int pxlY = (int)((double)r.height * ((Math.min(hv.getValue(), getRangeEnd()) - getRangeStart()) / (getRangeEnd() - getRangeStart())));
 				pxlY = r.y + r.height - pxlY + 1; /* + 1 to STAY under the top of the rect */
 
 				/* Track the min and max values */
@@ -269,9 +298,14 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 			g.drawLine(r.x, lowValueY - 1, r.x + r.width, lowValueY - 1);
 		}
 
+		if (valueCount != 0)
+		{
+			valueAverage = valueAverage / ((double)valueCount);
+		}
+		
 		g.setForeColor(cm.get(ColorModel.DEFAULT_TEXT));
 		g.drawText(Convert.toString(highValue, 0), r.x + 5, r.y + 5);
-		g.drawText(Convert.toString(valueAverage / ((double)valueCount), 0), r.x + 5, r.y + (r.height / 2) - (this.labelFont_.fm.height / 2) + this.labelFont_.fm.descent);
+		g.drawText(Convert.toString(valueAverage, 0), r.x + 5, r.y + (r.height / 2) - (this.labelFont_.fm.height / 2) + this.labelFont_.fm.descent);
 		g.drawText(Convert.toString(lowValue, 0), r.x + 5, r.y + r.height - 5 - this.labelFont_.fm.height + this.labelFont_.fm.descent);
 	
 	}
@@ -292,20 +326,17 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 		/* Remember the lable font cuz we'll need it for the digital values */
 		this.labelFont_ = ProfileRenderer.findFontBestFitHeight((int)(r.height * 0.15), false);
 
-		this.rangeStart_ = getDoubleProperty(PROP_D_RANGE_START, NULL_DOUBLE);
-		this.rangeEnd_ = getDoubleProperty(PROP_D_RANGE_END, NULL_DOUBLE);
-		
-		if (this.rangeStart_ == NULL_DOUBLE)
+		if (getRangeStart() == NULL_DOUBLE)
 		{
-			throw new RuntimeException(PROP_D_RANGE_START + " value not set in gauge profile");
+			throw new RuntimeException("Range Start value not set in gauge profile");
 		}
 		
-		if (this.rangeEnd_ == NULL_DOUBLE)
+		if (getRangeEnd() == NULL_DOUBLE)
 		{
-			throw new RuntimeException(PROP_D_RANGE_END + " value not set in gauge profile");
+			throw new RuntimeException("Range End value not set in gauge profile");
 		}
 		
-		this.range_ = this.rangeEnd_ - this.rangeStart_;
+//		this.range_ = this.rangeEnd_ - this.rangeStart_;
 		
 		
 		g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
@@ -331,7 +362,7 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 //		}
 //		
 		 /* Just for debugging, start all the way to the end */
-		this.historyIndex_.decrementHead();
+//		this.historyIndex_.decrementHead();
 
 		
 		/* Draw the label */

@@ -38,17 +38,21 @@ import waba.sys.Convert;
  *  Zero degrees is straight right.  Rotation is right to left
  *
  *********************************************************/
+/*********************************************************
+ * 
+ *
+ *********************************************************/
 public class AnalogGauge extends ProfileGauge
 {
 
 	
-	public static final String PROP_D_RANGE_START 			= "range-start";
-	public static final String PROP_D_RANGE_END				= "range-end";
-	public static final String PROP_I_TICK_COUNT 				= "tick-count";
-	public static final String PROP_B_INCLUDE_TICKS 			= "include-ticks";
-	public static final String PROP_B_INCLUDE_TICK_LABELS		= "include-tick-labels";
-	public static final String PROP_B_INCLUDE_DIGITAL_VALUE	= "include-digital-value";
-	public static final String PROP_I_PRECISION				= "precision";
+	private static final String PROP_D_RANGE_START 				= "range-start";
+	private static final String PROP_D_RANGE_END				= "range-end";
+	private static final String PROP_I_TICK_COUNT 				= "tick-count";
+	private static final String PROP_B_INCLUDE_TICKS 			= "include-ticks";
+	private static final String PROP_B_INCLUDE_TICK_LABELS		= "include-tick-labels";
+	private static final String PROP_B_INCLUDE_DIGITAL_VALUE	= "include-digital-value";
+	private static final String PROP_I_PRECISION				= "precision";
 
 	
 	protected static final double OUTER_RING_RADIUS = 0.48;
@@ -60,20 +64,17 @@ public class AnalogGauge extends ProfileGauge
 	protected static final double MAXIMUM_DEGREE = 360 - 50;
 	
 
-	/* The range starting value of the ecu value */
-	private double rangeStart_ = 0.0;
-	
-	/* The range ending value of the ecu value */
-	private double rangeEnd_ = 0.0;
-
-	/* The default number of decimal places to show */
-	private int decimalPrecision_ = 0;
-
-	/* Include the digital value readout ? */
-	private boolean includeDigitalValue_ = false;
-	
-	/* When the render method is called, we compare the previos rect to see if we need to re-generate the static content */
-	private Rect lastRect_ = null;
+//	/* The range starting value of the ecu value */
+//	private double cachedRangeStart_ = 0.0;
+//	
+//	/* The range ending value of the ecu value */
+//	private double cachedRangeEnd_ = 0.0;
+//
+//	/* The default number of decimal places to show */
+//	private int cachedDecimalPrecision_ = 0;
+//
+//	/* Include the digital value readout ? */
+//	private boolean cachedIncludeDigitalValue_ = false;
 	
 	/* The image for the static background stuff */
 	private Image staticContent_ = null;
@@ -90,34 +91,152 @@ public class AnalogGauge extends ProfileGauge
 	public AnalogGauge()
 	{
 
+//		this.rangeStart_ = getDoubleProperty(PROP_D_RANGE_START, 0);
+//		this.rangeEnd_   = getDoubleProperty(PROP_D_RANGE_END, 1);
+//		this.decimalPrecision_ = getIntProperty(PROP_I_PRECISION, 0);
+//		this.includeDigitalValue_ = getBooleanProperty(PROP_B_INCLUDE_DIGITAL_VALUE);
+
 	}
 
+	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public double getRangeStart()
+	{
+		return getDoubleProperty(PROP_D_RANGE_START, 0);
+	}
+	
+	
+	/********************************************************
+	 * @param r
+	 ********************************************************/
+	public void setRangeStart(double r)
+	{
+		setDoubleProperty(PROP_D_RANGE_START, r);
+	}
+
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public double getRangeEnd()
+	{
+		return getDoubleProperty(PROP_D_RANGE_END, 0);
+	}
+	
+	/********************************************************
+	 * @param r
+	 ********************************************************/
+	public void setRangeEnd(double r)
+	{
+		setDoubleProperty(PROP_D_RANGE_END, r);
+	}
+
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public int getTickCount()
+	{
+		return getIntProperty(PROP_I_TICK_COUNT, 5);
+	}
+	
+	/********************************************************
+	 * @param c
+	 ********************************************************/
+	public void setTickCount(int c)
+	{
+		setIntProperty(PROP_I_TICK_COUNT, c);
+	}
+
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public boolean getIncludeTicks()
+	{
+		return getBooleanProperty(PROP_B_INCLUDE_TICKS);
+	}
+	
+	/********************************************************
+	 * @param i
+	 ********************************************************/
+	public void setIncludeTicks(boolean i)
+	{
+		setBooleanProperty(PROP_B_INCLUDE_TICKS, i);
+	}
+	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public boolean getIncludeTickLabels()
+	{
+		return getBooleanProperty(PROP_B_INCLUDE_TICK_LABELS);
+	}
+	
+	/********************************************************
+	 * @param i
+	 ********************************************************/
+	public void setIncludeTickLabels(boolean i)
+	{
+		setBooleanProperty(PROP_B_INCLUDE_TICK_LABELS, i);
+	}
+
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public boolean getIncludeDigitalValue()
+	{
+		return getBooleanProperty(PROP_B_INCLUDE_DIGITAL_VALUE);
+	}
+	
+	/********************************************************
+	 * @param d
+	 ********************************************************/
+	public void setIncludeDigitalValue(boolean d)
+	{
+		setBooleanProperty(PROP_B_INCLUDE_DIGITAL_VALUE, d);
+	}
+
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public int getPrecision()
+	{
+		return getIntProperty(PROP_I_PRECISION, 0);
+	}
+	
+	/********************************************************
+	 * @param p
+	 ********************************************************/
+	public void setPrecision(int p)
+	{
+		setIntProperty(PROP_I_PRECISION, p);
+	}
+	
 	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll, boolean includingStaticContent)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRepaint)
 	{
 
 		/* Generate the static image */
-		if ((redrawAll && includingStaticContent) || r.equals(this.lastRect_) == false)
+		if (r.equals(this.currentRect_) == false || cm != this.currentColorModel_)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
 			generateStaticImage(cm, (int)(Math.min(r.width, r.height) * 0.04));
 		}
 		
 		/* Now, the dynamic image */
-		if (this.previousValue_ != getECUParameter().getValue() || redrawAll || r.equals(this.lastRect_) == false)
+		if (this.previousValue_ != getECUParameter().getValue() || forceRepaint || r.equals(this.currentRect_) == false || cm != this.currentColorModel_)
 		{
 			g.drawImage(this.staticContent_, r.x, r.y);
 			renderDynamic(g, r, cm);
 		}
 
+		this.currentRect_ = r;
+		this.currentColorModel_ = cm;
 
-		/* Remember the rect */
-		this.lastRect_ = r;
-		
 	}
 	
 	
@@ -152,20 +271,20 @@ public class AnalogGauge extends ProfileGauge
 			/* Start with the ecu value, but watch for over/under values */
 			double valueAngle = getECUParameter().getValue();
 
-			if (valueAngle >= this.rangeEnd_)
+			if (valueAngle >= getRangeEnd())
 			{
-				valueAngle = this.rangeEnd_;
+				valueAngle = getRangeEnd();
 			}
-			else if (valueAngle <= this.rangeStart_)
+			else if (valueAngle <= getRangeStart())
 			{
-				valueAngle = this.rangeStart_;			
+				valueAngle = getRangeStart();			
 			}
 			
 			/* Calculate the distance of parameter value is from the minimum */
-			valueAngle = valueAngle - this.rangeStart_;
+			valueAngle = valueAngle - getRangeStart();
 			
 			/* Now, what percentage is the offset within the range */
-			valueAngle = valueAngle / (this.rangeEnd_ - this.rangeStart_);
+			valueAngle = valueAngle / (getRangeEnd() - getRangeStart());
 			
 			/* Now, calulcate the angle given the start and end angle */
 			valueAngle = MINIMUM_DEGREE + ((MAXIMUM_DEGREE - MINIMUM_DEGREE) * valueAngle);
@@ -191,14 +310,14 @@ public class AnalogGauge extends ProfileGauge
 		
 		
 		/* Draw the current digital value */
-		if (this.includeDigitalValue_)
+		if (getIncludeDigitalValue())
 		{
 	//		Font f = null;
 	//		f = ProfileRenderer.findFontBestFitHeight((int)(r.height * LABEL_HEIGHT), false);
 			int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
 			g.setFont(this.currentValueFont_);
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-			String val = Convert.toString(getECUParameter().getValue(), this.decimalPrecision_);
+			String val = Convert.toString(getECUParameter().getValue(), getPrecision());
 			g.drawText(val, centerX - (this.currentValueFont_.fm.getTextWidth(val) / 2), (centerY + (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent)));
 	//		g.drawText(val, centerX - (this.currentValueAndLabelFont_.fm.getTextWidth(val) / 2), centerY + needleWidth * 2);
 		}
@@ -225,10 +344,10 @@ public class AnalogGauge extends ProfileGauge
 		Rect r = new Rect(0, 0, this.staticContent_.getWidth(), this.staticContent_.getHeight());
 		
 		/* Pull out a few regularly needed values */
-		this.rangeStart_ = getDoubleProperty(PROP_D_RANGE_START, 0);
-		this.rangeEnd_   = getDoubleProperty(PROP_D_RANGE_END, 1);
-		this.decimalPrecision_ = getIntProperty(PROP_I_PRECISION, 0);
-		this.includeDigitalValue_ = getBooleanProperty(PROP_B_INCLUDE_DIGITAL_VALUE);
+//		this.rangeStart_ = getDoubleProperty(PROP_D_RANGE_START, 0);
+//		this.rangeEnd_   = getDoubleProperty(PROP_D_RANGE_END, 1);
+//		this.decimalPrecision_ = getIntProperty(PROP_I_PRECISION, 0);
+//		this.includeDigitalValue_ = getBooleanProperty(PROP_B_INCLUDE_DIGITAL_VALUE);
 		
 		/* Blank the gauge first */
 		g.setForeColor(cm.get(ColorModel.DEFAULT_BORDER));
@@ -244,7 +363,7 @@ public class AnalogGauge extends ProfileGauge
 		int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
 		
 		/* setup the current value font.  It's the same as the label font. */
-		this.currentValueFont_ = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), Convert.toString(this.rangeEnd_, this.decimalPrecision_), false);
+		this.currentValueFont_ = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), Convert.toString(getRangeEnd(), getPrecision()), false);
 //		Font labelFont = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), getLabel(), false);
 		
 		
@@ -262,17 +381,17 @@ public class AnalogGauge extends ProfileGauge
 	
 		
 		/* Calculate the tick mark range */
-		double tickRange = ((this.rangeEnd_ - this.rangeStart_) / (double)(getIntProperty(PROP_I_TICK_COUNT, 2) - 1.0));
+		double tickRange = ((getRangeEnd() - getRangeStart()) / (double)(getTickCount() - 1.0));
 		
 		
 		/* First, determine the normal length of the tick label values */
 		int tickLabelLen = 0;
-		for (double index = 0; index < getIntProperty(PROP_I_TICK_COUNT, 2); index++)
+		for (double index = 0; index < getTickCount(); index++)
 		{
-			String tickValue = Convert.toString(Math.abs(this.rangeStart_ + (index * tickRange)), this.decimalPrecision_);
+			String tickValue = Convert.toString(Math.abs(getRangeStart() + (index * tickRange)), getPrecision());
 			
 			/* No need to analize zero */
-			if ((this.rangeStart_ + (index * tickRange)) == 0)
+			if ((getRangeStart() + (index * tickRange)) == 0)
 			{
 				tickValue = "0";
 			}
@@ -293,18 +412,18 @@ public class AnalogGauge extends ProfileGauge
 		
 		
 		/* Draw each tick mark */
-		if (getBooleanProperty(PROP_B_INCLUDE_TICKS))
+		if (getIncludeTicks())
 		{
 			g.setFont(tickFont);
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
-			double ticInc = getBooleanProperty(PROP_B_INCLUDE_TICK_LABELS)?0.5:1;
-			for (double index = 0; index < getIntProperty(PROP_I_TICK_COUNT, 2) - 0.5; index+=(ticInc))
+			double ticInc = getIncludeTickLabels()?0.5:1;
+			for (double index = 0; index < getTickCount() - 0.5; index+=(ticInc))
 			{
 				Coord tickPoint1 = new Coord(0, mainRadius - (tickLength / 2));   /* outer tip of tick */
 				Coord tickPoint2 = new Coord(0, tickPoint1.y - tickLength);       /* inner tip of tick */
 				Coord tickPoint3 = new Coord(0, tickPoint2.y - (int)(tickLength * 1.5));  /* Center point of tick value */
 				
-				double tickAngle = MINIMUM_DEGREE + (((MAXIMUM_DEGREE - MINIMUM_DEGREE) / (double)(getIntProperty(PROP_I_TICK_COUNT, 2) - 1.0)) * index);
+				double tickAngle = MINIMUM_DEGREE + (((MAXIMUM_DEGREE - MINIMUM_DEGREE) / (double)(getTickCount() - 1.0)) * index);
 				
 				AffineTransform tickTxfm = AffineTransform.rotateInstance(Math.toRadians(tickAngle));
 				tickTxfm.addTranslate(centerX, centerY);
@@ -316,13 +435,13 @@ public class AnalogGauge extends ProfileGauge
 				g.drawLine(tickPoint1.x, tickPoint1.y, tickPoint2.x, tickPoint2.y);
 				
 				/* Only draw the text on whole ticks */
-				if (getBooleanProperty(PROP_B_INCLUDE_TICK_LABELS) && index % 1 == 0)
+				if (getIncludeTickLabels() && index % 1 == 0)
 				{
-					String tickValue = Convert.toString(this.rangeStart_ + (index * tickRange), this.decimalPrecision_);
+					String tickValue = Convert.toString(getRangeStart() + (index * tickRange), getPrecision());
 					tickValue = tickValue.substring(0, Math.min(tickLabelLen, tickValue.length()) + (tickValue.startsWith("-")?1:0));
 					
 					/* No need to analize zero */
-					if ((this.rangeStart_ + (index * tickRange)) == 0)
+					if ((getRangeStart() + (index * tickRange)) == 0)
 					{
 						tickValue = "0";
 					}

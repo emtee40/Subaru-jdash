@@ -55,12 +55,21 @@ public class ListeningMenuItem extends MenuItem
 		super(caption, checked);
 	}
 	
+	
 	/*******************************************************
 	 * @param l
 	 ********************************************************/
 	public void setActionListener(MenuActionListener l)
 	{
 		this.actionListener_ = l;
+	}
+	
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public MenuActionListener getActionListener()
+	{
+		return this.actionListener_;
 	}
 
 	/********************************************************

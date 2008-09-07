@@ -75,6 +75,15 @@ public class DefaultColorModel implements ColorModel
 
 	}
 	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.profile.color.ColorModel#getName()
+	 ********************************************************/
+	public String getName()
+	{
+		return "Default";
+	}
+	
 	/*******************************************************
 	 * Shorthand convinet method to add colors to the hash.
 	 * @param id

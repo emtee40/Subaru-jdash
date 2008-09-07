@@ -151,7 +151,7 @@ public class ProfileEditControl extends Control
 		{
 			/* We need to re-set the active page each time to force a redraw of the elements */
 			this.profileRenderer_.setActivePage(this.profileRenderer_.getActivePage());
-			this.profileRenderer_.render(g, drawRect, ColorModel.DEFAULT_MODEL, true, true);
+			this.profileRenderer_.render(g, drawRect, ColorModel.DEFAULT_MODEL, true);
 		}
 		catch(Exception e)
 		{

@@ -126,14 +126,14 @@ public class Profile
 		row.addGauge(analogGauge);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 0);
+		analogGauge.setPrecision(0);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 8000);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 9);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);
+		analogGauge.setRangeStart(0);
+		analogGauge.setRangeEnd(8000);
+		analogGauge.setTickCount(9);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(false);
 		
 		/* Page 0 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -141,8 +141,8 @@ public class Profile
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "RPM");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME,  "RPM");
 		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 8000);
+		lineGraphGauge.setRangeStart(0);
+		lineGraphGauge.setRangeEnd(8000);
 		
 
 
@@ -165,14 +165,14 @@ public class Profile
 		row.addGauge(analogGauge);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, "STFT");
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "STFT1");
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 2);
+		analogGauge.setPrecision(2);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);
+		analogGauge.setRangeStart(-30);
+		analogGauge.setRangeEnd(30);
+		analogGauge.setTickCount(5);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(false);
 		
 		/* Page 0 row 1 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -180,8 +180,8 @@ public class Profile
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "ST Fuel Trim %");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "STFT1");
 		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
+		lineGraphGauge.setRangeStart(-30);
+		lineGraphGauge.setRangeEnd(30);
 
 		/* Page 0 row 1 gauge 2 */
 		digitalGauge = new DigitalGauge();
@@ -202,14 +202,14 @@ public class Profile
 		row.addGauge(analogGauge);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "LTFT1");
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 2);
+		analogGauge.setPrecision(2);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, false);
+		analogGauge.setRangeStart(-30);
+		analogGauge.setRangeEnd(30);
+		analogGauge.setTickCount(5);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(false);
 		
 		/* Page 0 row 2 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -217,8 +217,8 @@ public class Profile
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "LT Fuel Trim %");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "LTFT1");
 		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, -30);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 30);
+		lineGraphGauge.setRangeStart(-30);
+		lineGraphGauge.setRangeEnd(30);
 
 		/* Page 0 row 2 gauge 2 */
 		digitalGauge = new DigitalGauge();
@@ -242,13 +242,13 @@ public class Profile
 		row.addGauge(analogGauge);
 		analogGauge.setProperty(DigitalGauge.PROP_STR_LABEL, "RPM");
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 0);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 8000);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 9);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, true);
+		analogGauge.setPrecision(0);
+		analogGauge.setRangeStart(0);
+		analogGauge.setRangeEnd(8000);
+		analogGauge.setTickCount(9);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(true);
 
 		/* Page 1 Row 1 */
 		row = new ProfileRow();
@@ -260,8 +260,8 @@ public class Profile
 		row.setHeightPercent(0.2);
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, null);
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME,  "RPM");
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 8000);
+		lineGraphGauge.setRangeStart(0);
+		lineGraphGauge.setRangeEnd(8000);
 		
 		
 
@@ -278,14 +278,14 @@ public class Profile
 		row.addGauge(analogGauge);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "COOLANT_TEMP_C");
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 0);
+		analogGauge.setPrecision(0);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.4);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 220);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 6);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, true);
+		analogGauge.setRangeStart(0);
+		analogGauge.setRangeEnd(220);
+		analogGauge.setTickCount(6);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(true);
 		
 		/* Page 0 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -293,8 +293,8 @@ public class Profile
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Coolant C");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "COOLANT_TEMP_C");
 //		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 220);
+		lineGraphGauge.setRangeStart(0);
+		lineGraphGauge.setRangeEnd(220);
 		
 
 		/* Page 2 Row 1 */
@@ -307,14 +307,14 @@ public class Profile
 		row.addGauge(analogGauge);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "LOAD");
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_PRECISION, 0);
+		analogGauge.setPrecision(0);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.4);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 100);
-		analogGauge.setIntProperty(AnalogGauge.PROP_I_TICK_COUNT, 5);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICKS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_TICK_LABELS, true);
-		analogGauge.setBooleanProperty(AnalogGauge.PROP_B_INCLUDE_DIGITAL_VALUE, true);
+		analogGauge.setRangeStart(0);
+		analogGauge.setRangeEnd(100);
+		analogGauge.setTickCount(5);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(true);
 		
 		/* Page 0 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -322,8 +322,8 @@ public class Profile
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Load %");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "LOAD");
 //		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_START, 0);
-		lineGraphGauge.setDoubleProperty(AnalogGauge.PROP_D_RANGE_END, 100);
+		lineGraphGauge.setRangeStart(0);
+		lineGraphGauge.setRangeEnd(100);
 
 		
 		return sampleProfile;

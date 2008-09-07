@@ -53,7 +53,7 @@ public class DigitalGauge extends ProfileGauge
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void render(Graphics g, Rect r, ColorModel cm, boolean redrawAll, boolean includingStaticContent)
+	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRepaint)
 	{
 
 		/* Blank the gauge first */

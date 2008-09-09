@@ -24,9 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.ecu.comm.util;
 
-import superwaba.ext.xplat.util.StrTokenizer;
-import waba.util.IntVector;
-import waba.util.Vector;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
 import net.sourceforge.JDash.ecu.param.ECUParameter;
 import net.sourceforge.JDash.ecu.param.special.InternalParam;
 import net.sourceforge.JDash.util.ByteUtil;
@@ -96,13 +96,13 @@ public class ELMUtil
 			System.out.println("Response to CEL code request is [" + celResponse + "]");
 			
 			/* Convert to an array of Strings */
-			StrTokenizer strTok = new StrTokenizer(celResponse, " ");
-			Vector dtcVector = new Vector();
+			StringTokenizer strTok = new StringTokenizer(celResponse, " ");
+			ArrayList dtcVector = new ArrayList();
 			while (strTok.hasMoreTokens())
 			{
 				dtcVector.add(strTok.nextToken().toUpperCase());
 			}
-			String[] responseValues = (String[])dtcVector.items;
+			String[] responseValues = (String[])dtcVector.toArray(new String[0]);
 			
 			
 			/* We should get a 43 back */
@@ -299,7 +299,7 @@ public class ELMUtil
 		}
 
 		/* We'll put the resuting int values in here */
-		IntVector responseValues = new IntVector(0);
+		int[] responseValues = new int[cleanByteCount];
 		
 		/* Process every pair of bytes */
 		for (int index = 0; index < cleanByteCount; index+=2)
@@ -334,10 +334,9 @@ public class ELMUtil
 				i += (int)cleanResponse[index+1] - ((int)'0');
 			}
 			
-			responseValues.addElement(i);
 		}
 		
-		return responseValues.items;
+		return responseValues;
 	}
 	
 

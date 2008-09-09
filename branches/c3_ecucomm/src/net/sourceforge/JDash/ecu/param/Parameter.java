@@ -24,10 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ******************************************************/
 package net.sourceforge.JDash.ecu.param;
 
-import waba.util.Vector;
-
-
-//import java.util.ArrayList;
+import java.util.ArrayList;
 
 
 /******************************************************
@@ -57,7 +54,7 @@ public abstract class Parameter implements DoubleParameter
 	
 	
 	/* The linked listeners */
-	private Vector eventListeners_ = new Vector();
+	private ArrayList eventListeners_ = new ArrayList();
 	
 	
     private boolean isEnabled_ = true;
@@ -94,7 +91,7 @@ public abstract class Parameter implements DoubleParameter
 	 *******************************************************/
 	public void removeEventListener(ParameterEventListener l)
 	{
-		this.eventListeners_.removeElement(l);
+		this.eventListeners_.remove(l);
 	}
 	
 	/*******************************************************
@@ -105,7 +102,7 @@ public abstract class Parameter implements DoubleParameter
 	{
 		for (int index = 0; index < this.eventListeners_.size(); index++)
 		{
-			ParameterEventListener l = (ParameterEventListener)this.eventListeners_.items[index];
+			ParameterEventListener l = (ParameterEventListener)this.eventListeners_.get(index);
 			l.valueChanged(this);
 		}
 	}

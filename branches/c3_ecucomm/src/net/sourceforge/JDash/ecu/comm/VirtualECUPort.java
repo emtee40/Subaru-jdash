@@ -202,8 +202,8 @@ public class VirtualECUPort extends BasePort {
 		return pipeECU2CommInput;
 	}
 	synchronized public OutputStream getOutputStream() {
-		//return pipeComm2ECUOutput;
-        return streamFromPC;
+		return pipeComm2ECUOutput;
+        //return streamFromPC;
 	}
 
 
@@ -211,8 +211,8 @@ public class VirtualECUPort extends BasePort {
 		return pipeComm2ECUInput;
 	}
 	synchronized public OutputStream getECUOutputStream() {
-		//return pipeECU2CommOutput;
-        return streamFromECU;
+        return pipeECU2CommOutput;
+        //return streamFromECU;
 	}
 
     //

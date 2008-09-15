@@ -22,9 +22,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  ******************************************************/
 package net.sourceforge.JDash.ecu.comm;
-import java.io.InputStream;
-import java.io.OutputStream;
+import net.sourceforge.JDash.logger.StreamTraceLog;
+import java.io.*;
+/*
+ import java.io.OutputStream;
 import java.io.IOException;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+*/
 
 /**
  * BasePort is a base class for classes that represent the interface of Java to
@@ -34,6 +39,14 @@ import java.io.IOException;
  */
 public abstract class BasePort {
     protected boolean bIsOpen = false;
+    
+    protected StreamTraceLog strace = new StreamTraceLog();
+    
+    BasePort()
+    {
+        
+    }
+    
 	/*******************************************************
 	 * Override
 	 * @see java.lang.Object#finalize()
@@ -44,7 +57,7 @@ public abstract class BasePort {
 		close();
 	}
 
-	
+ 
 	/*******************************************************
 	 * Close any resources associated with this class
 	 * @throws IOException

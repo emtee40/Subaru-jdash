@@ -21,8 +21,10 @@ package net.sourceforge.JDash.ecu.comm;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import net.sourceforge.JDash.logger.StreamTraceLog;
 
 public class CobbSerialPort extends BasePort {
+    public static final int DEBUGLEVEL = 0;
 
     // interfaces to the native Cobb driver methods.
     private native static int  nativeStart(int timeout);
@@ -46,6 +48,9 @@ public class CobbSerialPort extends BasePort {
 	
     public CobbSerialPort() 
 	{
+        super();
+        // TODO: wire in something that lets you enable or
+        // disable this trace.
 		nSessionID = -1;
     }
 
@@ -56,23 +61,47 @@ public class CobbSerialPort extends BasePort {
      * @return true on success, false on failure
      */
     public boolean open(int timeout) throws IOException {
+	    String errmsg = "";
 		nSessionID = nativeStart(timeout);
-        
+
+		// Interpret error codes
+		switch (nSessionID) {
+		case -1: errmsg = "Could not open COBBdriver.dll"; break;
+		case -2: errmsg = "Could not locate all necessary routines in COBBdriver.dll.\n" + 
+		                  "COBBdriver.dll and cobbjni.dll may be out of sync."; 
+		         break;
+		case -3: errmsg = "Port driver couldn't open a session. \n" +
+				          "Is the hardware dongle connected?";
+		         break;
+		default: if (nSessionID < 0)
+			     errmsg = "Unknown error " + nSessionID + ".";
+		         break;	
+		}
+		
         if (nSessionID < 0) 
-            throw new IOException(
-                    "Couldn't open Cobb USB Driver! Error " 
-                    + nSessionID);
+            throw new IOException("CobbSerialPort error:\n" + errmsg );
+
         
 		istream = new CobbSerialInputStream(this);
 		ostream = new CobbSerialOutputStream(this);
-		
+        
+        strace.open("cobbserialport.log");
+        ((CobbSerialInputStream)istream).strace = strace;
+        ((CobbSerialOutputStream)ostream).strace = strace;
+        
+        
+        
+		if (DEBUGLEVEL >= 2) 
+            System.out.println("CobbSerialPort::open() returning code " + nSessionID);
 		return (nSessionID < 0);
     }
 
+	@Override
     public boolean open() throws IOException
     {
         return open(0);
     }
+	@Override
 	public boolean isOpen() {
 		return nSessionID >= 0;
 	}
@@ -85,8 +114,14 @@ public class CobbSerialPort extends BasePort {
      * @return true
      */
     public boolean close() {
+		if (DEBUGLEVEL >= 2) 
+            System.out.println("CobbSerialPort::close()");
 		nativePurge(nSessionID);
+		if (DEBUGLEVEL >= 3) 
+            System.out.println("CobbSerialPort::close() finished purge");
 		nativeStop(nSessionID);
+		if (DEBUGLEVEL >= 3) 
+            System.out.println("CobbSerialPort::close() finished stop");
 		nSessionID = -1;
 		return true;
     }
@@ -109,11 +144,15 @@ public class CobbSerialPort extends BasePort {
     static public class CobbSerialInputStream extends InputStream {
 
 		// Pointer to the source port
-		CobbSerialPort cport;
+		CobbSerialPort cport = null;
+        StreamTraceLog strace = null;
+        
+        private int _avail;
 
 		CobbSerialInputStream(CobbSerialPort cstream) 
 		{
 			this.cport = cstream;
+            _avail = 0;
 		}
 
 		public int read() throws IOException 
@@ -126,15 +165,39 @@ public class CobbSerialPort extends BasePort {
 		@Override
 		public synchronized int read(byte[] b, int off, int len) throws IOException 
 		{
+       		if (DEBUGLEVEL >= 3) 
+                System.out.println("CobbSerialInputStream::read(off=" + off + "; len=" + len + ")");
 			checkPortIsOpen(cport);
 			int n = nativeRead(cport.nSessionID, b, off, len);
-			return n;
+       		if (DEBUGLEVEL >= 2) 
+                System.out.println("CobbSerialInputStream::read(off=" + off + "; len=" + len + ") returned "+n+ " bytes");
+            
+            
+            if (strace != null)
+            {
+                strace.logDataEvent("ECU2PC", b, off, len);
+            }
+            
+            _avail -= n;
+
+            return n;
 		} // end read()
+        
+        @Override
+        public synchronized int available()
+        {
+            // Hmm... how do we figure out how many bytes are
+            // available on the input stream?
+            int n = _avail++ - 1;
+            return (n < 0) ? 0 : n;
+        }
+        
     } // end CobbSerialInputStream
 
     static public class CobbSerialOutputStream extends OutputStream {
 
-		CobbSerialPort cport;
+		CobbSerialPort cport = null;
+        StreamTraceLog strace = null;
 
 
 		CobbSerialOutputStream(CobbSerialPort cport) 
@@ -166,6 +229,8 @@ public class CobbSerialPort extends BasePort {
 		public synchronized void write(byte[] b, int off, int len) throws IOException 
 		{
 			checkPortIsOpen(cport);
+    		if (DEBUGLEVEL >= 2) 
+            System.out.println("CobbSerialOutputStream::write(" + len + " bytes)");
 
 			int n = nativeWrite(cport.nSessionID, b, off, len);
 			if (n != len) 
@@ -174,12 +239,23 @@ public class CobbSerialPort extends BasePort {
 						"Not all data was written to CobbSerialPort (only " 
 						+ n + " bytes)");
 			}
+
+            if (strace != null)
+            {
+                strace.logDataEvent("PC2ECU", b, off, len);
+            }
+            
+            if (DEBUGLEVEL >= 2) 
+            System.out.println("CobbSerialOutputStream::write() wrote " + n + " bytes");
 		}
 
 		@Override
 		public synchronized void flush() throws IOException 
 		{
+    		if (DEBUGLEVEL >= 2) 
+            System.out.println("CobbSerialOutputStream::flush()");
 			checkPortIsOpen(cport);
+            // Sort of assuming that "purge" means the same thing as "flush"
 			nativePurge(cport.nSessionID);
 		}
     } // end CobbSerialOutputStream

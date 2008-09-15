@@ -211,7 +211,7 @@ public class SSMOBD2VirtualECU extends VirtualECU {
                                 "SSMOBD2VirtualECU got into" +
                                 "an unexpected state! state=" + state);
                       
-                };
+                }
                 os.flush();
                 
 

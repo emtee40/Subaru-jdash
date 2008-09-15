@@ -56,7 +56,7 @@ import net.sourceforge.JDash.util.ByteUtil;
 public class SSMOBD2ProtocolHandler
 // extends ProtocolHandler
 {
-    public static final int DEBUGLEVEL = 1;
+    public static final int DEBUGLEVEL = 0;
 	// GN: I think these will probably end up being in a generic ProtocolHandler class
 
 	public static final int STATE_NOT_READY = 1;
@@ -144,11 +144,12 @@ public class SSMOBD2ProtocolHandler
 
 	void protocolInit() throws Exception { //public List<Parameter> init(ParameterRegistry reg, InitListener initListener) throws Exception {
 
-						//super.init(reg, initListener);
+        //super.init(reg, initListener);
 
 		/* Setup the init packet. DST=Subaru ECU(0x10), SRC=App(0xF0),
            Command=0xBF */
         SSMPacket txPacket = SSMPacket.packetInit();
+        SSMPacket rxPacket;
 
 		/*
 		 * Send the init packet. The datalength index value for the RX packet is the length of the
@@ -160,9 +161,22 @@ public class SSMOBD2ProtocolHandler
         System.out.println("SSMOBD2PH::Sending init packet.");
         sendPacket(txPacket, true);
         System.out.println("SSMOBD2PH::Sent init packet.");
-		SSMPacket rxPacket = receivePacket(0);
         System.out.println("SSMOBD2PH::waiting for init packet echo.");
 
+        
+        // GN: I have to chomp this packet.  My ECU echos the packet that
+        // I just sent to it.  Maybe
+        // I need to conditionally consume it (if it's seen to be an echo)?
+
+        rxPacket = receivePacket(0);
+        System.out.println(rxPacket.toString());
+        
+        // GN: The corresponding read hasn't yet been added to the
+        // virtualecu.
+        //rxPacket = receivePacket(0);
+
+        //TODO: verify the echo'd init packet before verifying the 
+        // ECU's response packet?
 
         /* New: The received packet header should have DST=APP(0xF0) and
          * SRC=ECU(0x10), and a data payload, of which we take bytes 2-9 as
@@ -184,13 +198,13 @@ public class SSMOBD2ProtocolHandler
                     " bytes. Received: " + rxPacket.toString());
 		}
 
-        System.out.println("SSMOBD2PH verified init packet.");
 
 		/* Ecu ID */
 		this.ecuId_ = String.format("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
 				rxPacket.getData()[1], rxPacket.getData()[2], rxPacket.getData()[3], rxPacket
 						.getData()[4], rxPacket.getData()[5], rxPacket.getData()[6], rxPacket
 						.getData()[7], rxPacket.getData()[8]);
+        System.out.println("SSMOBD2PH verified init packet. ecuID = " + ecuId_);
 
 		/*
 		 * Map the init results bitmask to our known values. For each defined ecu param
@@ -235,7 +249,7 @@ public class SSMOBD2ProtocolHandler
 
 	private int flushInputStream(InputStream is) throws IOException {
 		/* Read any stale bytes on the input stream */
-        if (DEBUGLEVEL > 1) 
+        if (DEBUGLEVEL >= 2) 
             System.out.println("Flushing inputstream");
 		if (is.available() != 0)
 		{
@@ -246,8 +260,12 @@ public class SSMOBD2ProtocolHandler
 			} catch (InterruptedException e) {}
 			int nAvailable = is.available();
 			is.skip(nAvailable);
+            if (DEBUGLEVEL >= 2) 
+                System.out.println("Flushed "+nAvailable+" bytes");
 			return nAvailable;
 		}
+        if (DEBUGLEVEL >= 2) 
+            System.out.println("Flushed stream.");
 		return 0;
 	}
 
@@ -436,8 +454,8 @@ public class SSMOBD2ProtocolHandler
             if (! rxPacket.verifyChecksum())
             {
                 throw new IOException(
-                        "Received SSM packet has bad checksum.  checksum=" + rxPacket.calcChecksum() +
-                        " but should be " + rxPacket.getChecksum() + "\n" + rxPacket);
+                        "Received SSM packet has bad checksum.  checksum=" + rxPacket.getChecksum() +
+                        " but should be " + rxPacket.calcChecksum() + "\n" + rxPacket);
             }
 
             // Return the RX packet
@@ -1541,10 +1559,26 @@ public class SSMOBD2ProtocolHandler
 		public void write(OutputStream os) throws IOException
 		{
 			/* Send the TX packet */
-			os.write(getHeader());
+            byte[] pdata = new byte[length()];
+            byte[] temp;
+            int i=0,j=0;
+            
+            temp = getHeader();
+            for (i=0; i < temp.length; i++) pdata[j++] = temp[i];
+            
+            pdata[j++] = (byte) getDataLength();
+            
+            temp = getData();
+            for (i=0; i < temp.length; i++) pdata[j++] = temp[i];
+
+            pdata[j++] = getChecksum();
+            if (DEBUGLEVEL >= 1) System.out.println("Writing packet: " + pdata.length + " bytes");
+            os.write(pdata);
+/*			os.write(getHeader());
 			os.write((byte)getDataLength());
 			os.write(getData());
 			os.write(getChecksum());
+ */
 		}
 
         /**
@@ -1569,7 +1603,8 @@ public class SSMOBD2ProtocolHandler
                 ((new Date()).getTime() + timeout)
                 :
                 0;
-
+            if (DEBUGLEVEL >= 2) System.out.println("Waiting for input for " + timeout + " ms.");
+            
             waitForInput(is, (SSM_HEADER_LEN+1), tlimit);
 
 			is.read(fieldHeader, 0, SSM_HEADER_LEN); // header

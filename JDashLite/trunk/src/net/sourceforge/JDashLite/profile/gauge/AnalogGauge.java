@@ -46,23 +46,28 @@ public class AnalogGauge extends ProfileGauge
 {
 
 	
-	private static final String PROP_D_RANGE_START 				= "range-start";
-	private static final String PROP_D_RANGE_END				= "range-end";
-	private static final String PROP_I_TICK_COUNT 				= "tick-count";
-	private static final String PROP_B_INCLUDE_TICKS 			= "include-ticks";
-	private static final String PROP_B_INCLUDE_TICK_LABELS		= "include-tick-labels";
-	private static final String PROP_B_INCLUDE_DIGITAL_VALUE	= "include-digital-value";
-	private static final String PROP_I_PRECISION				= "precision";
+	protected static final String PROP_D_RANGE_START 				= "range-start";
+	protected static final String PROP_D_RANGE_END					= "range-end";
+	protected static final String PROP_I_TICK_COUNT 				= "tick-count";
+	protected static final String PROP_B_INCLUDE_TICKS 				= "include-ticks";
+	protected static final String PROP_B_INCLUDE_TICK_LABELS		= "include-tick-labels";
+	protected static final String PROP_B_INCLUDE_DIGITAL_VALUE		= "include-digital-value";
+	protected static final String PROP_I_PRECISION					= "precision";
 
 	
 	protected static final double OUTER_RING_RADIUS = 0.48;
-	private static final double OUTER_POINT_RADIUS = 0.46;
-	private static final double INNTER_POINT_RADIUS = 0.40;
-	private static final double NEEDLE_WIDTH = 0.045;
+	protected static final double OUTER_POINT_RADIUS = 0.46;
+	protected static final double INNTER_POINT_RADIUS = 0.40;
+	protected static final double NEEDLE_WIDTH = 0.045;
 	
-	protected static final double MINIMUM_DEGREE = 50;
-	protected static final double MAXIMUM_DEGREE = 360 - 50;
+	/* The Angle in degrees of the MIN position.  Default is 50 */
+	protected double minimumAngle_ = 50;
 	
+	/* The angle in degrees of the MAX position.  Default is -50 */
+	protected double maximumAngle_ = 360 - 50;
+
+	/* The pivot point */
+//	protected Coord piviotCoord_ = null;
 
 //	/* The range starting value of the ecu value */
 //	private double cachedRangeStart_ = 0.0;
@@ -219,19 +224,29 @@ public class AnalogGauge extends ProfileGauge
 	 ********************************************************/
 	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRepaint)
 	{
+		Coord pivot = new Coord(r.x + (r.width / 2), r.y + (r.height / 2));
+		render(g, r, cm, forceRepaint, pivot);
+	}
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
+	 ********************************************************/
+	public void render(Graphics g, Rect r, ColorModel cm, boolean forceRepaint, Coord pivot)
+	{
 
 		/* Generate the static image */
-		if (r.equals(this.currentRect_) == false || cm != this.currentColorModel_)
+		if (r.equals(this.currentRect_) == false || cm != this.currentColorModel_ || forceRepaint)
 		{
 			this.staticContent_ = new Image(r.width, r.height);
-			generateStaticImage(cm, (int)(Math.min(r.width, r.height) * 0.04));
+			generateStaticImage(cm, (int)(Math.min(r.width, r.height) * 0.04), new Coord(pivot.x - r.x, pivot.y - r.y));
 		}
 		
 		/* Now, the dynamic image */
 		if (this.previousValue_ != getECUParameter().getValue() || forceRepaint || r.equals(this.currentRect_) == false || cm != this.currentColorModel_)
 		{
 			g.drawImage(this.staticContent_, r.x, r.y);
-			renderDynamic(g, r, cm);
+			renderDynamic(g, r, cm, pivot);
 		}
 
 		this.currentRect_ = r;
@@ -244,12 +259,12 @@ public class AnalogGauge extends ProfileGauge
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.profile.gauge.ProfileGauge#render(waba.fx.Graphics, waba.fx.Rect, net.sourceforge.JDashLite.ecu.comm.ECUParameter, net.sourceforge.JDashLite.profile.color.ColorModel, boolean)
 	 ********************************************************/
-	public void renderDynamic(Graphics g, Rect r, ColorModel cm)
+	public void renderDynamic(Graphics g, Rect r, ColorModel cm, Coord pivot)
 	{
 		
 		/* Calculate a few common needed values */
-		int centerX = r.x + (r.width / 2);
-		int centerY = r.y + (r.height / 2);
+//		int centerX = r.x + (r.width / 2);
+//		int centerY = r.y + (r.height / 2);
 		int needleLength = (int)((Math.min(r.width, r.height) * OUTER_POINT_RADIUS) - (OUTER_POINT_RADIUS - INNTER_POINT_RADIUS));
 		int needleWidth = (int)(needleLength * NEEDLE_WIDTH);
 		needleWidth = Math.max(3, needleWidth);
@@ -260,7 +275,7 @@ public class AnalogGauge extends ProfileGauge
 //			generateStaticImage(this.staticContent_.getGraphics(), new Rect(0, 0, r.width, r.height), cm, (int)(needleWidth * 1.5));
 //			this.lastRect_ = r;
 //		}
-//
+
 		/* Draw the static image */
 		g.drawImage(this.staticContent_, r.x, r.y);
 
@@ -287,14 +302,14 @@ public class AnalogGauge extends ProfileGauge
 			valueAngle = valueAngle / (getRangeEnd() - getRangeStart());
 			
 			/* Now, calulcate the angle given the start and end angle */
-			valueAngle = MINIMUM_DEGREE + ((MAXIMUM_DEGREE - MINIMUM_DEGREE) * valueAngle);
+			valueAngle = this.minimumAngle_ + ((this.maximumAngle_ - this.minimumAngle_) * valueAngle);
 			
 			/* Define the needle.  Origin pointing straight down */
 			Coord[] needlePoints = new Coord[] {new Coord(needleWidth / 2 * -1,needleLength / 8 * -1), new Coord(needleWidth / 2 * -1, needleLength), new Coord(needleWidth / 2, needleLength), new Coord(needleWidth / 2, needleLength / 8 * -1)};
 			
 			/* Rotate and translate it the calculated angle. */
 			AffineTransform trans = AffineTransform.rotateInstance(Math.toRadians(valueAngle));
-			trans.addTranslate(centerX, centerY);
+			trans.addTranslate(pivot.x, pivot.y);
 			
 			/* Apply the transform */
 			trans.apply(needlePoints);
@@ -305,7 +320,7 @@ public class AnalogGauge extends ProfileGauge
 			g.fillPolygon(ProfileRenderer.toXArray(needlePoints), ProfileRenderer.toYArray(needlePoints), needlePoints.length);
 			
 			/* Draw the nub */
-			g.fillCircle(centerX, centerY, (int)(needleWidth * 1.5));
+			g.fillCircle(pivot.x, pivot.y, (int)(needleWidth * 1.5));
 		}
 		
 		
@@ -318,7 +333,7 @@ public class AnalogGauge extends ProfileGauge
 			g.setFont(this.currentValueFont_);
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
 			String val = Convert.toString(getECUParameter().getValue(), getPrecision());
-			g.drawText(val, centerX - (this.currentValueFont_.fm.getTextWidth(val) / 2), (centerY + (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent)));
+			g.drawText(val, pivot.x - (this.currentValueFont_.fm.getTextWidth(val) / 2), (pivot.y + (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent)));
 	//		g.drawText(val, centerX - (this.currentValueAndLabelFont_.fm.getTextWidth(val) / 2), centerY + needleWidth * 2);
 		}
 			
@@ -332,7 +347,7 @@ public class AnalogGauge extends ProfileGauge
 	 * @param p
 	 * @param cm
 	 *******************************************************/
-	private void generateStaticImage(ColorModel cm, int tickLength)
+	private void generateStaticImage(ColorModel cm, int tickLength, Coord pivot)
 	{
 //		/* Create the static image first */
 //		if (this.staticContent_ == null)
@@ -358,10 +373,11 @@ public class AnalogGauge extends ProfileGauge
 		
 		/* Calculate a few common needed values */
 		Font tickFont = ProfileRenderer.findFontBestFitHeight(tickLength * 2, false);
-		int centerX = r.x + (r.width / 2);
-		int centerY = r.y + (r.height / 2);
+//		int centerX = r.x + (r.width / 2);
+//		int centerY = r.y + (r.height / 2);
 		int mainRadius = (int)(Math.min(r.width, r.height) * OUTER_RING_RADIUS);
-		
+
+
 		/* setup the current value font.  It's the same as the label font. */
 		this.currentValueFont_ = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), Convert.toString(getRangeEnd(), getPrecision()), false);
 //		Font labelFont = ProfileRenderer.findFontBestFitWidth((int)(mainRadius * 0.80), getLabel(), false);
@@ -375,9 +391,9 @@ public class AnalogGauge extends ProfileGauge
 		
 		/* Draw the outer circle */
 		g.setBackColor(cm.get(ColorModel.ANALOG_GAUGE_FACE));
-		g.fillCircle(centerX, centerY, mainRadius);
+		g.fillCircle(pivot.x, pivot.y, mainRadius);
 		g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_RING));
-		g.drawCircle(centerX, centerY, mainRadius);
+		g.drawCircle(pivot.x, pivot.y, mainRadius);
 	
 		
 		/* Calculate the tick mark range */
@@ -423,10 +439,10 @@ public class AnalogGauge extends ProfileGauge
 				Coord tickPoint2 = new Coord(0, tickPoint1.y - tickLength);       /* inner tip of tick */
 				Coord tickPoint3 = new Coord(0, tickPoint2.y - (int)(tickLength * 1.5));  /* Center point of tick value */
 				
-				double tickAngle = MINIMUM_DEGREE + (((MAXIMUM_DEGREE - MINIMUM_DEGREE) / (double)(getTickCount() - 1.0)) * index);
+				double tickAngle = this.minimumAngle_ + (((this.maximumAngle_ - this.minimumAngle_) / (double)(getTickCount() - 1.0)) * index);
 				
 				AffineTransform tickTxfm = AffineTransform.rotateInstance(Math.toRadians(tickAngle));
-				tickTxfm.addTranslate(centerX, centerY);
+				tickTxfm.addTranslate(pivot.x, pivot.y);
 				tickTxfm.apply(tickPoint1);
 				tickTxfm.apply(tickPoint2);
 				tickTxfm.apply(tickPoint3);
@@ -465,7 +481,7 @@ public class AnalogGauge extends ProfileGauge
 		{
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_TICK_MARK));
 			//g.drawText(getLabel(), centerX - (labelFont.fm.getTextWidth(getLabel()) / 2), centerY - tickLength - labelFont.fm.height);
-			g.drawText(label, centerX - (this.currentValueFont_.fm.getTextWidth(label) / 2), (centerY - (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent) / 3));
+			g.drawText(label, pivot.x - (this.currentValueFont_.fm.getTextWidth(label) / 2), (pivot.y - (mainRadius / 2)) - ((this.currentValueFont_.fm.height - this.currentValueFont_.fm.descent) / 3));
 		}
 
 	}

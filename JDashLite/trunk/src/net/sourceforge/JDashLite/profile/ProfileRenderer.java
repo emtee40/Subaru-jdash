@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.profile;
 
+import net.sourceforge.JDashLite.Cleanable;
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolEventListener;
 import net.sourceforge.JDashLite.ecu.comm.ProtocolHandler;

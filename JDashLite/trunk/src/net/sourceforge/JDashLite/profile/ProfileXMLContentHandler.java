@@ -29,6 +29,7 @@ import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
 import net.sourceforge.JDashLite.profile.gauge.LEDGauge;
 import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
 import net.sourceforge.JDashLite.profile.gauge.ProfileGauge;
+import net.sourceforge.JDashLite.profile.gauge.SweepAnalogGauge;
 import superwaba.ext.xplat.xml.AttributeList;
 import superwaba.ext.xplat.xml.ContentHandler;
 import superwaba.ext.xplat.xml.XmlReader;
@@ -66,6 +67,7 @@ public class ProfileXMLContentHandler implements ContentHandler
 	public static final String VALUE_LINE_GRAPH		= "line-graph";
 	public static final String VALUE_ANALOG			= "analog";
 	public static final String VALUE_LED			= "led";
+	public static final String VALUE_SWEEP			= "sweep";
 	
 	private static int TAG_PROFILE 	= 0;
 	private static int TAG_PAGE 	= 0;
@@ -201,6 +203,10 @@ public class ProfileXMLContentHandler implements ContentHandler
 		else if (VALUE_LED.equals(type))
 		{
 			gauge = new LEDGauge();
+		}
+		else if (VALUE_SWEEP.equals(type))
+		{
+			gauge = new SweepAnalogGauge();
 		}
 		else
 		{
@@ -443,8 +449,15 @@ public class ProfileXMLContentHandler implements ContentHandler
 			addTagAttribute(sb, ATTR_TYPE, VALUE_LINE_GRAPH);
 		}
 		
-		/* Analog */
-		if (gauge instanceof AnalogGauge)
+		
+		/* Sweep */
+		if (gauge instanceof SweepAnalogGauge)
+		{
+			addTagAttribute(sb, ATTR_TYPE, VALUE_SWEEP);
+		}
+		
+		/* Analog, but NOT sweep */
+		if (gauge instanceof AnalogGauge && !(gauge instanceof SweepAnalogGauge))
 		{
 			addTagAttribute(sb, ATTR_TYPE, VALUE_ANALOG);
 		}

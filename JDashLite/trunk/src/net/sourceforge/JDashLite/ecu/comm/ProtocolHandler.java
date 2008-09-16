@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.ecu.comm;
 
+import net.sourceforge.JDashLite.Cleanable;
 import waba.io.SerialPort;
 
 /*********************************************************
@@ -34,7 +35,7 @@ import waba.io.SerialPort;
  * and initialize the serial interface, and also to close it.
  *
  *********************************************************/
-public interface ProtocolHandler 
+public interface ProtocolHandler extends Cleanable
 {
 	
 	public static final String E_RPM = "RPM";

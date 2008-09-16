@@ -60,6 +60,21 @@ public abstract class AbstractProtocol implements ProtocolHandler
 		
 	}
 	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.Cleanable#clean()
+	 ********************************************************/
+	public void clean()
+	{
+		for (int index = 0; index < getSupportedParameters().length; index++)
+		{
+			ECUParameter p = getSupportedParameters()[index];
+			p.clean();
+		}
+		
+	}
+
+	
 	/********************************************************
 	 * @param stage
 	 * @param mode

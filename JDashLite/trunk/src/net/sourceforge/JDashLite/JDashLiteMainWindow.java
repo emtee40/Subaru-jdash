@@ -660,7 +660,6 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
 			
 			/* Add the profile render event listener.  This forces refreshes when the protocol handler fetches a batch */
-//				this.protocolHandler_.addProtocolEventListener(this.profileRenderer_.getEventAdapter());
 			this.protocolHandler_.addProtocolEventListener(this);
 			
 			
@@ -839,7 +838,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 		public void protocolStarted() {repaintNow();};
 		public void protocolStopped() {repaintNow();};
 		public void initStarted() {repaintNow();};
-		public void initFinished() {this.statusMessage_ = null; repaintNow();};
+		public void initFinished() {this.statusMessage_ = null; forceRepaint();};
 		public void initStatus(String statusMessage) {this.statusMessage_ = statusMessage; repaintNow();};
 		public void beginParameterBatch(int count) {repaintNow();};
 		public void parameterFetched(ECUParameter p) {repaintNow();};

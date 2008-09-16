@@ -28,6 +28,7 @@ import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
 import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
 import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
+import net.sourceforge.JDashLite.profile.gauge.SweepAnalogGauge;
 import waba.util.Vector;
 
 /*********************************************************
@@ -109,6 +110,7 @@ public class Profile
 		AnalogGauge analogGauge = null;
 		DigitalGauge digitalGauge = null;
 		LineGraphGauge lineGraphGauge = null;
+		SweepAnalogGauge sweepGauge = null;
 //		LEDGauge ledGauge = null;
 		
 		/* Page 0 */
@@ -122,25 +124,25 @@ public class Profile
 
 		
 		/* Page 0 row 0 gauge 0 */
-		analogGauge = new AnalogGauge();
-		row.addGauge(analogGauge);
-		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
-		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
-		analogGauge.setPrecision(0);
-		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
-		analogGauge.setRangeStart(0);
-		analogGauge.setRangeEnd(8000);
-		analogGauge.setTickCount(9);
-		analogGauge.setIncludeTicks(true);
-		analogGauge.setIncludeTickLabels(true);
-		analogGauge.setIncludeDigitalValue(false);
+		sweepGauge = new SweepAnalogGauge();
+		row.addGauge(sweepGauge);
+		sweepGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		sweepGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
+		sweepGauge.setPrecision(0);
+		sweepGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.45);
+		sweepGauge.setRangeStart(0);
+		sweepGauge.setRangeEnd(8000);
+		sweepGauge.setTickCount(9);
+		sweepGauge.setIncludeTicks(true);
+		sweepGauge.setIncludeTickLabels(true);
+		sweepGauge.setIncludeDigitalValue(false);
 		
 		/* Page 0 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "RPM");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME,  "RPM");
-		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.35);
 		lineGraphGauge.setRangeStart(0);
 		lineGraphGauge.setRangeEnd(8000);
 		

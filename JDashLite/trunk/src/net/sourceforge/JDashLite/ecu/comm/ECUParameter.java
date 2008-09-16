@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.ecu.comm;
 
+import net.sourceforge.JDashLite.Cleanable;
 import waba.sys.Vm;
 import waba.util.Vector;
 
@@ -32,7 +33,7 @@ import waba.util.Vector;
  * Parameters handled by JDash deal in double values.
  *
  *********************************************************/
-public abstract class ECUParameter
+public abstract class ECUParameter implements Cleanable
 {
 	public static final String RATE = "RATE";
 	
@@ -53,6 +54,16 @@ public abstract class ECUParameter
 		this.name_ = name;
 	}
 
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.Cleanable#clean()
+	 ********************************************************/
+	public void clean()
+	{
+		this.valueChangedListeners_.removeAllElements();
+		
+	}	
 	
 	/********************************************************
 	 * An enabled parameter is one that is ready and willing

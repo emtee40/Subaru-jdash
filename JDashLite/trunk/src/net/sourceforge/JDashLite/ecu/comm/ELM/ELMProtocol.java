@@ -63,7 +63,7 @@ public class ELMProtocol extends AbstractProtocol
 	private static final int STAGE_STOP				= 0;
 	private static final int STAGE_OPEN_PORT		= 10;
 	private static final int STAGE_RESET 			= 20;
-	private static final int STAGE_2ND_RESET 		= 25;
+//	private static final int STAGE_2ND_RESET 		= 25;
 	private static final int STAGE_ECHO_OFF 		= 30;
 	private static final int STAGE_LINEFEED_OFF		= 40;
 	private static final int STAGE_GET_PIDS 		= 50;
@@ -155,6 +155,7 @@ public class ELMProtocol extends AbstractProtocol
 		
 	}
 	
+	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#connect()
@@ -167,6 +168,22 @@ public class ELMProtocol extends AbstractProtocol
 		
 	}
 	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.ecu.comm.AbstractProtocol#disconnect()
+	 ********************************************************/
+	public boolean disconnect()
+	{
+		/* Read any pending data */
+		if (getSerialPort() != null && getSerialPort().isOpen())
+		{
+			resetReadBuffer();
+			readSeralData();
+		}
+		
+		return super.disconnect();
+	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
@@ -221,12 +238,12 @@ public class ELMProtocol extends AbstractProtocol
 				break;
 				
 				case STAGE_RESET:
-					doResetTask(STAGE_RESET);
+					doResetTask();
 				break;
 				
-				case STAGE_2ND_RESET:
-					doResetTask(STAGE_2ND_RESET);
-				break;
+//				case STAGE_2ND_RESET:
+//					doResetTask(STAGE_2ND_RESET);
+//				break;
 				
 				case STAGE_ECHO_OFF:
 					doEchoOffTask();
@@ -293,10 +310,19 @@ public class ELMProtocol extends AbstractProtocol
 				getSerialPort().writeTimeout = READ_WRITE_TIMEOUT_MS;
 			
 				setMode(MODE_RX);
+				
+				/* Put a 1 second delay into the read operation */
+				setOperationTimer(1000);
 			break;
 
 			/* Read any stale data in the serial port buffer */
 			case MODE_RX:
+				/* We want to wait at least on second after opening the port */
+				if (isOperationTimerExpired() == false)
+				{
+					return;
+				}
+				
 				readSeralData();
 				ErrorLog.info("Cleaned out " + this.responseBufferOffset_ + " stale bytes from serial buffer");
 				
@@ -314,20 +340,23 @@ public class ELMProtocol extends AbstractProtocol
 	/*******************************************************
 	 * @param stage
 	 ********************************************************/
-	private void doResetTask(int stage) throws InvalidStageModeException
+	private void doResetTask() throws InvalidStageModeException
 	{
 		switch(getMode())
 		{
 			case MODE_READY:
-				fireInitStatusEvent("Resetting ELM" + (stage == STAGE_2ND_RESET?"..":"."));
+				//fireInitStatusEvent("Resetting ELM" + (stage == STAGE_2ND_RESET?"..":"."));
+				fireInitStatusEvent("Resetting ELM");
 				setMode(MODE_TX);
 			break;
 			
 			case MODE_TX:
+				readSeralData();
 				resetReadBuffer();
 				sendELMCommand(AT_CMD_RESET);
 				setMode(MODE_RX);
 				setOperationTimer(INIT_TIMEOUT_MS);
+				setMode(MODE_RX);
 			break;
 			
 			case MODE_RX:
@@ -336,37 +365,27 @@ public class ELMProtocol extends AbstractProtocol
 				/* Timeout ? */
 				if (isOperationTimerExpired())
 				{
-					setStage(getStage()==STAGE_RESET?STAGE_2ND_RESET:STAGE_STOP);
-					setMode(MODE_READY);
 					fireInitFinishedEvent();
 					ErrorLog.info("ELM reset timed out.");
-					if (stage == STAGE_2ND_RESET)
-					{
-						throw new RuntimeException("Init Failure");
-					}
+					throw new RuntimeException("ELM Reset Timed Out");
 				}
 				
+//				setStageAndMode(STAGE_ECHO_OFF, MODE_READY);
+//				fireInitFinishedEvent();
+
+				
 				/* Look for the ready char */
-				if (checkBufferForString(">") == true)
+				if (checkBufferForString(">"))
 				{
 					cleanUnwantedCharsFromBuffer();
-					ErrorLog.debug("RX: [" + responseToString() + "]");
 					
 					if (checkBufferForString(AT_RESPONSE_ELM) == false)
 					{
 						ErrorLog.warn("ELM Interface Not Recognized");
+						throw new RuntimeException("Init Failure");
 					}
 					
-					/* If this is the first reset, then set to do the 2nd reset */
-					if (stage == STAGE_RESET)
-					{
-						setStage(STAGE_2ND_RESET);
-					}
-					else
-					{
-						setStage(STAGE_ECHO_OFF);
-					}
-					
+					setStageAndMode(STAGE_ECHO_OFF, MODE_READY);
 					setMode(MODE_READY);
 				}
 				
@@ -391,6 +410,7 @@ public class ELMProtocol extends AbstractProtocol
 			break;
 			
 			case MODE_TX:
+				readSeralData();
 				resetReadBuffer();
 				sendELMCommand(AT_CMD_ECHO_OFF);
 				setMode(MODE_RX);
@@ -411,7 +431,6 @@ public class ELMProtocol extends AbstractProtocol
 				if (checkBufferForString(CMD_RESPONSE_READY) == true)
 				{
 					cleanUnwantedCharsFromBuffer();
-					ErrorLog.debug("RX: [" + responseToString() + "]");
 					
 					if (checkBufferForString(AT_RESPONSE_OK) == false)
 					{
@@ -441,6 +460,7 @@ public class ELMProtocol extends AbstractProtocol
 			break;
 			
 			case MODE_TX:
+				readSeralData();
 				resetReadBuffer();
 				sendELMCommand(AT_CMD_LINEFEED_OFF);
 				setMode(MODE_RX);
@@ -461,7 +481,6 @@ public class ELMProtocol extends AbstractProtocol
 				if (checkBufferForString(CMD_RESPONSE_READY) == true)
 				{
 					cleanUnwantedCharsFromBuffer();
-					ErrorLog.debug("RX: [" + responseToString() + "]");
 					
 					if (checkBufferForString(AT_RESPONSE_OK) == false)
 					{
@@ -491,6 +510,7 @@ public class ELMProtocol extends AbstractProtocol
 			break;
 			
 			case MODE_TX:
+				readSeralData();
 				resetReadBuffer();
 				sendELMCommand(this.PIDParam_.getFullCommand());
 				setMode(MODE_RX);
@@ -514,7 +534,6 @@ public class ELMProtocol extends AbstractProtocol
 					
 					/* Check the buffer for known error strings */
 					boolean hasError = checkBufferForErrorString();
-					ErrorLog.debug("RX: [" + responseToString() + "]");
 					
 					if (hasError)
 					{
@@ -563,6 +582,7 @@ public class ELMProtocol extends AbstractProtocol
 				this.currentParameterIndex_ = getNextEnabledParamIndex(this.currentParameterIndex_);
 					
 				/* Send the elm request */
+//				readSeralData();
 				resetReadBuffer();
 				sendELMCommand(SUPPORTD_PARAMS[this.currentParameterIndex_].getFullCommand());
 				
@@ -623,6 +643,7 @@ public class ELMProtocol extends AbstractProtocol
 					{
 						/* An exception here is not normal, nor expected.  If it happens, we'll do a re-init */
 						ErrorLog.error("Parameter Fetch Exception, do reset.", e2);
+						ErrorLog.error("RX: [" + responseToString() + "]");
 						setStageAndMode(STAGE_RESET, MODE_READY);
 						return;
 					}

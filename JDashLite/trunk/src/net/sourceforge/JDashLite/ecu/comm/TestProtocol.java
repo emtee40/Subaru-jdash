@@ -63,13 +63,7 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	{
 
 		this.primaryHandler_ = primaryHandler;
-//		this.stubbedParameters_ = new StubbedParameter[primaryHandler.getSupportedParameters().length];
-//		
-//		/* Setup our stubbed parameters */
-//		for (int index = 0; index < primaryHandler.getSupportedParameters().length; index++)
-//		{
-//			this.stubbedParameters_[index] = new StubbedParameter(primaryHandler.getSupportedParameters()[index]);
-//		}
+
 	}
 	
 
@@ -147,31 +141,35 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 			break;
 				
 			case 7:
-				fireCommTXEvent();
 				
 				ECUParameter p = this.primaryHandler_.getSupportedParameters()[this.parameterIndex_];
 				
 				//if (this.stubbedParameters_[this.parameterIndex_].isEnabled())
 				//if (p.isEnabled())
-				{
+//				{
 
 //					this.stubbedParameters_[this.parameterIndex_].value_ += 95.1;
 //					this.stubbedParameters_[this.parameterIndex_].markTimeStamp();
 //					fireParemeterFetchedEvent(this.stubbedParameters_[this.parameterIndex_]);
-					
-					p.setDemoValue();
-					
-					/* To fool the gauges.  The value changes, but they don't know it? */
-					if (p.isEnabled())
+	
+					/* Only simulate non meta paremters */
+					if (p instanceof MetaParameter == false)
 					{
-						p.notifyValueChanged();
-						fireParemeterFetchedEvent(p);
+						fireCommTXEvent();
+
+						p.setDemoValue();
+						
+						/* To fool the gauges.  The value changes, but they don't know it? */
+						if (p.isEnabled())
+						{
+							p.notifyValueChanged();
+							fireParemeterFetchedEvent(p);
+						}
+						
+						fireCommRXEvent();
+
 					}
 					
-					fireCommRXEvent();
-
-				}
-
 				/* Next param */
 				int nextIndex = getNextEnabledParamIndex(this.parameterIndex_);
 					
@@ -209,35 +207,6 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	
 	
 
-//	/*******************************************************
-//	 * @return
-//	 ********************************************************/
-//	private int getNextEnabledParamIndex()
-//	{
-//		int nextIndex = this.parameterIndex_;
-//		
-//		do
-//		{
-//			nextIndex++;
-//			
-//			/* Back to 0 */
-//			if (nextIndex >= this.primaryHandler_.getSupportedParameters().length)
-//			{
-//				nextIndex = 0;
-//			}
-//			
-//			/* Full circle witout a match? */
-//			if (nextIndex == this.parameterIndex_)
-//			{
-//				return this.parameterIndex_;
-//			}
-//			
-//		}
-//		while(this.primaryHandler_.getSupportedParameters()[nextIndex].isEnabled() == false);
-//		
-//		
-//		return nextIndex;
-//	}
 	 
 }
 

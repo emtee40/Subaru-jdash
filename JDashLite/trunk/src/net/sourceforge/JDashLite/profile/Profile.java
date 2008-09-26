@@ -110,7 +110,7 @@ public class Profile
 		AnalogGauge analogGauge = null;
 		DigitalGauge digitalGauge = null;
 		LineGraphGauge lineGraphGauge = null;
-		SweepAnalogGauge sweepGauge = null;
+//		SweepAnalogGauge sweepGauge = null;
 //		LEDGauge ledGauge = null;
 		
 		/* Page 0 */
@@ -124,25 +124,26 @@ public class Profile
 
 		
 		/* Page 0 row 0 gauge 0 */
-		sweepGauge = new SweepAnalogGauge();
-		row.addGauge(sweepGauge);
-		sweepGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
-		sweepGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
-		sweepGauge.setPrecision(0);
-		sweepGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.45);
-		sweepGauge.setRangeStart(0);
-		sweepGauge.setRangeEnd(8000);
-		sweepGauge.setTickCount(9);
-		sweepGauge.setIncludeTicks(true);
-		sweepGauge.setIncludeTickLabels(true);
-		sweepGauge.setIncludeDigitalValue(false);
+		analogGauge = new AnalogGauge();
+		row.addGauge(analogGauge);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "RPM");
+		analogGauge.setPrecision(0);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.25);
+		analogGauge.setRangeStart(0);
+		analogGauge.setRangeEnd(8000);
+		analogGauge.setTickCount(9);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(false);
+		analogGauge.setTickLabelDivisor(1000);
 		
 		/* Page 0 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "RPM");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME,  "RPM");
-		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.35);
+		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
 		lineGraphGauge.setRangeStart(0);
 		lineGraphGauge.setRangeEnd(8000);
 		
@@ -175,6 +176,7 @@ public class Profile
 		analogGauge.setIncludeTicks(true);
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(false);
+
 		
 		/* Page 0 row 1 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -212,6 +214,7 @@ public class Profile
 		analogGauge.setIncludeTicks(true);
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(false);
+
 		
 		/* Page 0 row 2 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -251,6 +254,7 @@ public class Profile
 		analogGauge.setIncludeTicks(true);
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(true);
+		analogGauge.setTickLabelDivisor(1000);
 
 		/* Page 1 Row 1 */
 		row = new ProfileRow();
@@ -282,29 +286,57 @@ public class Profile
 		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "COOLANT_TEMP_C");
 		analogGauge.setPrecision(0);
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.4);
-		analogGauge.setRangeStart(0);
+		analogGauge.setRangeStart(-40);
 		analogGauge.setRangeEnd(220);
 		analogGauge.setTickCount(6);
 		analogGauge.setIncludeTicks(true);
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(true);
 		
-		/* Page 0 row 0 gauge 1 */
+		/* Page 2 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Coolant C");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "COOLANT_TEMP_C");
 //		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
-		lineGraphGauge.setRangeStart(0);
+		lineGraphGauge.setRangeStart(-40);
 		lineGraphGauge.setRangeEnd(220);
 		
-
+		
 		/* Page 2 Row 1 */
 		row = new ProfileRow();
 		page.addRow(row);
 		
-		
 		/* Page 2 row 1 gauge 0 */
+		analogGauge = new AnalogGauge();
+		row.addGauge(analogGauge);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
+		analogGauge.setProperty(AnalogGauge.PROP_STR_PARAMETER_NAME, "COOLANT_TEMP_F");
+		analogGauge.setPrecision(0);
+		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.4);
+		analogGauge.setRangeStart(-40);
+		analogGauge.setRangeEnd(420);
+		analogGauge.setTickCount(6);
+		analogGauge.setIncludeTicks(true);
+		analogGauge.setIncludeTickLabels(true);
+		analogGauge.setIncludeDigitalValue(true);
+		
+		/* Page 2 row 1 gauge 1 */
+		lineGraphGauge = new LineGraphGauge();
+		row.addGauge(lineGraphGauge);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Coolant F");
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "COOLANT_TEMP_F");
+//		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
+		lineGraphGauge.setRangeStart(-40);
+		lineGraphGauge.setRangeEnd(420);
+		
+
+		/* Page 2 Row 2 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		
+		/* Page 2 row 2 gauge 0 */
 		analogGauge = new AnalogGauge();
 		row.addGauge(analogGauge);
 		analogGauge.setProperty(AnalogGauge.PROP_STR_LABEL, null);
@@ -318,7 +350,7 @@ public class Profile
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(true);
 		
-		/* Page 0 row 0 gauge 1 */
+		/* Page 2 row 2 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "Load %");
@@ -326,6 +358,116 @@ public class Profile
 //		lineGraphGauge.setDoubleProperty(LineGraphGauge.PROP_D_WIDTH, 0.55);
 		lineGraphGauge.setRangeStart(0);
 		lineGraphGauge.setRangeEnd(100);
+
+		
+
+		/* Page 3 */
+		page = new ProfilePage();
+		sampleProfile.addPage(page);
+
+		/* Page 3 Row 0 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		/* Page 3 row 0 gauge 0 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MAF");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"MAF");
+		
+		/* Page 3 row 0 gauge 1 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MAP_kpa");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 1);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"kpa");
+		
+		/* Page 3 row 0 gauge 1 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MAP_psi");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 1);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"psi");
+		
+		/* Page 3 row 0 gauge 1 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MAP_inhg");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 1);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"Hg");
+		
+		/* Page 3 Row 1 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		/* Page 3 row 1 gauge 0 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "KPH");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"KPH");
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MPH");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"MPH");
+		
+		
+		/* Page 3 Row 2 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		/* Page 3 row 2 gauge 0 */
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "INTAKE_TEMP_C");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"IAT C");
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "INTAKE_TEMP_F");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"IAT F");
+		
+		/* Page 3 Row 3 */
+		row = new ProfileRow();
+		page.addRow(row);
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS0");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL tmp");
+
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS1");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CL");
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS2");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL ld");
+
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS3");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL err");
+
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS4");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CL err");
 
 		
 		return sampleProfile;

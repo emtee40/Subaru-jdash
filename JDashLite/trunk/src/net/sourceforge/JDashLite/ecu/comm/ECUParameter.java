@@ -35,8 +35,6 @@ import waba.util.Vector;
  *********************************************************/
 public abstract class ECUParameter implements Cleanable
 {
-	public static final String RATE = "RATE";
-	
 	private boolean isEnabled_ = true;
 	
 	private String name_ = null;
@@ -44,6 +42,12 @@ public abstract class ECUParameter implements Cleanable
 	private int timeStamp_ = 0;
 	
 	private Vector valueChangedListeners_ = new Vector(1);
+	
+	/** 
+	 * The default is that all parameters are user selectable.  This variable
+	 * can be used to change that behavior.
+	 */
+	protected boolean isSelectable_ = true;
 	
 	/********************************************************
 	 *  A parameter is identified by it's name.  The name of
@@ -95,6 +99,37 @@ public abstract class ECUParameter implements Cleanable
 		return this.name_;
 	}
 
+	/********************************************************
+	 * Return a brief human readable description of this parameters.
+	 * This description will be shown to the user as they select it
+	 * for display on the screen.
+	 * 
+	 * @return
+	 ********************************************************/
+	public abstract String getDescription();
+	
+	/*******************************************************
+	 * Slightly different from the parameters Name, it's Label is
+	 * a display string to show the user when they are selecting 
+	 * from a list.  the getName() returns the unique string key for
+	 * this parameter, but the Label is for the users.
+	 * @return
+	 ********************************************************/
+	public abstract String getLabel();
+	
+	
+	/*******************************************************
+	 * By default, all ECU parameters are user selectable for display.
+	 * If however a parameter should NOT be user selectable, trip
+	 * the isSelectable_ member variable that is returned by this
+	 * method.
+	 * @return
+	 ********************************************************/
+	public boolean isUserSelectable()
+	{
+		return this.isSelectable_;
+	}
+	
 	/********************************************************
 	 * @return
 	 ********************************************************/

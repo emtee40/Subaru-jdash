@@ -27,34 +27,20 @@ package net.sourceforge.JDashLite.ecu.comm.ELM;
 import net.sourceforge.JDashLite.ecu.comm.AbstractProtocol;
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.InvalidStageModeException;
+import net.sourceforge.JDashLite.ecu.param.DegCelToDegFarMetaParam;
+import net.sourceforge.JDashLite.ecu.param.KpaToInHgMetaParam;
+import net.sourceforge.JDashLite.ecu.param.KpaToPsiMetaParam;
+import net.sourceforge.JDashLite.ecu.param.KphToMphMetaParam;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import waba.io.SerialPort;
 import waba.sys.Convert;
+import waba.util.Vector;
 
 
 /*********************************************************
- *
- 
- <pre>
- 
- >ATZ
- y
- ELM327 v1.2a
- 
- >ATE0
- OK
- 
- >
- 
- </pre>
-
-// TODO
- - 2-3 retries in PID mode
- - 2-3 re-connect tries for init mode
- - tweak status messages to indicated 1-3 attempts
- - Move Serial POrt into profile, and use in here.
-  
+ * This class can request and process the values from an ELM 
+ * interface module.
  *
  *********************************************************/
 public class ELMProtocol extends AbstractProtocol
@@ -106,33 +92,12 @@ public class ELMProtocol extends AbstractProtocol
 	private ELMParameter PIDParam_ = new ELMParameter("PID", 1, 0x00, 4)
 	{
 		public double getValue() { return 0.0; }  
+		public String getLabel() { return getName(); };
+		public String getDescription() { return getName(); };
 	};
 	
 	/* The supported parametes list */
-	private static final ELMParameter[] SUPPORTD_PARAMS = new ELMParameter[]
-	{
-		new ELMParameter("RPM", 1, 0x0c, 2)
-		{
-			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
-		},
-		new ELMParameter("STFT1", 1, 0x06, 1) 	
-		{
-			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }
-		},
-		new ELMParameter("LTFT1", 1, 0x07, 1) 		
-		{ 
-			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }  
-		},
-		new ELMParameter("COOLANT_TEMP_C", 1, 0x05, 1) 		
-		{ 
-			public double getValue() { return getResponseDouble(0) - 40.0; }  
-		},
-		new ELMParameter("LOAD", 1, 0x04, 1) 		
-		{ 
-			public double getValue() { return getResponseDouble(0) * 100.0 / 255.0; }  
-		}
-	};
-	
+	private static ECUParameter[] SUPPORTED_PARAMS = null;
 	
 	/* The index of the currently being fetched parameter */
 	private int currentParameterIndex_ = 0;
@@ -146,6 +111,162 @@ public class ELMProtocol extends AbstractProtocol
 	
 	/* PID request retry count */
 	private int pidReadAttemptCount_ = 0;
+	
+	
+	/** The static initializer that sets up the parameters */
+	static
+	{
+		Vector pList = new Vector(20);
+
+		ELMParameter fuelSystem = new ELMParameter("FuelSystemStatus", 1, 0x03, 2)
+		{
+			public double getValue() { throw new RuntimeException("Method Not Used"); }
+			public String getLabel() { return getName(); }
+			public String getDescription() {return "Bit Encoded Fuel System Status. ";}
+		};
+		pList.addElement(fuelSystem);
+		
+		pList.addElement(new BitCheckMetaParam("FS0", fuelSystem, 0, 0x80)
+		{
+			public String getLabel() { return "Fuel System F0"; }
+			public String getDescription() {return "Fuel System #1 in Open Loop due to cold engine";}
+		});
+		
+		pList.addElement(new BitCheckMetaParam("FS1", fuelSystem, 0, 0x40)
+		{
+			public String getLabel() { return "Fuel System F1"; }
+			public String getDescription() {return "Fuel System #1 in Closed Loop";}
+		});
+		
+		pList.addElement(new BitCheckMetaParam("FS2", fuelSystem, 0, 0x20)
+		{
+			public String getLabel() { return "Fuel System F2"; }
+			public String getDescription() {return "Fuel System #1 in Open Loop due to engine load";}
+		});
+	
+		pList.addElement(new BitCheckMetaParam("FS3", fuelSystem, 0, 0x10)
+		{
+			public String getLabel() { return "Fuel System F3"; }
+			public String getDescription() {return "Fuel System #1 in Open Loop due to system failure";}
+		});
+		
+		pList.addElement(new BitCheckMetaParam("FS4", fuelSystem, 0, 0x08)
+		{
+			public String getLabel() { return "Fuel System F4"; }
+			public String getDescription() {return "Fuel System #1 in Closed Loop but there is a fault";}
+		});
+		
+		pList.addElement(new ELMParameter("LOAD", 1, 0x04, 1) 		
+		{ 
+			public double getValue() { return getResponseDouble(0) * 100.0 / 255.0; }  
+			public String getLabel() { return "Engine Load"; }
+			public String getDescription() {return "The engine load percentage (0-100%) as calculated by the ECU";}
+		});
+
+		pList.addElement(new ELMParameter("COOLANT_TEMP_C", 1, 0x05, 1) 		
+		{ 
+			public double getValue() { return getResponseDouble(0) - 40.0; }  
+			public String getLabel() { return "Coolant C"; }
+			public String getDescription() {return "The Engine coolant temperature in degrees C (-40 to 215)";}
+		});
+
+		pList.addElement(new DegCelToDegFarMetaParam("COOLANT_TEMP_F",(ECUParameter)pList.items[pList.size() - 1])
+		{
+			public String getLabel() { return "Coolant F"; }
+			public String getDescription() {return "The Engine coolant temperature in degrees F (-40 to 420)";}
+		});
+
+
+		pList.addElement(new ELMParameter("STFT1", 1, 0x06, 1) 	
+		{
+			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }
+			public String getLabel() { return "Short Term Fuel Trim 1"; }
+			public String getDescription() {return "The Short Term Fuel Trim percentage from 0-100% for Bank 1";}
+		});
+		
+		pList.addElement(new ELMParameter("LTFT1", 1, 0x07, 1) 		
+		{ 
+			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }
+			public String getLabel() { return "Long Term Fuel Trim 1"; }
+			public String getDescription() {return "The Long Term Fuel Trim percentage from 0-100% for Bank 1";}
+		});
+		
+		pList.addElement(new ELMParameter("MAF", 1, 0x10, 2) 		
+		{ 
+			public double getValue() { return ((256.0 * getResponseDouble(0)) + getResponseDouble(1)) / 100.0; }
+			public String getLabel() { return getName(); }
+			public String getDescription() {return "MAF Rate in g/s";}
+		});
+		
+		pList.addElement(new ELMParameter("TPS", 1, 0x11, 2) 		
+		{ 
+			public double getValue() { return ((256.0 * getResponseDouble(0)) + getResponseDouble(1)) / 100.0; }
+			public String getLabel() { return getName(); }
+			public String getDescription() {return "Throttle Position Sensor Percentage 0-100%";}
+		});
+
+		pList.addElement(new ELMParameter("MAP_kpa", 1, 0x0B, 2)
+		{
+			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
+			public String getLabel() { return "MAP (kPa)"; }
+			public String getDescription() {return "Absolute Intake Manifold Pressure in kPa";}
+		});
+
+		pList.addElement(new KpaToPsiMetaParam("MAP_psi",(ECUParameter)pList.items[pList.size() - 1])
+		{
+			public String getLabel() { return "MAP (psi)"; }
+			public String getDescription() {return "Absolute Intake Manifold Pressure in psi";}
+		});
+		
+		pList.addElement(new KpaToInHgMetaParam("MAP_inhg",(ECUParameter)pList.items[pList.size() - 2])
+		{
+			public String getLabel() { return "MAP (Hg)"; }
+			public String getDescription() {return "Absolute Intake Manifold Pressure in inches of mercury";}
+		});
+		
+		pList.addElement(new ELMParameter("RPM", 1, 0x0c, 2)
+		{
+			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
+			public String getLabel() { return getName(); }
+			public String getDescription() {return "Engine Revolutions Per Minute";}
+		});
+
+		pList.addElement(new ELMParameter("KPH", 1, 0x0D, 1)
+		{
+			public double getValue() { return getResponseDouble(0); }  
+			public String getLabel() { return getName(); }
+			public String getDescription() {return "Vehicle speed in KPH";}
+		});
+
+		pList.addElement(new KphToMphMetaParam("MPH",(ECUParameter)pList.items[pList.size() - 1])
+		{
+			public String getLabel() { return getName(); }
+			public String getDescription() {return "Vehicle speed in MPH";}
+		});
+		
+		pList.addElement(new ELMParameter("INTAKE_TEMP_C", 1, 0x0F, 2)
+		{
+			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
+			public String getLabel() { return "Intake Air Temp C"; }
+			public String getDescription() {return "Intake Air Temperature in Degrees C";}
+		});
+
+		pList.addElement(new DegCelToDegFarMetaParam("INTAKE_TEMP_F",(ECUParameter)pList.items[pList.size() - 1])
+		{
+			public String getLabel() { return "Intake Air Temp F"; }
+			public String getDescription() {return "Intake Air Temperature in Degrees F";}
+		});
+	
+
+		/* Populate our array */
+		SUPPORTED_PARAMS = new ECUParameter[pList.size()];
+		for (int index = 0; index < pList.size(); index++)
+		{
+			SUPPORTED_PARAMS[index] = (ECUParameter)pList.items[index];
+		}
+		
+		
+	}
 	
 	/********************************************************
 	 * 
@@ -175,6 +296,8 @@ public class ELMProtocol extends AbstractProtocol
 	 ********************************************************/
 	public boolean disconnect()
 	{
+		ErrorLog.info("DOING ELM DISCONNECT");
+		
 		/* Read any pending data */
 		if (getSerialPort() != null && getSerialPort().isOpen())
 		{
@@ -191,7 +314,7 @@ public class ELMProtocol extends AbstractProtocol
 	 ********************************************************/
 	public ECUParameter[] getSupportedParameters()
 	{
-		return SUPPORTD_PARAMS;
+		return SUPPORTED_PARAMS;
 	}
 	
 	
@@ -580,11 +703,21 @@ public class ELMProtocol extends AbstractProtocol
 
 				/* Next param */
 				this.currentParameterIndex_ = getNextEnabledParamIndex(this.currentParameterIndex_);
+				
+				/* If the current index does NOT point to an ELM parameter (could be a meta param), then return to try the next one */
+				if (getSupportedParameters()[this.currentParameterIndex_] instanceof ELMParameter == false)
+				{
+					return;
+				}
+				
+				
+				/* For quick reference */
+				ELMParameter param = (ELMParameter)getSupportedParameters()[this.currentParameterIndex_];
 					
 				/* Send the elm request */
 //				readSeralData();
 				resetReadBuffer();
-				sendELMCommand(SUPPORTD_PARAMS[this.currentParameterIndex_].getFullCommand());
+				sendELMCommand(param.getFullCommand());
 				
 				/* Go to RX mode */
 				setMode(MODE_RX);
@@ -637,7 +770,7 @@ public class ELMProtocol extends AbstractProtocol
 					/* Try to extract the desired values.  An error will cause an attempted reset */
 					try
 					{
-						extractResponseBytes(SUPPORTD_PARAMS[this.currentParameterIndex_]);
+						extractResponseBytes((ELMParameter)SUPPORTED_PARAMS[this.currentParameterIndex_]);
 					}
 					catch(Exception e2)
 					{
@@ -649,7 +782,7 @@ public class ELMProtocol extends AbstractProtocol
 					}
 					
 					setStageAndMode(STAGE_PID_REQ, MODE_READY);
-					fireParemeterFetchedEvent(SUPPORTD_PARAMS[this.currentParameterIndex_]);
+					fireParemeterFetchedEvent(SUPPORTED_PARAMS[this.currentParameterIndex_]);
 					fireEndParameterBatchEvent();
 				}
 				
@@ -719,7 +852,7 @@ public class ELMProtocol extends AbstractProtocol
 		getSerialPort().writeBytes(cmd.getBytes(), 0, cmd.length());
 	}
 	
-//	
+	
 	
 	/*******************************************************
 	 * 

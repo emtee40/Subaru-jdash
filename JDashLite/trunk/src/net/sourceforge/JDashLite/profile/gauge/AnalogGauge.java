@@ -53,6 +53,7 @@ public class AnalogGauge extends ProfileGauge
 	protected static final String PROP_B_INCLUDE_TICK_LABELS		= "include-tick-labels";
 	protected static final String PROP_B_INCLUDE_DIGITAL_VALUE		= "include-digital-value";
 	protected static final String PROP_I_PRECISION					= "precision";
+	protected static final String PROP_I_TICK_LABEL_DIV				= "tick-label-div";
 
 	
 	protected static final double OUTER_RING_RADIUS = 0.48;
@@ -185,6 +186,22 @@ public class AnalogGauge extends ProfileGauge
 		setBooleanProperty(PROP_B_INCLUDE_TICK_LABELS, i);
 	}
 
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public double getTickLabelDivisor()
+	{
+		return getDoubleProperty(PROP_I_TICK_LABEL_DIV, 1);
+	}
+	
+	/*******************************************************
+	 * @param div
+	 ********************************************************/
+	public void setTickLabelDivisor(double div)
+	{
+		setDoubleProperty(PROP_I_TICK_LABEL_DIV, div);
+	}
+	
 	/********************************************************
 	 * @return
 	 ********************************************************/
@@ -453,8 +470,8 @@ public class AnalogGauge extends ProfileGauge
 				/* Only draw the text on whole ticks */
 				if (getIncludeTickLabels() && index % 1 == 0)
 				{
-					String tickValue = Convert.toString(getRangeStart() + (index * tickRange), getPrecision());
-					tickValue = tickValue.substring(0, Math.min(tickLabelLen, tickValue.length()) + (tickValue.startsWith("-")?1:0));
+					String tickValue = Convert.toString((getRangeStart() + (index * tickRange)) / getTickLabelDivisor(), getPrecision());
+//					tickValue = tickValue.substring(0, Math.min(tickLabelLen,tickValue.length()) + (tickValue.startsWith("-")?1:0));
 					
 					/* No need to analize zero */
 					if ((getRangeStart() + (index * tickRange)) == 0)

@@ -123,6 +123,15 @@ public class LineGraphGauge extends ProfileGauge implements ValueChangedListener
 	 ********************************************************/
 	public void onValueChanged()
 	{
+//		try
+//		{
+//			throw new Exception("Value Change being fired for " + getECUParameter().getName());
+//		}
+//		catch(Exception e)
+//		{
+//			
+//			e.printStackTrace();
+//		}
 		
 		/* If the history array isn't initialized yet, then we don't care what the value is */
 		if (this.valueHistory_ == null)

@@ -97,8 +97,8 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	/* The active color model */
 	private ColorModel colorModel_ = ColorModel.DEFAULT_MODEL;
 	
-	/* Remember the previous system off time */
-	private int originalSystemOffTime_ = 0;
+//	/* Remember the previous system off time */
+//	private int originalSystemOffTime_ = 0;
 	
 	/* force a redraw of the gauges dynamic data regardless of if a new EcU value has been detected.  It's an override */
 	private boolean forceRedraw_ = false;
@@ -168,6 +168,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			/* Make sure there is at least SOMETHING in the profile list */
 			if (getPreferences().getProfileCount() == 0)
 			{
+				ErrorLog.info("Creating New Sample Profile");
 				getPreferences().addProfile(Profile.createSampleProfile().toXml());
 			}
 
@@ -227,17 +228,19 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 	 *******************************************************/
 	public void onExit()
 	{
-		/* restore the system off time */
-		if (this.originalSystemOffTime_ > 0)
-		{
-			Vm.setDeviceAutoOff(this.originalSystemOffTime_);
-		}
+		ErrorLog.info("OnExit in main window called");
+//		/* restore the system off time */
+//		if (this.originalSystemOffTime_ > 0)
+//		{
+//			Vm.setDeviceAutoOff(this.originalSystemOffTime_);
+//		}
 		
-//		stop();
-		doDisconnect();
+		setPausePaint(true);
 		killThreads();
 		removeThread(this.protocolHandlerThread_);
-//		super.onGameExit();
+		doDisconnect();
+		ErrorLog.info("OnExit in main window finished");
+		super.onExit();
 	}
 	
 	

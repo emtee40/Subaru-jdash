@@ -538,57 +538,70 @@ public class ProfileRenderer
 	private void renderPage(Graphics g, ColorModel cm, int pageIndex, boolean forceRepaint) throws Exception
 	{
 
-		/* No Pages? */
-		if (this.profile_.getPageCount() == 0)
-		{
-			return;
-		}
-	
-		/* Get the page */
-		ProfilePage page = this.profile_.getPage(pageIndex);
-		Rect pageRect = (Rect)this.rectCache_.get(page);
-		if (pageRect == null)
-		{
-			throw new Exception("Cannot render page: " + pageIndex + " the RECT cache has no entry for it");
-		}
-
+		int rowIndex = 0;
+		int gaugeIndex = 0;
 		
-		/* For each row */
-		for (int rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
+		try
 		{
-			ProfileRow row = page.getRow(rowIndex);
-			Rect rowRect = (Rect)this.rectCache_.get(row);
-			if (rowRect == null)
+			
+			/* No Pages? */
+			if (this.profile_.getPageCount() == 0)
 			{
-				throw new Exception("Cannot render row: " + rowIndex + " the RECT cache has no entry for it");
+				return;
 			}
-			
-			
-			/* For each gauge in this row */
-			for (int gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
+		
+			/* Get the page */
+			ProfilePage page = this.profile_.getPage(pageIndex);
+			Rect pageRect = (Rect)this.rectCache_.get(page);
+			if (pageRect == null)
 			{
+				throw new Exception("Cannot render page: " + pageIndex + " the RECT cache has no entry for it");
+			}
 	
-				ProfileGauge gauge = row.getGauge(gaugeIndex);
-				Rect gaugeRect = (Rect)this.rectCache_.get(gauge);
+			
+			/* For each row */
+			for (rowIndex = 0; rowIndex < page.getRowCount(); rowIndex++)
+			{
+				ProfileRow row = page.getRow(rowIndex);
+				Rect rowRect = (Rect)this.rectCache_.get(row);
+				if (rowRect == null)
+				{
+					throw new Exception("Cannot render row: " + rowIndex + " the RECT cache has no entry for it");
+				}
 				
-				if (gaugeRect == null)
+				
+				/* For each gauge in this row */
+				for (gaugeIndex = 0; gaugeIndex < row.getGaugeCount(); gaugeIndex++)
 				{
-					ErrorLog.error("Cannot render gauge: " + rowIndex + " on row " + rowIndex + " the RECT cache has no entry for it");
-				}
-
-				/* Render this gauge */
-				if (gauge != null)
-				{
-					renderGauge(g, gaugeRect, gauge, cm, forceRepaint);
-				}
-				else
-				{
-					ErrorLog.fatal("Row " + rowIndex + " returned a null gauge at " + gaugeIndex);
-				}
 		
-			}
-		}
+					ProfileGauge gauge = row.getGauge(gaugeIndex);
+					Rect gaugeRect = (Rect)this.rectCache_.get(gauge);
+					
+					if (gaugeRect == null)
+					{
+						ErrorLog.error("Cannot render gauge: " + rowIndex + " on row " + rowIndex + " the RECT cache has no entry for it");
+					}
 	
+					/* Render this gauge */
+					if (gauge != null)
+					{
+						renderGauge(g, gaugeRect, gauge, cm, forceRepaint);
+					}
+					else
+					{
+						ErrorLog.fatal("Row " + rowIndex + " returned a null gauge at " + gaugeIndex);
+					}
+			
+				}
+			}
+
+		}
+		catch(Exception e)
+		{
+			ErrorLog.error("There was an unexpected error rendering gauge " + (gaugeIndex+1) + " on row " + (rowIndex+1) + " on page " + (pageIndex+1));
+			throw e;
+		}
+			
 	}
 	
 	
@@ -798,7 +811,6 @@ public class ProfileRenderer
 	private void renderGauge(Graphics g, Rect rect, ProfileGauge gauge, ColorModel cm, boolean forceRepaint) throws Exception
 	{
 	
-		
 		/* Get the parameter for this gauge */
 		String parameteName = gauge.getProperty(ProfileGauge.PROP_STR_PARAMETER_NAME);
 		if (parameteName == null)

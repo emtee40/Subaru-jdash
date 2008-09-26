@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 package net.sourceforge.JDashLite.ecu.comm;
 
+import net.sourceforge.JDashLite.error.ErrorLog;
 import waba.io.SerialPort;
 import waba.sys.Vm;
 import waba.util.Vector;
@@ -138,6 +139,18 @@ public abstract class AbstractProtocol implements ProtocolHandler
 		return (this.opTimeStart_ + this.opTimeLimit_) < Vm.getTimeStamp();
 	}
 	
+
+	/*******************************************************
+	 * A convience method that calls the static version with the
+	 * getSupportedParameters() array.
+	 * @param name
+	 * @return
+	 ********************************************************/
+	public ECUParameter getParameter(String name)
+	{
+		return getParameter(name, getSupportedParameters());
+	}
+	
 	/*******************************************************
 	 * Given the list of parameters supported, find the one
 	 * by it's name.  This is just a simple utility method 
@@ -146,18 +159,20 @@ public abstract class AbstractProtocol implements ProtocolHandler
 	 * @param name
 	 * @return
 	 ********************************************************/
-	public ECUParameter getParameter(String name)
+	public static ECUParameter getParameter(String name, ECUParameter[] parameters)
 	{
-		for (int index = 0; index < getSupportedParameters().length; index++)
+		for (int index = 0; index < parameters.length; index++)
 		{
-			if (name.equals(getSupportedParameters()[index].getName()))
+			if (name.equals(parameters[index].getName()))
 			{
-				return getSupportedParameters()[index];
+				return parameters[index];
 			}
 		}
 		return null;
 	}
 
+	
+	
 	
 	/*********************************************************
 	 * This method will automatcially close the serial port, if it
@@ -173,6 +188,7 @@ public abstract class AbstractProtocol implements ProtocolHandler
 			getSerialPort().close();
 		}
 		
+		ErrorLog.info("FINISHED WITH DISONNECT");
 		return true;
 	}
 

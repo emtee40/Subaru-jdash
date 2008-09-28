@@ -51,6 +51,8 @@ public interface ColorModel
 	public static final int ANALOG_GAUGE_FACE				= 301;
 	public static final int ANALOG_GAUGE_TICK_MARK			= 302;
 	public static final int ANALOG_GAUGE_NEEDLE				= 303;
+	public static final int ANALOG_GAUGE_HIGH_NEEDLE		= 304;
+	public static final int ANALOG_GAUGE_LOW_NEEDLE			= 305;
 	
 	public static final int LED_GAUGE_RING					= 400;
 	public static final int LEG_GAUGE_FACE					= 401;

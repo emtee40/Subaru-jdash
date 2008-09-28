@@ -120,6 +120,25 @@ public abstract class ELMParameter extends ECUParameter
 	}
 	
 	
+	/*******************************************************
+	 * Unlike the call to getResponsedouble(int) that returns one of the 
+	 * bytes as a double. This method will assume that the 1-2 bytes that
+	 * make up this parameter infact are a 16 bit word that represents 
+	 * an int.  This int is then cast to a double
+	 * 
+	 * @return
+	 ********************************************************/
+	public double getResponseDouble()
+	{
+		int r = getResponseByte(0);
+		if (responseBytes_.length == 2)
+		{
+			r = r << 8;
+			r += getResponseByte(1);
+		}
+		return (double)r;
+	}
+	
 	/*********************************************************
 	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.ecu.comm.ECUParameter#setDemoValue()

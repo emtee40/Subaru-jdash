@@ -26,6 +26,7 @@ package net.sourceforge.JDashLite.profile;
 
 import net.sourceforge.JDashLite.ecu.comm.ELM.ELMProtocol;
 import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
+import net.sourceforge.JDashLite.profile.gauge.DigitalCummulativeAverageGauge;
 import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
 import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
 import net.sourceforge.JDashLite.profile.gauge.SweepAnalogGauge;
@@ -137,6 +138,8 @@ public class Profile
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(false);
 		analogGauge.setTickLabelDivisor(1000);
+		analogGauge.setIncludeHighHold(true);
+		analogGauge.setIncludeLowHold(true);
 		
 		/* Page 0 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -255,6 +258,9 @@ public class Profile
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(true);
 		analogGauge.setTickLabelDivisor(1000);
+		analogGauge.setIncludeHighHold(true);
+		analogGauge.setIncludeLowHold(true);
+
 
 		/* Page 1 Row 1 */
 		row = new ProfileRow();
@@ -288,7 +294,7 @@ public class Profile
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.4);
 		analogGauge.setRangeStart(-40);
 		analogGauge.setRangeEnd(220);
-		analogGauge.setTickCount(6);
+		analogGauge.setTickCount(14);
 		analogGauge.setIncludeTicks(true);
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(true);
@@ -316,10 +322,11 @@ public class Profile
 		analogGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.4);
 		analogGauge.setRangeStart(-40);
 		analogGauge.setRangeEnd(420);
-		analogGauge.setTickCount(6);
+		analogGauge.setTickCount(10);
 		analogGauge.setIncludeTicks(true);
 		analogGauge.setIncludeTickLabels(true);
 		analogGauge.setIncludeDigitalValue(true);
+	
 		
 		/* Page 2 row 1 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
@@ -435,6 +442,13 @@ public class Profile
 		/* Page 3 Row 3 */
 		row = new ProfileRow();
 		page.addRow(row);
+		
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FuelSystemStatus");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"FS");
 
 		digitalGauge = new DigitalGauge();
 		row.addGauge(digitalGauge);
@@ -469,6 +483,44 @@ public class Profile
 		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
 		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CL err");
 
+		
+		/* Page 4 */
+		page = new ProfilePage();
+		sampleProfile.addPage(page);
+
+		
+		/* Page 4 Row 0 */
+		row = new ProfileRow();
+		page.addRow(row);
+
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MPG1");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"MPG");
+
+		
+		digitalGauge = new DigitalCummulativeAverageGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MPG1");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"MPG Avg");
+		
+		
+
+		/* Page 4 Row 1 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		
+		/* Page 2 row 2 gauge 1 */
+		lineGraphGauge = new LineGraphGauge();
+		row.addGauge(lineGraphGauge);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "MPG");
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "MPG1");
+		lineGraphGauge.setRangeStart(0);
+		lineGraphGauge.setRangeEnd(100);
 		
 		return sampleProfile;
 	}

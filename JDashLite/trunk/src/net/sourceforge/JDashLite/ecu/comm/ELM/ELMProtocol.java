@@ -27,10 +27,12 @@ package net.sourceforge.JDashLite.ecu.comm.ELM;
 import net.sourceforge.JDashLite.ecu.comm.AbstractProtocol;
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.comm.InvalidStageModeException;
+import net.sourceforge.JDashLite.ecu.param.BitCheckMetaParam;
 import net.sourceforge.JDashLite.ecu.param.DegCelToDegFarMetaParam;
 import net.sourceforge.JDashLite.ecu.param.KpaToInHgMetaParam;
 import net.sourceforge.JDashLite.ecu.param.KpaToPsiMetaParam;
 import net.sourceforge.JDashLite.ecu.param.KphToMphMetaParam;
+import net.sourceforge.JDashLite.ecu.param.MPG1MetaParam;
 import net.sourceforge.JDashLite.error.ErrorDialog;
 import net.sourceforge.JDashLite.error.ErrorLog;
 import waba.io.SerialPort;
@@ -116,41 +118,44 @@ public class ELMProtocol extends AbstractProtocol
 	/** The static initializer that sets up the parameters */
 	static
 	{
+		ELMParameter fuelSystem;
+		ELMParameter maf;
+		ELMParameter kph;
 		Vector pList = new Vector(20);
 
-		ELMParameter fuelSystem = new ELMParameter("FuelSystemStatus", 1, 0x03, 2)
+		fuelSystem = new ELMParameter("FuelSystemStatus", 1, 0x03, 2)
 		{
-			public double getValue() { throw new RuntimeException("Method Not Used"); }
+			public double getValue() { return getResponseDouble(); }
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "Bit Encoded Fuel System Status. ";}
 		};
 		pList.addElement(fuelSystem);
 		
-		pList.addElement(new BitCheckMetaParam("FS0", fuelSystem, 0, 0x80)
+		pList.addElement(new BitCheckMetaParam("FS0", fuelSystem, 0x0100)
 		{
 			public String getLabel() { return "Fuel System F0"; }
 			public String getDescription() {return "Fuel System #1 in Open Loop due to cold engine";}
 		});
 		
-		pList.addElement(new BitCheckMetaParam("FS1", fuelSystem, 0, 0x40)
+		pList.addElement(new BitCheckMetaParam("FS1", fuelSystem, 0x0200)
 		{
 			public String getLabel() { return "Fuel System F1"; }
 			public String getDescription() {return "Fuel System #1 in Closed Loop";}
 		});
 		
-		pList.addElement(new BitCheckMetaParam("FS2", fuelSystem, 0, 0x20)
+		pList.addElement(new BitCheckMetaParam("FS2", fuelSystem, 0x0400)
 		{
 			public String getLabel() { return "Fuel System F2"; }
 			public String getDescription() {return "Fuel System #1 in Open Loop due to engine load";}
 		});
 	
-		pList.addElement(new BitCheckMetaParam("FS3", fuelSystem, 0, 0x10)
+		pList.addElement(new BitCheckMetaParam("FS3", fuelSystem, 0x0800)
 		{
 			public String getLabel() { return "Fuel System F3"; }
 			public String getDescription() {return "Fuel System #1 in Open Loop due to system failure";}
 		});
 		
-		pList.addElement(new BitCheckMetaParam("FS4", fuelSystem, 0, 0x08)
+		pList.addElement(new BitCheckMetaParam("FS4", fuelSystem, 0x1000)
 		{
 			public String getLabel() { return "Fuel System F4"; }
 			public String getDescription() {return "Fuel System #1 in Closed Loop but there is a fault";}
@@ -191,23 +196,24 @@ public class ELMProtocol extends AbstractProtocol
 			public String getDescription() {return "The Long Term Fuel Trim percentage from 0-100% for Bank 1";}
 		});
 		
-		pList.addElement(new ELMParameter("MAF", 1, 0x10, 2) 		
+		maf = new ELMParameter("MAF", 1, 0x10, 2) 		
 		{ 
 			public double getValue() { return ((256.0 * getResponseDouble(0)) + getResponseDouble(1)) / 100.0; }
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "MAF Rate in g/s";}
-		});
+		};
+		pList.addElement(maf);
 		
 		pList.addElement(new ELMParameter("TPS", 1, 0x11, 2) 		
 		{ 
-			public double getValue() { return ((256.0 * getResponseDouble(0)) + getResponseDouble(1)) / 100.0; }
+			public double getValue() { return getResponseDouble(0) * 100.0 / 255.0; }
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "Throttle Position Sensor Percentage 0-100%";}
 		});
 
-		pList.addElement(new ELMParameter("MAP_kpa", 1, 0x0B, 2)
+		pList.addElement(new ELMParameter("MAP_kpa", 1, 0x0B, 1)
 		{
-			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
+			public double getValue() { return getResponseDouble(0); }  
 			public String getLabel() { return "MAP (kPa)"; }
 			public String getDescription() {return "Absolute Intake Manifold Pressure in kPa";}
 		});
@@ -231,12 +237,14 @@ public class ELMProtocol extends AbstractProtocol
 			public String getDescription() {return "Engine Revolutions Per Minute";}
 		});
 
-		pList.addElement(new ELMParameter("KPH", 1, 0x0D, 1)
+		
+		kph = new ELMParameter("KPH", 1, 0x0D, 1)
 		{
 			public double getValue() { return getResponseDouble(0); }  
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "Vehicle speed in KPH";}
-		});
+		};
+		pList.addElement(kph);
 
 		pList.addElement(new KphToMphMetaParam("MPH",(ECUParameter)pList.items[pList.size() - 1])
 		{
@@ -244,9 +252,9 @@ public class ELMProtocol extends AbstractProtocol
 			public String getDescription() {return "Vehicle speed in MPH";}
 		});
 		
-		pList.addElement(new ELMParameter("INTAKE_TEMP_C", 1, 0x0F, 2)
+		pList.addElement(new ELMParameter("INTAKE_TEMP_C", 1, 0x0F, 1)
 		{
-			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
+			public double getValue() { return getResponseDouble(0) - 40.0; }  
 			public String getLabel() { return "Intake Air Temp C"; }
 			public String getDescription() {return "Intake Air Temperature in Degrees C";}
 		});
@@ -257,6 +265,8 @@ public class ELMProtocol extends AbstractProtocol
 			public String getDescription() {return "Intake Air Temperature in Degrees F";}
 		});
 	
+		
+		pList.addElement(new MPG1MetaParam("MPG1", maf, kph));
 
 		/* Populate our array */
 		SUPPORTED_PARAMS = new ECUParameter[pList.size()];

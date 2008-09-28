@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package net.sourceforge.JDashLite.profile;
 
 import net.sourceforge.JDashLite.profile.gauge.AnalogGauge;
+import net.sourceforge.JDashLite.profile.gauge.DigitalCummulativeAverageGauge;
 import net.sourceforge.JDashLite.profile.gauge.DigitalGauge;
 import net.sourceforge.JDashLite.profile.gauge.LEDGauge;
 import net.sourceforge.JDashLite.profile.gauge.LineGraphGauge;
@@ -63,11 +64,12 @@ public class ProfileXMLContentHandler implements ContentHandler
 //	public static final String ATTR_SHOW_TICKS		= "show-ticks";
 //	public static final String ATTR_SHOW_TICK_LABEL	= "tick_labels";
 	
-	public static final String VALUE_DIGITAL		= "digital";
-	public static final String VALUE_LINE_GRAPH		= "line-graph";
-	public static final String VALUE_ANALOG			= "analog";
-	public static final String VALUE_LED			= "led";
-	public static final String VALUE_SWEEP			= "sweep";
+	public static final String VALUE_DIGITAL			= "digital";
+	public static final String VALUE_LINE_GRAPH			= "line-graph";
+	public static final String VALUE_ANALOG				= "analog";
+	public static final String VALUE_LED				= "led";
+	public static final String VALUE_SWEEP				= "sweep";
+	public static final String VALUE_DIGITAL_AVERAGE	= "digital-average";
 	
 	private static int TAG_PROFILE 	= 0;
 	private static int TAG_PAGE 	= 0;
@@ -207,6 +209,10 @@ public class ProfileXMLContentHandler implements ContentHandler
 		else if (VALUE_SWEEP.equals(type))
 		{
 			gauge = new SweepAnalogGauge();
+		}
+		else if (VALUE_DIGITAL_AVERAGE.equals(type))
+		{
+			gauge = new DigitalCummulativeAverageGauge();
 		}
 		else
 		{
@@ -437,8 +443,14 @@ public class ProfileXMLContentHandler implements ContentHandler
 	{
 		addOpenTag(sb, NODE_GAUGE);
 		
+		/* Digital Average */
+		if (gauge instanceof DigitalCummulativeAverageGauge)
+		{
+			addTagAttribute(sb, ATTR_TYPE, VALUE_DIGITAL_AVERAGE);
+		}
+		
 		/* Digital */
-		if (gauge instanceof DigitalGauge)
+		if (gauge instanceof DigitalGauge && !(gauge instanceof DigitalCummulativeAverageGauge))
 		{
 			addTagAttribute(sb, ATTR_TYPE, VALUE_DIGITAL);
 		}

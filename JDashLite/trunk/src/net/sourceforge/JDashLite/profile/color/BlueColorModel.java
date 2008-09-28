@@ -62,6 +62,9 @@ public class BlueColorModel implements ColorModel
 		add(ANALOG_GAUGE_FACE,				get(DEFAULT_BACKGROUND));
 		add(ANALOG_GAUGE_TICK_MARK,			get(DEFAULT_TEXT));
 		add(ANALOG_GAUGE_NEEDLE,			Color.getColor(0xdd,00,00));
+		add(ANALOG_GAUGE_HIGH_NEEDLE,		Color.BLUE);
+		add(ANALOG_GAUGE_LOW_NEEDLE,		Color.GREEN);
+
 
 		
 		add(LED_GAUGE_RING,					get(ANALOG_GAUGE_RING));

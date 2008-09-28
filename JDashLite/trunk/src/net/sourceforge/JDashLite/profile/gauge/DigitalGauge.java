@@ -32,7 +32,7 @@ import waba.fx.Rect;
 import waba.sys.Convert;
 
 /*********************************************************
- * 
+ *  
  *
  *********************************************************/
 public class DigitalGauge extends ProfileGauge
@@ -48,6 +48,18 @@ public class DigitalGauge extends ProfileGauge
 	{
 	}
 
+	/********************************************************
+	 * this method by default simply returns the value from 
+	 * the ECUParameters getValue() method.  But, in the case
+	 * of some fancy calculating digital gauges like the 
+	 * average gauge, this method can be overidden to
+	 * provide a different value.
+	 * @return
+	 ********************************************************/
+	protected double getCurrentDisplayValue()
+	{
+		return getECUParameter().getValue();
+	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
@@ -75,10 +87,12 @@ public class DigitalGauge extends ProfileGauge
 		
 		/* Draw the current value */
 		//f = ProfileRenderer.findFontBestFitHeight((int)(r.height - LABEL_HEIGHT), true);
-		String val = Convert.toString(getECUParameter().getValue(), getIntProperty(PROP_I_PRECISION, 0));
+		String val = Convert.toString(getCurrentDisplayValue(), getIntProperty(PROP_I_PRECISION, 0));
 		f = ProfileRenderer.findFontBestFitWidth(r.width - 10, val, true);
 		g.setFont(f);
 		g.drawText(val, r.x + ((r.width - f.fm.getTextWidth(val)) / 2), r.y + ((r.height - f.fm.height) / 2));
 			
 	}
+	
+	
 }

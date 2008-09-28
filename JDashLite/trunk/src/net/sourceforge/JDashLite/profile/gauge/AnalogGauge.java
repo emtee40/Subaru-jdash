@@ -33,6 +33,7 @@ import waba.fx.Graphics;
 import waba.fx.Image;
 import waba.fx.Rect;
 import waba.sys.Convert;
+import waba.sys.Vm;
 
 /*********************************************************
  *  Zero degrees is straight right.  Rotation is right to left
@@ -52,6 +53,8 @@ public class AnalogGauge extends ProfileGauge
 	protected static final String PROP_B_INCLUDE_TICKS 				= "include-ticks";
 	protected static final String PROP_B_INCLUDE_TICK_LABELS		= "include-tick-labels";
 	protected static final String PROP_B_INCLUDE_DIGITAL_VALUE		= "include-digital-value";
+	protected static final String PROP_B_INCLUDE_HIGH_HOLD			= "include-high-hold";
+	protected static final String PROP_B_INCLUDE_LOW_HOLD			= "include-low-hold";
 	protected static final String PROP_I_PRECISION					= "precision";
 	protected static final String PROP_I_TICK_LABEL_DIV				= "tick-label-div";
 
@@ -61,26 +64,25 @@ public class AnalogGauge extends ProfileGauge
 	protected static final double INNTER_POINT_RADIUS = 0.40;
 	protected static final double NEEDLE_WIDTH = 0.045;
 	
+	private static final int HOLD_NEEDLE_DELAY_IN_MS = 3000;
+	
 	/* The Angle in degrees of the MIN position.  Default is 50 */
 	protected double minimumAngle_ = 50;
 	
 	/* The angle in degrees of the MAX position.  Default is -50 */
 	protected double maximumAngle_ = 360 - 50;
-
-	/* The pivot point */
-//	protected Coord piviotCoord_ = null;
-
-//	/* The range starting value of the ecu value */
-//	private double cachedRangeStart_ = 0.0;
-//	
-//	/* The range ending value of the ecu value */
-//	private double cachedRangeEnd_ = 0.0;
-//
-//	/* The default number of decimal places to show */
-//	private int cachedDecimalPrecision_ = 0;
-//
-//	/* Include the digital value readout ? */
-//	private boolean cachedIncludeDigitalValue_ = false;
+	
+	/* The angle, NOT the value of the high needle */
+	private double highHoldAngle_ = 0.0;
+	
+	/* The angle, NOT the value of the low needle */
+	private double lowHoldAngle_ = 999999999999999999.9;
+	
+	/* The last time the highhold was changed */
+	int highHoldTimestamp_ = 0;
+	
+	/* The last time the lowhold was changed */
+	int lowHoldTimestamp_ = 0;;
 	
 	/* The image for the static background stuff */
 	private Image staticContent_ = null;
@@ -234,6 +236,37 @@ public class AnalogGauge extends ProfileGauge
 		setIntProperty(PROP_I_PRECISION, p);
 	}
 	
+	/********************************************************
+	 * @param i
+	 ********************************************************/
+	public void setIncludeHighHold(boolean i)
+	{
+		setBooleanProperty(PROP_B_INCLUDE_HIGH_HOLD, i);
+	}
+	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public boolean getIncludeHighHold()
+	{
+		return getBooleanProperty(PROP_B_INCLUDE_HIGH_HOLD);
+	}
+	
+	/********************************************************
+	 * @param i
+	 ********************************************************/
+	public void setIncludeLowHold(boolean i)
+	{
+		setBooleanProperty(PROP_B_INCLUDE_LOW_HOLD, i);
+	}
+	
+	/********************************************************
+	 * @return
+	 ********************************************************/
+	public boolean getIncludeLowHold()
+	{
+		return getBooleanProperty(PROP_B_INCLUDE_LOW_HOLD);
+	}
 	
 	/*********************************************************
 	 * (non-Javadoc)
@@ -321,11 +354,82 @@ public class AnalogGauge extends ProfileGauge
 			/* Now, calulcate the angle given the start and end angle */
 			valueAngle = this.minimumAngle_ + ((this.maximumAngle_ - this.minimumAngle_) * valueAngle);
 			
+			
+			Coord[] needlePoints = null;
+			AffineTransform trans = null;
+			
+			/* Draw the high needle */
+			if (getIncludeHighHold())
+			{
+				if (valueAngle > this.highHoldAngle_)
+				{
+					this.highHoldAngle_ = valueAngle;
+					this.highHoldTimestamp_ = Vm.getTimeStamp();
+				}
+				
+				if (this.highHoldTimestamp_ < Vm.getTimeStamp() - HOLD_NEEDLE_DELAY_IN_MS)
+				{
+					this.highHoldTimestamp_ = Vm.getTimeStamp();
+					this.highHoldAngle_ = valueAngle;
+				}
+
+				/* Define the needle.  Origin pointing straight down */
+				needlePoints = new Coord[] {new Coord(needleWidth / 2 * -1,needleLength / 8 * -1), new Coord(needleWidth / 2 * -1, needleLength), new Coord(needleWidth / 2, needleLength), new Coord(needleWidth / 2, needleLength / 8 * -1)};
+				
+				/* Rotate and translate it the calculated angle. */
+				trans = AffineTransform.rotateInstance(Math.toRadians(this.highHoldAngle_));
+				trans.addTranslate(pivot.x, pivot.y);
+				
+				/* Apply the transform */
+				trans.apply(needlePoints);
+				
+				/* Draw the needle */
+				g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_HIGH_NEEDLE));
+				g.setBackColor(cm.get(ColorModel.ANALOG_GAUGE_HIGH_NEEDLE));
+				g.fillPolygon(ProfileRenderer.toXArray(needlePoints), ProfileRenderer.toYArray(needlePoints), needlePoints.length);
+				
+			}
+			
+			
+			/* Draw the Low needle */
+			if (getIncludeLowHold())
+			{
+
+				if (valueAngle < this.lowHoldAngle_)
+				{
+					this.lowHoldAngle_ = valueAngle;
+					this.lowHoldTimestamp_ = Vm.getTimeStamp();
+				}
+				
+				if (this.lowHoldTimestamp_ < Vm.getTimeStamp() - HOLD_NEEDLE_DELAY_IN_MS)
+				{
+					this.lowHoldTimestamp_ = Vm.getTimeStamp();
+					this.lowHoldAngle_ = valueAngle;
+				}
+				
+				/* Define the needle.  Origin pointing straight down */
+				needlePoints = new Coord[] {new Coord(needleWidth / 2 * -1,needleLength / 8 * -1), new Coord(needleWidth / 2 * -1, needleLength), new Coord(needleWidth / 2, needleLength), new Coord(needleWidth / 2, needleLength / 8 * -1)};
+				
+				/* Rotate and translate it the calculated angle. */
+				trans = AffineTransform.rotateInstance(Math.toRadians(this.lowHoldAngle_));
+				trans.addTranslate(pivot.x, pivot.y);
+				
+				/* Apply the transform */
+				trans.apply(needlePoints);
+				
+				/* Draw the needle */
+				g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_LOW_NEEDLE));
+				g.setBackColor(cm.get(ColorModel.ANALOG_GAUGE_LOW_NEEDLE));
+				g.fillPolygon(ProfileRenderer.toXArray(needlePoints), ProfileRenderer.toYArray(needlePoints), needlePoints.length);
+
+			}
+			
+			
 			/* Define the needle.  Origin pointing straight down */
-			Coord[] needlePoints = new Coord[] {new Coord(needleWidth / 2 * -1,needleLength / 8 * -1), new Coord(needleWidth / 2 * -1, needleLength), new Coord(needleWidth / 2, needleLength), new Coord(needleWidth / 2, needleLength / 8 * -1)};
+			needlePoints = new Coord[] {new Coord(needleWidth / 2 * -1,needleLength / 8 * -1), new Coord(needleWidth / 2 * -1, needleLength - needleWidth), new Coord(needleWidth / 2, needleLength - needleWidth), new Coord(needleWidth / 2, needleLength / 8 * -1)};
 			
 			/* Rotate and translate it the calculated angle. */
-			AffineTransform trans = AffineTransform.rotateInstance(Math.toRadians(valueAngle));
+			trans = AffineTransform.rotateInstance(Math.toRadians(valueAngle));
 			trans.addTranslate(pivot.x, pivot.y);
 			
 			/* Apply the transform */
@@ -335,6 +439,7 @@ public class AnalogGauge extends ProfileGauge
 			g.setForeColor(cm.get(ColorModel.ANALOG_GAUGE_NEEDLE));
 			g.setBackColor(cm.get(ColorModel.ANALOG_GAUGE_NEEDLE));
 			g.fillPolygon(ProfileRenderer.toXArray(needlePoints), ProfileRenderer.toYArray(needlePoints), needlePoints.length);
+			
 			
 			/* Draw the nub */
 			g.fillCircle(pivot.x, pivot.y, (int)(needleWidth * 1.5));

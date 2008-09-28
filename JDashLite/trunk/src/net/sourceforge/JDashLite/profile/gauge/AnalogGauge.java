@@ -64,7 +64,11 @@ public class AnalogGauge extends ProfileGauge
 	protected static final double INNTER_POINT_RADIUS = 0.40;
 	protected static final double NEEDLE_WIDTH = 0.045;
 	
-	private static final int HOLD_NEEDLE_DELAY_IN_MS = 3000;
+	/* The time a hold needle holds it's position */
+	private static final int HOLD_NEEDLE_DELAY_IN_MS = 2000;
+	
+	/* The angle rate a hold needle moves back into position */
+	private static final double HOLD_NEEDLE_RETURN_ANGLE_INCREMENT = 10.0;
 	
 	/* The Angle in degrees of the MIN position.  Default is 50 */
 	protected double minimumAngle_ = 50;
@@ -369,8 +373,13 @@ public class AnalogGauge extends ProfileGauge
 				
 				if (this.highHoldTimestamp_ < Vm.getTimeStamp() - HOLD_NEEDLE_DELAY_IN_MS)
 				{
-					this.highHoldTimestamp_ = Vm.getTimeStamp();
-					this.highHoldAngle_ = valueAngle;
+					this.highHoldAngle_ -= HOLD_NEEDLE_RETURN_ANGLE_INCREMENT;
+					
+					if (this.highHoldAngle_ <= valueAngle + (HOLD_NEEDLE_RETURN_ANGLE_INCREMENT / 2.0))
+					{
+						this.highHoldAngle_ = valueAngle;
+						this.highHoldTimestamp_ = Vm.getTimeStamp();
+					}
 				}
 
 				/* Define the needle.  Origin pointing straight down */
@@ -401,10 +410,17 @@ public class AnalogGauge extends ProfileGauge
 					this.lowHoldTimestamp_ = Vm.getTimeStamp();
 				}
 				
+				/* If the hold time has passed, then move the low needel quickly to the current angle */
 				if (this.lowHoldTimestamp_ < Vm.getTimeStamp() - HOLD_NEEDLE_DELAY_IN_MS)
 				{
-					this.lowHoldTimestamp_ = Vm.getTimeStamp();
-					this.lowHoldAngle_ = valueAngle;
+					this.lowHoldAngle_+= HOLD_NEEDLE_RETURN_ANGLE_INCREMENT;
+
+					if (this.lowHoldAngle_ >= valueAngle - (HOLD_NEEDLE_RETURN_ANGLE_INCREMENT / 2.0))
+					{
+						this.lowHoldAngle_ = valueAngle;
+						this.lowHoldTimestamp_ = Vm.getTimeStamp();
+					}
+
 				}
 				
 				/* Define the needle.  Origin pointing straight down */

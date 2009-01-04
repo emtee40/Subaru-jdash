@@ -171,6 +171,27 @@ public class SSMProtocol extends AbstractProtocol
 		return SUPPORTD_PARAMS;
 	}
 	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#getSpecialToolNames()
+	 ********************************************************/
+	public String[] getSpecialToolNames()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#executeSpecialTool(int)
+	 ********************************************************/
+	public String executeSpecialTool(int index)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 //	/*******************************************************
 //	 *  init or re-init the ELM interface. 

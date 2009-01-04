@@ -71,7 +71,7 @@ public class PreferencesWindow extends AbstractWindow
 	private ComboBox portComboBox_ = null;
 	private Check    autoConnectCheckBox_ = null;
 //	private Check    disableAutoOffCheckBox_ = null;
-	private Check    scanDisplayedOnlyCheckBox_ = null;
+//	private Check    scanDisplayedOnlyCheckBox_ = null;
 	private Check    testModeCheckBox_ = null;
 	private ComboBox logLevel_ = null;
 	
@@ -143,11 +143,11 @@ public class PreferencesWindow extends AbstractWindow
 		settingsContainer.add(new Label("Auto Connect:"), BEFORE - CONTROL_SPACE, SAME);
 
 		
-		/* Scan displayed only */
-		this.scanDisplayedOnlyCheckBox_ = new Check("");
-		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
-		settingsContainer.add(this.scanDisplayedOnlyCheckBox_, AFTER, SAME);
-		settingsContainer.add(new Label("Scan Only Visible:"), BEFORE - CONTROL_SPACE, SAME);
+//		/* Scan displayed only */
+//		this.scanDisplayedOnlyCheckBox_ = new Check("");
+//		settingsContainer.add(new Label(" "), CENTER, AFTER + CONTROL_SPACE);
+//		settingsContainer.add(this.scanDisplayedOnlyCheckBox_, AFTER, SAME);
+//		settingsContainer.add(new Label("Scan Only kle:"), BEFORE - CONTROL_SPACE, SAME);
 		
 
 		/* Buggy  */
@@ -181,7 +181,7 @@ public class PreferencesWindow extends AbstractWindow
 		this.guiStyleComboBox_.select(ListItem.findItem(GUI_LIST, this.prefs_.getInt(Preferences.KEY_GUI_STYLE, GUI_LIST[0].getId())));
 		this.portComboBox_.select(ListItem.findItem(PORT_LIST, this.prefs_.getInt(Preferences.KEY_COM_PORT, PORT_LIST[0].getId())));
 		this.autoConnectCheckBox_.setChecked(this.prefs_.getBoolean(Preferences.KEY_AUTO_CONNET, false));
-		this.scanDisplayedOnlyCheckBox_.setChecked(this.prefs_.getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
+//		this.scanDisplayedOnlyCheckBox_.setChecked(this.prefs_.getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
 //		this.disableAutoOffComboBox_.select(ListItem.findItem(YESNO_LIST, this.prefs_.getInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, YESNO_LIST[1].getId())));
 		this.testModeCheckBox_.setChecked(this.prefs_.getBoolean(Preferences.KEY_TEST_MODE, false));
 		this.logLevel_.select(this.prefs_.getString(Preferences.KEY_LOG_LEVEL, ErrorLog.LOG_LEVELS[0]));
@@ -209,7 +209,7 @@ public class PreferencesWindow extends AbstractWindow
 			this.prefs_.setInt(Preferences.KEY_GUI_STYLE, ((ListItem)this.guiStyleComboBox_.getSelectedItem()).getId());
 			this.prefs_.setInt(Preferences.KEY_COM_PORT, ((ListItem)this.portComboBox_.getSelectedItem()).getId());
 			this.prefs_.setBoolean(Preferences.KEY_AUTO_CONNET, this.autoConnectCheckBox_.getChecked());
-			this.prefs_.setBoolean(Preferences.KEY_DISPLAYED_SENSORS, this.scanDisplayedOnlyCheckBox_.getChecked());
+//			this.prefs_.setBoolean(Preferences.KEY_DISPLAYED_SENSORS, this.scanDisplayedOnlyCheckBox_.getChecked());
 //			this.prefs_.setInt(Preferences.KEY_DISABLE_AUTO_SCREEN_OFF, ((ListItem)this.disableAutoOffComboBox_.getSelectedItem()).getId());
 			this.prefs_.setBoolean(Preferences.KEY_TEST_MODE, this.testModeCheckBox_.getChecked());
 			this.prefs_.setString(Preferences.KEY_LOG_LEVEL, this.logLevel_.getSelectedItem().toString());

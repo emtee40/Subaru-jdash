@@ -599,7 +599,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 
 		
 		/* re-enable/disable active params */
-		this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
+		this.profileRenderer_.enableDisableParameters();
 		
 
 	}
@@ -660,7 +660,7 @@ public class JDashLiteMainWindow extends MainWindow/*GameEngine*/ implements Pro
 			/* Create a new profile display container, But, you'll notice we dont' add it. Because
 			 * we are not acutally using any GUI components.  This is display ONLY */
 			this.profileRenderer_ = new ProfileRenderer(this.activeProfile_, this.protocolHandler_);
-			this.profileRenderer_.enableDisableParameters(getPreferences().getBoolean(Preferences.KEY_DISPLAYED_SENSORS, false));
+			this.profileRenderer_.enableDisableParameters();
 			
 			/* Add the profile render event listener.  This forces refreshes when the protocol handler fetches a batch */
 			this.protocolHandler_.addProtocolEventListener(this);

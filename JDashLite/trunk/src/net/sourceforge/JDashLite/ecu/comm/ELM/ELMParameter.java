@@ -29,23 +29,41 @@ import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 
 
 /*********************************************************
- * 
+ * http://en.wikipedia.org/wiki/OBD-II_PIDs
  *
  *********************************************************/
 public abstract class ELMParameter extends ECUParameter
 {
 	
+	
+	public static final int MODE_1 = 1; 
+	public static final int MODE_2 = 2;
+	public static final int MODE_3 = 3;  /* Current Trouble Codes */
+	public static final int MODE_4 = 4;  /* Clear Trouble Codes */
+	public static final int MODE_5 = 5;
+	public static final int MODE_6 = 6;
+	public static final int MODE_7 = 7;  /* Pending Trouble Codes */
+	public static final int MODE_8 = 8;
+	public static final int MODE_9 = 9;
+	public static final int MODE_A = 10;  /* Permanent Trouble Codes */
+	
+	public static final int COMMAND_NULL = -1;
+	public static final int RESONSE_SIZE_DYNAMIC = -1;
+	
 	private int mode_ = -1;
 	private int command_ = 01;
+	private int responseSize_ = 0;
 	private int[] responseBytes_ = null;
+	protected boolean responseIsInHex_ = true; 
 	
 	private String fullCommand_ = null;
+	private String expectedResponsePrefix_ = null;
 	
 	/********************************************************
 	 * 
 	 * @param name IN - The uniqe name for this parameter.
 	 * @param mode IN - the ELM mode.  1 is the most common.
-	 * @param command IN - the PID command. eg 0x0c for RPM
+	 * @param command IN - the PID command. eg 0x0c for RPM.  a command of -1 means it will NOT be sent.  Like when sending a mode 03 request.
 	 * @param responseSize IN - the expected number of response bytes, including the leading 41 0c ....
 	 *******************************************************/
 	public ELMParameter(String name, int mode, int command, int responseSize)
@@ -53,7 +71,18 @@ public abstract class ELMParameter extends ECUParameter
 		super(name);
 		this.mode_ = mode;
 		this.command_ = command;
-		responseBytes_ = new int[responseSize];
+		this.responseSize_ = responseSize;
+		
+		/* Look to see if a dynamic sized response is identified.  Ok.. so. we're not really making it dynamic, 
+		 * but rather just givign it a nice big buffer. So far, this only seems needed for the DTCs anyway */
+		if (RESONSE_SIZE_DYNAMIC == responseSize)
+		{
+			responseBytes_ = new int[ELMProtocol.MAX_RESPONSE_BUFFER];
+		}
+		else
+		{
+			responseBytes_ = new int[responseSize];
+		}
 		
 		
 	}
@@ -74,6 +103,28 @@ public abstract class ELMParameter extends ECUParameter
 		return this.command_;
 	}
 	
+	/********************************************************
+	 * The default is true.  The response from an ELM module
+	 * is usually in HEX form. Except for DTCs. They return in
+	 * string/INT form.  If you are expecting a string of ints
+	 * rather than a string of HEX, then return a false here.
+	 * 
+	 * @return
+	 ********************************************************/
+	public boolean isResponseInHex()
+	{
+		return responseIsInHex_;
+	}
+	
+	/*******************************************************
+	 * returns the value passed into the constructor for responseSize.
+	 * This value is used to allocate space in the response buffer. 
+	 * @return
+	 ********************************************************/
+	public int getResponseSize()
+	{
+		return this.responseSize_;
+	}
 	
 	/*******************************************************
 	 * Given the mode and PID, generate the full ELM command, 
@@ -84,12 +135,37 @@ public abstract class ELMParameter extends ECUParameter
 	{
 		if (this.fullCommand_ == null)
 		{
-			this.fullCommand_ = Convert.unsigned2hex(getMode(), 2) + Convert.unsigned2hex(getCommand(), 2) + ELMProtocol.ELM_NEWLINE;
+			this.fullCommand_ = Convert.unsigned2hex(getMode(), 2);
+			
+			/* A -1 command actually means to NOT send the command.  Like when sending mode 03 requests */
+			if (getCommand() != COMMAND_NULL)
+			{
+				this.fullCommand_ += Convert.unsigned2hex(getCommand(), 2) + ELMProtocol.ELM_NEWLINE;
+			}
 		}
 		
 		return this.fullCommand_;
 	}
 
+	/*******************************************************
+	 * @return
+	 ********************************************************/
+	public String getExpectedResponsePrefix()
+	{
+		if (this.expectedResponsePrefix_ == null)
+		{
+			this.expectedResponsePrefix_ = "4" + Convert.unsigned2hex(getMode(), 1);
+			
+			/* A -1 command actually means to NOT send the command.  Like when sending mode 03 requests */
+			if (getCommand() != COMMAND_NULL)
+			{
+				this.expectedResponsePrefix_ += Convert.unsigned2hex(getCommand(), 2);
+			}
+		}
+		
+		return this.expectedResponsePrefix_;
+	}
+	
 	/*******************************************************
 	 * @return
 	 ********************************************************/
@@ -130,12 +206,19 @@ public abstract class ELMParameter extends ECUParameter
 	 ********************************************************/
 	public double getResponseDouble()
 	{
-		int r = getResponseByte(0);
-		if (responseBytes_.length == 2)
+		if (responseBytes_.length > 8)
+		{
+			throw new RuntimeException("Cannot convert the array of " + responseBytes_.length + " bytes to a long.  A long cannot be more than 8 bytes.");
+		}
+		
+		/* Place and shift the bytes into a long */
+		long r = getResponseByte(0);
+		for (int shiftCount = 1; shiftCount < responseBytes_.length; shiftCount++)
 		{
 			r = r << 8;
-			r += getResponseByte(1);
+			r += getResponseByte(shiftCount);
 		}
+		
 		return (double)r;
 	}
 	

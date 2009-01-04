@@ -42,7 +42,7 @@ public class Preferences
 	public static final String KEY_GUI_STYLE					= "gui.style";
 	public static final String KEY_COM_PORT 					= "com.port";
 	public static final String KEY_AUTO_CONNET 					= "auto.connect";
-	public static final String KEY_DISPLAYED_SENSORS 			= "displayed.sensors";
+//	public static final String KEY_DISPLAYED_SENSORS 			= "displayed.sensors";
 	public static final String KEY_ACTIVE_PROFILE				= "active.profile";
 	public static final String KEY_TEST_MODE 					= "test.mode";
 	public static final String KEY_LOG_LEVEL					= "log.level";

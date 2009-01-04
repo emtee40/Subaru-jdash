@@ -80,6 +80,27 @@ public class TestProtocol extends AbstractProtocol implements ProtocolHandler
 	
 	/*********************************************************
 	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#getSpecialToolNames()
+	 ********************************************************/
+	public String[] getSpecialToolNames()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	/*********************************************************
+	 * (non-Javadoc)
+	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#executeSpecialTool(int)
+	 ********************************************************/
+	public String executeSpecialTool(int index)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/*********************************************************
+	 * (non-Javadoc)
 	 * @see net.sourceforge.JDashLite.ecu.comm.ProtocolHandler#doTask()
 	 ********************************************************/
 	public void doTask()

@@ -46,12 +46,6 @@ public class ProfileEditWindow extends AbstractWindow
 {
 
 	
-	private static final ListItem[] PROTOCOL_LIST = new ListItem[]
-	{
-		new ListItem(ELMProtocol.class.getName(),	"ELM OBD2"),
-		new ListItem(SSMProtocol.class.getName(),	"Subaru SSM")
-	};
-	
 	private Profile profile_ = null;
 	
 	private Edit profileNameEditBox_ = null;
@@ -92,7 +86,7 @@ public class ProfileEditWindow extends AbstractWindow
  		this.profileNameEditBox_.getRect().width = getClientRect().width - this.profileNameEditBox_.getRect().x - CONTROL_SPACE;
  		
 		/* Protocol Handler */
-		this.protocolHandlerComboBox_ = new ComboBox(PROTOCOL_LIST);
+		this.protocolHandlerComboBox_ = new ComboBox(ProtocolHandler.PROTOCOL_LIST);
 		this.protocolHandlerComboBox_.fullHeight = true;
 		add(new Label("Protocol:"), LEFT + CONTROL_SPACE, AFTER + CONTROL_SPACE);
 		add(this.protocolHandlerComboBox_, AFTER + CONTROL_SPACE, SAME);
@@ -101,7 +95,7 @@ public class ProfileEditWindow extends AbstractWindow
 
 		/* Set the current profile values */
 		this.profileNameEditBox_.setText(this.profile_.getName() == null?"New Profile":this.profile_.getName());
-		this.protocolHandlerComboBox_.select(ListItem.findItem(PROTOCOL_LIST, this.profile_.getProtocolClass()));
+		this.protocolHandlerComboBox_.select(ListItem.findItem(ProtocolHandler.PROTOCOL_LIST, this.profile_.getProtocolClass()));
 
 		
 		

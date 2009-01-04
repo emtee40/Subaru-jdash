@@ -107,7 +107,7 @@ public class ProfileRenderer
 //	/** If there is a status messgae to be displayed, put it here */
 //	private String statusMessage_ = null;
 	
-	private boolean fetchVisibleOnly_ = false;
+//	private boolean fetchVisibleOnly_ = false;
 	
 	
 	/* The FIRST render call needs to render EVERYBODY at least once.. first. */
@@ -283,7 +283,7 @@ public class ProfileRenderer
 		this.statusBar_.setActivePage(this.currentlyActivePage_);
 		
 		/* enable or disable the desired parameters */
-		enableDisableParameters(this.fetchVisibleOnly_);
+		enableDisableParameters();
 			
 			
 	}
@@ -292,9 +292,9 @@ public class ProfileRenderer
 	/*******************************************************
 	 * @param visibleOnly
 	 ********************************************************/
-	public void enableDisableParameters(boolean visibleOnly)
+	public void enableDisableParameters()
 	{
-		this.fetchVisibleOnly_ = visibleOnly;
+//		this.fetchVisibleOnly_ = visibleOnly;
 		
 		
 		/* Since a gauge can be on multiple pages, we need to simply cache the ones to be enabled,
@@ -318,20 +318,13 @@ public class ProfileRenderer
 					/* The default, is to disable */
 					gauge.getECUParameter().setEnabled(false);
 
-					/* If we want visable only, then we need to check the active page id */
-					if (this.fetchVisibleOnly_)
+					/* We want visable only so we need to check the active page id */
+					if (pageIndex == this.currentlyActivePage_)
 					{
-						if (pageIndex == this.currentlyActivePage_)
+						if (toEnableParams.indexOf(gauge.getECUParameter()) < 0)
 						{
-							if (toEnableParams.indexOf(gauge.getECUParameter()) < 0)
-							{
-								toEnableParams.addElement(gauge.getECUParameter());
-							}
+							toEnableParams.addElement(gauge.getECUParameter());
 						}
-					}
-					else
-					{
-						gauge.getECUParameter().setEnabled(true);
 					}
 					
 				} /* end gauge loop */

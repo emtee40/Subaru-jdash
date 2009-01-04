@@ -443,45 +443,47 @@ public class Profile
 		row = new ProfileRow();
 		page.addRow(row);
 		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC_COUNT");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CEL#");
+
+//		digitalGauge = new DigitalGauge();
+//		row.addGauge(digitalGauge);
+//		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS1");
+//		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+//		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CL");
+//
+//		digitalGauge = new DigitalGauge();
+//		row.addGauge(digitalGauge);
+//		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS2");
+//		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+//		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL");
 		
 		digitalGauge = new DigitalGauge();
 		row.addGauge(digitalGauge);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FuelSystemStatus");
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC1");
 		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"FS");
-
-		digitalGauge = new DigitalGauge();
-		row.addGauge(digitalGauge);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS0");
-		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL tmp");
-
-
-		digitalGauge = new DigitalGauge();
-		row.addGauge(digitalGauge);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS1");
-		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CL");
-
-		digitalGauge = new DigitalGauge();
-		row.addGauge(digitalGauge);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS2");
-		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL ld");
-
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC1");
 		
 		digitalGauge = new DigitalGauge();
 		row.addGauge(digitalGauge);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS3");
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC2");
 		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL err");
-
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC2");
 		
 		digitalGauge = new DigitalGauge();
 		row.addGauge(digitalGauge);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS4");
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC3");
 		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CL err");
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC3");
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC4");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC4");
 
 		
 		/* Page 4 */

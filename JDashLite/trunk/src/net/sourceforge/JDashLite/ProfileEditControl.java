@@ -33,7 +33,10 @@ import waba.fx.Color;
 import waba.fx.Graphics;
 import waba.fx.Rect;
 import waba.ui.Control;
+import waba.ui.ControlEvent;
 import waba.ui.Event;
+import waba.ui.IKeys;
+import waba.ui.KeyEvent;
 import waba.ui.PenEvent;
 
 /*********************************************************
@@ -55,6 +58,7 @@ public class ProfileEditControl extends Control
 	public ProfileEditControl(Profile profile)
 	{
 		this.profile_ = profile;
+//		setFocusLess(true);
 	}
 	
 	/*******************************************************
@@ -87,7 +91,23 @@ public class ProfileEditControl extends Control
 			case PenEvent.PEN_DRAG:
 //				System.out.println("Pen Drag");
 			break;
-				
+			
+			case ControlEvent.FOCUS_IN:
+//				System.out.println("Focus In");
+			break;
+			
+			case ControlEvent.FOCUS_OUT:
+//				System.out.println("Focus Out");
+			break;
+			
+			case KeyEvent.KEY_PRESS:
+				doKeyPress((KeyEvent)event);
+			break;
+			
+			default:
+//				System.out.println("E: " + event.type);
+				super.onEvent(event);
+			break;
 			
 		}
 		
@@ -129,6 +149,45 @@ public class ProfileEditControl extends Control
 
 		Rect gaugeRect = this.profileRenderer_.getGaugeRect(pageIndex, rowIndex, gaugeIndex);
 		this.activeElementRect_ = gaugeRect;
+		
+	}
+	
+	/********************************************************
+	 * @param ke
+	 ********************************************************/
+	private void doKeyPress(KeyEvent ke)
+	{
+//		System.out.println("Key Press");
+
+		if (ke.isActionKey())
+		{
+//			System.out.println("Action");
+			
+			/* This took a while to discover!!  This method will return the focus back to the outside */
+			postEvent(new ControlEvent(ControlEvent.PRESSED, this));
+			//changeHighlighted(this.getParent(), true);
+		}
+		
+		switch(ke.key)
+		{
+			
+			case IKeys.UP:
+//				System.out.println("up");
+			break;
+			
+			case IKeys.DOWN:
+//				System.out.println("down");
+			break;
+			
+			case IKeys.LEFT:
+//				System.out.println("left");
+			break;
+			
+			case IKeys.RIGHT:
+//				System.out.println("right");
+			break;
+			
+		}
 		
 	}
 	

@@ -52,6 +52,17 @@ public abstract class MultiParamMetaParameter extends MetaParameter
 		super(name);
 		this.params_ = params;
 
+		/* If no parameters were provided, then no point in listening for any changes */
+		if ((this.params_ == null) || (this.params_.length < 1))
+		{
+			return;
+		}
+
+		if (this.params_[0] == null)
+		{
+			return;
+		}
+		
 		this.params_[0].addValueChangedListener(new ValueChangedListener()
 		{
 			public void onValueChanged()

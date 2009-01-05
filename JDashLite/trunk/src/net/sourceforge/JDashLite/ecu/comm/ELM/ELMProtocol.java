@@ -32,6 +32,7 @@ import net.sourceforge.JDashLite.ecu.param.DegCelToDegFarMetaParam;
 import net.sourceforge.JDashLite.ecu.param.KpaToInHgMetaParam;
 import net.sourceforge.JDashLite.ecu.param.KpaToPsiMetaParam;
 import net.sourceforge.JDashLite.ecu.param.KphToMphMetaParam;
+import net.sourceforge.JDashLite.ecu.param.MPG1AverageMetaParam;
 import net.sourceforge.JDashLite.ecu.param.MPG1MetaParam;
 import net.sourceforge.JDashLite.ecu.param.OneParamMetaParameter;
 import net.sourceforge.JDashLite.error.ErrorDialog;
@@ -130,6 +131,7 @@ public class ELMProtocol extends AbstractProtocol
 	{
 		ELMParameter DTCStatus;
 		ELMParameter DTCCodes;
+		ELMParameter PTCCodes;
 		ELMParameter fuelSystem;
 		ELMParameter maf;
 		ELMParameter kph;
@@ -171,54 +173,31 @@ public class ELMProtocol extends AbstractProtocol
 		};
 		pList.addElement(DTCCodes);
 		
-		/* DTC 1 */
+		/* DTCs */
 		pList.addElement(new ELMDTCParameter("DTC1", DTCCodes, 0));
 		pList.addElement(new ELMDTCParameter("DTC2", DTCCodes, 4));
 		pList.addElement(new ELMDTCParameter("DTC3", DTCCodes, 8));
 		pList.addElement(new ELMDTCParameter("DTC4", DTCCodes, 14));
 		pList.addElement(new ELMDTCParameter("DTC5", DTCCodes, 18));
 		pList.addElement(new ELMDTCParameter("DTC6", DTCCodes, 22));
-//		
-//		/* DTC 2 */
-//		pList.addElement(new OneParamMetaParameter("DTC2", DTCCodes)
-//		{
-//			public double getValue() { return Convert.toDouble(new String(((ELMParameter)p1_).getResponseBytes(), 4, 4));  }
-//			public String getLabel() { return getName(); }
-//			public String getDescription() {return "Diagnostic Trouble Code 2";}
-//		});
-//		
-//		/* DTC 3 */
-//		pList.addElement(new OneParamMetaParameter("DTC3", DTCCodes)
-//		{
-//			public double getValue() { return Convert.toDouble(new String(((ELMParameter)p1_).getResponseBytes(), 8, 4));  }
-//			public String getLabel() { return getName(); }
-//			public String getDescription() {return "Diagnostic Trouble Code 3";}
-//		});
-//
-//		/* DTC 4 */
-//		pList.addElement(new OneParamMetaParameter("DTC4", DTCCodes)
-//		{
-//			public double getValue() { return Convert.toDouble(new String(((ELMParameter)p1_).getResponseBytes(), 14, 4));  }
-//			public String getLabel() { return getName(); }
-//			public String getDescription() {return "Diagnostic Trouble Code 4";}
-//		});
-//
-//		/* DTC 5 */
-//		pList.addElement(new OneParamMetaParameter("DTC5", DTCCodes)
-//		{
-//			public double getValue() { return Convert.toDouble(new String(((ELMParameter)p1_).getResponseBytes(), 18, 4));  }
-//			public String getLabel() { return getName(); }
-//			public String getDescription() {return "Diagnostic Trouble Code 5";}
-//		});
-//
-//		/* DTC 6 */
-//		pList.addElement(new OneParamMetaParameter("DTC6", DTCCodes)
-//		{
-//			public double getValue() { return Convert.toDouble(new String(((ELMParameter)p1_).getResponseBytes(), 22, 4));  }
-//			public String getLabel() { return getName(); }
-//			public String getDescription() {return "Diagnostic Trouble Code 6";}
-//		});
-
+		
+		
+		/* The full set of Pending DTCs.  The buffer is set to 28 which should be big enough for 8 lines of DTCs.  */
+		PTCCodes = new ELMParameter("PTCCodes", ELMParameter.MODE_7, ELMParameter.COMMAND_NULL , ELMParameter.RESONSE_SIZE_DYNAMIC)
+		{
+			public double getValue() { return 0; }
+			public String getLabel() { return getName(); }
+			public boolean isResponseInHex() { return false; }
+			public boolean isUserSelectable() { return false; }
+			public String getDescription() {return "Full List of Pending DTCs";}
+		};
+		pList.addElement(DTCCodes);
+		pList.addElement(new ELMDTCParameter("PTC1", PTCCodes, 0));
+		pList.addElement(new ELMDTCParameter("PTC2", PTCCodes, 4));
+		pList.addElement(new ELMDTCParameter("PTC3", PTCCodes, 8));
+		pList.addElement(new ELMDTCParameter("PTC4", PTCCodes, 14));
+		pList.addElement(new ELMDTCParameter("PTC5", PTCCodes, 18));
+		pList.addElement(new ELMDTCParameter("PTC6", PTCCodes, 22));
 		
 		fuelSystem = new ELMParameter("FuelSystemStatus", ELMParameter.MODE_1, 0x03, 2)
 		{
@@ -364,7 +343,9 @@ public class ELMProtocol extends AbstractProtocol
 		});
 	
 		
+		/* The various MPG calculations */
 		pList.addElement(new MPG1MetaParam("MPG1", maf, kph));
+		pList.addElement(new MPG1AverageMetaParam("MPG1Average", maf, kph));
 
 		/* Populate our array */
 		SUPPORTED_PARAMS = new ECUParameter[pList.size()];
@@ -1146,6 +1127,8 @@ public class ELMProtocol extends AbstractProtocol
 		/* Process each byte.  Note, HEX strings are treated different from non-hex strings */
 		if (p.isResponseInHex())
 		{
+			/* Since the parameter claims to expect it's response in HEX form, we'll convert every
+			 * 2 chars from a HEX representation, into a single INT value */
 			while (bufferOffset < this.responseBufferOffset_)
 			{
 				/* Convert the next 2 characters into an int */
@@ -1161,6 +1144,7 @@ public class ELMProtocol extends AbstractProtocol
 		}
 		else
 		{
+			/* If not HEX, then we'll convert each character/byte into a single INT. */
 			while (bufferOffset < this.responseBufferOffset_)
 			{
 				/* Convert from the char value to it's int value */

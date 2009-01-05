@@ -70,7 +70,7 @@ public class MPG1MetaParam extends MultiParamMetaParameter
 	{
 		if (this.params_[MAF_NDX].getValue() != 0)
 		{
-			return (411.77346 * this.params_[KPH_NDX].getValue() *  0.621371) / (3600.0 * this.params_[MAF_NDX].getValue() / 100);
+			return calculateMPG(this.params_[MAF_NDX].getValue(), this.params_[KPH_NDX].getValue());
 		}
 		else
 		{
@@ -95,5 +95,16 @@ public class MPG1MetaParam extends MultiParamMetaParameter
 	public String getDescription()
 	{
 		return DESC; 
+	}
+	
+	/********************************************************
+	 * Given a MAF and KPH value, calculate an MPG value.
+	 * @param MAF
+	 * @param KPH
+	 * @return
+	 ********************************************************/
+	public double calculateMPG(double MAF, double KPH)
+	{
+		return (411.77346 * KPH *  0.621371) / (3600.0 * MAF / 100);
 	}
 }

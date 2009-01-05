@@ -449,18 +449,6 @@ public class Profile
 		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
 		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CEL#");
 
-//		digitalGauge = new DigitalGauge();
-//		row.addGauge(digitalGauge);
-//		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS1");
-//		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-//		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CL");
-//
-//		digitalGauge = new DigitalGauge();
-//		row.addGauge(digitalGauge);
-//		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "FS2");
-//		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
-//		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"OL");
-		
 		digitalGauge = new DigitalGauge();
 		row.addGauge(digitalGauge);
 		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC1");
@@ -495,34 +483,160 @@ public class Profile
 		row = new ProfileRow();
 		page.addRow(row);
 
-		
+
+		/* Page 4 row 0 gauge 0 */
 		digitalGauge = new DigitalGauge();
 		row.addGauge(digitalGauge);
 		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MPG1");
 		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
 		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"MPG");
+		digitalGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.2);
 
 		
-		digitalGauge = new DigitalCummulativeAverageGauge();
-		row.addGauge(digitalGauge);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MPG1");
-		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
-		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"MPG Avg");
-		
-		
-
-		/* Page 4 Row 1 */
-		row = new ProfileRow();
-		page.addRow(row);
-		
-		
-		/* Page 2 row 2 gauge 1 */
+		/* Page 4 row 0 gauge 1 */
 		lineGraphGauge = new LineGraphGauge();
 		row.addGauge(lineGraphGauge);
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "MPG");
 		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "MPG1");
 		lineGraphGauge.setRangeStart(0);
 		lineGraphGauge.setRangeEnd(100);
+
+		
+		/* Page 4 Row 1 */
+		row = new ProfileRow();
+		page.addRow(row);
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "MPG1Average");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 2);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"MPG Avg");
+		digitalGauge.setDoubleProperty(AnalogGauge.PROP_D_WIDTH, 0.2);
+
+		/* Page 4 row 1 gauge 1 */
+		lineGraphGauge = new LineGraphGauge();
+		row.addGauge(lineGraphGauge);
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_LABEL, "MPG Avg");
+		lineGraphGauge.setProperty(LineGraphGauge.PROP_STR_PARAMETER_NAME, "MPG1Average");
+		lineGraphGauge.setRangeStart(0);
+		lineGraphGauge.setRangeEnd(100);
+
+		
+		
+		
+		/* Page 5 */
+		page = new ProfilePage();
+		sampleProfile.addPage(page);
+
+		/* Page 5 Row 0 */
+		row = new ProfileRow();
+		page.addRow(row);
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "CEL");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"CEL");
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC_COUNT");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTCs");
+
+		
+		/* Page 5 Row 1 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC1");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC 01");
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC2");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC 02");
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC3");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC 03");
+		
+
+		/* Page 5 Row 2 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC4");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC 04");
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC5");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC 05");
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC6");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"DTC 06");
+
+		
+		/* Page 5 Row 2 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC1");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"PTC 01");
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC2");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"PTC 02");
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC3");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"PTC 03");
+
+		/* Page 5 Row 3 */
+		row = new ProfileRow();
+		page.addRow(row);
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC4");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"PTC 04");
+
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC5");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"PTC 05");
+		
+		digitalGauge = new DigitalGauge();
+		row.addGauge(digitalGauge);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_PARAMETER_NAME,  "DTC6");
+		digitalGauge.setIntProperty(DigitalGauge.PROP_I_PRECISION, 0);
+		digitalGauge.setProperty(DigitalGauge.PROP_STR_LABEL,"PTC 06");
+
+
+		
 		
 		return sampleProfile;
 	}

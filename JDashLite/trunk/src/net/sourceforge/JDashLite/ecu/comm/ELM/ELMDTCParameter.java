@@ -27,7 +27,6 @@ package net.sourceforge.JDashLite.ecu.comm.ELM;
 import waba.sys.Convert;
 import net.sourceforge.JDashLite.ecu.comm.ECUParameter;
 import net.sourceforge.JDashLite.ecu.param.OneParamMetaParameter;
-import net.sourceforge.JDashLite.error.ErrorLog;
 
 /*********************************************************
  * 
@@ -72,16 +71,7 @@ public class ELMDTCParameter extends OneParamMetaParameter
 	 ********************************************************/
 	public double getValue()
 	{
-		int c1 = ((ELMParameter)p1_).getResponseByte(this.offset_);
-		int c2 = ((ELMParameter)p1_).getResponseByte(this.offset_+1);
-		int c3 = ((ELMParameter)p1_).getResponseByte(this.offset_+2);
-		int c4 = ((ELMParameter)p1_).getResponseByte(this.offset_+3);
-		
-		//ErrorLog.info(getName() + " Gauge Requested " + c1 + " " + c2);
-		
-		String dtc = c1 + "" + c2 + "" + c3 + "" + c4;
-		return Convert.toDouble(dtc);
-		
+		return ((ELMParameter)p1_).fromCharsToInt(this.offset_, 4);
 	}
 
 }

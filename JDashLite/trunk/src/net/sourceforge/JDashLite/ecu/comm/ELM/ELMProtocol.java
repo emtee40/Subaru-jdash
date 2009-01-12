@@ -137,9 +137,9 @@ public class ELMProtocol extends AbstractProtocol
 		ELMParameter kph;
 		Vector pList = new Vector(20);
 
-		DTCStatus = new ELMParameter("DTCStatus", ELMParameter.MODE_1, 0x01, 4)
+		DTCStatus = new ELMParameter("DTCStatus", ELMParameter.MODE_1, 0x01, 8)
 		{
-			public double getValue() { return getResponseDouble(); }
+			public double getValue() { return fromHexCharsToInt(0, 8); }
 			public String getLabel() { return getName(); }
 			public boolean isUserSelectable() { return false; }
 			public String getDescription() {return "Bit Encoded DTC Status. ";}
@@ -148,14 +148,14 @@ public class ELMProtocol extends AbstractProtocol
 		
 		pList.addElement(new OneParamMetaParameter("CEL", DTCStatus)
 		{
-			public double getValue() { return (((ELMParameter)p1_).getResponseByte(0) >> 7); }
+			public double getValue() { return (((ELMParameter)p1_).getInt(0) >> 7); }
 			public String getLabel() { return "Check Engine Light"; }
 			public String getDescription() {return "Is the CEL light on or off.";}
 		});
 		
 		ELMProtocol.DTCCount = new OneParamMetaParameter("DTC_COUNT", DTCStatus)
 		{
-			public double getValue() { return (((ELMParameter)p1_).getResponseByte(0) & 0x7F); }
+			public double getValue() { return (((ELMParameter)p1_).getInt(0) & 0x7F); }
 			public String getLabel() { return "DTC Count"; }
 			public String getDescription() {return "The number of current DTC codes.";}
 		};
@@ -199,9 +199,9 @@ public class ELMProtocol extends AbstractProtocol
 		pList.addElement(new ELMDTCParameter("PTC5", PTCCodes, 18));
 		pList.addElement(new ELMDTCParameter("PTC6", PTCCodes, 22));
 		
-		fuelSystem = new ELMParameter("FuelSystemStatus", ELMParameter.MODE_1, 0x03, 2)
+		fuelSystem = new ELMParameter("FuelSystemStatus", ELMParameter.MODE_1, 0x03, 4)
 		{
-			public double getValue() { return getResponseDouble(); }
+			public double getValue() { return fromHexCharsToInt(0, 4); }
 			public String getLabel() { return getName(); }
 			public boolean isUserSelectable() { return false; }
 			public String getDescription() {return "Bit Encoded Fuel System Status.";}
@@ -238,16 +238,16 @@ public class ELMProtocol extends AbstractProtocol
 			public String getDescription() {return "Fuel System #1 in Closed Loop but there is a fault";}
 		});
 		
-		pList.addElement(new ELMParameter("LOAD", ELMParameter.MODE_1, 0x04, 1) 		
+		pList.addElement(new ELMParameter("LOAD", ELMParameter.MODE_1, 0x04, 2) 		
 		{ 
-			public double getValue() { return getResponseDouble(0) * 100.0 / 255.0; }  
+			public double getValue() { return getDouble(0) * 100.0 / 255.0; }  
 			public String getLabel() { return "Engine Load"; }
 			public String getDescription() {return "The engine load percentage (0-100%) as calculated by the ECU";}
 		});
 
-		pList.addElement(new ELMParameter("COOLANT_TEMP_C", ELMParameter.MODE_1, 0x05, 1) 		
+		pList.addElement(new ELMParameter("COOLANT_TEMP_C", ELMParameter.MODE_1, 0x05, 2) 		
 		{ 
-			public double getValue() { return getResponseDouble(0) - 40.0; }  
+			public double getValue() { return getDouble(0) - 40.0; }  
 			public String getLabel() { return "Coolant C"; }
 			public String getDescription() {return "The Engine coolant temperature in degrees C (-40 to 215)";}
 		});
@@ -259,23 +259,23 @@ public class ELMProtocol extends AbstractProtocol
 		});
 
 
-		pList.addElement(new ELMParameter("STFT1", ELMParameter.MODE_1, 0x06, 1) 	
+		pList.addElement(new ELMParameter("STFT1", ELMParameter.MODE_1, 0x06, 2) 	
 		{
-			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }
+			public double getValue() { return 0.7812 *  (getDouble(0) - 128.0); }
 			public String getLabel() { return "Short Term Fuel Trim 1"; }
 			public String getDescription() {return "The Short Term Fuel Trim percentage from 0-100% for Bank 1";}
 		});
 		
-		pList.addElement(new ELMParameter("LTFT1", ELMParameter.MODE_1, 0x07, 1) 		
+		pList.addElement(new ELMParameter("LTFT1", ELMParameter.MODE_1, 0x07, 2) 		
 		{ 
-			public double getValue() { return 0.7812 *  (getResponseDouble(0) - 128.0); }
+			public double getValue() { return 0.7812 *  (getDouble(0) - 128.0); }
 			public String getLabel() { return "Long Term Fuel Trim 1"; }
 			public String getDescription() {return "The Long Term Fuel Trim percentage from 0-100% for Bank 1";}
 		});
 		
-		maf = new ELMParameter("MAF", ELMParameter.MODE_1, 0x10, 2) 		
+		maf = new ELMParameter("MAF", ELMParameter.MODE_1, 0x10, 4) 		
 		{ 
-			public double getValue() { return ((256.0 * getResponseDouble(0)) + getResponseDouble(1)) / 100.0; }
+			public double getValue() { return ((256.0 * getDouble(0)) + getDouble(1)) / 100.0; }
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "MAF Rate in g/s";}
 		};
@@ -283,14 +283,14 @@ public class ELMProtocol extends AbstractProtocol
 		
 		pList.addElement(new ELMParameter("TPS", ELMParameter.MODE_1, 0x11, 2) 		
 		{ 
-			public double getValue() { return getResponseDouble(0) * 100.0 / 255.0; }
+			public double getValue() { return getDouble(0) * 100.0 / 255.0; }
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "Throttle Position Sensor Percentage 0-100%";}
 		});
 
-		pList.addElement(new ELMParameter("MAP_kpa", ELMParameter.MODE_1, 0x0B, 1)
+		pList.addElement(new ELMParameter("MAP_kpa", ELMParameter.MODE_1, 0x0B, 2)
 		{
-			public double getValue() { return getResponseDouble(0); }  
+			public double getValue() { return getDouble(0); }  
 			public String getLabel() { return "MAP (kPa)"; }
 			public String getDescription() {return "Absolute Intake Manifold Pressure in kPa";}
 		});
@@ -307,17 +307,17 @@ public class ELMProtocol extends AbstractProtocol
 			public String getDescription() {return "Absolute Intake Manifold Pressure in inches of mercury";}
 		});
 		
-		pList.addElement(new ELMParameter("RPM", ELMParameter.MODE_1, 0x0c, 2)
+		pList.addElement(new ELMParameter("RPM", ELMParameter.MODE_1, 0x0c, 4)
 		{
-			public double getValue() { return ((getResponseDouble(0) * 256.0) + getResponseDouble(1)) / 4.0; }  
+			public double getValue() { return ((getDouble(0) * 256.0) + getDouble(1)) / 4.0; }  
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "Engine Revolutions Per Minute";}
 		});
 
 		
-		kph = new ELMParameter("KPH", ELMParameter.MODE_1, 0x0D, 1)
+		kph = new ELMParameter("KPH", ELMParameter.MODE_1, 0x0D, 2)
 		{
-			public double getValue() { return getResponseDouble(0); }  
+			public double getValue() { return getDouble(0); }  
 			public String getLabel() { return getName(); }
 			public String getDescription() {return "Vehicle speed in KPH";}
 		};
@@ -329,9 +329,9 @@ public class ELMProtocol extends AbstractProtocol
 			public String getDescription() {return "Vehicle speed in MPH";}
 		});
 		
-		pList.addElement(new ELMParameter("INTAKE_TEMP_C", ELMParameter.MODE_1, 0x0F, 1)
+		pList.addElement(new ELMParameter("INTAKE_TEMP_C", ELMParameter.MODE_1, 0x0F, 2)
 		{
-			public double getValue() { return getResponseDouble(0) - 40.0; }  
+			public double getValue() { return getDouble(0) - 40.0; }  
 			public String getLabel() { return "Intake Air Temp C"; }
 			public String getDescription() {return "Intake Air Temperature in Degrees C";}
 		});
@@ -882,7 +882,9 @@ public class ELMProtocol extends AbstractProtocol
 					/* Try to extract the desired values.  An error will cause an attempted reset */
 					try
 					{
-						extractResponseBytes((ELMParameter)SUPPORTED_PARAMS[this.currentParameterIndex_]);
+						trimNonHexFromResponseBuffer();
+						((ELMParameter)SUPPORTED_PARAMS[this.currentParameterIndex_]).extractResponseBytes(this.responseBuffer_, 0, this.responseBufferOffset_);
+//						extractResponseBytes((ELMParameter)SUPPORTED_PARAMS[this.currentParameterIndex_]);
 					}
 					catch(Exception e2)
 					{
@@ -1065,97 +1067,97 @@ public class ELMProtocol extends AbstractProtocol
 		
 	}
 	
-	/********************************************************
-	 * Set the response from the ELM module.  The byte[] is basically
-	 * a string response.  eg 41 0c oe d8
-	 * This method will convert the 4 string byte value pairs into true bytes.
-	 * @param length IN - The number of bytes in the response buffer that holds the desired byte string
-	 * @param dest IN - the destination integer array.
-	 * @return true if the response was processed sucessfully, false if it was not.
-	 ********************************************************/
-	public void extractResponseBytes(ELMParameter p) throws Exception
-	{
-
-		/* Lets clean out the response buffer of any unwanted characters */
-		trimNonHexFromResponseBuffer();
-		
-		int expectedHeaderSize = 2;  /* 2 chars for the mode return value */
-		if (p.getCommand() != ELMParameter.COMMAND_NULL)
-		{
-			expectedHeaderSize += 2;  /* 2 chars for the command return value */
-		}
-		
-		/* Check the buffer length. It should be a 2x the length of the dest array + 4 (2 for the mode and 2 for the command response) */
-		if (p.getResponseSize() != ELMParameter.RESONSE_SIZE_DYNAMIC && this.responseBufferOffset_ != ((p.getResponseSize() * 2) + expectedHeaderSize))
-		{
-			throw new Exception("Response Not Formatted Correctly\nTX: [" + p.getFullCommand() + "]\nRX: [" + responseToString() + "]\nExpecing " + ((p.getResponseSize() * 2) + 4) + " chars");
-		}
-		
-		/* Check the returned mode/command */
-		String expectedPrefix = p.getExpectedResponsePrefix();
-		for (int index = 0; index < expectedPrefix.length(); index++)
-		{
-			if (expectedPrefix.charAt(index) != this.responseBuffer_[index])
-			{
-				throw new Exception("Response [" + responseToString() + "] did not return the expected prefix of [" + expectedPrefix + "]");
-			}
-		}
-		
-		
-		/* If the expected number of bytes is known, then check the buffer size */
-		if (p.getResponseSize() != ELMParameter.RESONSE_SIZE_DYNAMIC)
-		{
-			int headerSize = 2;
-			if (p.getCommand() != ELMParameter.COMMAND_NULL)
-			{
-				headerSize += 2;
-			}
-			if (((p.getResponseSize() * 2) + headerSize) != this.responseBufferOffset_)
-			{
-				throw new Exception("Response [" + responseToString() + "] did not containe the correct number of bytes [" + ((p.getResponseSize() * 2) + headerSize));
-			}
-		}
-		
-		/* For each byte returned */
-		int bufferOffset = 2;
-		int responseIndex = 0;
-		if (p.getCommand() != ELMParameter.COMMAND_NULL)
-		{
-			bufferOffset += 2;
-		}
-		
-		/* Process each byte.  Note, HEX strings are treated different from non-hex strings */
-		if (p.isResponseInHex())
-		{
-			/* Since the parameter claims to expect it's response in HEX form, we'll convert every
-			 * 2 chars from a HEX representation, into a single INT value */
-			while (bufferOffset < this.responseBufferOffset_)
-			{
-				/* Convert the next 2 characters into an int */
-				int v = 0;
-				v = toOct(this.responseBuffer_[bufferOffset]) * 16;
-				v += toOct(this.responseBuffer_[bufferOffset+1]);
-				p.getResponseBytes()[responseIndex] = v;
-				
-				/* Increment the 2 index pointers */
-				responseIndex++;
-				bufferOffset += 2;
-			}
-		}
-		else
-		{
-			/* If not HEX, then we'll convert each character/byte into a single INT. */
-			while (bufferOffset < this.responseBufferOffset_)
-			{
-				/* Convert from the char value to it's int value */
-				p.getResponseBytes()[responseIndex] = this.responseBuffer_[bufferOffset] - '0';
-				responseIndex++;
-				bufferOffset++;
-			}
-		}
-		
-		p.notifyValueChanged();
-	}
+//	/********************************************************
+//	 * Set the response from the ELM module.  The byte[] is basically
+//	 * a string response.  eg 41 0c oe d8
+//	 * This method will convert the 4 string byte value pairs into true bytes.
+//	 * @param length IN - The number of bytes in the response buffer that holds the desired byte string
+//	 * @param dest IN - the destination integer array.
+//	 * @return true if the response was processed sucessfully, false if it was not.
+//	 ********************************************************/
+//	public void eextractResponseBytes(ELMParameter p) throws Exception
+//	{
+//
+//		/* Lets clean out the response buffer of any unwanted characters */
+//		trimNonHexFromResponseBuffer();
+//		
+//		int expectedHeaderSize = 2;  /* 2 chars for the mode return value */
+//		if (p.getCommand() != ELMParameter.COMMAND_NULL)
+//		{
+//			expectedHeaderSize += 2;  /* 2 chars for the command return value */
+//		}
+//		
+//		/* Check the buffer length. It should be a 2x the length of the dest array + 4 (2 for the mode and 2 for the command response) */
+//		if (p.getResponseSize() != ELMParameter.RESONSE_SIZE_DYNAMIC && this.responseBufferOffset_ != ((p.getResponseSize() * 2) + expectedHeaderSize))
+//		{
+//			throw new Exception("Response Not Formatted Correctly\nTX: [" + p.getFullCommand() + "]\nRX: [" + responseToString() + "]\nExpecing " + ((p.getResponseSize() * 2) + 4) + " chars");
+//		}
+//		
+//		/* Check the returned mode/command */
+//		String expectedPrefix = p.getExpectedResponsePrefix();
+//		for (int index = 0; index < expectedPrefix.length(); index++)
+//		{
+//			if (expectedPrefix.charAt(index) != this.responseBuffer_[index])
+//			{
+//				throw new Exception("Response [" + responseToString() + "] did not return the expected prefix of [" + expectedPrefix + "]");
+//			}
+//		}
+//		
+//		
+//		/* If the expected number of bytes is known, then check the buffer size */
+//		if (p.getResponseSize() != ELMParameter.RESONSE_SIZE_DYNAMIC)
+//		{
+//			int headerSize = 2;
+//			if (p.getCommand() != ELMParameter.COMMAND_NULL)
+//			{
+//				headerSize += 2;
+//			}
+//			if (((p.getResponseSize() * 2) + headerSize) != this.responseBufferOffset_)
+//			{
+//				throw new Exception("Response [" + responseToString() + "] did not containe the correct number of bytes [" + ((p.getResponseSize() * 2) + headerSize));
+//			}
+//		}
+//		
+//		/* For each byte returned */
+//		int bufferOffset = 2;
+//		int responseIndex = 0;
+//		if (p.getCommand() != ELMParameter.COMMAND_NULL)
+//		{
+//			bufferOffset += 2;
+//		}
+//		
+//		/* Process each byte.  Note, HEX strings are treated different from non-hex strings */
+//		if (p.isResponseInHex())
+//		{
+//			/* Since the parameter claims to expect it's response in HEX form, we'll convert every
+//			 * 2 chars from a HEX representation, into a single INT value */
+//			while (bufferOffset < this.responseBufferOffset_)
+//			{
+//				/* Convert the next 2 characters into an int */
+//				int v = 0;
+//				v = toOct(this.responseBuffer_[bufferOffset]) * 16;
+//				v += toOct(this.responseBuffer_[bufferOffset+1]);
+//				p.getResponseBytes()[responseIndex] = v;
+//				
+//				/* Increment the 2 index pointers */
+//				responseIndex++;
+//				bufferOffset += 2;
+//			}
+//		}
+//		else
+//		{
+//			/* If not HEX, then we'll convert each character/byte into a single INT. */
+//			while (bufferOffset < this.responseBufferOffset_)
+//			{
+//				/* Convert from the char value to it's int value */
+//				p.getResponseBytes()[responseIndex] = this.responseBuffer_[bufferOffset] - '0';
+//				responseIndex++;
+//				bufferOffset++;
+//			}
+//		}
+//		
+//		p.notifyValueChanged();
+//	}
 	
 	
 	/*******************************************************
@@ -1231,31 +1233,31 @@ public class ELMProtocol extends AbstractProtocol
 	}
 	
 	
-	/********************************************************
-	 *  Convert the character into it's int octal form
-	 * @param b
-	 * @return
-	 ********************************************************/
-	private int toOct(byte b) throws Exception
-	{
-		
-		/* convert the character number into the byte value */
-		if (b >= '0' && b <= '9')
-		{
-			return b - 0x30;
-		}
-		else if (b >= 'A' && b <= 'F')
-		{
-			return b - 0x41 + 10;
-		}
-		else if (b >= 'a' && b <= 'f')
-		{
-			return b - 0x11 + 10;
-		}
-		else
-		{
-			throw new Exception("the char [" + b + "] is not a valid octal character");
-		}
-		
-	}
+//	/********************************************************
+//	 *  Convert the character into it's int octal form
+//	 * @param b
+//	 * @return
+//	 ********************************************************/
+//	private int toOct(byte b) throws Exception
+//	{
+//		
+//		/* convert the character number into the byte value */
+//		if (b >= '0' && b <= '9')
+//		{
+//			return b - 0x30;
+//		}
+//		else if (b >= 'A' && b <= 'F')
+//		{
+//			return b - 0x41 + 10;
+//		}
+//		else if (b >= 'a' && b <= 'f')
+//		{
+//			return b - 0x11 + 10;
+//		}
+//		else
+//		{
+//			throw new Exception("the char [" + b + "] is not a valid octal character");
+//		}
+//		
+//	}
 }

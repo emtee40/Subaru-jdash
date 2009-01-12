@@ -51,10 +51,11 @@ public abstract class ELMParameter extends ECUParameter
 	public static final int RESONSE_SIZE_DYNAMIC = -1;
 	
 	private int mode_ = -1;
-	private int command_ = 01;
-	private int responseSize_ = 0;
-	private int[] responseBytes_ = null;
-	protected boolean responseIsInHex_ = true; 
+	private int command_ = COMMAND_NULL;
+	private int responseCharCount_ = 0;
+	private char[] responseChars_ = null;
+	
+	private int responseOffset_ = 0;
 	
 	private String fullCommand_ = null;
 	private String expectedResponsePrefix_ = null;
@@ -66,25 +67,19 @@ public abstract class ELMParameter extends ECUParameter
 	 * @param command IN - the PID command. eg 0x0c for RPM.  a command of -1 means it will NOT be sent.  Like when sending a mode 03 request.
 	 * @param responseSize IN - the expected number of response bytes, including the leading 41 0c ....
 	 *******************************************************/
-	public ELMParameter(String name, int mode, int command, int responseSize)
+	public ELMParameter(String name, int mode, int command, int responseCharCount)
 	{
 		super(name);
 		this.mode_ = mode;
 		this.command_ = command;
-		this.responseSize_ = responseSize;
+		this.responseCharCount_ = responseCharCount;
 		
-		/* Look to see if a dynamic sized response is identified.  Ok.. so. we're not really making it dynamic, 
-		 * but rather just givign it a nice big buffer. So far, this only seems needed for the DTCs anyway */
-		if (RESONSE_SIZE_DYNAMIC == responseSize)
+		/* Pre-calculate the location of the first byte of the response data */
+		this.responseOffset_ = 2;
+		if (this.command_ != COMMAND_NULL)
 		{
-			responseBytes_ = new int[ELMProtocol.MAX_RESPONSE_BUFFER];
+			this.responseOffset_ += 2;
 		}
-		else
-		{
-			responseBytes_ = new int[responseSize];
-		}
-		
-		
 	}
 	
 	/********************************************************
@@ -103,27 +98,14 @@ public abstract class ELMParameter extends ECUParameter
 		return this.command_;
 	}
 	
-	/********************************************************
-	 * The default is true.  The response from an ELM module
-	 * is usually in HEX form. Except for DTCs. They return in
-	 * string/INT form.  If you are expecting a string of ints
-	 * rather than a string of HEX, then return a false here.
-	 * 
-	 * @return
-	 ********************************************************/
-	public boolean isResponseInHex()
-	{
-		return responseIsInHex_;
-	}
-	
 	/*******************************************************
 	 * returns the value passed into the constructor for responseSize.
 	 * This value is used to allocate space in the response buffer. 
 	 * @return
 	 ********************************************************/
-	public int getResponseSize()
+	public int getResponseCharCount()
 	{
-		return this.responseSize_;
+		return this.responseCharCount_;
 	}
 	
 	/*******************************************************
@@ -150,7 +132,7 @@ public abstract class ELMParameter extends ECUParameter
 	/*******************************************************
 	 * @return
 	 ********************************************************/
-	public String getExpectedResponsePrefix()
+	private String getExpectedResponsePrefix()
 	{
 		if (this.expectedResponsePrefix_ == null)
 		{
@@ -166,60 +148,231 @@ public abstract class ELMParameter extends ECUParameter
 		return this.expectedResponsePrefix_;
 	}
 	
-	/*******************************************************
-	 * @return
-	 ********************************************************/
-	public int[] getResponseBytes()
-	{
-		return this.responseBytes_;
-	}
 	
 	/*******************************************************
-	 * Parse the response string and return the ELM byte value
-	 * indicated with the index value.
-	 * @param index
+	 * @param resp
+	 * @param startIndex
+	 * @param length
+	 * @throws Exception if any part of the response byte was missing, formmated incorectly, 
+	 * etc. etc.
+	 ********************************************************/
+	protected void extractResponseBytes(byte[] resp, int startIndex, int length) throws RuntimeException
+	{
+		
+		/* Initialize the array if needed, or if resized */
+		if (this.responseChars_ == null || (this.responseChars_.length != length))
+		{
+			this.responseChars_ = new char[length];
+		}
+		
+		/* Copy each byte, and in the process convert to chars.  I know.. same thing.  This is done just for clarity */
+		for (int index = 0; index < length; index++)
+		{
+			this.responseChars_[index] = (char)resp[startIndex + index];
+		}
+		
+		
+		/* Check the mode returned */
+		
+		
+		/* Check the command returned */
+		
+		
+		
+		notifyValueChanged();
+	}
+	
+	
+	/*******************************************************
+	 * Given the response characters identified between
+	 * start and length, convert them to the equvelant INT 
+	 * value is though they were all HEX chars.
+	 * For example, if the buffer contained [41010345]
+	 * And you called fromHexCharsToInt(0,4).  It would convert 0345 as if it was 0x0345 into 837
+	 * @param start IN - the starting index withing the response data.  This method already
+	 * knows how to skip the header prefix data. So, the actual data starts at 0 99.99% of the time
+	 * @param length How many chars to use to make up the int.
 	 * @return
 	 ********************************************************/
-	public int getResponseByte(int index)
+	public int fromHexCharsToInt(int start, int length)
 	{
-		return this.responseBytes_[index];
-	}
+		if (this.responseChars_ == null)
+		{
+			return 0;
+		}
+		
+		int v = 0;
+		boolean shift = false;
+		
+		for (int index = start + this.responseOffset_; index < start + this.responseOffset_ + length; index++)
+		{
+			/* Shift 4 bits for the single oct char */
+			if (shift)
+			{
+				v = v << 4;
+			}
 
-	/*******************************************************
-	 * For convience, simply casts the byte into a float.
-	 * @param index
-	 * @return
-	 ********************************************************/
-	public double getResponseDouble(int index)
-	{
-		return (double)getResponseByte(index);
+			/* bitwise AND the next OCT into place */
+			v = v | toOct(this.responseChars_[index]);
+			
+			/* From now on, we'll need to shift first */
+			shift = true;
+		}
+		
+		return v;
 	}
 	
 	
 	/*******************************************************
-	 * Unlike the call to getResponsedouble(int) that returns one of the 
-	 * bytes as a double. This method will assume that the 1-2 bytes that
-	 * make up this parameter infact are a 16 bit word that represents 
-	 * an int.  This int is then cast to a double
-	 * 
+	 * Similar to fromHexCharsToInt except this method does
+	 * not expect the chars to be HEX values, but instead
+	 * to already be INT values.
+	 * @param start
+	 * @param length
 	 * @return
 	 ********************************************************/
-	public double getResponseDouble()
+	public int fromCharsToInt(int start, int length)
 	{
-		if (responseBytes_.length > 8)
+		
+		if (this.responseChars_ == null)
 		{
-			throw new RuntimeException("Cannot convert the array of " + responseBytes_.length + " bytes to a long.  A long cannot be more than 8 bytes.");
+			return 0;
 		}
 		
-		/* Place and shift the bytes into a long */
-		long r = getResponseByte(0);
-		for (int shiftCount = 1; shiftCount < responseBytes_.length; shiftCount++)
+		int v = 0;
+		boolean shift = false;
+		
+		for (int index = start + this.responseOffset_; index < start + this.responseOffset_ + length; index++)
 		{
-			r = r << 8;
-			r += getResponseByte(shiftCount);
+			/* Shift 4 bits for the single oct char */
+			if (shift)
+			{
+				v = v * 10;
+			}
+
+			/* bitwise AND the next OCT into place */
+			v = v | (this.responseChars_[index] - '0' );
+			
+			/* From now on, we'll need to shift first */
+			shift = true;
 		}
 		
-		return (double)r;
+		return v;
+		
+	}
+	
+	/*******************************************************
+	 * Since most ELM responses are a series of 2 char HEX
+	 * values that make up a simple INT, this method gives us
+	 * easy access to read these pair, and return the combined INT value.
+	 * This is just a convience method to fromHexCharsToInt
+	 * @param ndx
+	 * @return
+	 ********************************************************/
+	public int getInt(int ndx)
+	{
+		return fromHexCharsToInt(ndx, 2);
+	}
+	
+	
+	/*******************************************************
+	 * Just calls getInt(int) and casts it as a double.
+	 * 
+	 * @param ndx
+	 * @return
+	 ********************************************************/
+	public double getDouble(int ndx)
+	{
+		return (double)getInt(ndx);
+	}
+	
+	
+	
+//	/*******************************************************
+//	 * @return
+//	 ********************************************************/
+//	public int[] getResponseBytes()
+//	{
+//		return this.responseBytes_;
+//	}
+	
+	
+//	
+//	/*******************************************************
+//	 * Parse the response string and return the ELM byte value
+//	 * indicated with the index value.
+//	 * @param index
+//	 * @return
+//	 ********************************************************/
+//	public char getResponseChar(int index)
+//	{
+//		return this.responseChars_[index];
+//	}
+//
+//	/*******************************************************
+//	 * For convience, simply casts the byte into a float.
+//	 * @param index
+//	 * @return
+//	 ********************************************************/
+//	public double getResponseDouble(int index)
+//	{
+//		return (double)getResponseChar(index);
+//	}
+	
+	
+//	/*******************************************************
+//	 * Unlike the call to getResponsedouble(int) that returns one of the 
+//	 * bytes as a double. This method will assume that the 1-2 bytes that
+//	 * make up this parameter infact are a 16 bit word that represents 
+//	 * an int.  This int is then cast to a double
+//	 * 
+//	 * @return
+//	 ********************************************************/
+//	public double getResponseDouble()
+//	{
+//		if (responseBytes_.length > 8)
+//		{
+//			throw new RuntimeException("Cannot convert the array of " + responseBytes_.length + " bytes to a long.  A long cannot be more than 8 bytes.");
+//		}
+//		
+//		/* Place and shift the bytes into a long */
+//		long r = getResponseByte(0);
+//		for (int shiftCount = 1; shiftCount < responseBytes_.length; shiftCount++)
+//		{
+//			r = r << 8;
+//			r += getResponseByte(shiftCount);
+//		}
+//		
+//		return (double)r;
+//	}
+//	
+	
+	/********************************************************
+	 *  Convert the character into it's int octal form
+	 * @param b
+	 * @return
+	 ********************************************************/
+	private int toOct(char b) throws RuntimeException
+	{
+		
+		/* convert the character number into the byte value */
+		if (b >= '0' && b <= '9')
+		{
+			return b - 0x30;
+		}
+		else if (b >= 'A' && b <= 'F')
+		{
+			return b - 0x41 + 10;
+		}
+		else if (b >= 'a' && b <= 'f')
+		{
+			return b - 0x61 + 10;
+		}
+		else
+		{
+			throw new RuntimeException("the char [" + b + "] is not a valid octal character");
+		}
+		
 	}
 	
 	/*********************************************************
@@ -228,13 +381,53 @@ public abstract class ELMParameter extends ECUParameter
 	 ********************************************************/
 	public void setDemoValue()
 	{
+		final byte[] demoValue = new  byte[this.getResponseCharCount() == RESONSE_SIZE_DYNAMIC?8:this.getResponseCharCount()];
+
+		
 		/* Increment each value in the int */
-		for (int index = 0 ;index < this.responseBytes_.length; index++)
+		for (int index = 0 ;index < demoValue.length; index++)
 		{
-			byte b = (byte)this.responseBytes_[index];
-			b+=2;
-			this.responseBytes_[index] = b;
+			byte c = demoValue[index];
+			c+=2;
+			demoValue[index] = c;
 		}
 		
+		extractResponseBytes(demoValue, 0, demoValue.length);
+	}
+	
+
+	/********************************************************
+	 * Unit Testing
+	 * @param args
+	 ********************************************************/
+	public static void main(String[] args)
+	{
+		try
+		{
+			byte[] b = new byte[] {'4','3','0','3','0','2','0','3','0','3'};
+			ELMParameter p = new ELMParameter("test", 1, ELMParameter.COMMAND_NULL, 1)
+			{
+				public String getDescription()
+				{
+					return null;
+				}
+				public String getLabel() 
+				{
+					return null;
+				}
+				public double getValue()
+				{
+					return 0;
+				}
+			};
+			
+			p.extractResponseBytes(b, 0, b.length);
+			//System.out.println(">>" + p.fromHexCharsToInt(0,6));
+			System.out.println(">>" + p.fromCharsToInt(0,4));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
